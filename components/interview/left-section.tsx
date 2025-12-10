@@ -6,12 +6,12 @@ import { ArrowLeft } from 'lucide-react'
 
 export default function LeftSection() {
     return (
-        <div className=''>
+        <div >
             <div className="flex items-center justify-between px-6 py-4 ">
                 <div className="flex items-center gap-4">
                     <Button variant="outline" size="lg" className="flex text-[rgba(104,100,247,1)] border-[rgba(142, 158, 254, 0.6)] items-center gap-2">
                         <ArrowLeft className="w-4 h-4 " />
-                        Back to Job Listing
+                        <span className="font-semibold">Back to Job Listing</span>
                     </Button>
                 </div>
                 
@@ -31,7 +31,7 @@ export default function LeftSection() {
                             <div className="flex items-center gap-3">
                                 <Image src="/interview/file.svg" alt="Upload Icon" width={16} height={16} />
                                 <div>
-                                    <h3 className="font-medium">Upload Resume</h3>
+                                    <h3 className="font-medium text-muted-foreground">Upload Resume</h3>
                                 </div>
 
                             </div>
@@ -45,7 +45,7 @@ export default function LeftSection() {
                             <div className="flex items-center gap-3">
                                 <Image src="/interview/monitor.svg" alt="monitor" width={16} height={16} />
                                 <div>
-                                    <h3 className="font-medium">Domain Expert Interview</h3>
+                                    <h3 className="font-medium text-muted-foreground">Domain Expert Interview</h3>
                                 </div>
 
                             </div>
@@ -54,7 +54,6 @@ export default function LeftSection() {
                         </div>
                     </div>
                 </div>
-                {/* Main Content */}
             </div>
         </div>
     )

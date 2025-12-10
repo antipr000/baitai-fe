@@ -9,19 +9,18 @@ export default function RightSection() {
         <div className=''>
             {/* <RightSection /> */}
             <div>
-
                 <div className="flex items-center gap-3 justify-end px-6 py-4">
-                    <Button variant="outline" size="lg" className="rounded-3xl text-[rgba(104,100,247,1)] hover:text-[rgba(104,100,247,1)]! border-[rgba(142,158,254,0.6)]" >FAQ</Button>
-                    <Button variant="outline" size="lg" className="rounded-3xl text-[rgba(104,100,247,1)] hover:text-[rgba(104,100,247,1)]! border-[rgba(142,158,254,0.6)]" >Contact Support</Button>
+                    <Button variant="outline" size="lg" className="rounded-3xl text-[rgba(104,100,247,1)] hover:text-[rgba(104,100,247,1)] font-semibold border-[rgba(142,158,254,0.6)]" >FAQ</Button>
+                    <Button variant="outline" size="lg" className="rounded-3xl text-[rgba(104,100,247,1)] hover:text-[rgba(104,100,247,1)] font-semibold border-[rgba(142,158,254,0.6)]" >Contact Support</Button>
                 </div>
 
                 <div className="flex items-center px-6 py-4 justify-between mb-6">
                     <div>
                         <div className="relative">
                             <h2 className="text-2xl font-semibold bg-linear-to-r from-[rgba(0,13,144,0.9)] to-[rgba(93,107,238,1)] bg-clip-text text-transparent mb-1">Domain Expert Interview</h2>
-                            <Badge className="absolute -right-15 -top-4" variant="secondary">30 min</Badge>
+                            <Badge className="absolute font-semibold text-muted-foreground -right-16 top-0" variant="secondary">30 min</Badge>
                         </div>
-                        <p className="text-gray-600">AI-powered domain evaluation</p>
+                        <p className="text-muted-foreground text-sm">AI-powered domain evaluation</p>
                     </div>
                 </div>
                 {/* Main Content Area */}
@@ -68,8 +67,6 @@ export default function RightSection() {
                                 <p className="text-xs text-green-600">Restart camera</p>
                             </div>
                         </div>
-
-
                     </div>
                 </div>
             </div>
