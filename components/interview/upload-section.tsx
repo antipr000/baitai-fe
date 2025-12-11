@@ -2,9 +2,7 @@
 
 import React, { useRef } from 'react'
 import { Button } from '../ui/button'
-import { ChevronDown, Mic, Video, Volume2 } from 'lucide-react'
 import Image from 'next/image'
-import { Badge } from '../ui/badge'
 import { motion } from "motion/react"
 
 const beforeYouBeginItems = [

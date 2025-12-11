@@ -1,11 +1,5 @@
 "use client"
 
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Progress } from "@/components/ui/progress"
-import { ArrowLeft, HelpCircle, MessageCircle, CheckCircle2, FileText, MessageSquare, Mic, Video, Volume2, ChevronDown } from "lucide-react"
-import Image from "next/image"
 import LeftSection from "@/components/interview/left-section"
 import InterviewSection from "@/components/interview/interview-section"
 import UploadSection from "@/components/interview/upload-section"

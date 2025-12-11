@@ -1,5 +1,4 @@
 import Image from 'next/image'
-import React from 'react'
 import { Progress } from '../ui/progress'
 import { Button } from '../ui/button'
 import { ArrowLeft } from 'lucide-react'
