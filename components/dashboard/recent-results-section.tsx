@@ -49,7 +49,7 @@ export function RecentResultsSection({
 }: RecentResultsSectionProps) {
   return (
     <div>
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex justify-between items-center mb-6 ">
         <h2 className="text-2xl font-semibold">Recent Results</h2>
       </div>
 
@@ -69,7 +69,7 @@ export function RecentResultsSection({
         <div className="flex justify-end mt-6">
           <Button
             variant="outline"
-            className="border-[rgba(104,100,247,0.5)] font-bold text-[rgba(104,100,247,1)] hover:bg-[rgba(104, 100, 247,0.1)]"
+            className="border-[rgba(104,100,247,0.5)] font-bold hover:text-[rgba(104,100,247,1)] hover:border-2 text-[rgba(104,100,247,1)] hover:bg-[rgba(104, 100, 247,0.1)]"
             onClick={onViewMore}
           >
             View more

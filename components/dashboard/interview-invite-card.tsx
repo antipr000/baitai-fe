@@ -18,7 +18,7 @@ export function InterviewInviteCard({
     onStartClick
 }: InterviewInviteCardProps) {
     return (
-        <Card className="bg-white">
+        <Card className="bg-white border-2 border-[rgba(255,147,96,0.1)] hover:border-[rgba(255,147,96,1)] transition-border">
             <CardContent className="pt-6">
                 <div className="space-y-4">
                     <div className="flex justify-between items-center gap-4">
@@ -38,7 +38,7 @@ export function InterviewInviteCard({
                     </div>
 
                     <Button
-                        className="w-full bg-linear-to-r text-[rgba(248, 250, 255, 1)] font-semibold  from-[rgba(255,103,32,1)] to-[rgba(255,140,86,1)] hover:bg-orange-600 border border-[rgba(255,147,96,0.1)] text-[rgba(248,250,255,1)]"
+                        className="w-full hover:opacity-70 transition-opacity duration-100 text-[rgba(248, 250, 255, 1)] font-semibold bg-linear-to-r from-[rgba(255,103,32,1)] to-[rgba(255,140,86,1)] hover: border border-[rgba(255,147,96,0.1)] text-[rgba(248,250,255,1)]"
                         onClick={onStartClick}
                     >
                         Start Interview

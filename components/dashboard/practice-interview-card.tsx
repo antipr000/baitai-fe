@@ -43,7 +43,7 @@ export function PracticeInterviewCard({
       <CardContent className="pt-6">
         <div className="space-y-4">
           <div>
-            <h3 className="font-bold text-lg text-slate-900">{company}</h3>
+            <h3 className="font-medium text-lg">{company}</h3>
             <div className="flex items-center gap-4 mt-1">
               <Badge className={cn(style.bg, style.text, style.border, "p-1 px-7 border")}>
                 {difficulty}
@@ -55,7 +55,7 @@ export function PracticeInterviewCard({
             </div>
           </div>
           <Button
-            className="w-full border-2 border-[rgba(82,86,184,1)] font-semibold hover:bg-[rgba(82,86,184,1)] text-[rgba(83,87,184,1)] hover:text-white bg-white"
+            className="w-full border-2 border-[rgba(82,86,184,1)] font-sebold hover:bg-[rgba(82,86,184,1)] text-[rgba(83,87,184,1)] hover:text-white bg-white"
             onClick={onStartClick}
           >
             Start Interview

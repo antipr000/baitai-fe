@@ -38,7 +38,7 @@ export function InterviewInvitesSection({
     return (
         <div>
             <div className="flex justify-between items-center mb-4">
-                <h2 className="text-2xl font-bold text-[rgba(117,134,253,1)]">Interview Invites</h2>
+                <h2 className="text-2xl font-semibold text-[rgba(117,134,253,1)]">Interview Invites</h2>
                 <button
                     className="text-[rgba(255,100,27,0.9)]  font-semibold hover:underline flex items-center gap-2"
                     onClick={onViewMore}
