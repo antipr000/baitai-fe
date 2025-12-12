@@ -3,9 +3,10 @@
 import React from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { CheckCircle2, Clock, Zap, Target, ArrowRight } from 'lucide-react'
 import Image from 'next/image'
+import { RecentResultsSection } from '@/components/dashboard/recent-results-section'
+import { InterviewInvitesSection } from '@/components/dashboard/interview-invites-section'
+import { PracticeInterviewsSection } from '@/components/dashboard/practice-interviews-section'
 
 export default function DashboardPage() {
     return (
@@ -14,9 +15,14 @@ export default function DashboardPage() {
 
                 {/* Header */}
                 <div className="flex justify-between items-center">
-                    <h1 className="text-4xl font-bold bg-linear-to-r from-[rgba(62,84,251,1)] to-[rgba(195,206,255,1)] bg-clip-text text-transparent">My Dashboard</h1>
-                    <Button variant="default" className="gap-2 bg-linear-to-r from-[rgba(62,84,251,1)] to-[rgba(195,206,255,1)]">
-                        <Image src="/candidate/note.svg" alt="Results" width={20} height={20} /> <span>View all Results </span>
+                    <div className='flex items-center justify-center gap-4'>
+                        <div className='bg-[rgba(98,117,252,0.82)] p-2 px-1 rounded-md'>
+                            <Image src="/candidate/left-arrow.svg" alt="User Avatar" width={20} height={20} />
+                        </div>
+                        <h1 className="text-2xl tracking-wide font-bold bg-linear-to-r from-[rgba(62,84,251,1)] to-[rgba(195,206,255,1)] bg-clip-text text-transparent">My Dashboard</h1>
+                    </div>
+                    <Button variant="default" className="gap-2  bg-linear-to-r from-[rgba(62,84,251,1)] to-[rgba(195,206,255,1)]">
+                        <Image src="/candidate/note.svg" alt="Results" width={20} height={20} /> <span className='font-semibold'>View all Results</span>
                     </Button>
                 </div>
 
@@ -68,7 +74,7 @@ export default function DashboardPage() {
 
 
                     {/* Total Time */}
-                   
+
                     <Card className="bg-[rgba(224,83,83,0.1)] border border-[rgba(224,83,83,0.5)]">
                         <CardContent className="pt-6">
                             <div className="flex items-center justify-between">
@@ -84,129 +90,12 @@ export default function DashboardPage() {
 
                 {/* Main Content - Two Columns */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-
-                    {/* Interview Invites */}
-                    <div>
-                        <div className="flex justify-between items-center mb-4">
-                            <h2 className="text-2xl font-bold text-[rgba(117,134,253,1)]">Interview Invites</h2>
-                            <button className="text-[rgba(255,100,27,0.9)] text-sm font-medium hover:underline flex items-center gap-1">
-                                View more <ArrowRight className="w-4 h-4" />
-                            </button>
-                        </div>
-
-                        <div className="space-y-4">
-                            {/* Interview Card 1 */}
-
-
-                             <Card className="bg-white">
-                                <CardContent className="pt-6">
-                                    <div className="space-y-4">
-                                        <div>
-                                            <h3 className="font-bold text-lg text-slate-900">Mindtrix</h3>
-                                            <p className="text-sm text-muted-foreground">Senior Software Engineer</p>
-                                        </div>
-                                        <Badge className="bg-orange-100 text-orange-700 border-0">
-                                            Due in 2 days
-                                        </Badge>
-                                        <Button className="w-full bg-linear-to-r from-[rgba(255,103,32,1)] to-[rgba(255,140,86,1)] hover:bg-orange-600 border border-[rgba(255,147,96,0.1)] text-[rgba(248,250,255,1)]">
-                                            Start Interview
-                                        </Button>
-                                    </div>
-                                </CardContent>
-                            </Card>
-
-
-                            {/* Interview Card 2 */}
-                            <Card className="bg-white">
-                                <CardContent className="pt-6">
-                                    <div className="space-y-4">
-                                        <div>
-                                            <h3 className="font-bold text-lg text-slate-900">Become</h3>
-                                            <p className="text-sm text-slate-500">UI/UX Designer</p>
-                                        </div>
-                                        <Badge className="bg-orange-100 text-orange-700 border-0">
-                                            Due in 5 days
-                                        </Badge>
-                                        <Button className="w-full bg-linear-to-r from-[rgba(255,103,32,1)] to-[rgba(255,140,86,1)] hover:bg-orange-600 border border-[rgba(255,147,96,0.1)] text-[rgba(248,250,255,1)]">
-                                            Start Interview
-                                        </Button>
-                                    </div>
-                                </CardContent>
-                            </Card>
-                        </div>
-                    </div>
-
-                    {/* Practice Interviews */}
-                    <div>
-                         <div className="flex justify-between items-center mb-4">
-                            <h2 className="text-2xl font-bold text-[rgba(117,134,253,1)]">Practice Interviews</h2>
-                            <button className="text-[rgba(255,100,27,0.9)] text-sm font-medium hover:underline flex items-center gap-1">
-                                View more <ArrowRight className="w-4 h-4" />
-                            </button>
-                        </div>
-                        <div className="space-y-4">
-                            {/* Practice Card 1 */}
-                            <Card className="bg-white">
-                                <CardContent className="pt-6">
-                                    <div className="space-y-4">
-                                        <div>
-                                            <h3 className="font-bold text-lg text-slate-900">Mindtrix</h3>
-                                            <div className="flex items-center gap-2 mt-1">
-                                                <Badge className="bg-green-100 text-green-700 border-0">
-                                                    Easy
-                                                </Badge>
-                                                <span className="text-sm text-slate-500">45 min</span>
-                                            </div>
-                                        </div>
-                                        <Button className="w-full border border-[rgba(82,86,184,1)] text-[rgba(83,87,184,1)] hover:bg-blue-50 bg-white">
-                                            Start Interview
-                                        </Button>
-                                    </div>
-                                </CardContent>
-                            </Card>
-
-                            {/* Practice Card 2 */}
-                            <Card className="bg-white">
-                                <CardContent className="pt-6">
-                                    <div className="space-y-4">
-                                        <div>
-                                            <h3 className="font-bold text-lg text-slate-900">Mindtrix</h3>
-                                            <div className="flex items-center gap-2 mt-1">
-                                                <Badge className="bg-yellow-100 text-yellow-700 border-0">
-                                                    Medium
-                                                </Badge>
-                                                <span className="text-sm text-slate-500">45 min</span>
-                                            </div>
-                                        </div>
-                                        <Button className="w-full border border-[rgba(82,86,184,1)] text-[rgba(83,87,184,1)] hover:bg-blue-50 bg-white">
-                                            Start Interview
-                                        </Button>
-                                    </div>
-                                </CardContent>
-                            </Card>
-
-                            {/* Practice Card 3 */}
-                            <Card className="bg-white">
-                                <CardContent className="pt-6">
-                                    <div className="space-y-4">
-                                        <div>
-                                            <h3 className="font-bold text-lg text-slate-900">Mindtrix</h3>
-                                            <div className="flex items-center gap-2 mt-1">
-                                                <Badge className="bg-red-100 text-red-700 border-0">
-                                                    Difficult
-                                                </Badge>
-                                                <span className="text-sm text-slate-500">45 min</span>
-                                            </div>
-                                        </div>
-                                        <Button className="w-full border border-[rgba(82,86,184,1)] text-[rgba(83,87,184,1)] hover:bg-blue-50 bg-white">
-                                            Start Interview
-                                        </Button>
-                                    </div>
-                                </CardContent>
-                            </Card>
-                        </div>
-                    </div>
+                    <InterviewInvitesSection />
+                    <PracticeInterviewsSection />
                 </div>
+
+                {/* Recent Results Section */}
+                <RecentResultsSection />
             </div>
         </div>
     )
