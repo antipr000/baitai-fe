@@ -55,7 +55,7 @@ export function PracticeInterviewCard({
             </div>
           </div>
           <Button
-            className="w-full border-2 border-[rgba(82,86,184,1)] font-sebold hover:bg-[rgba(82,86,184,1)] text-[rgba(83,87,184,1)] hover:text-white bg-white"
+            className="w-full border-2 border-[rgba(82,86,184,1)] font-semibold hover:bg-[rgba(82,86,184,1)] text-[rgba(83,87,184,1)] hover:text-white bg-white"
             onClick={onStartClick}
           >
             Start Interview
