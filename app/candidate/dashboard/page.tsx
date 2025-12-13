@@ -30,7 +30,7 @@ export default function DashboardPage() {
                     <div className="flex justify-between items-center ">
                         <div className='flex items-center justify-center gap-4'>
                             <div className='bg-[rgba(98,117,252,0.82)] p-2 px-1 rounded-md'>
-                                <Image src="/candidate/dashboard/left-arrow.svg" alt="User Avatar" width={20} height={20} />
+                                <Image src="/candidate/dashboard/left-arrow.svg" alt="Back" width={20} height={20} />
                             </div>
                             <h1 className="text-2xl tracking-wide font-bold bg-linear-to-r from-[rgba(62,84,251,1)] to-[rgba(195,206,255,1)] bg-clip-text text-transparent">My Dashboard</h1>
                         </div>

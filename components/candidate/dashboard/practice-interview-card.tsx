@@ -49,7 +49,7 @@ export function PracticeInterviewCard({
                 {difficulty}
               </Badge>
               <span className="text-sm text-muted-foreground flex items-center justify-center">
-                <Image src="/candidate/timer.svg" alt="clock" width={18} height={18} className="inline-block mr-1" />
+                <Image src="/candidate/dashboard/timer.svg" alt="clock" width={18} height={18} className="inline-block mr-1" />
                 <span>{duration}</span>
               </span>
             </div>
