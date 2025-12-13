@@ -6,6 +6,7 @@ import {
     getCoreRowModel,
     getFilteredRowModel,
     useReactTable,
+    ColumnFiltersState,
     GlobalFilterTableState,
 } from "@tanstack/react-table"
 
@@ -20,6 +21,9 @@ import {
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group"
 import Image from "next/image"
 import { useState } from "react"
+import { Button } from "@/components/ui/button"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { ChevronDown, Filter } from "lucide-react"
 
 interface DataTableProps<TData, TValue> {
     columns: ColumnDef<TData, TValue>[]
@@ -31,7 +35,8 @@ export function DataTable<TData, TValue>({
     data,
 }: DataTableProps<TData, TValue>) {
     const [globalFilter, setGlobalFilter] = useState("")
-
+    const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
+    
     const table = useReactTable({
         data,
         columns,
@@ -40,24 +45,52 @@ export function DataTable<TData, TValue>({
         globalFilterFn: "includesString",
         state: {
             globalFilter,
+            columnFilters,
         },
         onGlobalFilterChange: setGlobalFilter,
+        onColumnFiltersChange: setColumnFilters,
     })
 
     return (
         <div>
-            <div className="flex items-center py-4 w-[85%] mx-7">
-                <InputGroup>
-                    <InputGroupInput placeholder="Search..."
-                        value={globalFilter ?? ""}
-                        onChange={(event) => setGlobalFilter(event.target.value)}
-                        className=" font-medium placeholder:text-muted-foreground/70"
-                    />
-                    <InputGroupAddon>
-                        <Image src="/candidate/company-interviews/search.svg" alt="Search" width={22} height={22} />
-                    </InputGroupAddon>
-                </InputGroup>
-              
+            <div className="f py-4 2-full ">
+                <div className="w-[85%] flex gap-4 items-center">
+                    <InputGroup className="bg-white w-full">
+                        <InputGroupInput  placeholder="Search..."
+                            value={globalFilter ?? ""}
+                            onChange={(event) => setGlobalFilter(event.target.value)}
+                            className=" font-medium  placeholder:text-muted-foreground/70"
+                        />
+                        <InputGroupAddon>
+                            <Image src="/candidate/practice-interviews/search.svg" alt="Search" width={22} height={22} />
+                        </InputGroupAddon>
+                    </InputGroup>
+
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button variant="outline" className="gap-2">
+                                <Filter className="h-4 w-4" />
+                                Filter
+                                <ChevronDown className="h-4 w-4" />
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="start" className="w-40">
+                            <DropdownMenuItem onClick={() => table.getColumn("difficulty")?.setFilterValue("")}>
+                                All
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => table.getColumn("difficulty")?.setFilterValue("Easy")}>
+                                Easy
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => table.getColumn("difficulty")?.setFilterValue("Medium")}>
+                                Medium
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => table.getColumn("difficulty")?.setFilterValue("Difficult")}>
+                                Difficult
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                </div>
+
             </div>
             <div className="overflow-hidden rounded-md border">
                 <Table>

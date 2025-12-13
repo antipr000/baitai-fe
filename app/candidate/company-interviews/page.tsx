@@ -1,5 +1,6 @@
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
+import { BackButton } from '@/components/ui/back-button'
 import Image from 'next/image'
 import React from 'react'
 import { DataTable } from './data-table'
@@ -64,7 +65,7 @@ async function getData(): Promise<CompanyInterview[]> {
 
 export default async function CompanyInterviews() {
     const data = await getData()
-
+    
     return (
         <div>
             <div className='w-full min-h-screen bg-[rgba(248,250,255,1)]'>
@@ -74,9 +75,7 @@ export default async function CompanyInterviews() {
                         {/* Header */}
                         <div className="flex justify-between items-center ">
                             <div className='flex items-center justify-center gap-4'>
-                                <div className='bg-[rgba(98,117,252,0.82)] p-2 px-1 rounded-md'>
-                                    <Image src="/candidate/company-interviews/left-arrow.svg" alt="Back" width={20} height={20} />
-                                </div>
+                                <BackButton />
                                 <h1 className="text-2xl tracking-wide font-semibold bg-linear-to-r from-[rgba(62,84,251,1)] to-[rgba(195,206,255,1)] bg-clip-text text-transparent">Interview Invites</h1>
                             </div>
 

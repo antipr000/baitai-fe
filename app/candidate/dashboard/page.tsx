@@ -47,7 +47,7 @@ export default function DashboardPage() {
                                 <div className="group flex items-center justify-between">
                                     <Image src="/candidate/dashboard/complete.svg" alt="Completed" width={32} height={32} />
                                     <div>
-                                        <p className="text-sm text-muted-foreground mb-2 transition-all duration-400 group-hover:-translate-y-1.5">Completed</p>
+                                        <p className="  font-medium text-muted-foreground mb-2 transition-all duration-400 group-hover:-translate-y-1.5">Completed</p>
                                         <p className="text-center text-2xl font-bold text-[rgba(104,100,247,1)] transition-all duration-400 group-hover:scale-[1.3]">6</p>
                                     </div>
                                 </div>
@@ -61,7 +61,7 @@ export default function DashboardPage() {
                                 <div className="group flex items-center justify-between">
                                     <Image src="/candidate/dashboard/pending.svg" className='group-hover:-rotate-10 transition-all duration-400' alt="Pending" width={32} height={32} />
                                     <div>
-                                        <p className="text-sm text-muted-foreground mb-2 transition-all duration-400 group-hover:-translate-y-1.5">Pending</p>
+                                        <p className="font-medium  text-muted-foreground mb-2 transition-all duration-400 group-hover:-translate-y-1.5">Pending</p>
                                         <p className="text-center text-2xl font-bold text-[rgba(104,100,247,1)] transition-all duration-400 group-hover:scale-[1.3]">2</p>
                                     </div>
                                 </div>
@@ -76,7 +76,7 @@ export default function DashboardPage() {
                                 <div className="group flex items-center justify-between">
                                     <Image src="/candidate/dashboard/score.svg" className='group-hover:-rotate-10 transition-all duration-400' alt="score" width={32} height={32} />
                                     <div>
-                                        <p className="text-sm text-muted-foreground mb-2 transition-all duration-400 group-hover:-translate-y-1.5">Average Score</p>
+                                        <p className="font-medium text-muted-foreground mb-2 transition-all duration-400 group-hover:-translate-y-1.5">Average Score</p>
                                         <p className="text-center text-2xl font-bold text-[rgba(104,100,247,1)] transition-all duration-400 group-hover:scale-[1.3]">82%</p>
                                     </div>
                                 </div>
@@ -92,7 +92,7 @@ export default function DashboardPage() {
                                 <div className="group flex items-center justify-between">
                                     <Image src="/candidate/dashboard/time.svg" className='group-hover:-rotate-10 transition-all duration-400' alt="time" width={32} height={32} />
                                     <div>
-                                        <p className="text-sm text-muted-foreground mb-2 transition-all duration-400 group-hover:-translate-y-1.5">Total Time</p>
+                                        <p className="font-medium text-muted-foreground mb-2 transition-all duration-400 group-hover:-translate-y-1.5">Total Time</p>
                                         <p className="text-center text-2xl font-bold text-[rgba(104,100,247,1)] transition-all duration-400 group-hover:scale-[1.3]">7h</p>
                                     </div>
                                 </div>
@@ -102,8 +102,8 @@ export default function DashboardPage() {
 
                     {/* Main Content - Two Columns */}
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-15">
-                        <InterviewInvitesSection onStartInterview={handleInterviewStart} />
-                        <PracticeInterviewsSection onStartInterview={handlePracticeStart} />
+                        <InterviewInvitesSection onStartInterview={handleInterviewStart} onViewMore={()=>router.push("/candidate/company-interviews")} />
+                        <PracticeInterviewsSection onStartInterview={handlePracticeStart} onViewMore={()=>router.push("/candidate/practice-interviews")}/>
                     </div>
 
                     {/* Recent Results Section */}

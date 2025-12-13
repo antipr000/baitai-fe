@@ -90,7 +90,7 @@ export const columns: ColumnDef<CompanyInterview>[] = [
       const interview = row.original
       return (
         <Button className="bg-[rgba(184,255,179,0.7)] hover:bg-white border-2 border-[rgba(19,232,4,0.1)]  hover:border-[rgba(8,102,2,0.8)] text-[rgba(8,102,2,0.9)] px-4 py-2 rounded-md" >
-          <Image src="/candidate/company-interviews/play.svg" alt="Start" width={14} height={14} /> Start
+          <Image src="/candidate/company-interviews/play.svg" alt="Start" width={14} height={14} /> <span className="font-medium">Start</span>
         </Button>
       )
     },
