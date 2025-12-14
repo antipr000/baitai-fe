@@ -110,7 +110,7 @@ export default async function PracticeInterviews() {
                                     <div className=" flex items-center gap-3">
                                         <Image src="/candidate/practice-interviews/up.svg" className='translate-y-1' alt="Company" width={30} height={30} />
                                         <div className=''>
-                                            <p className="text-xl  text-[rgba(10,13,26,0.6)] font-medium ">Total Practice</p>
+                                            <p className="text-xl font-medium text-muted-foreground/70 ">Total Practice</p>
                                             <p className="text-2xl font-bold text-[rgba(104,100,247,1)] ">10</p>
                                         </div>
                                     </div>
