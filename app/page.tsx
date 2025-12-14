@@ -1,12 +1,12 @@
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
+    <div className="min-h-screen ">
       {/* Header */}
       <header className="px-6 py-4">
         <nav className="flex items-center justify-between max-w-7xl mx-auto">
@@ -88,7 +88,7 @@ export default function Home() {
             </div>
             <div>
               <h3 className="text-4xl  text-[rgba(255,255,255,0.3)] leading-tight">
-                What if your next hire 
+                What if your next hire
               </h3>
 
               <h3 className="text-4xl ml-20 text-[rgba(255,255,255,0.3)] leading-tight">came twice as fast?</h3>
@@ -96,6 +96,83 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* Features Section */}
+      <section className="py-20 px-6 bg-[linear-gradient(106.66deg,#DCF4FF_3.3%,#E6F5FF_98.34%)]">
+        <div className="max-w-6xl mx-auto">
+          <div className="flex flex-col items-center  md:flex-row gap-8">
+            {/* Left Content */}
+            <div className="flex-1  space-y-6">
+              <h2 className="text-4xl  bg-[linear-gradient(103.06deg,rgba(0,13,144,0.5)_8.76%,rgba(93,107,238,0.5)_59.41%)] text-transparent bg-clip-text font-semibold">
+                Our AI interview platform integrates seamlessly into your existing workflow, helping you identify top talent faster and more accurately.
+              </h2>
+            </div>
+
+            {/* Right Content - Feature Cards */}
+            <div className="flex-1 flex flex-col gap-4">
+              {/* Better Quality Card */}
+              <Card className="bg-[rgba(253,203,80,0.3)] rounded-4xl border border-[rgba(192,237,245,0.3)]">
+                <CardContent className="p-6">
+                  <div className="flex items-start space-x-4">
+                    <Image src="/main/book.gif" alt="Better Quality Icon" className="rounded-full" width={40} height={40} />
+                    <div>
+                      <h3 className="text-lg font-semibold text-[rgba(116,130,248,1)]  mb-2">Better Quality</h3>
+                      <p className="text-[rgba(116,130,248,0.7)] font-semibold ">Go beyond resumes to assess real skills and fit</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Reduce Bias Card */}
+              <Card className="bg-[rgba(51,204,204,0.2)] rounded-4xl border border-[rgba(192,237,245,0.3)]">
+                <CardContent className="p-6">
+                  <div className="flex items-start space-x-4">
+                    <Image src="/main/balance.gif" alt="Reduce Bias Icon" className="rounded-full" width={40} height={40} />
+                    <div>
+                      <h3 className="text-lg font-semibold text-[rgba(116,130,248,1)]  mb-2">Reduce Bias</h3>
+                      <p className="text-[rgba(116,130,248,0.7)] font-semibold ">Fair, consistent evaluation criteria for every candidate</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Save Time Card */}
+              <Card className="bg-[rgba(177,217,82,0.3)] rounded-4xl border border-[rgba(183,228,79,0.31)]">
+                <CardContent className="p-6">
+                  <div className="flex items-start space-x-4">
+                    <Image src="/main/time.gif" alt="Save Time Icon" className="rounded-full" width={40} height={40} />
+                    <div>
+                      <h3 className="text-lg font-semibold text-[rgba(116,130,248,1)] mb-2">Save Time</h3>
+                      <p className="text-[rgba(116,130,248,0.7)] font-semibold ">Automate initial screening and focus on the best candidates</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Scale Easily Card */}
+              <Card className="bg-[rgba(39,162,204,0.2)] rounded-4xl border border-[rgba(192,237,245,0.3)]">
+                <CardContent className="p-6">
+                  <div className="flex items-start space-x-4">
+                    <Image src="/main/people.gif" alt="Scale Easily Icon" className="rounded-full" width={40} height={40} />
+                    <div>
+                      <h3 className="text-lg font-semibold text-[rgba(116,130,248,1)] mb-2">Scale Easily</h3>
+                      <p className="text-[rgba(116,130,248,0.7)] font-semibold ">Interview hundreds of candidates without adding resources</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+          <div className="flex items-center   w-fit border-b border-[rgba(120,130,237,0.6)] my-4 pb-2">
+            <p className="text-4xl font-semibold my-4 tracking-widest text-semibold text-transparent bg-clip-text bg-[linear-gradient(94.46deg,#6772E6_-13.88%,#8791F4_113.71%)]">
+              Journey made easy
+            </p>
+          </div>
+        </div>
+
+      </section>
+
+
     </div>
   );
 }

@@ -76,7 +76,7 @@ export default async function CompanyInterviews() {
                         <div className="flex justify-between items-center ">
                             <div className='flex items-center justify-center gap-4'>
                                 <BackButton />
-                                <h1 className="text-2xl tracking-wide font-semibold bg-linear-to-r from-[rgba(62,84,251,1)] to-[rgba(195,206,255,1)] bg-clip-text text-transparent">Interview Invites</h1>
+                                <h1 className="text-2xl tracking-wide font-semibold bg-[linear-gradient(91.24deg,#3E54FB_-35.23%,#C3CEFF_202.55%)] bg-clip-text text-transparent">Interview Invites</h1>
                             </div>
 
                         </div>

@@ -38,7 +38,7 @@ export function InterviewInviteCard({
                     </div>
 
                     <Button
-                        className="w-full hover:opacity-70 transition-opacity duration-100 text-[rgba(248, 250, 255, 1)] font-semibold bg-linear-to-r from-[rgba(255,103,32,1)] to-[rgba(255,140,86,1)] hover: border border-[rgba(255,147,96,0.1)] text-[rgba(248,250,255,1)]"
+                        className="w-full hover:opacity-70 transition-opacity duration-100 text-[rgba(248, 250, 255, 1)] font-semibold bg-[linear-gradient(92.34deg,rgba(255,103,32,1)_17.04%,rgba(255,140,86,1)_122.22%)] hover: border border-[rgba(255,147,96,0.1)] text-[rgba(248,250,255,1)]"
                         onClick={onStartClick}
                     >
                         Start Interview
