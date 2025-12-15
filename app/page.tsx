@@ -6,7 +6,7 @@ import Link from "next/link";
 
 export default function Home() {
   return (
-    <div className="min-h-screen ">
+    <div className="min-h-screen w-full  ">
       {/* Header */}
       <header className="px-6 py-4">
         <nav className="flex items-center justify-between max-w-7xl mx-auto">
@@ -51,7 +51,7 @@ export default function Home() {
           </p>
 
           {/* Feature Cards */}
-          <div className="grid md:grid-cols-2 gap-12 max-w-6xl mx-auto">
+          <div className="grid md:grid-cols-2 gap-12 justify-start max-w-6xl mx-auto">
             {/* Interview Section */}
             <div className="text-center">
               <Image src="/main/interview.png" alt="Interview Illustration" width={300} height={200} className="mx-auto mb-6" />
@@ -79,7 +79,7 @@ export default function Home() {
 
       {/* Bottom Section */}
       <section className="mt-2 bg-[linear-gradient(68.04deg,rgba(58,63,187,0.9)_-8.15%,rgba(107,124,255,0.9)_66.87%)] text-white py-20 px-6">
-        <div className="w-3/5 mx-auto">
+        <div className="max-w-6xl mx-auto">
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div>
               <h2 className="text-4xl  mb-4">
@@ -98,7 +98,7 @@ export default function Home() {
       </section>
 
       {/* Features Section */}
-      <section className="py-20 px-6 bg-[linear-gradient(106.66deg,#DCF4FF_3.3%,#E6F5FF_98.34%)]">
+      <section className="py-10 px-6 bg-[linear-gradient(106.66deg,#DCF4FF_3.3%,#E6F5FF_98.34%)]">
         <div className="max-w-6xl mx-auto">
           <div className="flex flex-col items-center  md:flex-row gap-8">
             {/* Left Content */}
@@ -111,7 +111,7 @@ export default function Home() {
             {/* Right Content - Feature Cards */}
             <div className="flex-1 flex flex-col gap-4">
               {/* Better Quality Card */}
-              <Card className="bg-[rgba(253,203,80,0.3)] rounded-4xl border border-[rgba(192,237,245,0.3)]">
+              <Card className="bg-[rgba(253,203,80,0.3)] p-0 rounded-4xl border border-[rgba(192,237,245,0.3)]">
                 <CardContent className="p-6">
                   <div className="flex items-start space-x-4">
                     <Image src="/main/book.gif" alt="Better Quality Icon" className="rounded-full" width={40} height={40} />
@@ -124,7 +124,7 @@ export default function Home() {
               </Card>
 
               {/* Reduce Bias Card */}
-              <Card className="bg-[rgba(51,204,204,0.2)] rounded-4xl border border-[rgba(192,237,245,0.3)]">
+              <Card className="bg-[rgba(51,204,204,0.2)] p-0  rounded-4xl border border-[rgba(192,237,245,0.3)]">
                 <CardContent className="p-6">
                   <div className="flex items-start space-x-4">
                     <Image src="/main/balance.gif" alt="Reduce Bias Icon" className="rounded-full" width={40} height={40} />
@@ -137,7 +137,7 @@ export default function Home() {
               </Card>
 
               {/* Save Time Card */}
-              <Card className="bg-[rgba(177,217,82,0.3)] rounded-4xl border border-[rgba(183,228,79,0.31)]">
+              <Card className="bg-[rgba(177,217,82,0.3)] p-0  rounded-4xl border border-[rgba(183,228,79,0.31)]">
                 <CardContent className="p-6">
                   <div className="flex items-start space-x-4">
                     <Image src="/main/time.gif" alt="Save Time Icon" className="rounded-full" width={40} height={40} />
@@ -150,7 +150,7 @@ export default function Home() {
               </Card>
 
               {/* Scale Easily Card */}
-              <Card className="bg-[rgba(39,162,204,0.2)] rounded-4xl border border-[rgba(192,237,245,0.3)]">
+              <Card className="bg-[rgba(39,162,204,0.2)] p-0  rounded-4xl border border-[rgba(192,237,245,0.3)]">
                 <CardContent className="p-6">
                   <div className="flex items-start space-x-4">
                     <Image src="/main/people.gif" alt="Scale Easily Icon" className="rounded-full" width={40} height={40} />
@@ -169,6 +169,107 @@ export default function Home() {
             </p>
           </div>
         </div>
+
+      </section>
+
+      {/* Workflow and CTA Section */}
+      <section className="  bg-[linear-gradient(106.66deg,#DCF4FF_3.3%,#E6F5FF_98.34%)]">
+        <div className="max-w-6xl mx-auto ">
+
+          {/* Steps Container */}
+          <div className="flex flex-col lg:flex-row justify-between items-start gap-8 mb-12">
+            {/* Step 1 */}
+            <div className="flex-1">
+              <Card className="bg-[rgba(174,237,250,1)] p-0  border border-[rgba(184,254,195,1)] rounded-3xl mb-6">
+                <CardContent className="flex items-center justify-center p-6">
+                  <div className="flex items-center justify-center gap-4">
+                    <div className="w-12 h-12 rounded-full bg-[rgba(224,245,255,1)] border border-[rgba(94, 114, 255, 0.5)] border-2 border-[rgba(108,132,255,1)] flex items-center justify-center">
+                      <span className="text-lg font-medium text-transparent bg-clip-text bg-[linear-gradient(93.61deg,#3A3FBB_-27.79%,#6B7CFF_125.55%)] ">1</span>
+                    </div>
+                    <h3 className="text-xl font-semibold text-transparent bg-clip-text bg-[linear-gradient(90deg,#455EFF_0%,#7988FF_100%)]">Design Your Flow</h3>
+                  </div>
+                </CardContent>
+              </Card>
+              <p className="text-center text-[rgba(108,132,255,0.7)] text-sm font-medium">
+                Create interview sections with custom configurations and AI guidelines
+              </p>
+              {/* Placeholder for image */}
+              <div className="m-3 rounded-4xl py-15 shadow-md px-2 bg-[rgba(249,255,255,1)]">
+                  <Image className="rounded-lg" src="/main/getting-started.png" alt="Getting Started Illustration" width={320} height={110} />
+              </div>
+            </div>
+
+            {/* Connector 1 */}
+            {/* <div className="hidden lg:flex items-center justify-center h-2 w-12 bg-gradient-to-r from-[rgba(198,232,73,0.9)] to-[rgba(0,215,255,0.9)]"></div> */}
+
+            {/* Step 2 */}
+            <div className="flex-1">
+              <Card className="bg-[rgba(169,237,249,0.9)] p-0 border border-[rgba(168,237,249,1)] rounded-3xl mb-6">
+                <CardContent className="flex items-center justify-center p-6">
+                  <div className="flex items-center justify-center gap-4">
+                    <div className="w-12 h-12 rounded-full bg-[rgba(224,245,255,1)] border border-[rgba(94, 114, 255, 0.5)] border-2 border-[rgba(108,132,255,1)] flex items-center justify-center">
+                      <span className="text-lg font-medium text-transparent bg-clip-text bg-[linear-gradient(93.61deg,#3A3FBB_-27.79%,#6B7CFF_125.55%)] ">2</span>
+                    </div>
+                    <h3 className="text-xl font-semibold text-transparent bg-clip-text bg-[linear-gradient(90deg,#455EFF_0%,#7988FF_100%)]">Conduct AI Interviews</h3>
+                  </div>
+                </CardContent>
+              </Card>
+              <p className="text-center text-[rgba(108,132,255,0.7)] text-sm font-medium">
+                AI-powered interviews with real-time adaptation and candidate interaction
+              </p>
+              {/* Placeholder for image */}
+              <Image className="rounded-4xl m-3" src="/main/candidate.png" alt="Candidate Illustration" width={350} height={230} />
+            </div>
+
+            {/* Connector 2 */}
+            {/* <div className="hidden lg:flex items-center justify-center h-2 w-12 bg-gradient-to-r from-[rgba(0,215,255,0.6)] to-[rgba(255,192,203,0.6)]"></div> */}
+
+            {/* Step 3 */}
+            <div className="flex-1">
+              <Card className="bg-[rgba(174,237,250,1)] p-0 border border-[#95eafb] rounded-3xl mb-6">
+                <CardContent className="flex items-center justify-center p-6">
+                  <div className="flex items-center justify-center gap-4">
+                    <div className="w-12 h-12 rounded-full bg-[rgba(224,245,255,1)] border border-[rgba(94, 114, 255, 0.5)] border-2 border-[rgba(108,132,255,1)] flex items-center justify-center">
+                      <span className="text-lg font-medium text-transparent bg-clip-text bg-[linear-gradient(93.61deg,#3A3FBB_-27.79%,#6B7CFF_125.55%)] ">3</span>
+                    </div>
+                    <h3 className="text-xl font-semibold text-transparent bg-clip-text bg-[linear-gradient(90deg,#455EFF_0%,#7988FF_100%)]">Get Insights</h3>
+                  </div>
+                </CardContent>
+              </Card>
+              <p className="text-center text-[rgba(108,132,255,0.7)] text-sm font-medium">
+                Review interview scores, transcripts, and performance analytics for better decisions
+              </p>
+              {/* Placeholder for image */}
+              <Image className="rounded-4xl m-3" src="/main/meet.png" alt="Insights Illustration" width={350} height={230} />
+            </div>
+          </div>
+        </div>
+
+
+      {/* CTA Section */}
+      <section className="w-full bg-[linear-gradient(92.11deg,rgba(2,32,132,0.7)_0.33%,rgba(0,50,216,0.7)_110.42%)] rounded-t-3xl px-0 py-6">
+        <div className="w-full">
+            <div className="flex flex-col items-center text-center gap-6">
+            <div>
+                 <h2 className="text-2xl mb-2 md:text-3xl text-transparent bg-clip-text bg-[linear-gradient(90deg,#EFF3FF_0%,#C8C7FF_100%)] font-semibold tracking-tight">
+                Excited to revolutionize your hiring process?
+              </h2>
+              <p className="text-[rgba(206,241,248,0.3)] max-w-2xl text-2xl">
+                Join leading companies who are already hiring smarter with AI
+              </p>
+
+            </div>
+              <div className="flex flex-col sm:flex-row gap-4 mt-2">
+                <Button className="rounded-full p-7 text-xl bg-[rgba(0,12,134,0.9)] hover:bg-[rgba(0,12,134,0.9)] hover:opacity-70 hover:text-white shadow-[0px_4px_4px_0px_rgba(0,0,0,0.08)] text-[rgba(224,244,255,0.9)]">
+                  Schedule a Demo
+                </Button>
+                <Button variant="outline" className="rounded-full p-7 text-xl hover:opacity-70 hover:text-white bg-[rgba(68,102,198,1)] border-2 border-[rgba(217,226,255,0.7)] font-semibold text-[rgba(224,244,255,0.9)] hover:bg-[rgba(255,255,255,0.1)]">
+                  View Pricing
+                </Button>
+              </div>
+            </div>
+          </div>
+      </section>
 
       </section>
 
