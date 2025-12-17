@@ -6,17 +6,139 @@ import Link from "next/link";
 import { Separator } from "@/components/ui/separator";
 
 export default function Home() {
+  const hiringFeatures = [
+    {
+      bgColor: "bg-[rgba(253,203,80,0.3)]",
+      borderColor: "border-[rgba(192,237,245,0.3)]",
+      icon: "/main/book.gif",
+      title: "Better Quality",
+      description: "Go beyond resumes to assess real skills and fit"
+    },
+    {
+      bgColor: "bg-[rgba(51,204,204,0.2)]",
+      borderColor: "border-[rgba(192,237,245,0.3)]",
+      icon: "/main/balance.gif",
+      title: "Reduce Bias",
+      description: "Fair, consistent evaluation criteria for every candidate"
+    },
+    {
+      bgColor: "bg-[rgba(177,217,82,0.3)]",
+      borderColor: "border-[rgba(183,228,79,0.31)]",
+      icon: "/main/time.gif",
+      title: "Save Time",
+      description: "Automate initial screening and focus on the best candidates"
+    },
+    {
+      bgColor: "bg-[rgba(39,162,204,0.2)]",
+      borderColor: "border-[rgba(192,237,245,0.3)]",
+      icon: "/main/people.gif",
+      title: "Scale Easily",
+      description: "Interview hundreds of candidates without adding resources"
+    }
+  ];
+
+  const jobSeekerSteps = [
+    {
+      number: "1",
+      title: "Mock Interview",
+      description: "Our AI coach helps you get comfortable with conversational, unlimited mock interviews.",
+      image: "/main/mock_interview.png",
+      imageAlt: "Mock Interview",
+      hasImageContainer: true
+    },
+    {
+      number: "2",
+      title: "Instant Feedback",
+      description: "Receive your interview performance score, strengths, weaknesses, and improvement tips instantly.",
+      image: "/main/feedback.png",
+      imageAlt: "Feedback",
+      hasImageContainer: false
+    },
+    {
+      number: "3",
+      title: "Actual Interview",
+      description: "When you're ready, start your official interview — just like a real hiring round.",
+      image: "/main/interview2.png",
+      imageAlt: "Interview",
+      hasImageContainer: false
+    }
+  ];
+
+  const jobSeekerFeatures = [
+    {
+      bgColor: "bg-[rgba(51,204,204,0.1)]",
+      borderColor: "border-[rgba(192,237,245,0.3)]",
+      icon: "/main/24.gif",
+      title: "Practice Anytime",
+      description: "24/7 access to mock interviews—no scheduling hassles"
+    },
+    {
+      bgColor: "bg-[rgba(253,96,80,0.1)]",
+      borderColor: "border-[rgba(246,225,220,1)]",
+      icon: "/main/score.gif",
+      title: "Instant Scores",
+      description: "Get your interview score based on your performance within a few minutes"
+    },
+    {
+      bgColor: "bg-[rgba(51,204,204,0.1)]",
+      borderColor: "border-[rgba(192,237,245,0.3)]",
+      icon: "/main/eye.gif",
+      title: "Realistic Scenarios",
+      description: "Practice with interview questions from your industry"
+    },
+    {
+      bgColor: "bg-[rgba(177,217,82,0.1)]",
+      borderColor: "border-[rgba(238,245,229,1)]",
+      icon: "/main/progress.gif",
+      title: "Track your Progress",
+      description: "Get detailed insights on your performance"
+    }
+  ];
+
+  const hiringTeamSteps = [
+    {
+      number: "1",
+      bgColor: "bg-[rgba(174,237,250,1)]",
+      borderColor: "border-[rgba(184,254,195,1)]",
+      title: "Design Your Flow",
+      description: "Create interview sections with custom configurations and AI guidelines",
+      image: "/main/getting-started.png",
+      imageAlt: "Getting Started Illustration",
+      hasImageContainer: true
+    },
+    {
+      number: "2",
+      bgColor: "bg-[rgba(169,237,249,0.9)]",
+      borderColor: "border-[rgba(168,237,249,1)]",
+      title: "Conduct AI Interviews",
+      description: "AI-powered interviews with real-time adaptation and candidate interaction",
+      image: "/main/candidate.png",
+      imageAlt: "Candidate Illustration",
+      hasImageContainer: false
+    },
+    {
+      number: "3",
+      bgColor: "bg-[rgba(174,237,250,1)]",
+      borderColor: "border-[#95eafb]",
+      title: "Get Insights",
+      description: "Review interview scores, transcripts, and performance analytics for better decisions",
+      image: "/main/meet.png",
+      imageAlt: "Insights Illustration",
+      hasImageContainer: false
+    }
+  ];
+
   return (
     <div className="min-h-screen w-full  ">
       {/* Header */}
       <header className="px-6 py-4">
         <nav className="flex items-center justify-between max-w-7xl mx-auto">
           <div className="flex items-center space-x-2">
-            <Image src="/main/logo.png" alt="Bait AI Logo" width={40} height={40} />
+            <Image className="md:size-[34px] lg:[size-40px]" src="/main/logo.png" alt="Bait AI Logo" width={40} height={40} />
             <span className="text-3xl font-bold bg-clip-text text-transparent bg-[linear-gradient(106.63deg,rgba(16,81,171,1)_0%,rgba(28,15,111,1)_144.25%)]">bAIt</span>
           </div>
 
-          <div className="hidden md:flex items-center space-x-8">
+          <div className="hidden md:flex items-center lg:space-x-8 space-x-4">
             <Link href="#" className="text-[rgba(69,94,255,0.8)] hover:opacity-70 font-medium">About us</Link>
             <Link href="#" className="text-[rgba(69,94,255,0.8)] hover:opacity-70 font-medium">For Hiring Teams</Link>
             <Link href="#" className="text-[rgba(69,94,255,0.8)] hover:opacity-70 font-medium">For Job Seekers</Link>
@@ -24,8 +146,8 @@ export default function Home() {
           </div>
 
           <div className="flex items-center space-x-4">
-            <Button variant="ghost" className="bg-[linear-gradient(106.03deg,rgba(239,246,254,0.5)_0%,rgba(163,217,248,0.5)_238.47%)]  text-[rgba(108,132,255,1)] hover:opacity-70 border font-medium  border-[rgba(108,132,255,0.9)]">Sign in</Button>
-            <Button className="rounded-full bg-[linear-gradient(106.03deg,#677CFF_0%,#A3D9F8_238.47%)] hover:opacity-70  text-[rgba(238,246,251,1)]  font-medium ">
+            <Button variant="ghost" className="lg:text-base text-sm bg-[linear-gradient(106.03deg,rgba(239,246,254,0.5)_0%,rgba(163,217,248,0.5)_238.47%)]  text-[rgba(108,132,255,1)] hover:opacity-70 border font-medium  border-[rgba(108,132,255,0.9)]">Sign in</Button>
+            <Button className="lg:text-base text-sm rounded-full bg-[linear-gradient(106.03deg,#677CFF_0%,#A3D9F8_238.47%)] hover:opacity-70  text-[rgba(238,246,251,1)]  font-medium ">
               Request a demo
             </Button>
           </div>
@@ -33,33 +155,33 @@ export default function Home() {
       </header>
 
       {/* Hero Section */}
-      <main className="px-6 py-6 bg-[linear-gradient(95.57deg,#E7F5FF_7.28%,#F5F7FF_100.24%)]">
-        <div className="max-w-7xl mx-auto text-center">
+      <main className="px-6 py-6  bg-[linear-gradient(95.57deg,#E7F5FF_7.28%,#F5F7FF_100.24%)]">
+        <div className="lg:max-w-7xl md:max-w-4xl mx-auto text-center">
           {/* AI Badge */}
-          <Badge className="bg-[linear-gradient(91deg,rgba(15,2,53,1)_-107.69%,rgba(43,5,155,1)_80.08%)] text-white px-6 py-2 mb-8 text-sm">
+          <Badge className="bg-[linear-gradient(91deg,rgba(15,2,53,1)_-107.69%,rgba(43,5,155,1)_80.08%)] text-white px-6 py-2 mb-8 mt-5 text-sm">
             <Image src="/main/lightning.svg" alt="AI Badge" width={14} height={14} className="inline-block mr-2" />
-            <span className="text-[rgba(213,220,255,0.9)]">AI-powered interview</span>
+            <span className="text-[rgba(213,220,255,0.9)] ">AI-powered interview</span>
           </Badge>
 
           {/* Main Heading */}
-          <h1 className="text-4xl md:text-5xl font-semibold mb-6">
+          <h1 className="lg:text-4xl md: md:text-3xl font-semibold lg:mb-6 md:mb-4 ">
             <span className="bg-[linear-gradient(90deg,rgba(49,56,217,0.79)_-46.65%,rgba(71,84,236,0.79)_0.59%,rgba(0,215,255,0.79)_43.6%,rgba(186,228,0,0.79)_69.68%,rgba(59,81,254,0.79)_88.72%)] text-transparent bg-clip-text">Train Talent,Transform Hiring</span>
           </h1>
 
           {/* Subtitle */}
-          <p className="md:text-2xl text-xl text-[rgba(53,77,194,0.5)] mb-16 max-w-3xl mx-auto">
+          <p className="lg:text-2xl md:text-xl text-[rgba(53,77,194,0.5)] mb-16 max-w-3xl mx-auto">
             Streamline recruitment and ace interviews with our AI-powered platform
           </p>
 
           {/* Feature Cards */}
-          <div className="grid md:grid-cols-2 gap-12 justify-start max-w-6xl mx-auto">
+          <div className="grid md:grid-cols-2 gap-12 justify-start lg:max-w-6xl md:max-w-4xl mx-auto">
             {/* Interview Section */}
             <div className="text-center">
               <Image src="/main/interview.png" alt="Interview Illustration" width={300} height={200} className="mx-auto mb-6" />
-              <h2 className="text-3xl font-semibold text-gray-800 mb-4">
+              <h2 className="lg:text-3xl text-2xl font-semibold text-gray-800 mb-4">
                 <span className="text-[rgba(69,94,255,1)]">Interview</span> <span className="bg-[linear-gradient(55.21deg,#173D7E_34.16%,#C3E1FC_93.59%)] text-transparent bg-clip-text">effortlessly</span>
               </h2>
-              <Button size="lg" className="bg-[linear-gradient(91.23deg,rgba(198,232,73,0.9)_-28.19%,rgba(0,215,255,0.9)_134.02%)] text-[rgba(53,77,194,1)] font-medium px-8 py-3 rounded-full text-lg hover:shadow-lg">
+              <Button size="lg" className="bg-[linear-gradient(91.23deg,rgba(198,232,73,0.9)_-28.19%,rgba(0,215,255,0.9)_134.02%)] text-[rgba(53,77,194,1)] font-medium px-8 py-3 rounded-full lg:text-lg text-base hover:shadow-lg">
                 Take interviews
               </Button>
             </div>
@@ -67,10 +189,10 @@ export default function Home() {
             {/* Hire Section */}
             <div className="text-center">
               <Image src="/main/hire.png" alt="Hire Illustration" width={300} height={200} className="mx-auto mb-6" />
-              <h2 className="text-3xl font-semibold text-gray-800 mb-4">
+              <h2 className="lg:text-3xl text-2xl font-semibold text-gray-800 mb-4">
                 <span className="text-[rgba(69,94,255,1)]">Hire</span> <span className="bg-[linear-gradient(55.21deg,#173D7E_34.16%,#C3E1FC_93.59%)] text-transparent bg-clip-text">Smarter</span>
               </h2>
-              <Button size="lg" className="px-8 py-3 rounded-full text-lg bg-[linear-gradient(90deg,#3A3FBB_0%,#00D7FF_100%)] text-[rgba(217,246,255,1)] font-medium">
+              <Button size="lg" className="px-8 py-3 rounded-full lg:text-lg text-base bg-[linear-gradient(90deg,#3A3FBB_0%,#00D7FF_100%)] text-[rgba(217,246,255,1)] font-medium">
                 Schedule a demo
               </Button>
             </div>
@@ -79,93 +201,55 @@ export default function Home() {
       </main>
 
       {/* Bottom Section */}
-      <section className="mt-2 bg-[linear-gradient(68.04deg,rgba(58,63,187,0.9)_-8.15%,rgba(107,124,255,0.9)_66.87%)] text-white py-20 px-6">
+      <section className="mt-2 bg-[linear-gradient(68.04deg,rgba(58,63,187,0.9)_-8.15%,rgba(107,124,255,0.9)_66.87%)] text-white lg:py-20 md:py-10 lg:px-6 md:px-20">
         <div className="max-w-6xl mx-auto">
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div>
-              <h2 className="text-4xl  mb-4">
+              <h2 className="lg:text-4xl text-2xl mb-4">
                 For <span className=""><span className="font-bold">Hiring Teams</span></span>
               </h2>
             </div>
             <div>
-              <h3 className="text-4xl  text-[rgba(255,255,255,0.3)] leading-tight">
+              <h3 className="lg:text-4xl md:text-2xl  text-[rgba(255,255,255,0.3)] leading-tight">
                 What if your next hire
               </h3>
 
-              <h3 className="text-4xl ml-20 text-[rgba(255,255,255,0.3)] leading-tight">came twice as fast?</h3>
+              <h3 className="lg:text-4xl md:text-2xl ml-20 text-[rgba(255,255,255,0.3)] leading-tight">came twice as fast?</h3>
             </div>
           </div>
         </div>
       </section>
 
       {/* Features Section */}
-      <section className="py-10 px-6 bg-[linear-gradient(106.66deg,#DCF4FF_3.3%,#E6F5FF_98.34%)]">
-        <div className="max-w-6xl mx-auto">
+      <section className="py-10 lg:px-6 md:px-10 bg-[linear-gradient(106.66deg,#DCF4FF_3.3%,#E6F5FF_98.34%)]">
+        <div className="lg:max-w-6xl md:max-w-3xl mx-auto">
           <div className="flex flex-col items-center  md:flex-row gap-8">
             {/* Left Content */}
             <div className="flex-1  space-y-6">
-              <h2 className="text-4xl  bg-[linear-gradient(103.06deg,rgba(0,13,144,0.5)_8.76%,rgba(93,107,238,0.5)_59.41%)] text-transparent bg-clip-text font-semibold">
+              <h2 className="lg:text-4xl md:text-xl  bg-[linear-gradient(103.06deg,rgba(0,13,144,0.5)_8.76%,rgba(93,107,238,0.5)_59.41%)] text-transparent bg-clip-text font-semibold">
                 Our AI interview platform integrates seamlessly into your existing workflow, helping you identify top talent faster and more accurately.
               </h2>
             </div>
 
             {/* Right Content - Feature Cards */}
             <div className="flex-1 flex flex-col gap-4">
-              {/* Better Quality Card */}
-              <Card className="bg-[rgba(253,203,80,0.3)] p-0 rounded-4xl border border-[rgba(192,237,245,0.3)]">
-                <CardContent className="p-6">
-                  <div className="flex items-start space-x-4">
-                    <Image src="/main/book.gif" alt="Better Quality Icon" className="rounded-full" width={40} height={40} />
-                    <div>
-                      <h3 className="text-lg font-semibold text-[rgba(116,130,248,1)]  mb-2">Better Quality</h3>
-                      <p className="text-[rgba(116,130,248,0.7)] font-semibold ">Go beyond resumes to assess real skills and fit</p>
+              {hiringFeatures.map((feature, index) => (
+                <Card key={index} className={`${feature.bgColor} p-0 rounded-4xl border ${feature.borderColor}`}>
+                  <CardContent className="lg:p-6 md:p-5">
+                    <div className="flex items-start space-x-4">
+                      <Image src={feature.icon} alt={feature.title} className="rounded-full" width={40} height={40} />
+                      <div>
+                        <h3 className="lg:text-lg md:text-base font-semibold text-[rgba(116,130,248,1)]  mb-2">{feature.title}</h3>
+                        <p className="lg:text-base md:text-sm text-[rgba(116,130,248,0.7)] font-semibold ">{feature.description}</p>
+                      </div>
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Reduce Bias Card */}
-              <Card className="bg-[rgba(51,204,204,0.2)] p-0  rounded-4xl border border-[rgba(192,237,245,0.3)]">
-                <CardContent className="p-6">
-                  <div className="flex items-start space-x-4">
-                    <Image src="/main/balance.gif" alt="Reduce Bias Icon" className="rounded-full" width={40} height={40} />
-                    <div>
-                      <h3 className="text-lg font-semibold text-[rgba(116,130,248,1)]  mb-2">Reduce Bias</h3>
-                      <p className="text-[rgba(116,130,248,0.7)] font-semibold ">Fair, consistent evaluation criteria for every candidate</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Save Time Card */}
-              <Card className="bg-[rgba(177,217,82,0.3)] p-0  rounded-4xl border border-[rgba(183,228,79,0.31)]">
-                <CardContent className="p-6">
-                  <div className="flex items-start space-x-4">
-                    <Image src="/main/time.gif" alt="Save Time Icon" className="rounded-full" width={40} height={40} />
-                    <div>
-                      <h3 className="text-lg font-semibold text-[rgba(116,130,248,1)] mb-2">Save Time</h3>
-                      <p className="text-[rgba(116,130,248,0.7)] font-semibold ">Automate initial screening and focus on the best candidates</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Scale Easily Card */}
-              <Card className="bg-[rgba(39,162,204,0.2)] p-0  rounded-4xl border border-[rgba(192,237,245,0.3)]">
-                <CardContent className="p-6">
-                  <div className="flex items-start space-x-4">
-                    <Image src="/main/people.gif" alt="Scale Easily Icon" className="rounded-full" width={40} height={40} />
-                    <div>
-                      <h3 className="text-lg font-semibold text-[rgba(116,130,248,1)] mb-2">Scale Easily</h3>
-                      <p className="text-[rgba(116,130,248,0.7)] font-semibold ">Interview hundreds of candidates without adding resources</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
+              ))}
             </div>
           </div>
-          <div className="flex items-center   w-fit border-b border-[rgba(120,130,237,0.6)] my-4 pb-2">
-            <p className="text-4xl font-semibold my-4 tracking-widest text-semibold text-transparent bg-clip-text bg-[linear-gradient(94.46deg,#6772E6_-13.88%,#8791F4_113.71%)]">
+          <div className="flex items-center   w-fit border-b border-[rgba(120,130,237,0.6)] my-4 lg:pb-2">
+            <p className="lg:text-4xl md:text-2xl font-semibold my-4 tracking-[8px] text-semibold text-transparent bg-clip-text bg-[linear-gradient(94.46deg,#6772E6_-13.88%,#8791F4_113.71%)]">
               Journey made easy
             </p>
           </div>
@@ -175,74 +259,34 @@ export default function Home() {
 
       {/* Workflow and CTA Section */}
       <section className="  bg-[linear-gradient(106.66deg,#DCF4FF_3.3%,#E6F5FF_98.34%)]">
-        <div className="max-w-6xl mx-auto ">
+        <div className="lg:max-w-6xl md:max-w-3xl mx-auto ">
 
           {/* Steps Container */}
-          <div className="flex flex-col lg:flex-row justify-between items-start gap-8 mb-12">
-            {/* Step 1 */}
-            <div className="flex-1">
-              <Card className="bg-[rgba(174,237,250,1)] p-0  border border-[rgba(184,254,195,1)] rounded-3xl mb-6">
-                <CardContent className="flex items-center justify-center p-6">
-                  <div className="flex items-center justify-center gap-4">
-                    <div className="w-12 h-12 rounded-full bg-[rgba(224,245,255,1)] border border-[rgba(94, 114, 255, 0.5)] border-2 border-[rgba(108,132,255,1)] flex items-center justify-center">
-                      <span className="text-lg font-medium text-transparent bg-clip-text bg-[linear-gradient(93.61deg,#3A3FBB_-27.79%,#6B7CFF_125.55%)] ">1</span>
+          <div className="flex  justify-between items-start gap-8 mb-12">
+            {hiringTeamSteps.map((step, index) => (
+              <div key={index} className="flex-1">
+                <Card className={`${step.bgColor} p-0  border ${step.borderColor} rounded-3xl lg:mb-3 md:mb-1`}>
+                  <CardContent className="flex items-center justify-center lg:p-4 md:p-3 ">
+                    <div className="flex items-center justify-center gap-4">
+                      <div className="w-12 h-12 rounded-full bg-[rgba(224,245,255,1)] border border-[rgba(94, 114, 255, 0.5)] border-2 border-[rgba(108,132,255,1)] flex items-center justify-center">
+                        <span className="lg:text-lg md:text-base font-medium text-transparent bg-clip-text bg-[linear-gradient(93.61deg,#3A3FBB_-27.79%,#6B7CFF_125.55%)] ">{step.number}</span>
+                      </div>
+                      <h3 className="lg:text-lg md:text-base  font-semibold text-transparent bg-clip-text bg-[linear-gradient(90deg,#455EFF_0%,#7988FF_100%)]">{step.title}</h3>
                     </div>
-                    <h3 className="text-xl font-semibold text-transparent bg-clip-text bg-[linear-gradient(90deg,#455EFF_0%,#7988FF_100%)]">Design Your Flow</h3>
+                  </CardContent>
+                </Card>
+                <p className="text-center text-[rgba(108,132,255,0.7)] md:text-sm lg:text-base font-semibold p-2">
+                  {step.description}
+                </p>
+                {step.hasImageContainer ? (
+                  <div className="m-4 rounded-4xl md:py-12 lg:py-17 lg:w-[350px] lg:h-[230px]   shadow-md px-5 bg-[rgba(249,255,255,1)]">
+                    <Image className="rounded-lg" src={step.image} alt={step.imageAlt} width={330} height={110} />
                   </div>
-                </CardContent>
-              </Card>
-              <p className="text-center text-[rgba(108,132,255,0.7)] text-sm font-medium">
-                Create interview sections with custom configurations and AI guidelines
-              </p>
-              {/* image */}
-              <div className="m-3 rounded-4xl py-15 shadow-md px-2 bg-[rgba(249,255,255,1)]">
-                <Image className="rounded-lg" src="/main/getting-started.png" alt="Getting Started Illustration" width={320} height={110} />
+                ) : (
+                  <Image className="rounded-4xl m-4" src={step.image} alt={step.imageAlt} width={350} height={230} />
+                )}
               </div>
-            </div>
-
-            {/* Connector 1 */}
-            {/* <div className="hidden lg:flex items-center justify-center h-2 w-12 bg-gradient-to-r from-[rgba(198,232,73,0.9)] to-[rgba(0,215,255,0.9)]"></div> */}
-
-            {/* Step 2 */}
-            <div className="flex-1">
-              <Card className="bg-[rgba(169,237,249,0.9)] p-0 border border-[rgba(168,237,249,1)] rounded-3xl mb-6">
-                <CardContent className="flex items-center justify-center p-6">
-                  <div className="flex items-center justify-center gap-4">
-                    <div className="w-12 h-12 rounded-full bg-[rgba(224,245,255,1)] border border-[rgba(94, 114, 255, 0.5)] border-2 border-[rgba(108,132,255,1)] flex items-center justify-center">
-                      <span className="text-lg font-medium text-transparent bg-clip-text bg-[linear-gradient(93.61deg,#3A3FBB_-27.79%,#6B7CFF_125.55%)] ">2</span>
-                    </div>
-                    <h3 className="text-xl font-semibold text-transparent bg-clip-text bg-[linear-gradient(90deg,#455EFF_0%,#7988FF_100%)]">Conduct AI Interviews</h3>
-                  </div>
-                </CardContent>
-              </Card>
-              <p className="text-center text-[rgba(108,132,255,0.7)] text-sm font-medium">
-                AI-powered interviews with real-time adaptation and candidate interaction
-              </p>
-              {/*  image */}
-              <Image className="rounded-4xl m-3" src="/main/candidate.png" alt="Candidate Illustration" width={350} height={230} />
-            </div>
-
-            {/* Connector 2 */}
-            {/* <div className="hidden lg:flex items-center justify-center h-2 w-12 bg-gradient-to-r from-[rgba(0,215,255,0.6)] to-[rgba(255,192,203,0.6)]"></div> */}
-
-            {/* Step 3 */}
-            <div className="flex-1">
-              <Card className="bg-[rgba(174,237,250,1)] p-0 border border-[#95eafb] rounded-3xl mb-6">
-                <CardContent className="flex items-center justify-center p-6">
-                  <div className="flex items-center justify-center gap-4">
-                    <div className="w-12 h-12 rounded-full bg-[rgba(224,245,255,1)] border border-[rgba(94, 114, 255, 0.5)] border-2 border-[rgba(108,132,255,1)] flex items-center justify-center">
-                      <span className="text-lg font-medium text-transparent bg-clip-text bg-[linear-gradient(93.61deg,#3A3FBB_-27.79%,#6B7CFF_125.55%)] ">3</span>
-                    </div>
-                    <h3 className="text-xl font-semibold text-transparent bg-clip-text bg-[linear-gradient(90deg,#455EFF_0%,#7988FF_100%)]">Get Insights</h3>
-                  </div>
-                </CardContent>
-              </Card>
-              <p className="text-center text-[rgba(108,132,255,0.7)] text-sm font-medium">
-                Review interview scores, transcripts, and performance analytics for better decisions
-              </p>
-              {/*  image */}
-              <Image className="rounded-4xl m-3" src="/main/meet.png" alt="Insights Illustration" width={350} height={230} />
-            </div>
+            ))}
           </div>
         </div>
 
@@ -252,19 +296,19 @@ export default function Home() {
           <div className="w-full">
             <div className="flex flex-col items-center text-center gap-6">
               <div>
-                <h2 className="text-2xl mb-2 md:text-3xl text-transparent bg-clip-text bg-[linear-gradient(90deg,#EFF3FF_0%,#C8C7FF_100%)] font-semibold tracking-tight">
+                <h2 className="lg:text-[32px] md:mb-2 mb-3 md:text-2xl text-transparent bg-clip-text bg-[linear-gradient(90deg,#EFF3FF_0%,#C8C7FF_100%)] font-semibold tracking-tight">
                   Excited to revolutionize your hiring process?
                 </h2>
-                <p className="text-[rgba(206,241,248,0.3)] max-w-2xl text-2xl">
+                <p className="text-[rgba(206,241,248,0.3)] max-w-2xl lg:text-2xl md:text-xl">
                   Join leading companies who are already hiring smarter with AI
                 </p>
 
               </div>
-              <div className="flex flex-col sm:flex-row gap-4 mt-2">
-                <Button className="rounded-xl px-8 py-4  text-xl font-semibold bg-[rgba(0,12,134,0.9)] hover:bg-[rgba(0,12,134,0.9)] hover:opacity-90 border-[rgba(99,112,227,1)] hover:text-white shadow-[0px_4px_4px_0px_rgba(0,0,0,0.08)] text-[rgba(224,244,255,0.9)]">
+              <div className="flex flex-col sm:flex-row gap-4 mt-2 md:max-w-3xl lg:max-w-6xl">
+                <Button className="rounded-xl px-8 lg:py-6 md:py-4  lg:text-2xl  md:text-xl font-semibold bg-[rgba(0,12,134,0.9)] hover:bg-[rgba(0,12,134,0.9)] hover:opacity-90 border-[rgba(99,112,227,1)] hover:text-white shadow-[0px_4px_4px_0px_rgba(0,0,0,0.08)] text-[rgba(224,244,255,0.9)]">
                   Schedule a Demo
                 </Button>
-                <Button className="rounded-xl px-8 py-4 text-xl font-semibold hover:opacity-90 hover:text-white bg-[rgba(68,102,198,1)] border-2 border-[rgba(217,226,255,0.7)] text-[rgba(224,244,255,0.9)] hover:bg-[rgba(255,255,255,0.1)]">
+                <Button className="rounded-xl px-8 lg:py-6 md:py-4 lg:text-2xl md:text-xl  font-semibold hover:opacity-90 hover:text-white bg-[rgba(68,102,198,1)] border-2 border-[rgba(217,226,255,0.7)] text-[rgba(224,244,255,0.9)] hover:bg-[rgba(255,255,255,0.1)]">
                   View Pricing
                 </Button>
               </div>
@@ -276,16 +320,16 @@ export default function Home() {
       <section className="bg-[rgba(243,255,190,0.15)]">
         {/* Job Seekers Section */}
         <section className="mt-15 bg-[linear-gradient(91.27deg,rgba(231,255,125,0.6)_2.28%,rgba(243,255,191,0.6)_108.31%)] text-white py-12 px-6">
-          <div className="max-w-5xl mx-auto">
-            <div className="flex justify-between  items-center">
-              <div>
+          <div className="lg:max-w-5xl md:max-w-3xl mx-auto">
+            <div className="flex justify-between items-center">
+              <div className="">
                 <h2 className="text-5xl mb-4">
-                  <span className="block text-[rgba(166,203,29,0.5)]">Getting a job</span>
-                  <span className="block text-[rgba(166,203,29,0.5)] text-4xl font-semibold mt-2 ml-10">Just got easier</span>
+                  <span className="block  lg:text-4xl md:text-3xl text-[rgba(166,203,29,0.5)]">Getting a job</span>
+                  <span className="block text-[rgba(166,203,29,0.5)] lg:text-4xl md:text-3xl font-semibold mt-2 ml-10">Just got easier</span>
                 </h2>
               </div>
               <div>
-                <h3 className="text-4xl bg-[linear-gradient(271.56deg,#86A5FF_-14.72%,#4569D1_128.95%)] text-transparent bg-clip-text leading-tight">
+                <h3 className="lg:text-4xl md:text-3xl bg-[linear-gradient(271.56deg,#86A5FF_-14.72%,#4569D1_128.95%)] text-transparent bg-clip-text leading-tight">
                   <span className="">For</span> <span className="font-bold">Job Seekers</span>
                 </h3>
               </div>
@@ -300,63 +344,23 @@ export default function Home() {
             <div className="flex flex-col items-center  md:flex-row gap-4">
               {/* Left Content - Feature Cards */}
               <div className="flex-1 flex flex-col gap-4">
-                {/* Practice Card */}
-                <Card className="bg-[rgba(51,204,204,0.1)] p-0 rounded-4xl border border-[rgba(192,237,245,0.3)]">
-                  <CardContent className="p-6">
+              {jobSeekerFeatures.map((feature, index) => (
+                <Card key={index} className={`${feature.bgColor} p-0 rounded-4xl border ${feature.borderColor}`}>
+                  <CardContent className="g:p-6 md:p-5">
                     <div className="flex items-start space-x-4">
-                      <Image src="/main/24.gif" alt="Location Icon" className="rounded-full" width={40} height={40} />
+                      <Image src={feature.icon} alt={feature.title} className="rounded-full" width={40} height={40} />
                       <div>
-                        <h3 className="text-lg font-semibold text-[rgba(116,130,248,1)]  mb-2">Practice Anytime</h3>
-                        <p className="text-[rgba(116,130,248,0.7)] font-semibold ">24/7 access to mock interviews—no scheduling hassles</p>
+                        <h3 className="lg:text-lg md:text-base font-semibold text-[rgba(116,130,248,1)]  mb-2">{feature.title}</h3>
+                        <p className="lg:text-base md:text-sm text-[rgba(116,130,248,0.7)] font-semibold ">{feature.description}</p>
                       </div>
                     </div>
                   </CardContent>
                 </Card>
-
-                {/* Score Card */}
-                <Card className="bg-[rgba(253,96,80,0.1)] p-0  rounded-4xl border border-[rgba(246,225,220,1)]">
-                  <CardContent className="p-6">
-                    <div className="flex items-start space-x-4">
-                      <Image src="/main/score.gif" alt="Score Icon" className="rounded-full" width={40} height={40} />
-                      <div>
-                        <h3 className="text-lg font-semibold text-[rgba(116,130,248,1)]  mb-2">Instant Scores</h3>
-                        <p className="text-[rgba(116,130,248,0.7)] font-semibold ">Get your interview score based on your performance within a few minutes</p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* Scenario Card */}
-                <Card className="bg-[rgba(51,204,204,0.1)] p-0  rounded-4xl border border-[rgba(192,237,245,0.3)]">
-                  <CardContent className="p-6">
-                    <div className="flex items-start space-x-4">
-                      <Image src="/main/eye.gif" alt="Eye Icon" className="rounded-full" width={40} height={40} />
-                      <div>
-                        <h3 className="text-lg font-semibold text-[rgba(116,130,248,1)] mb-2">Realistic Scenarios</h3>
-                        <p className="text-[rgba(116,130,248,0.7)] font-semibold ">Practice with interview questions from your industry</p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* Track Progress Card */}
-                <Card className="bg-[rgba(177,217,82,0.1)] p-0  rounded-4xl border border-[rgba(238,245,229,1)]">
-                  <CardContent className="p-6">
-                    <div className="flex items-start space-x-4">
-                      <Image src="/main/progress.gif" alt="Progress Icon" className="rounded-full" width={40} height={40} />
-                      <div>
-                        <h3 className="text-lg font-semibold text-[rgba(116,130,248,1)] mb-2">Track your Progress</h3>
-                        <p className="text-[rgba(116,130,248,0.7)] font-semibold ">Get detailed insights on your performance</p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-
-              {/* Right Content */}
+              ))}
+            </div>
               <div className="flex-1 space-y-4">
                 <div className="max-w-xl md:max-w-2xl mx-auto md:ml-0 text-center md:text-right">
-                  <p className="font-semibold leading-tight text-[rgba(116,130,248,0.85)] text-2xl sm:text-3xl md:text-[32px]">
+                  <p className="font-semibold leading-tight text-[rgba(116,130,248,0.85)] lg:text-4xl md:text-2xl">
                     <span className="block">Prepare for</span>
                     <span className="block">any interview—</span>
                     <span className="block">AI-powered or traditional</span>
@@ -365,9 +369,6 @@ export default function Home() {
                   </p>
                 </div>
               </div>
-
-            </div>
-            <div className="flex items-center   w-fit border-b border-[rgba(120,130,237,0.6)] my-4 pb-2">
 
             </div>
           </div>
@@ -382,75 +383,37 @@ export default function Home() {
             <Separator className="bg-[rgba(201,231,81,0.7)]" />
           </div>
 
-          <div className="text-4xl mb-4 text-center text-transparent bg-clip-text bg-[linear-gradient(90.26deg,rgba(166,203,29,0.7)_32.47%,rgba(134,232,176,0.7)_71.09%)]">How it works</div>
+          <div className="text-4xl mb-10 text-center text-transparent bg-clip-text bg-[linear-gradient(90.26deg,rgba(166,203,29,0.7)_32.47%,rgba(134,232,176,0.7)_71.09%)]">How it works</div>
 
           <div className="max-w-6xl mx-auto ">
             {/* Steps Container */}
-            <div className="flex flex-col lg:flex-row justify-between items-start gap-8 mb-12">
-              {/* H- 1 */}
-              <div className="flex-1">
-                <Card className="bg-[linear-gradient(92.45deg,rgba(239,252,186,0.7)_0%,rgba(247,255,212,0.7)_106.31%)] p-0  border border-[rgba(205,226,137,0.4)] rounded-3xl mb-6">
-                  <CardContent className="flex items-center justify-center p-6">
-                    <div className="flex items-center justify-center gap-4">
-                      <div className="w-12 h-12 rounded-full bg-[rgba(224,245,255,1)] border border-[rgba(94, 114, 255, 0.5)] border-2 border-[rgba(108,132,255,1)] flex items-center justify-center">
-                        <span className="text-lg font-medium text-transparent bg-clip-text bg-[linear-gradient(93.61deg,#3A3FBB_-27.79%,#6B7CFF_125.55%)] ">1</span>
+
+
+            <div className="flex  justify-between items-start gap-8 mb-12 lg:max-w-6xl md:max-w-3xl mx-auto">
+              {jobSeekerSteps.map((step, index) => (
+                <div key={index} className="flex-1">
+                  <Card className="bg-[linear-gradient(92.45deg,rgba(239,252,186,0.7)_0%,rgba(247,255,212,0.7)_106.31%)] p-0  border border-[rgba(205,226,137,0.4)] rounded-3xl mb-6">
+                    <CardContent className="flex items-center justify-center lg:p-4 md:p-3">
+                      <div className="flex items-center justify-center gap-4">
+                        <div className="w-12 h-12 rounded-full bg-[rgba(224,245,255,1)] border border-[rgba(94, 114, 255, 0.5)] border-2 border-[rgba(108,132,255,1)] flex items-center justify-center">
+                          <span className="lg:text-lg md:text-base font-medium text-transparent bg-clip-text bg-[linear-gradient(93.61deg,#3A3FBB_-27.79%,#6B7CFF_125.55%)] ">{step.number}</span>
+                        </div>
+                        <h3 className="lg:text-lg md:text-base font-semibold text-transparent bg-clip-text bg-[linear-gradient(90deg,#455EFF_0%,#7988FF_100%)]">{step.title}</h3>
                       </div>
-                      <h3 className="text-xl font-semibold text-transparent bg-clip-text bg-[linear-gradient(90deg,#455EFF_0%,#7988FF_100%)]">Mock Interview</h3>
+                    </CardContent>
+                  </Card>
+                  <p className="text-center text-[rgba(6,15,100,0.5)] text-sm font-semibold">
+                    {step.description}
+                  </p>
+                  {step.hasImageContainer ? (
+                    <div className="flex items-center justify-center my-4 rounded-4xl py-6 h-[220px] shadow-md px-2 bg-[rgba(249,255,255,1)]">
+                      <Image className="rounded-lg" src={step.image} alt={step.imageAlt} width={300} height={450} />
                     </div>
-                  </CardContent>
-                </Card>
-                <p className="text-center text-[rgba(6,15,100,0.5)] text-sm font-semibold">
-                  Our AI coach helps you get comfortable with conversational, role-specific unlimited mock interviews.
-                </p>
-                {/* image */}
-                <div className="flex items-center justify-center my-1 rounded-4xl py-12  shadow-md px-2 bg-[rgba(249,255,255,1)] w-[350px] h-[230px]">
-                  <Image className="rounded-lg" src="/main/mock_interview.png" alt="Mock Interview" width={300} height={400} />
+                  ) : (
+                    <Image className="rounded-4xl m-4" src={step.image} alt={step.imageAlt} width={350} height={230} />
+                  )}
                 </div>
-              </div>
-
-              {/* Connector 1 */}
-              {/* <div className="hidden lg:flex items-center justify-center h-2 w-12 bg-gradient-to-r from-[rgba(198,232,73,0.9)] to-[rgba(0,215,255,0.9)]"></div> */}
-
-              {/* H- 2 */}
-              <div className="flex-1">
-                <Card className="bg-[linear-gradient(92.45deg,rgba(239,252,186,0.7)_0%,rgba(247,255,212,0.7)_106.31%)] p-0 border border-[rgba(205,226,137,0.4)] rounded-3xl mb-6">
-                  <CardContent className="flex items-center justify-center p-6">
-                    <div className="flex items-center justify-center gap-4">
-                      <div className="w-12 h-12 rounded-full bg-[rgba(224,245,255,1)] border border-[rgba(94, 114, 255, 0.5)] border-2 border-[rgba(108,132,255,1)] flex items-center justify-center">
-                        <span className="text-lg font-medium text-transparent bg-clip-text bg-[linear-gradient(93.61deg,#3A3FBB_-27.79%,#6B7CFF_125.55%)] ">2</span>
-                      </div>
-                      <h3 className="text-xl font-semibold text-transparent bg-clip-text bg-[linear-gradient(90deg,#455EFF_0%,#7988FF_100%)]">Instant Feedback</h3>
-                    </div>
-                  </CardContent>
-                </Card>
-                <p className="text-center text-[rgba(6,15,100,0.5)] text-sm font-semibold">
-                  Receive your interview performance score, strengths, weaknesses, and improvement tips instantly.
-                </p>
-                {/*  image */}
-                <Image className="rounded-4xl m-3" src="/main/feedback.png" alt="Feedback " width={350} height={230} />
-              </div>
-
-              {/* Connector 2 */}
-              {/* <div className="hidden lg:flex items-center justify-center h-2 w-12 bg-gradient-to-r from-[rgba(0,215,255,0.6)] to-[rgba(255,192,203,0.6)]"></div> */}
-
-              {/* H- 3 */}
-              <div className="flex-1">
-                <Card className="bg-[linear-gradient(92.45deg,rgba(239,252,186,0.7)_0%,rgba(247,255,212,0.7)_106.31%)]  p-0 border border-[rgba(205,226,137,0.4)] rounded-3xl mb-6">
-                  <CardContent className="flex items-center justify-center p-6">
-                    <div className="flex items-center justify-center gap-4">
-                      <div className="w-12 h-12 rounded-full bg-[rgba(224,245,255,1)] border border-[rgba(94, 114, 255, 0.5)] border-2 border-[rgba(108,132,255,1)] flex items-center justify-center">
-                        <span className="text-lg font-medium text-transparent bg-clip-text bg-[linear-gradient(93.61deg,#3A3FBB_-27.79%,#6B7CFF_125.55%)] ">3</span>
-                      </div>
-                      <h3 className="text-xl font-semibold text-transparent bg-clip-text bg-[linear-gradient(90deg,#455EFF_0%,#7988FF_100%)]">Actual Interview</h3>
-                    </div>
-                  </CardContent>
-                </Card>
-                <p className="text-center text-[rgba(6,15,100,0.5)] text-sm font-semibold">
-                  When you're ready, start your official  interview — just like a real hiring round.
-                </p>
-                {/* Placeholder for image */}
-                <Image className="rounded-4xl m-3" src="/main/interview2.png" alt="Interview" width={350} height={230} />
-              </div>
+              ))}
             </div>
           </div>
         </section>
@@ -461,19 +424,19 @@ export default function Home() {
           <div className="w-full">
             <div className="flex flex-col items-center text-center gap-6">
               <div>
-                <h2 className="text-2xl mb-2 md:text-3xl text-transparent bg-clip-text bg-[linear-gradient(271.56deg,#86A5FF_-14.72%,#4569D1_128.95%)] font-semibold tracking-tight">
+                <h2 className="md:text-2xl mb-2 lg:text-[32px] text-transparent bg-clip-text bg-[linear-gradient(271.56deg,#86A5FF_-14.72%,#4569D1_128.95%)] font-semibold tracking-tight">
                   Start Your Free Practice Today
                 </h2>
-                <p className="bg-clip-text text-transparent font-semibold bg-[linear-gradient(271.56deg,rgba(134,165,255,0.5)_-14.72%,rgba(69,105,209,0.5)_128.95%)] max-w-2xl text-2xl">
+                <p className="bg-clip-text text-transparent font-semibold bg-[linear-gradient(271.56deg,rgba(134,165,255,0.5)_-14.72%,rgba(69,105,209,0.5)_128.95%)] max-w-2xl lg:text-2xl md:text-xl">
                   No payment required. Start practicing in under 2 minutes.
                 </p>
 
               </div>
               <div className="flex flex-col sm:flex-row gap-4 mt-2">
-                <Button className="rounded-xl px-8 py-4  text-xl font-semibold bg-[rgba(83,118,219,1)] hover:bg-[rgba(83,118,219,1)] hover:opacity-90 border-[rgba(99,112,227,1)]  text-[rgba(234,253,161,1)]">
+                <Button className="rounded-xl px-8 lg:py-6 md:py-4   lg:text-2xl  md:text-xl font-semibold bg-[rgba(83,118,219,1)] hover:bg-[rgba(83,118,219,1)] hover:opacity-90 border-[rgba(99,112,227,1)]  text-[rgba(234,253,161,1)]">
                   Create a free account
                 </Button>
-                <Button className="rounded-xl px-8 py-4 text-xl font-semibold hover:opacity-90 hover:bg-[rgba(234,253,161,1)]   bg-[rgba(234,253,161,1)]  border-2 border-[rgba(83,118,219,1)] text-[rgba(83,118,219,1)] ">
+                <Button className="rounded-xl px-8 lg:py-6 md:py-4  lg:text-2xl  md:text-xl font-semibold hover:opacity-90 hover:bg-[rgba(234,253,161,1)]   bg-[rgba(234,253,161,1)]  border-2 border-[rgba(83,118,219,1)] text-[rgba(83,118,219,1)] ">
                   How it works
                 </Button>
               </div>
@@ -481,19 +444,19 @@ export default function Home() {
           </div>
         </section>
 
-        <section className="w-full   px-0 py-10">
+        <section className="w-full   px-0 lg:py-15 md:py-8">
           <div className="w-full">
             <div className="flex flex-col items-center text-center gap-6">
               <div className="flex items-center space-x-2 mb-2">
-                <Image src="/main/logo.png" alt="Bait AI Logo" width={40} height={40} />
+                <Image className="md:size-[34px] lg:[size-40px]" src="/main/logo.png" alt="Bait AI Logo" width={40} height={40} />
                 <span className="text-3xl font-bold bg-clip-text text-transparent bg-[linear-gradient(106.63deg,rgba(16,81,171,1)_0%,rgba(28,15,111,1)_144.25%)]">bAIt</span>
               </div>
               <div className="flex items-center space-x-6">
-                <Image src="/main/linkedin.svg" alt=" Linkedin Logo" width={30} height={30} />
-                <Image src="/main/gmail.svg" alt="Gmail Logo" width={30} height={30} />
-                <Image className="bg-black p-1" src="/main/x.svg" alt="X Logo" width={26} height={26} />
-                <Image src="/main/instagram.svg" alt="Instagram Logo" width={30} height={30} />
-                <Image src="/main/facebook.svg" alt="Facebook Logo" width={30} height={30} />
+                <Image className="md:size-6 lg:[size-30px]" src="/main/linkedin.svg" alt=" Linkedin Logo" width={30} height={30} />
+                <Image className="md:size-6 lg:[size-30px]" src="/main/gmail.svg" alt="Gmail Logo" width={30} height={30} />
+                <Image className="bg-black p-1 md:size-5 lg:[size-26px]" src="/main/x.svg" alt="X Logo" width={26} height={26} />
+                <Image className="md:size-6 lg:[size-30px]" src="/main/instagram.svg" alt="Instagram Logo" width={30} height={30} />
+                <Image className="md:size-6 lg:[size-30px]" src="/main/facebook.svg" alt="Facebook Logo" width={30} height={30} />
               </div>
 
               <div className="text-primary">
