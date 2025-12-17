@@ -1,9 +1,24 @@
-import React from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { Button } from '../ui/button'
-import { ChevronDown, Mic, Video, Volume2 } from 'lucide-react'
+import { Mic, Video, Volume2 } from 'lucide-react'
 import Image from 'next/image'
 import { Badge } from '../ui/badge'
 import { motion } from "motion/react"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select'
+import { Progress } from '../ui/progress'
+type InterviewSectionProps = {
+    cameras: MediaDeviceInfo[]
+    microphones: MediaDeviceInfo[]
+    speakers: MediaDeviceInfo[]
+    selectedCamera: string
+    selectedMic: string
+    selectedSpeaker: string
+    setSelectedCamera: (id: string) => void
+    setSelectedMic: (id: string) => void
+    setSelectedSpeaker: (id: string) => void
+    saveSelection: (key: string, value: string) => void
+}
+
 const beforeYouBeginItems = [
     {
         iconPath: "/interview/timer.svg",
@@ -31,7 +46,124 @@ const beforeYouBeginItems = [
     }
 ]
 
-export default function InterviewSection() {
+export default function InterviewSection({
+    cameras,
+    microphones,
+    speakers,
+    selectedCamera,
+    selectedMic,
+    selectedSpeaker,
+    setSelectedCamera,
+    setSelectedMic,
+    setSelectedSpeaker,
+    saveSelection,
+}: InterviewSectionProps) {
+    const [isMicTesting, setIsMicTesting] = useState(false)
+    const [audioLevel, setAudioLevel] = useState(0)
+    const [isSpeakerTesting, setIsSpeakerTesting] = useState(false)
+    const audioContextRef = useRef<AudioContext | null>(null)
+    const analyserRef = useRef<AnalyserNode | null>(null)
+    const micStreamRef = useRef<MediaStream | null>(null)
+    const animationFrameRef = useRef<number | null>(null)
+    const videoElementRef = useRef<HTMLVideoElement | null>(null)
+    const cameraStreamRef = useRef<MediaStream | null>(null)
+
+    const startMicTest = async () => {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+            const audioContext = new AudioContext()
+            const analyser = audioContext.createAnalyser()
+            const source = audioContext.createMediaStreamSource(stream)
+            source.connect(analyser)  // Connect source to analyser
+
+            micStreamRef.current = stream
+            audioContextRef.current = audioContext
+            analyserRef.current = analyser
+            
+            const buffer = new Uint8Array(analyser.frequencyBinCount)
+            const updateLevel = () => {
+                analyser.getByteFrequencyData(buffer)
+                const avg = buffer.reduce((sum, val) => sum + val, 0) / buffer.length
+                setAudioLevel(avg / 255)
+                animationFrameRef.current = requestAnimationFrame(updateLevel)
+            }
+
+            updateLevel()
+            setIsMicTesting(true)
+        } catch (error) {
+            console.error('Mic error:', error)
+        }
+    }
+
+    const stopMicTest = () => {
+        animationFrameRef.current && cancelAnimationFrame(animationFrameRef.current)
+        micStreamRef.current?.getTracks().forEach(track => track.stop())
+        micStreamRef.current = null
+        audioContextRef.current?.close()
+        audioContextRef.current = null
+        setIsMicTesting(false)
+        setAudioLevel(0)
+    }
+
+    const startSpeakerTest = () => {
+        const audio = new Audio('/interview/test.wav')
+        audio.play().catch(err => console.error('Audio play error:', err))
+        
+        setIsSpeakerTesting(true)
+        setTimeout(() => {
+            setIsSpeakerTesting(false)
+            audio.pause()
+            audio.currentTime = 0
+        }, 2000);  
+    }
+
+    const startCamera = async () => {
+        try {
+            // Stop existing stream if any
+            if (cameraStreamRef.current) {
+                cameraStreamRef.current.getTracks().forEach(track => track.stop())
+            }
+
+            const stream = await navigator.mediaDevices.getUserMedia({ 
+                video: selectedCamera ? { deviceId: { exact: selectedCamera } } : true 
+            })
+            
+            cameraStreamRef.current = stream
+            
+            if (videoElementRef.current) {
+                videoElementRef.current.srcObject = stream
+            }
+        } catch (error) {
+            console.error('Camera error:', error)
+        }
+    }
+
+    const restartCamera = () => {
+        startCamera()
+    }
+
+    useEffect(() => {
+        startCamera()
+        
+        return () => {
+            stopMicTest()
+            if (micStreamRef.current) {
+                micStreamRef.current.getTracks().forEach(track => track.stop())
+                micStreamRef.current = null
+            }
+            if (cameraStreamRef.current) {
+                cameraStreamRef.current.getTracks().forEach(track => track.stop())
+                cameraStreamRef.current = null
+            }
+        }
+    }, [])
+
+    useEffect(() => {
+        if (selectedCamera) {
+            startCamera()
+        }
+    }, [selectedCamera])
+
     return (
         <motion.div 
             initial={{ opacity: 0 }}
@@ -61,42 +193,103 @@ export default function InterviewSection() {
 
 
                         {/* Video Area */}
-                        <div className=" w-full">
-                            <Image
-                                src="/interview/person.png"
-                                alt="Interview Placeholder"
-                                width={2000}
-                                height={2000}
+                        <div className="w-full relative bg-black rounded-lg overflow-hidden aspect-video">
+                            <video
+                                ref={videoElementRef}
+                                autoPlay
+                                playsInline
+                                muted
                                 className="w-full h-full object-cover"
                             />
                         </div>
                         {/* Controls */}
-                        <div className="grid grid-cols-3  gap-4 mb-6 mt-5">
+                        <div className="grid grid-cols-3 gap-4 mb-6 mt-5">
                             <div className="space-y-2">
-                                <Button variant={"outline"}>
-                                    <Mic className="w-4 h-4" />
-                                    <span className="text-sm">Microphone</span>
-                                    <ChevronDown className="w-4 h-4" />
-                                </Button>
-                                <p className="text-xs text-green-600">Test your mic</p>
+                                <Select
+                                    value={selectedMic || undefined}
+                                    onValueChange={(val) => {
+                                        setSelectedMic(val)
+                                        saveSelection('selectedMic', val)
+                                    }}
+                                >
+                                    <SelectTrigger className="w-full justify-start gap-2">
+                                        <Mic className="w-4 h-4" />
+                                        <SelectValue placeholder="Microphone" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {microphones?.map((m, idx) => (
+                                            <SelectItem key={m.deviceId || `mic-${idx}`} value={m.deviceId}>
+                                                {m.label || `Microphone ${idx + 1}`}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                                <button 
+                                    onClick={isMicTesting ? stopMicTest : startMicTest}
+                                    className="text-xs text-green-600 hover:underline cursor-pointer"
+                                >
+                                    {isMicTesting ? 'Stop testing' : 'Test your mic'}
+                                </button>
+                                {isMicTesting && (
+                                    <Progress value={audioLevel * 100} />
+                                )}
                             </div>
 
-                            <div className="space-y-2 ">
-                                <Button variant={"outline"}>
-                                    <Volume2 className="w-4 h-4" />
-                                    <span className="text-sm">Speakers</span>
-                                    <ChevronDown className="w-4 h-4" />
-                                </Button>
-                                <p className="text-xs text-green-600">Play test sound</p>
+                            <div className="space-y-2">
+                                <Select
+                                    value={selectedSpeaker || undefined}
+                                    onValueChange={(val) => {
+                                        setSelectedSpeaker(val)
+                                        saveSelection('selectedSpeaker', val)
+                                    }}
+                                >
+                                    <SelectTrigger className="w-full justify-start gap-2">
+                                        <Volume2 className="w-4 h-4" />
+                                        <SelectValue placeholder="Speakers" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {speakers?.[0] && (
+                                            <SelectItem key={speakers[0].deviceId} value={speakers[0].deviceId}>
+                                                {speakers[0].label || 'Default Speaker'}
+                                            </SelectItem>
+                                        )}
+                                    </SelectContent>
+                                </Select>
+                                <button 
+                                    onClick={isSpeakerTesting ? undefined : startSpeakerTest}
+                                    disabled={isSpeakerTesting}
+                                    className="text-xs text-green-600 hover:underline cursor-pointer disabled:opacity-50"
+                                >
+                                    {isSpeakerTesting ? 'Playing...' : 'Play test sound'}
+                                </button>
                             </div>
 
                             <div className="space-y-2">
-                                <Button variant={"outline"}>
-                                    <Video className="w-4 h-4" />
-                                    <span className="text-sm">Camera</span>
-                                    <ChevronDown className="w-4 h-4" />
-                                </Button>
-                                <p className="text-xs text-green-600">Restart camera</p>
+                                <Select
+                                    value={selectedCamera || undefined}
+                                    onValueChange={(val) => {
+                                        setSelectedCamera(val)
+                                        saveSelection('selectedCamera', val)
+                                    }}
+                                >
+                                    <SelectTrigger className="w-full justify-start gap-2">
+                                        <Video className="w-4 h-4" />
+                                        <SelectValue placeholder="Camera" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {cameras?.map((c, idx) => (
+                                            <SelectItem key={c.deviceId || `cam-${idx}`} value={c.deviceId}>
+                                                {c.label || `Camera ${idx + 1}`}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                                <button 
+                                    onClick={restartCamera}
+                                    className="text-xs text-green-600 hover:underline cursor-pointer"
+                                >
+                                    Restart camera
+                                </button>
                             </div>
                         </div>
 

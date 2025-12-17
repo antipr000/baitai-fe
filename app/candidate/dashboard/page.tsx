@@ -44,8 +44,8 @@ export default function DashboardPage() {
                         {/* Completed */}
                         <Card className="bg-[rgba(0,186,0,0.1)] border border-[rgba(0,186,0,0.5)]">
                             <CardContent className="pt-6">
-                                <div className="group flex items-center justify-between">
-                                    <Image src="/candidate/dashboard/complete.svg" alt="Completed" width={32} height={32} />
+                                <div className="group flex items-center justify-center gap-5">
+                                    <Image src="/candidate/dashboard/complete.svg" alt="Completed" width={50} height={50} />
                                     <div>
                                         <p className="  font-medium text-muted-foreground mb-2 transition-all duration-400 group-hover:-translate-y-1.5">Completed</p>
                                         <p className="text-center text-2xl font-bold text-[rgba(104,100,247,1)] transition-all duration-400 group-hover:scale-[1.3]">6</p>
@@ -58,8 +58,8 @@ export default function DashboardPage() {
 
                         <Card className="bg-[rgba(254,118,168,0.1)] border border-[rgba(252,183,50,0.5)]">
                             <CardContent className="pt-6">
-                                <div className="group flex items-center justify-between">
-                                    <Image src="/candidate/dashboard/pending.svg" className='group-hover:-rotate-10 transition-all duration-400' alt="Pending" width={32} height={32} />
+                                <div className="group flex items-center justify-center gap-5">
+                                    <Image src="/candidate/dashboard/pending.svg" className='group-hover:-rotate-10 transition-all duration-400' alt="Pending" width={50} height={50} />
                                     <div>
                                         <p className="font-medium  text-muted-foreground mb-2 transition-all duration-400 group-hover:-translate-y-1.5">Pending</p>
                                         <p className="text-center text-2xl font-bold text-[rgba(104,100,247,1)] transition-all duration-400 group-hover:scale-[1.3]">2</p>
@@ -73,8 +73,8 @@ export default function DashboardPage() {
 
                         <Card className="bg-[rgba(252,183,50,0.1)] border border-[rgba(252,183,50,0.5)]">
                             <CardContent className="pt-6">
-                                <div className="group flex items-center justify-between">
-                                    <Image src="/candidate/dashboard/score.svg" className='group-hover:-rotate-10 transition-all duration-400' alt="score" width={32} height={32} />
+                                <div className="group flex items-center justify-center gap-5">
+                                    <Image src="/candidate/dashboard/score.svg" className='group-hover:-rotate-10 transition-all duration-400' alt="score" width={50} height={50} />
                                     <div>
                                         <p className="font-medium text-muted-foreground mb-2 transition-all duration-400 group-hover:-translate-y-1.5">Average Score</p>
                                         <p className="text-center text-2xl font-bold text-[rgba(104,100,247,1)] transition-all duration-400 group-hover:scale-[1.3]">82%</p>
@@ -89,8 +89,8 @@ export default function DashboardPage() {
 
                         <Card className="bg-[rgba(224,83,83,0.1)] border border-[rgba(224,83,83,0.5)]">
                             <CardContent className="pt-6">
-                                <div className="group flex items-center justify-between">
-                                    <Image src="/candidate/dashboard/time.svg" className='group-hover:-rotate-10 transition-all duration-400' alt="time" width={32} height={32} />
+                                <div className="group flex items-center justify-center gap-5">
+                                    <Image src="/candidate/dashboard/time.svg" className='group-hover:-rotate-10 transition-all duration-400' alt="time" width={50} height={50} />
                                     <div>
                                         <p className="font-medium text-muted-foreground mb-2 transition-all duration-400 group-hover:-translate-y-1.5">Total Time</p>
                                         <p className="text-center text-2xl font-bold text-[rgba(104,100,247,1)] transition-all duration-400 group-hover:scale-[1.3]">7h</p>
