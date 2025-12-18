@@ -16,14 +16,18 @@ export const useWebSocket = ({
     onError,
 }: WebSocketOptions) => {
     const ws = useRef<WebSocket | null>(null);
+    const hasCreatedSession = useRef(false);
     const [isConnected, setIsConnected] = useState(false);
     const [lastMessage, setLastMessage] = useState<any>(null);
 
     useEffect(() => {
+        if (hasCreatedSession.current) return; // prevent duplicate creations (StrictMode / re-renders)
+        hasCreatedSession.current = true;
+
         const createInterviewSession = async () => {
             // Connect to WebSocket
             const response = await fetch(
-                `http://localhost:8000/api/v1/interview-session/${'it_vj26f8sbu97qcrn9'}/create/`,
+                `http://localhost:8000/api/v1/interview-session/${'it_nfrocm7aik9rr3y5'}/create/`,
                 { 
                     method: 'POST',
                    // user id to be sent from the frontend
@@ -31,6 +35,7 @@ export const useWebSocket = ({
             );
 
             const session = await response.json();
+            console.log("Interview session :", session);
             const sessionId = session.id;
             const wsUrl = `ws://localhost:8000/ws/interview/${sessionId}/`;
             ws.current = new WebSocket(wsUrl);

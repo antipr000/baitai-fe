@@ -3,6 +3,7 @@
 import LeftSection from "@/components/interview/left-section"
 import InterviewSection from "@/components/interview/interview-section"
 import UploadSection from "@/components/interview/upload-section"
+import ActiveInterview from "@/components/interview/active-interview"
 import { useEffect, useState } from "react"
 
 
@@ -12,6 +13,7 @@ type PermissionStatus = "pending" | "granted" | "denied";
 
 export default function InterviewPage() {
     const [activeSection, setActiveSection] = useState<'upload' | 'interview'>('upload')
+    const [isInterviewActive, setIsInterviewActive] = useState(false)
     const [cameras, setCameras] = useState<MediaDevice[]>([]);
     const [microphones, setMicrophones] = useState<MediaDevice[]>([]);
     const [speakers, setSpeakers] = useState<MediaDevice[]>([]);
@@ -53,7 +55,7 @@ export default function InterviewPage() {
                 console.log(defaults);
             } catch (err) {
                 console.error(err);
-                setPermission("denied");
+                setPermission("denied");  /// Need to show error to user appropriately
                 if (err instanceof DOMException) {
                     if (err.name === "NotAllowedError") {
                         setError("Permission denied. Please allow camera & microphone access.");
@@ -68,13 +70,18 @@ export default function InterviewPage() {
         initDevices();
 
     }, [])
+    
+    if (isInterviewActive) {
+        return <ActiveInterview />
+    }
+    
     return (
         <div className="min-h-screen max-w-full md:max-w-4xl lg:max-w-5xl xl:max-w-7xl mx-auto flex gap-6 md:flex-row flex-col">
             <div className="bg-white rounded-xl text-center mx-auto w-[80%] md:w-[450px] shrink-0">
                 <LeftSection activeSection={activeSection} setActiveSection={setActiveSection} />
             </div>
             <div className="bg-[rgba(245,247,255,1)] flex-1 min-w-0">
-                {activeSection === 'upload' ? <UploadSection /> : <InterviewSection cameras={cameras} microphones={microphones} speakers={speakers} selectedCamera={selectedCamera} selectedMic={selectedMic} selectedSpeaker={selectedSpeaker} setSelectedCamera={setSelectedCamera} setSelectedMic={setSelectedMic} setSelectedSpeaker={setSelectedSpeaker} saveSelection={saveSelection} />}
+                {activeSection === 'upload' ? <UploadSection /> : <InterviewSection cameras={cameras} microphones={microphones} speakers={speakers} selectedCamera={selectedCamera} selectedMic={selectedMic} selectedSpeaker={selectedSpeaker} setSelectedCamera={setSelectedCamera} setSelectedMic={setSelectedMic} setSelectedSpeaker={setSelectedSpeaker} saveSelection={saveSelection} startInterview={() => setIsInterviewActive(true)} />}
             </div>
 
 

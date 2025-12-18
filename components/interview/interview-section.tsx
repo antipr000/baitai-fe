@@ -17,6 +17,7 @@ type InterviewSectionProps = {
     setSelectedMic: (id: string) => void
     setSelectedSpeaker: (id: string) => void
     saveSelection: (key: string, value: string) => void
+    startInterview: () => void
 }
 
 const beforeYouBeginItems = [
@@ -57,6 +58,7 @@ export default function InterviewSection({
     setSelectedMic,
     setSelectedSpeaker,
     saveSelection,
+    startInterview,
 }: InterviewSectionProps) {
     const [isMicTesting, setIsMicTesting] = useState(false)
     const [audioLevel, setAudioLevel] = useState(0)
@@ -324,7 +326,7 @@ export default function InterviewSection({
 
                         {/* Start Now Button */}
                         <div className="text-center mb-4">
-                            <Button className="w-full hover:bg-transparent border-2 border-[rgba(104,100,247,1)] hover:text-[rgba(104,100,247,1)] bg-[rgba(104,100,247,1)]  text-white py-3 rounded-lg font-semibold text-lg">
+                            <Button onClick={startInterview} className="w-full hover:bg-transparent border-2 border-[rgba(104,100,247,1)] hover:text-[rgba(104,100,247,1)] bg-[rgba(104,100,247,1)]  text-white py-3 rounded-lg font-semibold text-lg">
                                 Start Now
                             </Button>
                         </div>
