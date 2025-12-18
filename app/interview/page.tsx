@@ -23,6 +23,8 @@ export default function InterviewPage() {
     const [selectedCamera, setSelectedCamera] = useState<string>("default");
     const [selectedMic, setSelectedMic] = useState<string>("default");
     const [selectedSpeaker, setSelectedSpeaker] = useState<string>("default");
+    const [cameraStream, setCameraStream] = useState<MediaStream | null>(null);
+    const [micStream, setMicStream] = useState<MediaStream | null>(null);
 
 
     function saveSelection(key: string, value: string) {
@@ -72,7 +74,7 @@ export default function InterviewPage() {
     }, [])
     
     if (isInterviewActive) {
-        return <ActiveInterview />
+        return <ActiveInterview cameraStream={cameraStream} micStream={micStream} />
     }
     
     return (
@@ -81,7 +83,27 @@ export default function InterviewPage() {
                 <LeftSection activeSection={activeSection} setActiveSection={setActiveSection} />
             </div>
             <div className="bg-[rgba(245,247,255,1)] flex-1 min-w-0">
-                {activeSection === 'upload' ? <UploadSection /> : <InterviewSection cameras={cameras} microphones={microphones} speakers={speakers} selectedCamera={selectedCamera} selectedMic={selectedMic} selectedSpeaker={selectedSpeaker} setSelectedCamera={setSelectedCamera} setSelectedMic={setSelectedMic} setSelectedSpeaker={setSelectedSpeaker} saveSelection={saveSelection} startInterview={() => setIsInterviewActive(true)} />}
+                {activeSection === 'upload' ? (
+                    <UploadSection />
+                ) : (
+                    <InterviewSection
+                        cameras={cameras}
+                        microphones={microphones}
+                        speakers={speakers}
+                        selectedCamera={selectedCamera}
+                        selectedMic={selectedMic}
+                        selectedSpeaker={selectedSpeaker}
+                        setSelectedCamera={setSelectedCamera}
+                        setSelectedMic={setSelectedMic}
+                        setSelectedSpeaker={setSelectedSpeaker}
+                        saveSelection={saveSelection}
+                        startInterview={() => setIsInterviewActive(true)}
+                        onCameraStream={setCameraStream}
+                        onMicStream={setMicStream}
+                        keepCameraStreamOnUnmount
+                        keepMicStreamOnUnmount
+                    />
+                )}
             </div>
 
 

@@ -1,13 +1,18 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { Mic, MicOff, Video, VideoOff, Phone, ScreenShare } from 'lucide-react'
 import { useWebSocket } from '@/hooks/useWebSocket'
 
-export default function ActiveInterview() {
+type ActiveInterviewProps = {
+  cameraStream?: MediaStream | null
+  micStream?: MediaStream | null
+}
+
+export default function ActiveInterview({ cameraStream, micStream }: ActiveInterviewProps) {
   const [isMicOn, setIsMicOn] = useState(true)
   const [isVideoOn, setIsVideoOn] = useState(true)
   const [isSharing, setIsSharing] = useState(false)
@@ -40,33 +45,57 @@ export default function ActiveInterview() {
     }
   };
 
+
+  const videoRef = useRef<HTMLVideoElement | null>(null)
+
+  useEffect(() => {
+    if (videoRef.current && cameraStream) {
+      // attach the incoming camera stream to this page's video element
+      videoRef.current.srcObject = cameraStream
+      videoRef.current.play().catch((error) => {
+        console.error('Error playing video:', error)
+        // Show a toast/notification etc to the user
+      })
+    }
+  }, [cameraStream])
+
   return (
     <div className="flex flex-col h-screen bg-gray-900">
       {/* Main Video Area */}
       <div className="flex-1 flex items-center justify-center relative bg-gray-800 ">
         <div className=" relative">
-            <Image
-              src="/interview/logo.svg"
-              alt="Interviewer"
-              height={100}
-              width={100}
-              className="object-cover"
-              priority
-            />
+          <Image
+            src="/interview/logo.svg"
+            alt="Interviewer"
+            height={100}
+            width={100}
+            className="object-cover"
+            priority
+          />
 
           <div className="fixed bottom-30 right-6 w-60 h-50 bg-gray-700 rounded-lg overflow-hidden border-2 border-gray-600 shadow-lg">
-            <Image
-              src="/interview/person.png"
-              alt="Your Video"
-              fill
-              className="object-cover"
-            />
+            {cameraStream ? (
+              <div className="relative w-full h-full bg-black rounded-lg overflow-hidden">
+                <video
+                  ref={videoRef}
+                  autoPlay
+                  playsInline
+                  muted={!isMicOn}
+                  className="absolute inset-0 w-full h-full object-cover"
+                />
+              </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center h-full text-gray-400 gap-4">
+                <Image src="/interview/logo.svg" alt="Interview" height={80} width={80} className="object-cover" priority />
+                <p>No camera stream yet</p>
+              </div>
+            )}
           </div>
         </div>
       </div>
 
       {/* Bottom Control Bar */}
-      <div className="bg-gray-900 border-t border-gray-700 px-4 py-4 flex justify-center gap-4">
+      <div className="bg-gray-900 border-t border-gray-700 px-4 py-4 items-center flex justify-center gap-4">
         {/* Mute Button */}
         <Button
           onClick={() => setIsMicOn(!isMicOn)}
@@ -121,8 +150,8 @@ export default function ActiveInterview() {
           <Phone className="w-6 h-6 text-white rotate-135" />
         </Button>
       </div>
-      
-      <h2 className="text-lg font-bold">
+
+      <h2 className="text-lg font-bold fixed bottom-1 left-4">
         <span className={`ml-2 text-sm ${isConnected ? 'text-green-500' : 'text-red-500'}`}>
           {isConnected ? '● Connected' : '● Disconnected'}
         </span>

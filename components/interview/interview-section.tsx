@@ -18,6 +18,10 @@ type InterviewSectionProps = {
     setSelectedSpeaker: (id: string) => void
     saveSelection: (key: string, value: string) => void
     startInterview: () => void
+    onCameraStream?: (stream: MediaStream) => void
+    onMicStream?: (stream: MediaStream) => void
+    keepCameraStreamOnUnmount?: boolean
+    keepMicStreamOnUnmount?: boolean
 }
 
 const beforeYouBeginItems = [
@@ -59,6 +63,10 @@ export default function InterviewSection({
     setSelectedSpeaker,
     saveSelection,
     startInterview,
+    onCameraStream,
+    onMicStream,
+    keepCameraStreamOnUnmount,
+    keepMicStreamOnUnmount,
 }: InterviewSectionProps) {
     const [isMicTesting, setIsMicTesting] = useState(false)
     const [audioLevel, setAudioLevel] = useState(0)
@@ -72,7 +80,8 @@ export default function InterviewSection({
 
     const startMicTest = async () => {
         try {
-            const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+            // Reuse existing stream if available, otherwise create new one
+            const stream = micStreamRef.current || await navigator.mediaDevices.getUserMedia({ audio: true })
             const audioContext = new AudioContext()
             const analyser = audioContext.createAnalyser()
             const source = audioContext.createMediaStreamSource(stream)
@@ -81,6 +90,7 @@ export default function InterviewSection({
             micStreamRef.current = stream
             audioContextRef.current = audioContext
             analyserRef.current = analyser
+
             
             const buffer = new Uint8Array(analyser.frequencyBinCount)
             const updateLevel = () => {
@@ -101,10 +111,23 @@ export default function InterviewSection({
         animationFrameRef.current && cancelAnimationFrame(animationFrameRef.current)
         micStreamRef.current?.getTracks().forEach(track => track.stop())
         micStreamRef.current = null
-        audioContextRef.current?.close()
+        audioContextRef.current?.close() // Independent system resource → needs .close() to release
         audioContextRef.current = null
         setIsMicTesting(false)
         setAudioLevel(0)
+    }
+
+    const startMicStream = async () => {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ 
+                audio: selectedMic ? { deviceId: { exact: selectedMic } } : true
+            })
+            micStreamRef.current = stream
+            // surface mic stream to parent for reuse (e.g., ActiveInterview)
+            onMicStream?.(stream)
+        } catch (error) {
+            console.error('Mic stream error:', error)
+        }
     }
 
     const startSpeakerTest = () => {
@@ -121,17 +144,19 @@ export default function InterviewSection({
 
     const startCamera = async () => {
         try {
-            // Stop existing stream if any
-            if (cameraStreamRef.current) {
-                cameraStreamRef.current.getTracks().forEach(track => track.stop())
-            }
-
             const stream = await navigator.mediaDevices.getUserMedia({ 
                 video: selectedCamera ? { deviceId: { exact: selectedCamera } } : true 
             })
             
-            cameraStreamRef.current = stream
+            // Stop old stream only after new one is ready
+            if (cameraStreamRef.current) {
+                cameraStreamRef.current.getTracks().forEach(track => track.stop())
+            }
             
+            cameraStreamRef.current = stream
+            // surface camera stream to parent for reuse (e.g., ActiveInterview)
+            onCameraStream?.(stream)
+            console.log('Camera stream started')
             if (videoElementRef.current) {
                 videoElementRef.current.srcObject = stream
             }
@@ -145,26 +170,46 @@ export default function InterviewSection({
     }
 
     useEffect(() => {
+        // Initial mount - start both streams
         startCamera()
+        startMicStream()
         
         return () => {
-            stopMicTest()
-            if (micStreamRef.current) {
+            // Only fully stop mic test if we're not keeping the stream
+            if (!keepMicStreamOnUnmount) {
+                stopMicTest()
+            } else {
+                // Just cleanup UI state and audio analysis without killing the stream
+                animationFrameRef.current && cancelAnimationFrame(animationFrameRef.current)
+                audioContextRef.current?.close()
+                audioContextRef.current = null
+                analyserRef.current = null
+                setIsMicTesting(false)
+                setAudioLevel(0)
+            }
+            
+            // optionally keep mic stream alive for reuse on ActiveInterview
+            if (!keepMicStreamOnUnmount && micStreamRef.current) {
                 micStreamRef.current.getTracks().forEach(track => track.stop())
                 micStreamRef.current = null
             }
-            if (cameraStreamRef.current) {
+            // optionally keep camera stream alive for reuse on ActiveInterview
+            if (!keepCameraStreamOnUnmount && cameraStreamRef.current) {
                 cameraStreamRef.current.getTracks().forEach(track => track.stop())
                 cameraStreamRef.current = null
             }
         }
-    }, [])
+    }, [keepCameraStreamOnUnmount, keepMicStreamOnUnmount])
 
     useEffect(() => {
-        if (selectedCamera) {
+        // Only restart when device selection changes (not on initial mount)
+        if (selectedCamera && cameraStreamRef.current) {
             startCamera()
         }
-    }, [selectedCamera])
+        if(selectedMic && micStreamRef.current) {
+            startMicStream()
+        }
+    }, [selectedCamera, selectedMic])
 
     return (
         <motion.div 
