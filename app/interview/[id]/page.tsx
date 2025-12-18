@@ -5,11 +5,46 @@ import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { Mic, MicOff, Video, VideoOff, Phone, ScreenShare } from 'lucide-react'
+import { useWebSocket } from '@/hooks/useWebSocket'
+
+
 
 export default  function InterviewPage() {
   const [isMicOn, setIsMicOn] = useState(true)
   const [isVideoOn, setIsVideoOn] = useState(true)
   const [isSharing, setIsSharing] = useState(false)
+
+  const [messages, setMessages] = useState<any[]>([]);
+  const [inputValue, setInputValue] = useState('');
+
+
+  const { isConnected, send } = useWebSocket({
+    // url: 'ws://localhost:8000/ws/chat/basic/',
+    onMessage: (data) => {
+      console.log('Received:', data);
+      console.log(typeof data);
+      // setMessages((prev) => [...prev, data]);
+    },
+    onConnect: () => {
+      console.log('Connected to WebSocket');
+    },
+    onDisconnect: () => {
+      console.log('Disconnected from WebSocket');
+    },
+    onError: (error) => {
+      console.error('Error:', error);
+    },
+  });
+
+  const handleSendMessage = () => {
+    if (inputValue.trim()) {
+      // send({ message: inputValue });
+      setInputValue('');
+    }
+  };
+
+
+
   return (
     <div className="flex flex-col h-screen bg-gray-900">
       {/* Main Video Area */}
@@ -90,7 +125,14 @@ export default  function InterviewPage() {
         >
           <Phone className="w-6 h-6 text-white rotate-135" />
         </Button>
+
+       
       </div>
+       <h2 className="text-lg font-bold">
+          <span className={`ml-2 text-sm ${isConnected ? 'text-green-500' : 'text-red-500'}`}>
+            {isConnected ? '● Connected' : '● Disconnected'}
+          </span>
+        </h2>
     </div>
   )
 }
