@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Mic, Square } from "lucide-react";
 
 // Helper: downsample Float32 PCM to 16kHz Int16 PCM
@@ -46,11 +47,13 @@ export default function MicStreamPage() {
   const [isRecording, setIsRecording] = useState(false);
   const [status, setStatus] = useState<string>("Idle");
   const [lastTranscript, setLastTranscript] = useState<string>("");
+  const [sessionId, setSessionId] = useState<string>("");
 
   const audioContextRef = useRef<AudioContext | null>(null);
   const sourceNodeRef = useRef<MediaStreamAudioSourceNode | null>(null);
   const processorRef = useRef<ScriptProcessorNode | null>(null);
   const wsRef = useRef<WebSocket | null>(null);
+  const silenceMsRef = useRef<number>(0);
 
   useEffect(() => {
     return () => {
@@ -61,6 +64,10 @@ export default function MicStreamPage() {
 
   const startStreaming = async () => {
     if (isRecording) return;
+    if (!sessionId) {
+      setStatus("Please enter a session id first");
+      return;
+    }
 
     try {
       setStatus("Requesting microphone access...");
@@ -78,7 +85,9 @@ export default function MicStreamPage() {
 
       const processor = audioContext.createScriptProcessor(4096, 1, 1);
 
-      const ws = new WebSocket("ws://localhost:8000/ws/audio"); // TODO: adjust to your backend URL
+      const ws = new WebSocket(
+        `ws://localhost:8000/ws/interview/${encodeURIComponent(sessionId)}/`,
+      );
 
       ws.onopen = () => {
         setStatus("Streaming audio to backend...");
@@ -95,19 +104,43 @@ export default function MicStreamPage() {
       ws.onmessage = (event) => {
         try {
           const data = JSON.parse(event.data);
-          if (data.transcript) {
-            setLastTranscript(data.transcript as string);
+          if (data.type === "response.text" && typeof data.text === "string") {
+            setLastTranscript(data.text);
           }
         } catch {
           // ignore non-JSON messages
         }
       };
 
+      silenceMsRef.current = 0;
+
       processor.onaudioprocess = (event) => {
         if (ws.readyState !== WebSocket.OPEN) return;
         const inputBuffer = event.inputBuffer.getChannelData(0);
         const pcm16 = downsampleTo16k(inputBuffer, audioContext.sampleRate);
         ws.send(pcm16.buffer);
+
+        // Simple RMS-based silence detection on the frontend.
+        let sumSquares = 0;
+        for (let i = 0; i < inputBuffer.length; i++) {
+          const s = inputBuffer[i];
+          sumSquares += s * s;
+        }
+        const rms = Math.sqrt(sumSquares / inputBuffer.length);
+        const threshold = 0.02;
+
+        const frameMs = (inputBuffer.length / audioContext.sampleRate) * 1000;
+        if (rms < threshold) {
+          silenceMsRef.current += frameMs;
+        } else {
+          silenceMsRef.current = 0;
+        }
+
+        // If we have ~800ms of silence, signal end_of_turn to the backend.
+        if (silenceMsRef.current >= 800) {
+          ws.send(JSON.stringify({ type: "end_of_turn" }));
+          silenceMsRef.current = 0;
+        }
       };
 
       source.connect(processor);
@@ -162,11 +195,20 @@ export default function MicStreamPage() {
   return (
     <main className="min-h-screen flex items-center justify-center bg-[rgba(245,247,255,1)] px-4">
       <div className="w-full max-w-2xl bg-white rounded-2xl shadow-sm p-8 space-y-6">
-        <div>
-          <h1 className="text-2xl font-semibold mb-1">Live Audio Capture</h1>
+        <div className="space-y-2">
+          <h1 className="text-2xl font-semibold mb-1">Live Audio Capture (Interview WS)</h1>
           <p className="text-sm text-muted-foreground">
-            Frontend captures microphone audio at 16kHz PCM16 and streams it to the backend over WebSocket for real-time transcription.
+            Captures microphone audio at 16kHz PCM16 and streams it to the existing interview
+            WebSocket, sending an end_of_turn signal after ~800ms of silence.
           </p>
+          <div className="flex items-center gap-2">
+            <Input
+              placeholder="Enter interview session id"
+              value={sessionId}
+              onChange={(e) => setSessionId(e.target.value)}
+              className="max-w-xs"
+            />
+          </div>
         </div>
 
         <div className="flex items-center gap-4">
@@ -202,9 +244,9 @@ export default function MicStreamPage() {
 
         <div className="text-xs text-muted-foreground space-y-1">
           <p>🎤 Audio Capture: 16kHz PCM16 via Web Audio API.</p>
-          <p>📡 Streaming: Audio chunks are streamed over WebSocket in real-time.</p>
-          <p>📝 STT Processing: Backend can run transcription ~every 800ms on received audio.</p>
-          <p>🔇 Silence Detection: Backend can use RMS-based silence detection to decide when speech ends.</p>
+          <p>📡 Streaming: Audio chunks are streamed over the existing interview WebSocket route.</p>
+          <p>📝 STT Processing: Backend runs transcription when it receives an end_of_turn message.</p>
+          <p>🔇 Silence Detection: Frontend uses RMS-based silence detection (~800ms) to decide when to send end_of_turn.</p>
         </div>
       </div>
     </main>
