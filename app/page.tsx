@@ -1,11 +1,17 @@
+"use client"
+
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { Separator } from "@/components/ui/separator";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Menu } from "lucide-react";
+import { useState } from "react";
 
 export default function Home() {
+  const [open, setOpen] = useState(false);
   const hiringFeatures = [
     {
       bgColor: "bg-[rgba(253,203,80,0.3)]",
@@ -129,7 +135,7 @@ export default function Home() {
   ];
 
   return (
-    <div className="min-h-screen w-full  ">
+    <div className="min-h-screen w-[100vw]flex flex-col">
       {/* Header */}
       <header className="px-6 py-4">
         <nav className="flex items-center justify-between max-w-7xl mx-auto">
@@ -145,18 +151,69 @@ export default function Home() {
             <Link href="#" className="text-[rgba(69,94,255,0.8)] hover:opacity-70 font-medium">Pricing</Link >
           </div>
 
-          <div className="flex items-center space-x-4">
+          <div className="hidden md:flex items-center space-x-4">
             <Button variant="ghost" className="lg:text-base text-sm bg-[linear-gradient(106.03deg,rgba(239,246,254,0.5)_0%,rgba(163,217,248,0.5)_238.47%)]  text-[rgba(108,132,255,1)] hover:opacity-70 border font-medium  border-[rgba(108,132,255,0.9)]">Sign in</Button>
             <Button className="lg:text-base text-sm rounded-full bg-[linear-gradient(106.03deg,#677CFF_0%,#A3D9F8_238.47%)] hover:opacity-70  text-[rgba(238,246,251,1)]  font-medium ">
               Request a demo
             </Button>
           </div>
+
+          {/* Mobile Menu */}
+          <Sheet open={open} onOpenChange={setOpen}>
+            <SheetTrigger asChild className="md:hidden  ">
+              <Button variant="ghost" size="icon" className="text-[rgba(69,94,255,0.8)]">
+                <Menu className="h-6 w-6" />
+                <span className="sr-only">Toggle menu</span>
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="left" className="w-[400px] sm:w-[500px] p-10">
+              <nav className="flex flex-col gap-6 mt-8">
+                <Link 
+                  href="#" 
+                  className="text-lg text-[rgba(69,94,255,0.8)] hover:opacity-70 font-medium py-2"
+                  onClick={() => setOpen(false)}
+                >
+                  About us
+                </Link>
+                <Link 
+                  href="#" 
+                  className="text-lg text-[rgba(69,94,255,0.8)] hover:opacity-70 font-medium py-2"
+                  onClick={() => setOpen(false)}
+                >
+                  For Hiring Teams
+                </Link>
+                <Link 
+                  href="#" 
+                  className="text-lg text-[rgba(69,94,255,0.8)] hover:opacity-70 font-medium py-2"
+                  onClick={() => setOpen(false)}
+                >
+                  For Job Seekers
+                </Link>
+                <Link 
+                  href="#" 
+                  className="text-lg text-[rgba(69,94,255,0.8)] hover:opacity-70 font-medium py-2"
+                  onClick={() => setOpen(false)}
+                >
+                  Pricing
+                </Link>
+                <Separator className="my-2" />
+                <div className="flex flex-col gap-4">
+                  <Button variant="ghost" className="w-full bg-[linear-gradient(106.03deg,rgba(239,246,254,0.5)_0%,rgba(163,217,248,0.5)_238.47%)] text-[rgba(108,132,255,1)] hover:opacity-70 border font-medium border-[rgba(108,132,255,0.9)]">
+                    Sign in
+                  </Button>
+                  <Button className="w-full rounded-full bg-[linear-gradient(106.03deg,#677CFF_0%,#A3D9F8_238.47%)] hover:opacity-70 text-[rgba(238,246,251,1)] font-medium">
+                    Request a demo
+                  </Button>
+                </div>
+              </nav>
+            </SheetContent>
+          </Sheet>
         </nav>
       </header>
 
       {/* Hero Section */}
       <main className="px-6 py-6  bg-[linear-gradient(95.57deg,#E7F5FF_7.28%,#F5F7FF_100.24%)]">
-        <div className="lg:max-w-7xl md:max-w-4xl mx-auto text-center">
+        <div className="lg:max-w-7xl md:max-w-4xl w-full mx-auto text-center">
           {/* AI Badge */}
           <Badge className="bg-[linear-gradient(91deg,rgba(15,2,53,1)_-107.69%,rgba(43,5,155,1)_80.08%)] text-white px-6 py-2 mb-8 mt-5 text-sm">
             <Image src="/main/lightning.svg" alt="AI Badge" width={14} height={14} className="inline-block mr-2" />
