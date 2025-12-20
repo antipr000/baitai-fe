@@ -5,6 +5,7 @@ import InterviewSection from "@/components/interview/interview-section"
 import UploadSection from "@/components/interview/upload-section"
 import ActiveInterview from "@/components/interview/active-interview"
 import { useEffect, useState } from "react"
+import { useSearchParams } from "next/navigation"
 
 
 type MediaDevice = MediaDeviceInfo;
@@ -12,6 +13,10 @@ type PermissionStatus = "pending" | "granted" | "denied";
 
 
 export default function InterviewPage() {
+    const searchParams = useSearchParams()
+    // Support both templateId and template_id for compatibility
+    const templateId = searchParams.get('templateId') || searchParams.get('template_id') || 'it_nrc1zpkq1o738ajl' // fallback for development
+    
     const [activeSection, setActiveSection] = useState<'upload' | 'interview'>('upload')
     const [isInterviewActive, setIsInterviewActive] = useState(false)
     const [cameras, setCameras] = useState<MediaDevice[]>([]);
@@ -25,6 +30,7 @@ export default function InterviewPage() {
     const [selectedSpeaker, setSelectedSpeaker] = useState<string>("default");
     const [cameraStream, setCameraStream] = useState<MediaStream | null>(null);
     const [micStream, setMicStream] = useState<MediaStream | null>(null);
+    const [resumeUploaded, setResumeUploaded] = useState(false);
 
 
     function saveSelection(key: string, value: string) {
@@ -74,7 +80,7 @@ export default function InterviewPage() {
     }, [])
     
     if (isInterviewActive) {
-        return <ActiveInterview cameraStream={cameraStream} micStream={micStream} />
+        return <ActiveInterview cameraStream={cameraStream} micStream={micStream} templateId={templateId} />
     }
     
     return (
@@ -84,7 +90,10 @@ export default function InterviewPage() {
             </div>
             <div className="bg-[rgba(245,247,255,1)] flex-1 min-w-0">
                 {activeSection === 'upload' ? (
-                    <UploadSection />
+                    <UploadSection onUploadComplete={() => {
+                        setResumeUploaded(true);
+                        setActiveSection('interview');
+                    }} />
                 ) : (
                     <InterviewSection
                         cameras={cameras}
