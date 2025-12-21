@@ -7,6 +7,7 @@ import Image from 'next/image'
 import { motion } from "motion/react"
 import { Progress } from '../ui/progress'
 import { Loader2, CheckCircle2, XCircle } from 'lucide-react'
+import api from '@/lib/api/client'
 
 type UploadSectionProps = {
     onUploadComplete?: () => void
@@ -41,6 +42,7 @@ export default function UploadSection({ onUploadComplete }: UploadSectionProps) 
         }
     }
 
+
     const handleUpload = async () => {
         if (!selectedFile) return
 
@@ -55,8 +57,8 @@ export default function UploadSection({ onUploadComplete }: UploadSectionProps) 
             
 
             // needs to be changed to actual backend URL
-            await axios.post(
-                'http://127.0.0.1:8000/api/v1/upload/resume/', 
+            await api.post(
+                '/api/v1/upload/resume/', 
                 formData,
                 {
                     onUploadProgress: (progressEvent) => {
@@ -77,7 +79,7 @@ export default function UploadSection({ onUploadComplete }: UploadSectionProps) 
             } else {
                 setUploadError('An error occurred during upload. Please try again.')
             }
-            console.log('Upload error:', error)   // remove this line in production
+            console.log('Upload error:', error)   
         } finally {
             setIsUploading(false)
         }

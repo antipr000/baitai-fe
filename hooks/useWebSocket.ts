@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
+import api from '../lib/api/client';
 
 interface WebSocketOptions {
     templateId: string;
@@ -31,27 +32,16 @@ export const useWebSocket = ({
                 return;
             }
 
-            const url = `http://127.0.0.1:8000/api/v1/interview-session/${templateId}/create/`;
+            const url = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/interview-session/${templateId}/create/`;
 
             console.log(`[WebSocket] Creating interview session for template: ${templateId}`);
             console.log(`[WebSocket] POST ${url}`);
 
             try {
-                // Connect to WebSocket
-                const response = await fetch(url, {
-                    method: 'POST',
-                   
-                    // user id to be sent from the frontend
-                });
+                // Create interview session
+                const response = await api.post(`/api/v1/interview-session/${templateId}/create/`)
 
-                if (!response.ok) {
-                    const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
-                    console.error(`[WebSocket] Failed to create session: ${response.status}`, errorData);
-                    onError?.(new Event('session_creation_failed'));
-                    return;
-                }
-
-                const session = await response.json();
+                const session = response.data;
                 console.log("[WebSocket] Interview session created:", session);
 
                 if (!session.id) {
@@ -61,7 +51,11 @@ export const useWebSocket = ({
                 }
 
                 const sessionId = session.id;
-                const wsUrl = `ws://127.0.0.1:8000/ws/interview/${sessionId}/`;
+                const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+                if (!apiUrl) {
+                    throw new Error('NEXT_PUBLIC_API_URL is not defined in environment variables');
+                }
+                const wsUrl = `${apiUrl.replace('http', 'ws')}/ws/interview/${sessionId}/`;
                 console.log(`[WebSocket] Connecting to WebSocket: ${wsUrl}`);
 
                 ws.current = new WebSocket(wsUrl);
