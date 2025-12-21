@@ -17,7 +17,7 @@ interface PracticeInterviewsSectionProps {
 
 const defaultInterviews = [
   {
-    id: '1',
+    id: 'it_cjcbzuapqb767ojt',
     company: 'Mindtrix',
     difficulty: 'Easy' as const,
     duration: '45 min'

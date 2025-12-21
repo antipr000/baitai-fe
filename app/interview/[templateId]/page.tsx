@@ -5,7 +5,7 @@ import InterviewSection from "@/components/interview/interview-section"
 import UploadSection from "@/components/interview/upload-section"
 import ActiveInterview from "@/components/interview/active-interview"
 import { useEffect, useState } from "react"
-import { useSearchParams } from "next/navigation"
+import { useParams } from "next/navigation"
 
 
 type MediaDevice = MediaDeviceInfo;
@@ -13,9 +13,8 @@ type PermissionStatus = "pending" | "granted" | "denied";
 
 
 export default function InterviewPage() {
-    const searchParams = useSearchParams()
-    // Support both templateId and template_id for compatibility
-    const templateId = searchParams.get('templateId') || searchParams.get('template_id') || 'it_nrc1zpkq1o738ajl' // fallback for development
+    const params = useParams()
+    const templateId = params.templateId as string || 'it_nrc1zpkq1o738ajl' // fallback for development
     
     const [activeSection, setActiveSection] = useState<'upload' | 'interview'>('upload')
     const [isInterviewActive, setIsInterviewActive] = useState(false)
@@ -79,7 +78,7 @@ export default function InterviewPage() {
 
     }, [])
     
-    if (isInterviewActive) {
+    if (isInterviewActive && permission === 'granted' && templateId) {  // could check for resume uploaded also if want to make it mandatory
         return <ActiveInterview cameraStream={cameraStream} micStream={micStream} templateId={templateId} />
     }
     
@@ -111,6 +110,7 @@ export default function InterviewPage() {
                         onMicStream={setMicStream}
                         keepCameraStreamOnUnmount
                         keepMicStreamOnUnmount
+                        permission={permission}
                     />
                 )}
             </div>

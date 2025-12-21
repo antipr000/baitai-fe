@@ -492,7 +492,7 @@ export default function ActiveInterview({ cameraStream, micStream, templateId }:
       silenceTimerRef.current = null
     }
 
-    if (audioContextRef.current) {
+    if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
       audioContextRef.current.close().catch(console.error)
       audioContextRef.current = null
       console.log('[Recording] AudioContext closed')
@@ -515,14 +515,21 @@ export default function ActiveInterview({ cameraStream, micStream, templateId }:
     // Stop media streams
     cameraStream?.getTracks().forEach(track => track.stop())
     micStream?.getTracks().forEach(track => track.stop())
-
+    
+    // Clear video element
+    if (videoRef.current) {
+      videoRef.current.srcObject = null
+    }
     // Cleanup audio playback
-    if (audioPlaybackContextRef.current) {
+    if (audioPlaybackContextRef.current && audioPlaybackContextRef.current.state !== 'closed') {
       audioPlaybackContextRef.current.close().catch(console.error)
     }
 
     // Navigate away (you can customize this)
     router.push('/candidate/dashboard')
+
+    //bug : sometimes camera does not turn off
+
   }
 
   const handleMicToggle = () => {
@@ -542,9 +549,7 @@ export default function ActiveInterview({ cameraStream, micStream, templateId }:
   useEffect(() => {
     if (videoRef.current && cameraStream) {
       videoRef.current.srcObject = cameraStream
-      videoRef.current.play().catch((error) => {
-        console.error('Error playing video:', error)
-      })
+
     }
   }, [cameraStream])
 
@@ -553,7 +558,7 @@ export default function ActiveInterview({ cameraStream, micStream, templateId }:
     return () => {
       stopRecording()
       closeWebSocket()
-      if (audioPlaybackContextRef.current) {
+      if (audioPlaybackContextRef.current && audioPlaybackContextRef.current.state !== 'closed') {
         audioPlaybackContextRef.current.close().catch(console.error)
       }
     }
@@ -726,7 +731,7 @@ export default function ActiveInterview({ cameraStream, micStream, templateId }:
               <Button
                 variant="outline"
                 onClick={() => setShowEndConfirm(false)}
-                className="text-white border-gray-600 hover:bg-gray-700"
+                className="hover:opacity-90"
               >
                 Cancel
               </Button>

@@ -40,9 +40,7 @@ export const useWebSocket = ({
                 // Connect to WebSocket
                 const response = await fetch(url, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
+                   
                     // user id to be sent from the frontend
                 });
 

@@ -1,6 +1,7 @@
 "use client"
 
 import React, { useRef, useState } from 'react'
+import axios from 'axios'
 import { Button } from '../ui/button'
 import Image from 'next/image'
 import { motion } from "motion/react"
@@ -51,40 +52,33 @@ export default function UploadSection({ onUploadComplete }: UploadSectionProps) 
             const formData = new FormData()
             formData.append('file', selectedFile)
             formData.append('type', 'resume')
+            
 
-            const xhr = new XMLHttpRequest()
-
-            xhr.upload.addEventListener('progress', (e) => {
-                if (e.lengthComputable) {
-                    const percentComplete = (e.loaded / e.total) * 100
-                    setUploadProgress(percentComplete)
+            // needs to be changed to actual backend URL
+            await axios.post(
+                'http://127.0.0.1:8000/api/v1/upload/resume/', 
+                formData,
+                {
+                    onUploadProgress: (progressEvent) => {
+                        if (progressEvent.lengthComputable && progressEvent.total !== undefined) {
+                            const percentComplete = (progressEvent.loaded / progressEvent.total) * 100
+                            setUploadProgress(percentComplete)
+                        }
+                    },
                 }
-            })
+            )
 
-            xhr.addEventListener('load', () => {
-                if (xhr.status === 200 || xhr.status === 201) {
-                    setUploadSuccess(true)
-                    setUploadProgress(100)
-                    setTimeout(() => {
-                        onUploadComplete?.()
-                    }, 1000)
-                } else {
-                    setUploadError('Upload failed. Please try again.')
-                    setIsUploading(false)
-                }
-            })
-
-            xhr.addEventListener('error', () => {
-                setUploadError('Network error. Please check your connection and try again.')
-                setIsUploading(false)
-            })
-
-            // TODO: Replace with actual backend endpoint
-            xhr.open('POST', 'http://127.0.0.1:8000/api/v1/upload/resume/')
-            xhr.send(formData)
+            setUploadSuccess(true)
+            setUploadProgress(100)
+                onUploadComplete?.()
         } catch (error) {
-            console.error('Upload error:', error)
-            setUploadError('An error occurred during upload. Please try again.')
+            if (axios.isAxiosError(error)) {
+                setUploadError(error.message ||'Upload failed. Please try again.')
+            } else {
+                setUploadError('An error occurred during upload. Please try again.')
+            }
+            console.log('Upload error:', error)   // remove this line in production
+        } finally {
             setIsUploading(false)
         }
     }
