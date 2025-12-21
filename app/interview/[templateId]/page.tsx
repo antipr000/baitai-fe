@@ -5,6 +5,7 @@ import InterviewSection from "@/components/interview/interview-section"
 import UploadSection from "@/components/interview/upload-section"
 import ActiveInterview from "@/components/interview/active-interview"
 import { useEffect, useState } from "react"
+import { useParams } from "next/navigation"
 
 
 type MediaDevice = MediaDeviceInfo;
@@ -12,6 +13,9 @@ type PermissionStatus = "pending" | "granted" | "denied";
 
 
 export default function InterviewPage() {
+    const params = useParams()
+    const templateId = params.templateId as string || 'it_nrc1zpkq1o738ajl' // fallback for development
+    
     const [activeSection, setActiveSection] = useState<'upload' | 'interview'>('upload')
     const [isInterviewActive, setIsInterviewActive] = useState(false)
     const [cameras, setCameras] = useState<MediaDevice[]>([]);
@@ -25,6 +29,7 @@ export default function InterviewPage() {
     const [selectedSpeaker, setSelectedSpeaker] = useState<string>("default");
     const [cameraStream, setCameraStream] = useState<MediaStream | null>(null);
     const [micStream, setMicStream] = useState<MediaStream | null>(null);
+    const [resumeUploaded, setResumeUploaded] = useState(false);
 
 
     function saveSelection(key: string, value: string) {
@@ -73,8 +78,8 @@ export default function InterviewPage() {
 
     }, [])
     
-    if (isInterviewActive) {
-        return <ActiveInterview cameraStream={cameraStream} micStream={micStream} />
+    if (isInterviewActive && permission === 'granted' && templateId) {  // could check for resume uploaded also if want to make it mandatory
+        return <ActiveInterview cameraStream={cameraStream} micStream={micStream} templateId={templateId} />
     }
     
     return (
@@ -84,7 +89,10 @@ export default function InterviewPage() {
             </div>
             <div className="bg-[rgba(245,247,255,1)] flex-1 min-w-0">
                 {activeSection === 'upload' ? (
-                    <UploadSection />
+                    <UploadSection onUploadComplete={() => {
+                        setResumeUploaded(true);
+                        setActiveSection('interview');
+                    }} />
                 ) : (
                     <InterviewSection
                         cameras={cameras}
@@ -102,6 +110,7 @@ export default function InterviewPage() {
                         onMicStream={setMicStream}
                         keepCameraStreamOnUnmount
                         keepMicStreamOnUnmount
+                        permission={permission}
                     />
                 )}
             </div>

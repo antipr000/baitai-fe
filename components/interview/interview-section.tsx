@@ -22,6 +22,7 @@ type InterviewSectionProps = {
     onMicStream?: (stream: MediaStream) => void
     keepCameraStreamOnUnmount?: boolean
     keepMicStreamOnUnmount?: boolean
+    permission?: "pending" | "granted" | "denied"
 }
 
 const beforeYouBeginItems = [
@@ -49,6 +50,7 @@ const beforeYouBeginItems = [
         iconPath: "/interview/record.svg",
         text: "The interview will be recorded for evaluation"
     }
+
 ]
 
 export default function InterviewSection({
@@ -67,6 +69,8 @@ export default function InterviewSection({
     onMicStream,
     keepCameraStreamOnUnmount,
     keepMicStreamOnUnmount,
+    permission,
+    
 }: InterviewSectionProps) {
     const [isMicTesting, setIsMicTesting] = useState(false)
     const [audioLevel, setAudioLevel] = useState(0)
@@ -371,7 +375,11 @@ export default function InterviewSection({
 
                         {/* Start Now Button */}
                         <div className="text-center mb-4">
-                            <Button onClick={startInterview} className="w-full hover:bg-transparent border-2 border-[rgba(104,100,247,1)] hover:text-[rgba(104,100,247,1)] bg-[rgba(104,100,247,1)]  text-white py-3 rounded-lg font-semibold text-lg">
+                            <Button
+                                disabled={permission !== 'granted'}
+                                onClick={startInterview}
+                                className={`w-full hover:bg-transparent border-2 border-[rgba(104,100,247,1)] hover:text-[rgba(104,100,247,1)] bg-[rgba(104,100,247,1)] text-white py-3 rounded-lg font-semibold text-lg ${permission !== 'granted' ? 'bg-gray-300 text-gray-500 border-gray-300 cursor-not-allowed' : ''}`}
+                            >
                                 Start Now
                             </Button>
                         </div>

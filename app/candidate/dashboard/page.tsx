@@ -13,11 +13,11 @@ export default function DashboardPage() {
     const router = useRouter()
 
     const handleInterviewStart = (interviewId: string) => {
-        router.push('/interview')
+        router.push(`/interview/${interviewId}`)
     }
 
     const handlePracticeStart = (interviewId: string) => {
-        router.push('/interview')
+        router.push(`/interview/${interviewId}`)
     }
 
 

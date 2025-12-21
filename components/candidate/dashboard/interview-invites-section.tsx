@@ -17,7 +17,7 @@ interface InterviewInvitesSectionProps {
 
 const defaultInterviews = [
     {
-        id: '1',
+        id: 'it_cjcbzuapqb767ojt',
         company: 'Mindtrix',
         position: 'Senior Software Engineer',
         dueIn: 'Due in 2 days'
