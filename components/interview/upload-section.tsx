@@ -80,7 +80,7 @@ export default function UploadSection({ onUploadComplete }: UploadSectionProps) 
             })
 
             // TODO: Replace with actual backend endpoint
-            xhr.open('POST', 'http://localhost:8000/api/v1/upload/resume/')
+            xhr.open('POST', 'http://127.0.0.1:8000/api/v1/upload/resume/')
             xhr.send(formData)
         } catch (error) {
             console.error('Upload error:', error)
@@ -90,7 +90,7 @@ export default function UploadSection({ onUploadComplete }: UploadSectionProps) 
     }
 
     return (
-        <motion.div 
+        <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5 }}
@@ -118,7 +118,7 @@ export default function UploadSection({ onUploadComplete }: UploadSectionProps) 
                         <div className="w-full bg-white rounded-lg border p-8 flex flex-col items-center justify-center min-h-[400px] space-y-4">
                             {!selectedFile && !uploadSuccess ? (
                                 <>
-                                    <Button 
+                                    <Button
                                         onClick={handleButtonClick}
                                         disabled={isUploading}
                                         className="bg-[rgba(104,100,247,1)] hover:bg-[rgba(98,117,252,1)] text-white px-8 py-3 rounded-lg font-semibold flex items-center gap-2"

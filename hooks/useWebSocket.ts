@@ -30,15 +30,15 @@ export const useWebSocket = ({
                 onError?.(new Event('no_template_id'));
                 return;
             }
-            
-            const url = `http://localhost:8000/api/v1/interview-session/${templateId}/create/`;
-            
+
+            const url = `http://127.0.0.1:8000/api/v1/interview-session/${templateId}/create/`;
+
             console.log(`[WebSocket] Creating interview session for template: ${templateId}`);
             console.log(`[WebSocket] POST ${url}`);
-            
+
             try {
                 // Connect to WebSocket
-                const response = await fetch(url, { 
+                const response = await fetch(url, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -55,17 +55,17 @@ export const useWebSocket = ({
 
                 const session = await response.json();
                 console.log("[WebSocket] Interview session created:", session);
-                
+
                 if (!session.id) {
                     console.error("[WebSocket] Session created but no ID returned:", session);
                     onError?.(new Event('session_creation_failed'));
                     return;
                 }
-                
+
                 const sessionId = session.id;
-                const wsUrl = `ws://localhost:8000/ws/interview/${sessionId}/`;
+                const wsUrl = `ws://127.0.0.1:8000/ws/interview/${sessionId}/`;
                 console.log(`[WebSocket] Connecting to WebSocket: ${wsUrl}`);
-                
+
                 ws.current = new WebSocket(wsUrl);
                 ws.current.binaryType = "arraybuffer";
 
