@@ -36,6 +36,7 @@ export default function ActiveInterview({ cameraStream, micStream, templateId }:
   const mediaRecorderRef = useRef<MediaRecorder | null>(null)
   const audioContextRef = useRef<AudioContext | null>(null)
   const analyserRef = useRef<AnalyserNode | null>(null)
+  const silenceRAFRef = useRef<number | null>(null)
   const silenceTimerRef = useRef<NodeJS.Timeout | null>(null)
   const audioChunksRef = useRef<Blob[]>([])
 
@@ -43,6 +44,8 @@ export default function ActiveInterview({ cameraStream, micStream, templateId }:
   const audioPlaybackContextRef = useRef<AudioContext | null>(null)
   const audioQueueRef = useRef<ArrayBuffer[]>([])
   const isPlayingRef = useRef(false)
+  const aiStreamBufferRef = useRef<string>('') // Accumulates streaming AI text
+  const currentAiMessageIdRef = useRef<string | null>(null)
 
   // UI refs
   const videoRef = useRef<HTMLVideoElement | null>(null)
@@ -176,6 +179,54 @@ export default function ActiveInterview({ cameraStream, micStream, templateId }:
         timestamp: new Date(),
       }
       setMessages((prev) => [...prev, aiMessage])
+      // Clear any previous streaming state
+      aiStreamBufferRef.current = ''
+      currentAiMessageIdRef.current = null
+    } else if (message.type === 'response.start') {
+      // Start of streaming AI response; stop user recording and capture user transcript
+      setIsProcessing(false)
+      setIsAISpeaking(true)
+
+      if (message.user_transcript && message.user_transcript !== '[Silence/Unintelligible]') {
+        const userMessage: Message = {
+          id: `user-${Date.now()}`,
+          speaker: 'candidate',
+          text: message.user_transcript,
+          timestamp: new Date(),
+        }
+        setMessages((prev) => [...prev, userMessage])
+      }
+
+      const aiMessageId = `ai-${Date.now()}`
+      currentAiMessageIdRef.current = aiMessageId
+      aiStreamBufferRef.current = ''
+      const aiMessage: Message = {
+        id: aiMessageId,
+        speaker: 'ai',
+        text: '',
+        timestamp: new Date(),
+      }
+      setMessages((prev) => [...prev, aiMessage])
+    } else if (message.type === 'response.text.chunk') {
+      // Append streamed chunk to current AI message
+      const aiId = currentAiMessageIdRef.current
+      if (!aiId) return
+      aiStreamBufferRef.current = `${aiStreamBufferRef.current}${aiStreamBufferRef.current ? ' ' : ''}${message.text || ''}`.trim()
+      setMessages((prev) =>
+        prev.map((m) => (m.id === aiId ? { ...m, text: aiStreamBufferRef.current } : m)),
+      )
+    } else if (message.type === 'response.text.complete') {
+      // Finalize streaming AI message
+      const aiId = currentAiMessageIdRef.current
+      if (aiId) {
+        const finalText = message.text || aiStreamBufferRef.current
+        setMessages((prev) =>
+          prev.map((m) => (m.id === aiId ? { ...m, text: finalText } : m)),
+        )
+      }
+      aiStreamBufferRef.current = ''
+      currentAiMessageIdRef.current = null
+      setIsAISpeaking(false)
     } else if (message.type === 'response.wait') {
       console.log('[WebSocket] Response wait - processing...')
       setIsProcessing(true)
@@ -316,6 +367,18 @@ export default function ActiveInterview({ cameraStream, micStream, templateId }:
     return pcmBuffer
   }, [audioBufferToRawPCM])
 
+  const stopSilenceDetection = useCallback(() => {
+    if (silenceRAFRef.current !== null) {
+      cancelAnimationFrame(silenceRAFRef.current)
+      silenceRAFRef.current = null
+    }
+    analyserRef.current = null
+    if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
+      audioContextRef.current.close().catch(console.error)
+      audioContextRef.current = null
+    }
+  }, [])
+
   const sendEndOfTurn = useCallback(async () => {
     if (!isConnected || isProcessing || hasSentEndOfTurnRef.current) {
       console.log('[End of Turn] Skipping - isConnected:', isConnected, 'isProcessing:', isProcessing, 'hasSent:', hasSentEndOfTurnRef.current)
@@ -334,7 +397,9 @@ export default function ActiveInterview({ cameraStream, micStream, templateId }:
       // Wait a bit for the final chunk to be added
       await new Promise(resolve => setTimeout(resolve, 100))
     }
-
+    // Pause silence detection to avoid repeated triggers while processing
+    stopSilenceDetection()
+    
     // Convert accumulated WebM chunks to raw PCM and send
     if (audioChunksRef.current.length > 0) {
       try {
@@ -357,7 +422,7 @@ export default function ActiveInterview({ cameraStream, micStream, templateId }:
 
     const endOfTurnMessage = JSON.stringify({ type: 'end_of_turn' })
     send(endOfTurnMessage)
-  }, [isConnected, isProcessing, send, convertWebMToRawPCM])
+  }, [isConnected, isProcessing, send, convertWebMToRawPCM, stopSilenceDetection])
 
   const setupSilenceDetection = useCallback(() => {
     if (!micStream || !isMicOn) {
@@ -405,7 +470,7 @@ export default function ActiveInterview({ cameraStream, micStream, templateId }:
           }
         }
 
-        requestAnimationFrame(checkSilence)
+        silenceRAFRef.current = requestAnimationFrame(checkSilence)
       }
 
       checkSilence()
@@ -480,7 +545,7 @@ export default function ActiveInterview({ cameraStream, micStream, templateId }:
     startRecordingRef.current = startRecording
   }, [startRecording])
 
-  const stopRecording = () => {
+  const stopRecording = useCallback(() => {
     console.log('[Recording] Stopping recording...')
     if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
       mediaRecorderRef.current.stop()
@@ -492,13 +557,9 @@ export default function ActiveInterview({ cameraStream, micStream, templateId }:
       silenceTimerRef.current = null
     }
 
-    if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
-      audioContextRef.current.close().catch(console.error)
-      audioContextRef.current = null
-      console.log('[Recording] AudioContext closed')
-    }
-    analyserRef.current = null
-  }
+    stopSilenceDetection()
+    console.log('[Recording] AudioContext closed')
+  }, [stopSilenceDetection])
 
   const handleEndInterview = async () => {
     if (!showEndConfirm) {
@@ -562,7 +623,7 @@ export default function ActiveInterview({ cameraStream, micStream, templateId }:
         audioPlaybackContextRef.current.close().catch(console.error)
       }
     }
-  }, [closeWebSocket])
+  }, [closeWebSocket, stopRecording])
 
   return (
     <div className="flex flex-col h-screen bg-gray-900">
