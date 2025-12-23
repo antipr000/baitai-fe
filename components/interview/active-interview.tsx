@@ -70,7 +70,7 @@ export default function ActiveInterview({ cameraStream, micStream, templateId }:
   }
 
   const playNextAudioRef = useRef<(() => Promise<void>) | null>(null)
-  const startRecordingRef = useRef<((enableSilenceDetection?: boolean) => void) | null>(null)
+  const startRecordingRef = useRef<((enableSilenceDetection?: boolean) => Promise<void>) | null>(null)
   const isConnectedRef = useRef(false)
   const micStreamRef = useRef<MediaStream | null>(null)
   const isMicOnRef = useRef(true)
@@ -556,13 +556,12 @@ export default function ActiveInterview({ cameraStream, micStream, templateId }:
   }, [conversationState, setupSilenceDetection, stopSilenceDetection])
 
   // Start audio recording
-  const startRecording = useCallback((enableSilenceDetection?: boolean): void => {
-    const currentMicStream = micStreamRef.current
+  const startRecording = useCallback(async (enableSilenceDetection?: boolean): Promise<void> => {
     const currentIsConnected = isConnectedRef.current
     const shouldEnableSilenceDetection = enableSilenceDetection ?? conversationStateRef.current === 'listening'
     
-    if (!currentMicStream || !currentIsConnected) {
-      console.log('[Recording] Cannot start recording - micStream:', !!currentMicStream, 'isConnected:', currentIsConnected)
+    if (!currentIsConnected) {
+      console.log('[Recording] Cannot start recording - websocket disconnected')
       return
     }
 
@@ -572,10 +571,25 @@ export default function ActiveInterview({ cameraStream, micStream, templateId }:
       return
     }
 
+    let stream = micStreamRef.current
+    const hasLiveTrack = stream?.getAudioTracks().some(track => track.readyState === 'live')
+
+    if (!stream || !hasLiveTrack) {
+      console.log('[Recording] Mic stream missing or ended, requesting new stream')
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+        micStreamRef.current = stream
+      } catch (error) {
+        console.error('[Recording] Failed to obtain microphone stream:', error)
+        setError('Microphone unavailable. Please re-enable mic permissions.')
+        return
+      }
+    }
+
     try {
       console.log('[Recording] Starting user audio recording...')
       // Create MediaRecorder
-      const mediaRecorder = new MediaRecorder(currentMicStream, {
+      const mediaRecorder = new MediaRecorder(stream!, {
         mimeType: 'audio/webm;codecs=opus',
       })
 
