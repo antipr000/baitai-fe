@@ -28,6 +28,7 @@ export default function ActiveInterview({ cameraStream, micStream, templateId }:
   const [isSharing, setIsSharing] = useState(false)
   const [messages, setMessages] = useState<Message[]>([])
   const [isProcessing, setIsProcessing] = useState(false)
+  const [conversationState, setConversationState] = useState<'listening' | 'thinking'>('listening')
   const [isAISpeaking, setIsAISpeaking] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [showEndConfirm, setShowEndConfirm] = useState(false)
@@ -38,6 +39,7 @@ export default function ActiveInterview({ cameraStream, micStream, templateId }:
   const analyserRef = useRef<AnalyserNode | null>(null)
   const silenceRAFRef = useRef<number | null>(null)
   const silenceTimerRef = useRef<NodeJS.Timeout | null>(null)
+  const thinkingTimerRef = useRef<NodeJS.Timeout | null>(null)
   const audioChunksRef = useRef<Blob[]>([])
 
   // Audio playback refs
@@ -58,19 +60,26 @@ export default function ActiveInterview({ cameraStream, micStream, templateId }:
 
   // Define message handler types
   type WebSocketTextMessage = {
-    type: 'response.text' | 'response.wait' | 'error'
+    type: 'response.text' | 'response.start' | 'response.text.chunk' | 'response.text.complete' | 'response.wait' | 'response.completed' | 'error'
     text?: string
     message?: string
     status?: string
     user_transcript?: string  // User's transcribed speech
+    next_action?: string
   }
 
   const playNextAudioRef = useRef<(() => Promise<void>) | null>(null)
-  const startRecordingRef = useRef<(() => void) | null>(null)
+  const startRecordingRef = useRef<((enableSilenceDetection?: boolean) => void) | null>(null)
   const isConnectedRef = useRef(false)
   const micStreamRef = useRef<MediaStream | null>(null)
   const isMicOnRef = useRef(true)
   const hasSentEndOfTurnRef = useRef(false)
+  const conversationStateRef = useRef<'listening' | 'thinking'>('listening')
+
+  // Keep an imperative ref in sync with UI state
+  useEffect(() => {
+    conversationStateRef.current = conversationState
+  }, [conversationState])
 
   const playNextAudio = useCallback(async () => {
     if (isPlayingRef.current || audioQueueRef.current.length === 0) {
@@ -147,6 +156,7 @@ export default function ActiveInterview({ cameraStream, micStream, templateId }:
       console.log('[WebSocket] AI response text received, stopping user recording')
       setIsProcessing(false)
       setIsAISpeaking(true)
+      setConversationState('thinking')
       
       // Stop user recording when AI starts responding
       if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
@@ -186,6 +196,7 @@ export default function ActiveInterview({ cameraStream, micStream, templateId }:
       // Start of streaming AI response; stop user recording and capture user transcript
       setIsProcessing(false)
       setIsAISpeaking(true)
+      setConversationState('thinking')
 
       if (message.user_transcript && message.user_transcript !== '[Silence/Unintelligible]') {
         const userMessage: Message = {
@@ -231,6 +242,7 @@ export default function ActiveInterview({ cameraStream, micStream, templateId }:
       console.log('[WebSocket] Response wait - processing...')
       setIsProcessing(true)
       setIsAISpeaking(false)
+      setConversationState('thinking')
       
       // Add user message to conversation even during wait if transcript is available
       if (message.user_transcript && message.user_transcript !== '[Silence/Unintelligible]') {
@@ -243,9 +255,18 @@ export default function ActiveInterview({ cameraStream, micStream, templateId }:
         setMessages((prev) => [...prev, userMessage])
         console.log('[WebSocket] Added user message during wait:', message.user_transcript)
       }
+    } else if (message.type === 'response.completed') {
+      console.log('[WebSocket] Response completed - resuming listening')
+      setIsProcessing(false)
+      setConversationState('listening')
+      hasSentEndOfTurnRef.current = false
+      if (startRecordingRef.current && isConnectedRef.current && micStreamRef.current && isMicOnRef.current) {
+        startRecordingRef.current(true)
+      }
     } else if (message.type === 'error') {
       console.error('[WebSocket] Error message received:', message.message)
       setIsProcessing(false)
+      setConversationState('listening')
       setError(message.message || 'An error occurred')
     }
   }, [])
@@ -379,7 +400,7 @@ export default function ActiveInterview({ cameraStream, micStream, templateId }:
     }
   }, [])
 
-  const sendEndOfTurn = useCallback(async () => {
+  const sendEndOfTurn = useCallback(async (): Promise<void> => {
     if (!isConnected || isProcessing || hasSentEndOfTurnRef.current) {
       console.log('[End of Turn] Skipping - isConnected:', isConnected, 'isProcessing:', isProcessing, 'hasSent:', hasSentEndOfTurnRef.current)
       return
@@ -387,6 +408,7 @@ export default function ActiveInterview({ cameraStream, micStream, templateId }:
 
     console.log('[End of Turn] Sending end_of_turn signal to backend')
     setIsProcessing(true)
+    setConversationState('thinking')
     hasSentEndOfTurnRef.current = true
     
     // Stop recording when sending end of turn
@@ -422,9 +444,16 @@ export default function ActiveInterview({ cameraStream, micStream, templateId }:
 
     const endOfTurnMessage = JSON.stringify({ type: 'end_of_turn' })
     send(endOfTurnMessage)
+    // Start capturing audio while thinking (without silence detection) to avoid missing resumed speech
+    if (isConnectedRef.current && micStreamRef.current && isMicOnRef.current && startRecordingRef.current) {
+      startRecordingRef.current(false)
+    }
   }, [isConnected, isProcessing, send, convertWebMToRawPCM, stopSilenceDetection])
 
-  const setupSilenceDetection = useCallback(() => {
+  const setupSilenceDetection = useCallback((): void => {
+    if (conversationStateRef.current !== 'listening') {
+      return
+    }
     if (!micStream || !isMicOn) {
       console.log('[Silence Detection] Skipping setup - micStream:', !!micStream, 'isMicOn:', isMicOn)
       return
@@ -446,7 +475,7 @@ export default function ActiveInterview({ cameraStream, micStream, templateId }:
       let silenceStartTime: number | null = null
 
       const checkSilence = () => {
-        if (!analyserRef.current || !isMicOn) return
+        if (!analyserRef.current || !isMicOn || conversationStateRef.current !== 'listening') return
 
         analyserRef.current.getByteFrequencyData(dataArray)
         const average = dataArray.reduce((sum, val) => sum + val, 0) / dataArray.length
@@ -480,10 +509,41 @@ export default function ActiveInterview({ cameraStream, micStream, templateId }:
     }
   }, [micStream, isMicOn, sendEndOfTurn])
 
+  // Manage thinking timeout and toggle silence detection based on state
+  useEffect(() => {
+    if (conversationState === 'thinking') {
+      if (thinkingTimerRef.current) {
+        clearTimeout(thinkingTimerRef.current)
+      }
+      thinkingTimerRef.current = setTimeout(() => {
+        console.log('[Conversation State] Auto-toggling from thinking to listening after timeout')
+        setIsProcessing(false)
+        hasSentEndOfTurnRef.current = false
+        setConversationState('listening')
+        const recorderInactive = !mediaRecorderRef.current || mediaRecorderRef.current.state === 'inactive'
+        if (recorderInactive && startRecordingRef.current && isConnectedRef.current && micStreamRef.current && isMicOnRef.current) {
+          startRecordingRef.current(true)
+        } else if (!recorderInactive) {
+          setupSilenceDetection()
+        }
+      }, 10000)
+      stopSilenceDetection()
+    } else {
+      if (thinkingTimerRef.current) {
+        clearTimeout(thinkingTimerRef.current)
+        thinkingTimerRef.current = null
+      }
+      if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+        setupSilenceDetection()
+      }
+    }
+  }, [conversationState, setupSilenceDetection, stopSilenceDetection])
+
   // Start audio recording
-  const startRecording = useCallback(() => {
+  const startRecording = useCallback((enableSilenceDetection?: boolean): void => {
     const currentMicStream = micStreamRef.current
     const currentIsConnected = isConnectedRef.current
+    const shouldEnableSilenceDetection = enableSilenceDetection ?? conversationStateRef.current === 'listening'
     
     if (!currentMicStream || !currentIsConnected) {
       console.log('[Recording] Cannot start recording - micStream:', !!currentMicStream, 'isConnected:', currentIsConnected)
@@ -532,13 +592,17 @@ export default function ActiveInterview({ cameraStream, micStream, templateId }:
       mediaRecorder.start(100) // Send chunks every 100ms
       console.log('[Recording] MediaRecorder started with 100ms timeslice')
 
-      // Setup silence detection
-      setupSilenceDetection()
+      // Setup silence detection only if we're in listening mode
+      if (shouldEnableSilenceDetection) {
+        setupSilenceDetection()
+      } else {
+        stopSilenceDetection()
+      }
     } catch (error) {
       console.error('[Recording] Error starting recording:', error)
       setError('Failed to start recording')
     }
-  }, [setupSilenceDetection])
+  }, [setupSilenceDetection, stopSilenceDetection])
 
   // Store startRecording in ref
   useEffect(() => {
@@ -621,6 +685,9 @@ export default function ActiveInterview({ cameraStream, micStream, templateId }:
       closeWebSocket()
       if (audioPlaybackContextRef.current && audioPlaybackContextRef.current.state !== 'closed') {
         audioPlaybackContextRef.current.close().catch(console.error)
+      }
+      if (thinkingTimerRef.current) {
+        clearTimeout(thinkingTimerRef.current)
       }
     }
   }, [closeWebSocket, stopRecording])
