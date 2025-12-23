@@ -46,6 +46,7 @@ export default function ActiveInterview({ cameraStream, micStream, templateId }:
   const audioPlaybackContextRef = useRef<AudioContext | null>(null)
   const audioQueueRef = useRef<ArrayBuffer[]>([])
   const isPlayingRef = useRef(false)
+  const pendingResumeAfterPlaybackRef = useRef(false) // wait for audio to finish before resuming listening
   const aiStreamBufferRef = useRef<string>('') // Accumulates streaming AI text
   const currentAiMessageIdRef = useRef<string | null>(null)
 
@@ -110,10 +111,18 @@ export default function ActiveInterview({ cameraStream, micStream, templateId }:
           console.log('[Audio Playback] More audio in queue, playing next chunk')
           playNextAudioRef.current()
         } else {
-          // AI finished speaking completely - start user recording
-          console.log('[Audio Playback] AI finished speaking completely, starting user recording')
-          if (isConnectedRef.current && micStreamRef.current && isMicOnRef.current && startRecordingRef.current) {
-            startRecordingRef.current()
+          console.log('[Audio Playback] AI finished speaking completely')
+          // Only resume listening/recording once backend has sent completion
+          if (pendingResumeAfterPlaybackRef.current) {
+            pendingResumeAfterPlaybackRef.current = false
+            setConversationState('listening')
+            hasSentEndOfTurnRef.current = false
+            console.log('[Audio Playback] Backend completed, resuming user recording')
+            if (isConnectedRef.current && micStreamRef.current && isMicOnRef.current && startRecordingRef.current) {
+              startRecordingRef.current(true)
+            }
+          } else {
+            console.log('[Audio Playback] Skipping auto-record until backend completion arrives')
           }
         }
       }
@@ -258,10 +267,17 @@ export default function ActiveInterview({ cameraStream, micStream, templateId }:
     } else if (message.type === 'response.completed') {
       console.log('[WebSocket] Response completed - resuming listening')
       setIsProcessing(false)
-      setConversationState('listening')
-      hasSentEndOfTurnRef.current = false
-      if (startRecordingRef.current && isConnectedRef.current && micStreamRef.current && isMicOnRef.current) {
-        startRecordingRef.current(true)
+      pendingResumeAfterPlaybackRef.current = true
+      // If AI finished playback already, resume immediately
+      if (!isPlayingRef.current && audioQueueRef.current.length === 0) {
+        pendingResumeAfterPlaybackRef.current = false
+        setConversationState('listening')
+        hasSentEndOfTurnRef.current = false
+        if (startRecordingRef.current && isConnectedRef.current && micStreamRef.current && isMicOnRef.current) {
+          startRecordingRef.current(true)
+        }
+      } else {
+        console.log('[WebSocket] Waiting for AI playback to finish before resuming listening')
       }
     } else if (message.type === 'error') {
       console.error('[WebSocket] Error message received:', message.message)
