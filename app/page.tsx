@@ -137,7 +137,7 @@ export default function Home() {
   return (
     <div className="min-h-screen  flex flex-col">
       {/* Header */}
-      <header className="fixed top-0 left-0 right-0 z-50 sm:px-6 px-2 md:py-8 py-4 bg-white/80 backdrop-blur-md border-b border-gray-200/20 shadow-sm w-screen max-w-full overflow-x-hidden box-border">
+      <header className="fixed top-0 left-0 right-0 z-50 sm:px-6 px-2 md:py-4 py-4 bg-white/80 backdrop-blur-md border-b border-gray-200/20 shadow-sm w-screen max-w-full overflow-x-hidden box-border">
         <nav className="flex items-center justify-between w-full max-w-full md:max-w-7xl md:mx-auto overflow-x-hidden box-border m-0">
           <div className="flex items-center space-x-2">
             <Image className="md:size-[34px] lg:[size-40px] size-6" src="/main/logo.png" alt="Bait AI Logo" width={40} height={40} />

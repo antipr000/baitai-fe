@@ -1,7 +1,18 @@
+
 @import "tailwindcss";
 @import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
+
+
+.btn-pricing {
+  transition: background 0.3s, color 0.3s, border-color 0.3s;
+}
+.btn-pricing:hover {
+  background: transparent !important;
+  color: #3E54FB !important;
+  border-color: #3E54FB !important;
+}
 
 @theme inline {
   --color-background: var(--background);
@@ -111,6 +122,8 @@
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
 }
+
+
 
 @layer base {
   * {
