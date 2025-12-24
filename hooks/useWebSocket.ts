@@ -78,10 +78,20 @@ export const useWebSocket = ({
                     onError?.(error);
                 };
 
-                ws.current.onclose = () => {
-                    console.log('[WebSocket] WebSocket disconnected');
+                ws.current.onclose = (event) => {
+                    console.log('[WebSocket] WebSocket disconnected', {
+                        code: event.code,
+                        reason: event.reason,
+                        wasClean: event.wasClean
+                    });
                     setIsConnected(false);
                     onDisconnect?.();
+                    
+                    // Don't attempt reconnection if it was a clean close or server-initiated
+                    if (event.code === 4000 || event.code === 4001) {
+                        console.log('[WebSocket] Server closed connection, not reconnecting');
+                        return;
+                    }
                 };
 
             } catch (error) {
