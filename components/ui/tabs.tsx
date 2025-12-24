@@ -45,7 +45,7 @@ function TabsTrigger({
 }: TabsTriggerProps) {
   let variantActiveClass = '';
   if (variant === 'hiring' || variant === 'jobseeker') {
-    variantActiveClass = 'data-[state=active]:bg-[rgba(33,6,117,0.9)] data-[state=active]:border data-[state=active]:border-[rgba(84,106,252,0.6)] data-[state=active]:text-[rgba(226,229,255,0.9)]';
+    variantActiveClass = 'data-[state=active]:bg-[rgba(33,6,117,0.9)] border-[rgba(84,106,252,0.6)] border data-[state=active]:border-[rgba(84,106,252,0.6)] data-[state=active]:text-[rgba(226,229,255,0.9)] text-[rgba(84,106,252,0.7)]';
   }
   return (
     <TabsPrimitive.Trigger
