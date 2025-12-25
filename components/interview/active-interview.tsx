@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useEffect, useRef, useState, useCallback } from 'react'
+import { flushSync } from 'react-dom'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
@@ -57,6 +58,8 @@ export default function ActiveInterview({ cameraStream, micStream, templateId }:
   const isPlayingRef = useRef(false)
   const aiStreamBufferRef = useRef<string>('') // Accumulates streaming AI text
   const currentAiMessageIdRef = useRef<string | null>(null)
+  const tokenQueueRef = useRef<string[]>([]) // Queue of tokens to display
+  const isProcessingTokensRef = useRef(false) // Whether we're currently processing the queue
 
   // UI refs
   const videoRef = useRef<HTMLVideoElement | null>(null)
@@ -94,6 +97,44 @@ export default function ActiveInterview({ cameraStream, micStream, templateId }:
   useEffect(() => {
     conversationStateRef.current = conversationState
   }, [conversationState])
+
+  // Process token queue one at a time for visible streaming
+  const processTokenQueue = useCallback(() => {
+    if (isProcessingTokensRef.current || tokenQueueRef.current.length === 0) {
+      return
+    }
+
+    isProcessingTokensRef.current = true
+    const aiId = currentAiMessageIdRef.current
+
+    if (!aiId) {
+      isProcessingTokensRef.current = false
+      tokenQueueRef.current = []
+      return
+    }
+
+    const processNext = () => {
+      if (tokenQueueRef.current.length === 0) {
+        isProcessingTokensRef.current = false
+        return
+      }
+
+      const token = tokenQueueRef.current.shift()!
+      aiStreamBufferRef.current += token
+
+      // Force synchronous update to prevent batching
+      flushSync(() => {
+        setMessages((prev) =>
+          prev.map((m) => (m.id === aiId ? { ...m, text: aiStreamBufferRef.current } : m)),
+        )
+      })
+
+      // Process next token after a small delay (20ms for smooth streaming)
+      setTimeout(processNext, 20)
+    }
+
+    processNext()
+  }, [])
 
   const stopSilenceDetection = useCallback(() => {
     if (silenceRAFRef.current !== null) {
@@ -305,6 +346,8 @@ export default function ActiveInterview({ cameraStream, micStream, templateId }:
       const aiMessageId = `ai-${Date.now()}`
       currentAiMessageIdRef.current = aiMessageId
       aiStreamBufferRef.current = ''
+      tokenQueueRef.current = [] // Clear any previous tokens
+      isProcessingTokensRef.current = false
       const aiMessage: Message = {
         id: aiMessageId,
         speaker: 'ai',
@@ -313,26 +356,39 @@ export default function ActiveInterview({ cameraStream, micStream, templateId }:
       }
       setMessages((prev) => [...prev, aiMessage])
     } else if (message.type === 'response.text.chunk') {
-      // Append streamed chunk to current AI message
+      // Queue the token for gradual display
       const aiId = currentAiMessageIdRef.current
       if (!aiId) return
-      aiStreamBufferRef.current = `${aiStreamBufferRef.current}${aiStreamBufferRef.current ? ' ' : ''}${message.text || ''}`.trim()
-      setMessages((prev) =>
-        prev.map((m) => (m.id === aiId ? { ...m, text: aiStreamBufferRef.current } : m)),
-      )
+      
+      const token = message.text || ''
+      tokenQueueRef.current.push(token)
+      
+      // Start processing the queue if not already processing
+      processTokenQueue()
     } else if (message.type === 'response.text.complete') {
       // Finalize streaming AI message
       const aiId = currentAiMessageIdRef.current
-      if (aiId) {
-        const finalText = message.text || aiStreamBufferRef.current
-        setMessages((prev) =>
-          prev.map((m) => (m.id === aiId ? { ...m, text: finalText } : m)),
-        )
+      
+      // Wait for queue to finish processing, then finalize
+      const waitForQueueAndFinalize = () => {
+        if (tokenQueueRef.current.length > 0 || isProcessingTokensRef.current) {
+          setTimeout(waitForQueueAndFinalize, 50)
+          return
+        }
+        
+        if (aiId) {
+          const finalText = message.text || aiStreamBufferRef.current
+          setMessages((prev) =>
+            prev.map((m) => (m.id === aiId ? { ...m, text: finalText } : m)),
+          )
+        }
+        aiStreamBufferRef.current = ''
+        currentAiMessageIdRef.current = null
+        // This is *text* stream completion, not necessarily audio playback completion
+        if (!isPlayingRef.current) setIsAISpeaking(false)
       }
-      aiStreamBufferRef.current = ''
-      currentAiMessageIdRef.current = null
-      // This is *text* stream completion, not necessarily audio playback completion
-      if (!isPlayingRef.current) setIsAISpeaking(false)
+      
+      waitForQueueAndFinalize()
     } else if (message.type === 'response.wait') {
       console.log('[WebSocket] Response wait - processing...')
       setIsProcessing(true)
@@ -1017,6 +1073,9 @@ export default function ActiveInterview({ cameraStream, micStream, templateId }:
       if (silenceRAFRef.current !== null) {
         cancelAnimationFrame(silenceRAFRef.current)
       }
+      // Clear token queue
+      tokenQueueRef.current = []
+      isProcessingTokensRef.current = false
     }
   }, [closeWebSocket, stopRecording, cameraStream, micStream])
 
