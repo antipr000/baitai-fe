@@ -1,14 +1,17 @@
 
 
 
-
-
+"use client"
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
+import { Separator } from "@radix-ui/react-separator";
+import { Menu } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { useState } from "react";
 
 const plans = [
   {
@@ -123,46 +126,123 @@ const consumerPlans = [
   },
 ];
 
-export default function AboutPage() {
+export default function PricingPage() {
+  const [open, setOpen] = useState(false);
+
   return (
     <div className="min-h-screen bg-[linear-gradient(297.94deg,#E6FDFF_13.44%,#DDFBFE_108.79%)] flex flex-col items-center py-10 px-2">
       <div className="max-w-7xl p-5 mx-auto w-full flex justify-between items-center mb-8">
 
-        <div className="w-full">
-          <div className="justify-between flex w-full">
-           <div>
-             <h1 className="text-3xl md:text-4xl font-semibold  mb-2 text-transparent bg-clip-text bg-[linear-gradient(99.18deg,rgba(0,13,144,0.9)_-7.75%,#5D6BEE_98.02%)]">Choose your plan, evolve</h1>
-            <h1 className="text-3xl md:text-4xl font-semibold  mb-2 text-transparent bg-clip-text bg-[linear-gradient(99.18deg,rgba(0,13,144,0.9)_-7.75%,#5D6BEE_98.02%)]">with AI</h1>
-           </div>
-            <div>
+        <div className="w-full ">
+          <div className="flex sm:hidden mb-5">
+            <Image src="/pricing/home.svg" alt="Home" width={20} height={20} />
+
+            {/* Mobile Menu */}
+            <Sheet open={open} onOpenChange={setOpen} modal={false}>
+              <SheetTrigger asChild className="bg-transparent hover:bg-transparent">
+                <Button variant="ghost" size="icon" className="text-[rgba(69,94,255,0.8)] bg-transparent ml-auto">
+                  <Menu className="h-6 w-6" />
+                  <span className="sr-only">Toggle menu</span>
+                </Button>
+              </SheetTrigger>
+              <SheetContent
+                side="left"
+                className="w-full max-w-[100vw] p-4 min-h-screen bg-[linear-gradient(172.97deg,#E8F5FA_-6.95%,#F5F7FF_91.64%)]"
+                onOpenAutoFocus={(e) => e.preventDefault()}
+                onCloseAutoFocus={(e) => e.preventDefault()}
+              >
+                <nav className="flex flex-col gap-4 px-1 mt-8">
+                  <div className="flex items-center gap-2 border-[rgba(121,153,253,0.05)] border p-1 px-1 ">
+                    <Image src="/main/nav/about.svg" alt="Bait AI Logo" width={15} height={15} />
+                    <Link
+                      href="#"
+                      className=" text-[rgba(10,13,26,0.7)] hover:opacity-70 font-medium py-2"
+                      onClick={() => setOpen(false)}
+                    >
+                      About us
+                    </Link>
+                  </div>
+
+                  <div className="flex items-center gap-2 border-[rgba(121,153,253,0.05)] border p-1 px-1 ">
+                    <Image src="/main/nav/briefcase.svg" alt="briefcase" width={15} height={15} />
+                    <Link
+                      href="#"
+                      className=" text-[rgba(10,13,26,0.7)] hover:opacity-70 font-medium py-2"
+                      onClick={() => setOpen(false)}
+                    >
+                      For Hiring Teams
+                    </Link>
+                  </div>
+
+                  <div className="flex items-center gap-2 border-[rgba(121,153,253,0.05)] border p-1 px-1 ">
+                    <Image src="/main/nav/people.svg" alt="people" width={15} height={15} />
+
+                    <Link
+                      href="#"
+                      className=" text-[rgba(10,13,26,0.7)] hover:opacity-70 font-medium py-2"
+                      onClick={() => setOpen(false)}
+                    >
+                      For Job Seekers
+                    </Link>
+                  </div>
+
+                  <div className="flex items-center gap-2 border-[rgba(121,153,253,0.05)] border p-1 px-1 ">
+                    <Image src="/main/nav/money.svg" alt="money" width={15} height={15} />
+
+                    <Link
+                      href="#"
+                      className=" text-[rgba(10,13,26,0.7)] hover:opacity-70 font-medium py-2"
+                      onClick={() => setOpen(false)}
+                    >
+                      Pricing
+                    </Link>
+                  </div>
+
+                  <Separator className="my-2" />
+
+                </nav>
+                <div className="flex flex-col gap-4 border-[rgba(121,153,253,0.05)] border  px-1 p-1">
+                  <Button variant="ghost" className="w-full bg-[linear-gradient(106.03deg,rgba(239,246,254,0.5)_0%,rgba(163,217,248,0.5)_238.47%)] text-[rgba(108,132,255,1)] hover:opacity-70 border font-medium border-[rgba(108,132,255,0.9)]">
+                    Sign in
+                  </Button>
+                  <Button className="w-full  bg-[linear-gradient(106.03deg,#677CFF_0%,#A3D9F8_238.47%)] hover:opacity-70 text-[rgba(238,246,251,1)] font-medium">
+                    Request a demo
+                  </Button>
+                </div>
+              </SheetContent>
+            </Sheet>
+          </div>
+          <div className="justify-between  flex w-full">
+            <div className="max-w-6xl">
+              <h1 className=" md:text-4xl text-xl font-semibold  mb-2 text-transparent bg-clip-text bg-[linear-gradient(99.18deg,rgba(0,13,144,0.9)_-7.75%,#5D6BEE_98.02%)] w-[450px]">Choose your plan, evolve with AI</h1>
+            </div>
+            <div className="hidden sm:block">
               <Link href="/">
-                <Button variant="default" className="bg-[rgba(227,252,254,1)] hover:bg-[rgba(227,252,254,1)] hover:opacity-80 border-2 border-[rgba(52,31,131,0.6)] hover:border-[rgba(52,31,131,0.6)] text-[rgba(52,31,131,1)]">Back Home</Button>
+                <Button variant="default" className="bg-[rgba(227,252,254,1)] font-semibold hover:bg-[rgba(227,252,254,1)] hover:opacity-80 border-2 border-[rgba(52,31,131,0.6)] hover:border-[rgba(52,31,131,0.6)] text-[rgba(52,31,131,1)]">Back Home</Button>
               </Link>
             </div>
           </div>
+          <div className="flex gap-2 mb-4 max-w-7xl">
 
-
-          <div className="flex gap-2 mb-4">
-
-            <Tabs defaultValue="consumer" className="">
+            <Tabs defaultValue="teams" className="w-full">
               <TabsList className="flex gap-2 mb-4">
-                <TabsTrigger className="p-4" variant="hiring" value="teams">For Hiring Teams</TabsTrigger>
-                <TabsTrigger className="p-4" variant="jobseeker" value="consumer">For Job Seekers</TabsTrigger>
+                <TabsTrigger className="p-4 px-6 md:text-base text-sm" variant="hiring" value="teams">For Hiring Teams</TabsTrigger>
+                <TabsTrigger className="p-4 px-6 md:text-base text-sm" variant="jobseeker" value="consumer">For Job Seekers</TabsTrigger>
               </TabsList>
               <TabsContent value="teams">
-                <div className="w-full ">
-                  <div className="flex flex-col md:flex-row flex-0 gap-4 shrink-0 justify-center items-start">
+                <div className="w-full  ">
+                  <div className=" flex sm:mx-20   lg:px-0 flex-col items-center md:flex-row flex-0 gap-4 shrink-0 justify-center md:items-start">
                     {plans.map((plan, idx) => (
                       <Card
                         key={plan.name}
                         className={cn(
-                          " shadow-2xs bg-[linear-gradient(297.94deg,rgba(211,251,31,0.7)_13.44%,rgba(255,255,255,1)_108.79%)] rounded-2xl border border-[rgba(239,254,210,1)] relative",
+                          "w-full  shadow-2xs bg-[linear-gradient(156.96deg,rgba(211,251,31,0.7)_-3.8%,rgba(255,255,255,1)_118.22%)] rounded-2xl border border-[rgba(239,254,210,1)] relative",
                         )}
                       >
                         <CardHeader className="pb-2">
-                          <div className="flex items-center justify-between">
-                            <CardTitle className="text-3xl font-semibold text-[rgba(96,127,255,1)]">{plan.name}</CardTitle>
-                            <span className="text-lg font-semibold text-[rgba(32,5,117,1)]">{plan.price}</span>
+                          <div className="flex items-center  justify-between">
+                            <CardTitle className="sm:text-3xl text-xl font-semibold  text-[rgba(96,127,255,1)]">{plan.name}</CardTitle>
+                            <span className="sm:text-lg text-base font-semibold text-[rgba(32,5,117,1)]">{plan.price}</span>
                           </div>
                           <CardDescription className="text-xs mt-1 font-medium text-[rgba(96,127,255,0.6)]">{plan.description}</CardDescription>
                           <div className="h-px w-full bg-[rgba(32,5,116,0.1)] mt-3" />
@@ -170,9 +250,9 @@ export default function AboutPage() {
                         <CardContent className="pt-2 pb-0">
                           <ul className="space-y-3 mb-4 mt-2">
                             {plan.features.map((feature, i) => (
-                              <li key={i} className="flex items-center gap-3 text-sm text-[rgba(32,5,117,1)] font-medium">
+                              <li key={i} className="flex items-center gap-3 sm:text-sm text-xs text-[rgba(32,5,117,1)] font-medium">
                                 <Image src={feature.icon} alt={feature.text} width={20} height={20} className="w-6 h-6 object-contain" aria-hidden />
-                                <span>{feature.text}</span>
+                                <span className="sm:text-sm text-xs">{feature.text}</span>
                               </li>
                             ))}
                           </ul>
@@ -181,14 +261,14 @@ export default function AboutPage() {
                               <Image src={plan.note.icon} alt="credit card" width={24} height={24} className="w-6 h-6 object-contain mt-0.5" aria-hidden />
                               <div className="text-[rgba(32,5,117,0.9)]">
                                 <div className="font-bold mb-1">{plan.note.title}</div>
-                                <div className="text-xs font-medium">{plan.note.detail}</div>
+                                <div className="sm:text-xs text-xs font-medium">{plan.note.detail}</div>
                               </div>
                             </div>
                           )}
                         </CardContent>
                         <CardFooter className="pt-6">
                           <Button
-                            className="w-full py-2 text-base border-2 hover:bg-[linear-gradient(93.76deg,#3E54FB_-30.83%,#C3CEFF_172.66%)] font-semibold border-[rgba(158,172,255,0.3)] text-white bg-[linear-gradient(93.76deg,#3E54FB_-30.83%,#C3CEFF_172.66%)]  btn-pricing "
+                            className="w-full py-2 sm:text-base text-xs border-2 hover:bg-[linear-gradient(93.76deg,#3E54FB_-30.83%,#C3CEFF_172.66%)] font-semibold border-[rgba(158,172,255,0.3)] text-white bg-[linear-gradient(93.76deg,#3E54FB_-30.83%,#C3CEFF_172.66%)]  btn-pricing "
                           >
                             {plan.button}
                           </Button>
@@ -199,28 +279,28 @@ export default function AboutPage() {
                 </div>
               </TabsContent>
               <TabsContent value="consumer">
-                <div className="w-full ">
-                  <div className="flex flex-col md:flex-row justify-center gap-12 shrink-0 items-start ">
+                <div className="w-full flex items-center justify-center text-sm">
+                  <div className=" flex  sm:mx-20   lg:px-0  flex-col md:flex-row justify-center md:gap-20 gap-5  md:items-start ">
                     {consumerPlans.map((plan, idx) => (
                       <Card
                         key={plan.name}
                         className={cn(
-                          "max-w-sm shadow-2xs bg-[linear-gradient(150.84deg,#242995_8.25%,#595DC9_102.41%)] rounded-2xl border border-[rgba(140,157,255,0.2)] relative",
+                          "  shadow-2xs bg-[linear-gradient(150.84deg,#242995_8.25%,#595DC9_102.41%)] rounded-2xl border border-[rgba(140,157,255,0.2)] relative",
                         )}
                       >
                         <CardHeader className="pb-2">
                           <div className="flex items-center justify-between">
-                            <CardTitle className="text-3xl font-semibold text-white">{plan.name}</CardTitle>
-                            <span className={cn("text-lg font-semibold ", plan.name === "Starter" ? "text-[rgba(134,255,110,1)]" : "text-white")}>{plan.price}</span>
+                            <CardTitle className="sm:text-3xl text-xl font-semibold text-white">{plan.name}</CardTitle>
+                            <span className={cn("sm:text-lg text-base font-semibold ", plan.name === "Starter" ? "text-[rgba(134,255,110,1)]" : "text-white")}>{plan.price}</span>
                           </div>
                           <CardDescription className="text-xs mt-1 font-medium text-white/70">{plan.description}</CardDescription>
                           <div className="h-px w-3/4 mx-auto bg-[rgba(134,255,110,0.5)] mt-3" />
                         </CardHeader>
                         <CardContent className="pt-2 pb-0">
-                          <ul className="space-y-3 mb-4 mt-2">
+                          <ul className="space-y-3 mb-4 sm:px-15  lg:px-0 mt-2">
                             {plan.features.map((feature, i) => (
-                              <li key={i} className="flex items-center gap-3 text-sm text-[rgba(32,5,117,1)] font-medium">
-                                <Image src={feature.icon} alt={typeof feature.text === 'string' ? feature.text : ''} width={20} height={20} className="w-6 h-6 object-contain" aria-hidden />
+                              <li key={i} className="flex items-center gap-3 sm:text-sm text-xs text-[rgba(32,5,117,1)] font-medium">
+                                <Image src={feature.icon} alt={typeof feature.text === 'string' ? feature.text : ''} width={20} height={20} className="w-6 h-6 object-contain"  />
                                 <span className="text-white">{feature.text}</span>
                               </li>
                             ))}
@@ -229,7 +309,7 @@ export default function AboutPage() {
                           {plan.extra && plan.extra.buyCredits && (
                             <div className=" ml-10 mt-4">
                               <span className="font-semibold text-white">{plan.extra.buyCredits.title}</span>
-                              <ul className="ml-6 mt-1 space-y-1 text-sm text-white">
+                              <ul className="ml-6 mt-1 space-y-1 sm:text-sm text-xs text-white">
                                 {plan.extra.buyCredits.items.map((item, idx) => (
                                   <li className="text-white" key={idx}>{item}</li>
                                 ))}
@@ -239,7 +319,7 @@ export default function AboutPage() {
                           {plan.extra && plan.extra.useCredits && (
                             <div className=" ml-10 mt-4">
                               <span className="font-semibold text-white">{plan.extra.useCredits.title}</span>
-                              <ul className="ml-6 mt-1 space-y-1 text-sm text-white">
+                              <ul className="ml-6 mt-1 space-y-1 sm:text-sm text-xs text-white">
                                 {plan.extra.useCredits.items.map((item, idx) => (
                                   <li key={idx} className="flex items-center gap-2 text-white">
                                     <Image src="/pricing/tick.svg" alt="check mark" width={16} height={16} className="w-4 h-4 object-contain" aria-hidden />
@@ -253,7 +333,7 @@ export default function AboutPage() {
                         </CardContent>
                         <CardFooter className="pt-6">
                           <Button
-                            className="w-full py-2 text-base border-2 bg-transparent hover:bg-transparent  hover:opacity-80 "
+                            className="w-full py-2 sm:text-base text-xs border-2 bg-transparent hover:bg-transparent  hover:opacity-80 "
                           >
                             {plan.button}
                           </Button>
@@ -266,7 +346,7 @@ export default function AboutPage() {
             </Tabs>
           </div>
         </div>
-       
+
       </div>
 
     </div>
