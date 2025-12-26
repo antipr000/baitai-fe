@@ -16,7 +16,8 @@
 
 
 @theme {
-  --breakpoint-md:850px; /* Changes 'md' to 800px (default 768px) */
+  --breakpoint-md:800px; /* Changes 'md' to 800px (default 768px) */
+  --breakpoint-lg:1000px;
   }
 
 @theme inline {

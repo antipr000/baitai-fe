@@ -1,7 +1,6 @@
 
 
-
-"use client"
+import { MobileNavBar } from "@/components/mobile-navbar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -11,7 +10,6 @@ import { Separator } from "@radix-ui/react-separator";
 import { Menu } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
 
 const plans = [
   {
@@ -127,7 +125,6 @@ const consumerPlans = [
 ];
 
 export default function PricingPage() {
-  const [open, setOpen] = useState(false);
 
   return (
     <div className="min-h-screen bg-[linear-gradient(297.94deg,#E6FDFF_13.44%,#DDFBFE_108.79%)] flex flex-col items-center py-10 px-2">
@@ -137,80 +134,7 @@ export default function PricingPage() {
           <div className="flex sm:hidden mb-5">
             <Image src="/pricing/home.svg" alt="Home" width={20} height={20} />
 
-            {/* Mobile Menu */}
-            <Sheet open={open} onOpenChange={setOpen} modal={false}>
-              <SheetTrigger asChild className="bg-transparent hover:bg-transparent">
-                <Button variant="ghost" size="icon" className="text-[rgba(69,94,255,0.8)] bg-transparent ml-auto">
-                  <Menu className="h-6 w-6" />
-                  <span className="sr-only">Toggle menu</span>
-                </Button>
-              </SheetTrigger>
-              <SheetContent
-                side="left"
-                className="w-full max-w-[100vw] p-4 min-h-screen bg-[linear-gradient(172.97deg,#E8F5FA_-6.95%,#F5F7FF_91.64%)]"
-                onOpenAutoFocus={(e) => e.preventDefault()}
-                onCloseAutoFocus={(e) => e.preventDefault()}
-              >
-                <nav className="flex flex-col gap-4 px-1 mt-8">
-                  <div className="flex items-center gap-2 border-[rgba(121,153,253,0.05)] border p-1 px-1 ">
-                    <Image src="/main/nav/about.svg" alt="Bait AI Logo" width={15} height={15} />
-                    <Link
-                      href="#"
-                      className=" text-[rgba(10,13,26,0.7)] hover:opacity-70 font-medium py-2"
-                      onClick={() => setOpen(false)}
-                    >
-                      About us
-                    </Link>
-                  </div>
-
-                  <div className="flex items-center gap-2 border-[rgba(121,153,253,0.05)] border p-1 px-1 ">
-                    <Image src="/main/nav/briefcase.svg" alt="briefcase" width={15} height={15} />
-                    <Link
-                      href="#"
-                      className=" text-[rgba(10,13,26,0.7)] hover:opacity-70 font-medium py-2"
-                      onClick={() => setOpen(false)}
-                    >
-                      For Hiring Teams
-                    </Link>
-                  </div>
-
-                  <div className="flex items-center gap-2 border-[rgba(121,153,253,0.05)] border p-1 px-1 ">
-                    <Image src="/main/nav/people.svg" alt="people" width={15} height={15} />
-
-                    <Link
-                      href="#"
-                      className=" text-[rgba(10,13,26,0.7)] hover:opacity-70 font-medium py-2"
-                      onClick={() => setOpen(false)}
-                    >
-                      For Job Seekers
-                    </Link>
-                  </div>
-
-                  <div className="flex items-center gap-2 border-[rgba(121,153,253,0.05)] border p-1 px-1 ">
-                    <Image src="/main/nav/money.svg" alt="money" width={15} height={15} />
-
-                    <Link
-                      href="#"
-                      className=" text-[rgba(10,13,26,0.7)] hover:opacity-70 font-medium py-2"
-                      onClick={() => setOpen(false)}
-                    >
-                      Pricing
-                    </Link>
-                  </div>
-
-                  <Separator className="my-2" />
-
-                </nav>
-                <div className="flex flex-col gap-4 border-[rgba(121,153,253,0.05)] border  px-1 p-1">
-                  <Button variant="ghost" className="w-full bg-[linear-gradient(106.03deg,rgba(239,246,254,0.5)_0%,rgba(163,217,248,0.5)_238.47%)] text-[rgba(108,132,255,1)] hover:opacity-70 border font-medium border-[rgba(108,132,255,0.9)]">
-                    Sign in
-                  </Button>
-                  <Button className="w-full  bg-[linear-gradient(106.03deg,#677CFF_0%,#A3D9F8_238.47%)] hover:opacity-70 text-[rgba(238,246,251,1)] font-medium">
-                    Request a demo
-                  </Button>
-                </div>
-              </SheetContent>
-            </Sheet>
+            <MobileNavBar />
           </div>
           <div className="justify-between  flex w-full">
             <div className="max-w-6xl">
@@ -231,7 +155,7 @@ export default function PricingPage() {
               </TabsList>
               <TabsContent value="teams">
                 <div className="w-full  ">
-                  <div className=" flex sm:mx-20   lg:px-0 flex-col items-center md:flex-row flex-0 gap-4 shrink-0 justify-center md:items-start">
+                  <div className=" flex lg:mx-20   lg:px-0 flex-col items-center md:flex-row flex-0 gap-4 shrink-0 justify-center md:items-start">
                     {plans.map((plan, idx) => (
                       <Card
                         key={plan.name}
@@ -240,7 +164,7 @@ export default function PricingPage() {
                         )}
                       >
                         <CardHeader className="pb-2">
-                          <div className="flex items-center  justify-between">
+                          <div className="flex lg:flex-row md:flex-col flex-row items-center  justify-between">
                             <CardTitle className="sm:text-3xl text-xl font-semibold  text-[rgba(96,127,255,1)]">{plan.name}</CardTitle>
                             <span className="sm:text-lg text-base font-semibold text-[rgba(32,5,117,1)]">{plan.price}</span>
                           </div>
@@ -280,7 +204,7 @@ export default function PricingPage() {
               </TabsContent>
               <TabsContent value="consumer">
                 <div className="w-full flex items-center justify-center text-sm">
-                  <div className=" flex  sm:mx-20   lg:px-0  flex-col md:flex-row justify-center md:gap-20 gap-5  md:items-start ">
+                  <div className=" flex  lg:mx-20   lg:px-0  md:flex-col lg:flex-row flex-col justify-center md:gap-20 gap-5  lg:items-start ">
                     {consumerPlans.map((plan, idx) => (
                       <Card
                         key={plan.name}

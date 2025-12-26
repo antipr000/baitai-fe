@@ -1,4 +1,3 @@
-"use client"
 
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
@@ -8,10 +7,10 @@ import Link from "next/link";
 import { Separator } from "@/components/ui/separator";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Menu } from "lucide-react";
-import { useState } from "react";
+import { MobileNavBar } from "@/components/mobile-navbar";
+import { Footer } from "@/components/footer";
 
 export default function Home() {
-  const [open, setOpen] = useState(false);
   const hiringFeatures = [
     {
       bgColor: "bg-[rgba(253,203,80,0.3)]",
@@ -156,82 +155,13 @@ export default function Home() {
               Request a demo
             </Button>
           </div>
+  <div className="md:hidden  justify-around items-center">
+                  <MobileNavBar />
 
-          {/* Mobile Menu */}
-          <Sheet open={open} onOpenChange={setOpen}>
-            <SheetTrigger asChild className="md:hidden">
-              <Button variant="ghost" size="icon" className="text-[rgba(69,94,255,0.8)] ml-auto">
-                <Menu className="h-6 w-6" />
-                <span className="sr-only">Toggle menu</span>
-              </Button>
-            </SheetTrigger>
-            <SheetContent
-              side="left"
-              className="w-full p-10 min-h-screen bg-[linear-gradient(172.97deg,#E8F5FA_-6.95%,#F5F7FF_91.64%)]"
-              onOpenAutoFocus={(e) => e.preventDefault()}
-              onCloseAutoFocus={(e) => e.preventDefault()}
-            >
-              <nav className="flex flex-col gap-6 px-5 mt-8">
-                <div className="flex items-center gap-4 border-[rgba(121,153,253,0.05)] border p-1 px-2 ">
-                  <Image src="/main/nav/about.svg" alt="Bait AI Logo" width={15} height={15} />
-                  <Link
-                    href="#"
-                    className=" text-[rgba(10,13,26,0.7)] hover:opacity-70 font-medium py-2"
-                    onClick={() => setOpen(false)}
-                  >
-                    About us
-                  </Link>
-                </div>
+        </div>
 
-                <div className="flex items-center gap-4 border-[rgba(121,153,253,0.05)] border p-1 px-2 ">
-                  <Image src="/main/nav/briefcase.svg" alt="briefcase" width={15} height={15} />
-                  <Link
-                    href="#"
-                    className=" text-[rgba(10,13,26,0.7)] hover:opacity-70 font-medium py-2"
-                    onClick={() => setOpen(false)}
-                  >
-                    For Hiring Teams
-                  </Link>
-                </div>
-
-                <div className="flex items-center gap-4 border-[rgba(121,153,253,0.05)] border p-1 px-2 ">
-                  <Image src="/main/nav/people.svg" alt="people" width={15} height={15} />
-
-                  <Link
-                    href="#"
-                    className=" text-[rgba(10,13,26,0.7)] hover:opacity-70 font-medium py-2"
-                    onClick={() => setOpen(false)}
-                  >
-                    For Job Seekers
-                  </Link>
-                </div>
-
-                <div className="flex items-center gap-4 border-[rgba(121,153,253,0.05)] border p-1 px-2 ">
-                  <Image src="/main/nav/money.svg" alt="money" width={15} height={15} />
-
-                  <Link
-                    href="#"
-                    className=" text-[rgba(10,13,26,0.7)] hover:opacity-70 font-medium py-2"
-                    onClick={() => setOpen(false)}
-                  >
-                    Pricing
-                  </Link>
-                </div>
-
-                <Separator className="my-2" />
-               
-              </nav>
-               <div className="flex flex-col gap-4 border-[rgba(121,153,253,0.05)] border  px-2 p-1">
-                  <Button variant="ghost" className="w-full bg-[linear-gradient(106.03deg,rgba(239,246,254,0.5)_0%,rgba(163,217,248,0.5)_238.47%)] text-[rgba(108,132,255,1)] hover:opacity-70 border font-medium border-[rgba(108,132,255,0.9)]">
-                    Sign in
-                  </Button>
-                  <Button className="w-full  bg-[linear-gradient(106.03deg,#677CFF_0%,#A3D9F8_238.47%)] hover:opacity-70 text-[rgba(238,246,251,1)] font-medium">
-                    Request a demo
-                  </Button>
-                </div>
-            </SheetContent>
-          </Sheet>
         </nav>
+      
       </header>
 
       {/* Hero Section */}
@@ -527,28 +457,7 @@ export default function Home() {
           </div>
         </section>
 
-        <section className="w-full   px-0 lg:py-15 md:py-8 py-8">
-          <div className="w-full">
-            <div className="flex flex-col items-center text-center gap-6">
-              <div className="flex items-center space-x-2 mb-2">
-                <Image className="md:size-[34px] lg:[size-40px] size-[20px]" src="/main/logo.png" alt="Bait AI Logo" width={40} height={40} />
-                <span className="text-3xl font-bold bg-clip-text text-transparent bg-[linear-gradient(106.63deg,rgba(16,81,171,1)_0%,rgba(28,15,111,1)_144.25%)]">bAIt</span>
-              </div>
-              <div className="flex items-center space-x-6">
-                <Image className="md:size-6 lg:[size-30px] size-5" src="/main/linkedin.svg" alt=" Linkedin Logo" width={30} height={30} />
-                <Image className="md:size-6 lg:[size-30px] size-5" src="/main/gmail.svg" alt="Gmail Logo" width={30} height={30} />
-                <Image className="bg-black  md:size-5 lg:[size-26px] size-4 p-1" src="/main/x.svg" alt="X Logo" width={26} height={26} />
-                <Image className="md:size-6 lg:[size-30px] size-5" src="/main/instagram.svg" alt="Instagram Logo" width={30} height={30} />
-                <Image className="md:size-6 lg:[size-30px] size-5" src="/main/facebook.svg" alt="Facebook Logo" width={30} height={30} />
-              </div>
-
-              <div className="text-primary lg:text-base text-xs  md:text-sm">
-                Copyright © 2025 Bait AI | All Rights Reserved
-              </div>
-            </div>
-          </div>
-        </section>
-
+              <Footer />
       </section>
 
     </div>
