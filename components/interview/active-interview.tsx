@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useEffect, useRef, useState, useCallback } from 'react'
+import { flushSync } from 'react-dom'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
@@ -57,6 +58,10 @@ export default function ActiveInterview({ cameraStream, micStream, templateId }:
   const isPlayingRef = useRef(false)
   const aiStreamBufferRef = useRef<string>('') // Accumulates streaming AI text
   const currentAiMessageIdRef = useRef<string | null>(null)
+  const tokenQueueRef = useRef<string[]>([]) // Queue of tokens to display
+  const isProcessingTokensRef = useRef(false) // Whether we're currently processing the queue
+  const expectedAudioChunkRef = useRef<{ chunkIndex: number; text: string } | null>(null) // Track expected audio chunk
+  const sentenceCompleteRef = useRef<Map<number, string>>(new Map()) // Track completed sentences by chunk index
 
   // UI refs
   const videoRef = useRef<HTMLVideoElement | null>(null)
@@ -73,13 +78,14 @@ export default function ActiveInterview({ cameraStream, micStream, templateId }:
 
   // Define message handler types
   type WebSocketTextMessage = {
-    type: 'response.text' | 'response.start' | 'response.text.chunk' | 'response.text.complete' | 'response.wait' | 'response.completed' | 'error'
+    type: 'response.text' | 'response.start' | 'response.text.chunk' | 'response.text.complete' | 'response.wait' | 'response.completed' | 'response.audio.chunk' | 'response.sentence.complete' | 'error'
     text?: string
     message?: string
     status?: string
     user_transcript?: string  // User's transcribed speech
     next_action?: string
     error_type?: string  // Type of error (e.g., 'audio', 'session')
+    chunk_index?: number  // Audio chunk index
   }
 
   const playNextAudioRef = useRef<(() => Promise<void>) | null>(null)
@@ -94,6 +100,44 @@ export default function ActiveInterview({ cameraStream, micStream, templateId }:
   useEffect(() => {
     conversationStateRef.current = conversationState
   }, [conversationState])
+
+  // Process token queue one at a time for visible streaming
+  const processTokenQueue = useCallback(() => {
+    if (isProcessingTokensRef.current || tokenQueueRef.current.length === 0) {
+      return
+    }
+
+    isProcessingTokensRef.current = true
+    const aiId = currentAiMessageIdRef.current
+
+    if (!aiId) {
+      isProcessingTokensRef.current = false
+      tokenQueueRef.current = []
+      return
+    }
+
+    const processNext = () => {
+      if (tokenQueueRef.current.length === 0) {
+        isProcessingTokensRef.current = false
+        return
+      }
+
+      const token = tokenQueueRef.current.shift()!
+      aiStreamBufferRef.current += token
+
+      // Force synchronous update to prevent batching
+      flushSync(() => {
+        setMessages((prev) =>
+          prev.map((m) => (m.id === aiId ? { ...m, text: aiStreamBufferRef.current } : m)),
+        )
+      })
+
+      // Process next token after a small delay (20ms for smooth streaming)
+      setTimeout(processNext, 20)
+    }
+
+    processNext()
+  }, [])
 
   const stopSilenceDetection = useCallback(() => {
     if (silenceRAFRef.current !== null) {
@@ -227,14 +271,40 @@ export default function ActiveInterview({ cameraStream, micStream, templateId }:
       return
     }
 
+    // Check if this is a streaming audio chunk
+    if (expectedAudioChunkRef.current) {
+      const chunkInfo = expectedAudioChunkRef.current
+      const chunkIndex = chunkInfo.chunkIndex
+      
+      // Verify this matches a completed sentence for better sync
+      const sentenceText = sentenceCompleteRef.current.get(chunkIndex)
+      if (sentenceText && sentenceText === chunkInfo.text) {
+        console.log(
+          `[Audio] Received synchronized audio chunk ${chunkIndex} (${audioData.byteLength} bytes) for sentence: "${chunkInfo.text.substring(0, 30)}..."`
+        )
+        // Remove from tracking since we've received the audio
+        sentenceCompleteRef.current.delete(chunkIndex)
+      } else {
+        console.log(
+          `[Audio] Received audio chunk ${chunkIndex} (${audioData.byteLength} bytes) for: "${chunkInfo.text.substring(0, 30)}..."`
+        )
+      }
+      expectedAudioChunkRef.current = null
+    } else {
+      // Legacy complete audio (for backward compatibility)
+      console.log(`[Audio] Received complete audio (${audioData.byteLength} bytes)`)
+    }
+
     // Limit queue size to prevent memory issues (keep last 10 chunks)
     if (audioQueueRef.current.length >= 10) {
       console.warn('[Audio] Audio queue full, removing oldest chunk')
       audioQueueRef.current.shift()
     }
 
-    // Queue audio for playback
+    // Queue audio for playback - start playing immediately for better sync
     audioQueueRef.current.push(audioData)
+    
+    // Start playing immediately for synchronized playback
     if (playNextAudioRef.current) {
       playNextAudioRef.current()
     }
@@ -305,6 +375,10 @@ export default function ActiveInterview({ cameraStream, micStream, templateId }:
       const aiMessageId = `ai-${Date.now()}`
       currentAiMessageIdRef.current = aiMessageId
       aiStreamBufferRef.current = ''
+      tokenQueueRef.current = [] // Clear any previous tokens
+      isProcessingTokensRef.current = false
+      expectedAudioChunkRef.current = null // Clear expected audio chunk
+      sentenceCompleteRef.current.clear() // Clear sentence completion tracking
       const aiMessage: Message = {
         id: aiMessageId,
         speaker: 'ai',
@@ -313,26 +387,64 @@ export default function ActiveInterview({ cameraStream, micStream, templateId }:
       }
       setMessages((prev) => [...prev, aiMessage])
     } else if (message.type === 'response.text.chunk') {
-      // Append streamed chunk to current AI message
+      // Queue the token for gradual display
       const aiId = currentAiMessageIdRef.current
       if (!aiId) return
-      aiStreamBufferRef.current = `${aiStreamBufferRef.current}${aiStreamBufferRef.current ? ' ' : ''}${message.text || ''}`.trim()
-      setMessages((prev) =>
-        prev.map((m) => (m.id === aiId ? { ...m, text: aiStreamBufferRef.current } : m)),
-      )
+      
+      const token = message.text || ''
+      tokenQueueRef.current.push(token)
+      
+      // Start processing the queue if not already processing
+      processTokenQueue()
     } else if (message.type === 'response.text.complete') {
       // Finalize streaming AI message
       const aiId = currentAiMessageIdRef.current
-      if (aiId) {
-        const finalText = message.text || aiStreamBufferRef.current
-        setMessages((prev) =>
-          prev.map((m) => (m.id === aiId ? { ...m, text: finalText } : m)),
-        )
+      
+      // Wait for queue to finish processing, then finalize
+      const waitForQueueAndFinalize = () => {
+        if (tokenQueueRef.current.length > 0 || isProcessingTokensRef.current) {
+          setTimeout(waitForQueueAndFinalize, 50)
+          return
+        }
+        
+        if (aiId) {
+          const finalText = message.text || aiStreamBufferRef.current
+          setMessages((prev) =>
+            prev.map((m) => (m.id === aiId ? { ...m, text: finalText } : m)),
+          )
+        }
+        aiStreamBufferRef.current = ''
+        currentAiMessageIdRef.current = null
+        // This is *text* stream completion, not necessarily audio playback completion
+        if (!isPlayingRef.current) setIsAISpeaking(false)
       }
-      aiStreamBufferRef.current = ''
-      currentAiMessageIdRef.current = null
-      // This is *text* stream completion, not necessarily audio playback completion
-      if (!isPlayingRef.current) setIsAISpeaking(false)
+      
+      waitForQueueAndFinalize()
+    } else if (message.type === 'response.sentence.complete') {
+      // Sentence complete signal - text is ready, audio will follow
+      const chunkIndex = message.chunk_index ?? 0
+      const sentenceText = message.text || ''
+      sentenceCompleteRef.current.set(chunkIndex, sentenceText)
+      console.log(`[WebSocket] Sentence ${chunkIndex} complete: "${sentenceText.substring(0, 50)}..." - expecting audio chunk`)
+      
+      // Ensure we're in speaking state when sentence completes
+      if (chunkIndex === 0 && !isAISpeaking) {
+        setIsAISpeaking(true)
+        setConversationState('speaking')
+        stopSilenceDetection()
+      }
+    } else if (message.type === 'response.audio.chunk') {
+      // Audio chunk metadata received, expect binary audio data next
+      const chunkIndex = message.chunk_index ?? 0
+      const chunkText = message.text || ''
+      expectedAudioChunkRef.current = { chunkIndex, text: chunkText }
+      console.log(`[WebSocket] Audio chunk ${chunkIndex} metadata received, expecting binary data for: "${chunkText.substring(0, 30)}..."`)
+      
+      // Check if this sentence was already marked as complete
+      const sentenceText = sentenceCompleteRef.current.get(chunkIndex)
+      if (sentenceText && sentenceText === chunkText) {
+        console.log(`[WebSocket] Audio chunk ${chunkIndex} matches completed sentence - ready for synchronized playback`)
+      }
     } else if (message.type === 'response.wait') {
       console.log('[WebSocket] Response wait - processing...')
       setIsProcessing(true)
@@ -1017,6 +1129,9 @@ export default function ActiveInterview({ cameraStream, micStream, templateId }:
       if (silenceRAFRef.current !== null) {
         cancelAnimationFrame(silenceRAFRef.current)
       }
+      // Clear token queue
+      tokenQueueRef.current = []
+      isProcessingTokensRef.current = false
     }
   }, [closeWebSocket, stopRecording, cameraStream, micStream])
 
