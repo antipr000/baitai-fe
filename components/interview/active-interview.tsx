@@ -90,6 +90,7 @@ export default function ActiveInterview({ cameraStream, micStream, templateId }:
 
   const playNextAudioRef = useRef<(() => Promise<void>) | null>(null)
   const startRecordingRef = useRef<((enableSilenceDetection?: boolean) => Promise<void>) | null>(null)
+  const stopRecordingRef = useRef<(() => void) | null>(null)
   const isConnectedRef = useRef(false)
   const micStreamRef = useRef<MediaStream | null>(null)
   const isMicOnRef = useRef(true)
@@ -463,9 +464,41 @@ export default function ActiveInterview({ cameraStream, micStream, templateId }:
         console.log('[WebSocket] Added user message during wait:', message.user_transcript)
       }
     } else if (message.type === 'response.completed') {
-      console.log('[WebSocket] Response completed - resuming listening')
+      console.log('[WebSocket] Response completed - status:', message.status, 'next_action:', message.next_action)
       setIsProcessing(false)
-      // No-op for state: we already transition speaking -> listening when playback ends.
+      
+      // Check if interview has completed
+      const isCompleted = message.status === 'completed' || message.next_action === 'END_INTERVIEW'
+      
+      if (isCompleted) {
+        console.log('[WebSocket] Interview completed - ending session')
+        
+        // Stop recording
+        if (stopRecordingRef.current) {
+          stopRecordingRef.current()
+        }
+        
+        // Close WebSocket
+        if (closeWebSocketRef.current) {
+          closeWebSocketRef.current()
+        }
+        
+        // Add completion message to conversation
+        const completionMessage: Message = {
+          id: `completion-${Date.now()}`,
+          speaker: 'ai',
+          text: 'Thank you, the interview is now concluded.',
+          timestamp: new Date(),
+        }
+        setMessages((prev) => [...prev, completionMessage])
+        
+        // Redirect to dashboard after a short delay to show the completion message
+        setTimeout(() => {
+          router.push('/candidate/dashboard')
+        }, 2000)
+      } else {
+        // No-op for state: we already transition speaking -> listening when playback ends.
+      }
     } else if (message.type === 'error') {
       console.error('[WebSocket] Error message received:', message.message)
       setIsProcessing(false)
@@ -996,6 +1029,11 @@ export default function ActiveInterview({ cameraStream, micStream, templateId }:
     stopSilenceDetection()
     console.log('[Recording] AudioContext closed')
   }, [stopSilenceDetection])
+
+  // Store stopRecording in ref
+  useEffect(() => {
+    stopRecordingRef.current = stopRecording
+  }, [stopRecording])
 
   const handleEndInterview = async () => {
     if (!showEndConfirm) {
