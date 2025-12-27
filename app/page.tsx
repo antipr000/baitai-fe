@@ -1,4 +1,4 @@
-
+"use client";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -9,6 +9,8 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Menu } from "lucide-react";
 import { MobileNavBar } from "@/components/mobile-navbar";
 import { Footer } from "@/components/footer";
+import { motion } from "motion/react";
+import { Progress } from "@/components/ui/progress";
 
 export default function Home() {
   const hiringFeatures = [
@@ -49,7 +51,9 @@ export default function Home() {
       description: "Our AI coach helps you get comfortable with conversational, unlimited mock interviews.",
       image: "/main/mock_interview.png",
       imageAlt: "Mock Interview",
-      hasImageContainer: true
+      hasImageContainer: true,
+      bgColor: "bg-[rgba(107,124,255,1)]",
+      borderColor: "border-[rgba(107,124,255,1)]"
     },
     {
       number: "2",
@@ -57,7 +61,9 @@ export default function Home() {
       description: "Receive your interview performance score, strengths, weaknesses, and improvement tips instantly.",
       image: "/main/feedback.png",
       imageAlt: "Feedback",
-      hasImageContainer: false
+      hasImageContainer: false,
+      bgColor: "bg-[rgba(107,124,255,1)]",
+      borderColor: "border-[rgba(107,124,255,1)]"
     },
     {
       number: "3",
@@ -65,7 +71,9 @@ export default function Home() {
       description: "When you're ready, start your official interview — just like a real hiring round.",
       image: "/main/interview2.png",
       imageAlt: "Interview",
-      hasImageContainer: false
+      hasImageContainer: false,
+      bgColor: "bg-[rgba(107,124,255,1)]",
+      borderColor: "border-[rgba(107,124,255,1)]"
     }
   ];
 
@@ -146,6 +154,7 @@ export default function Home() {
             <Link href="#" className="text-[rgba(69,94,255,0.8)] hover:opacity-70 font-medium">About us</Link>
             <Link href="#" className="text-[rgba(69,94,255,0.8)] hover:opacity-70 font-medium">For Hiring Teams</Link>
             <Link href="#" className="text-[rgba(69,94,255,0.8)] hover:opacity-70 font-medium">For Job Seekers</Link>
+            <Link href="#" className="text-[rgba(69,94,255,0.8)] hover:opacity-70 font-medium">For Job Seekers</Link>
             <Link href="#" className="text-[rgba(69,94,255,0.8)] hover:opacity-70 font-medium">Pricing</Link >
           </div>
 
@@ -155,27 +164,51 @@ export default function Home() {
               Request a demo
             </Button>
           </div>
-  <div className="md:hidden  justify-around items-center">
-                  <MobileNavBar />
+          <div className="md:hidden  justify-around items-center">
+            <MobileNavBar />
 
-        </div>
+          </div>
 
         </nav>
-      
+
       </header>
 
       {/* Hero Section */}
-      <main className="w-full px-6 py-6 md:pt-28 pt-20 bg-[linear-gradient(95.57deg,#E7F5FF_7.28%,#F5F7FF_100.24%)]">
-        <div className="lg:max-w-7xl md:max-w-4xl w-full mx-auto text-center">
+      <main className="relative w-full px-6 py-6 md:pt-28 pt-20 bg-[linear-gradient(95.57deg,#E7F5FF_7.28%,#F5F7FF_100.24%)]">
+
+
+        {/* Content */}
+        <div className="relative z-10 lg:max-w-7xl md:max-w-4xl w-full mx-auto text-center">
+        {/* Grid Overlay */}
+        <div
+          className="
+      pointer-events-none
+      absolute inset-0
+      bg-[linear-gradient(to_right,rgba(0,0,0,0.05)_1px,transparent_1px),linear-gradient(to_bottom,rgba(0,0,0,0.05)_1px,transparent_1px)]
+      bg-[length:80px_80px]
+      mask-[radial-gradient(circle_at_center,black_60%,transparent_100%)]
+      "
+        />
+
           {/* AI Badge */}
           <Badge className="bg-[linear-gradient(91deg,rgba(15,2,53,1)_-107.69%,rgba(43,5,155,1)_80.08%)] text-white px-6 py-2 mb-8 mt-5 text-sm">
-            <Image src="/main/lightning.svg" alt="AI Badge" width={14} height={14} className="inline-block mr-2" />
-            <span className="text-[rgba(213,220,255,0.9)] ">AI-powered interview</span>
+            <Image
+              src="/main/lightning.svg"
+              alt="AI Badge"
+              width={14}
+              height={14}
+              className="inline-block mr-2"
+            />
+            <span className="text-[rgba(213,220,255,0.9)]">
+              AI-powered interview
+            </span>
           </Badge>
 
           {/* Main Heading */}
-          <h1 className="lg:text-4xl md: md:text-3xl text-2xl font-semibold lg:mb-6 md:mb-4 ">
-            <span className="text-[rgba(58,63,187,1)]">Train Talent,Transform Hiring</span>
+          <h1 className="lg:text-4xl md:text-3xl text-2xl font-semibold lg:mb-6 md:mb-4 -tracking-tightest">
+            <span className="text-[rgba(58,63,187,1)]">
+              Train Talent, Transform Hiring
+            </span>
           </h1>
 
           {/* Subtitle */}
@@ -185,30 +218,102 @@ export default function Home() {
 
           {/* Feature Cards */}
           <div className="grid grid-cols-2 gap-12 justify-start lg:max-w-6xl md:max-w-4xl mx-auto">
+
             {/* Interview Section */}
             <div className="text-center">
-              <Image src="/main/interview.png" alt="Interview Illustration" width={300} height={200} className="mx-auto mb-6 lg:w-[300px] md:w-[200px] w-[200px]" />
+              <Image
+                src="/main/interview.png"
+                alt="Interview Illustration"
+                width={300}
+                height={200}
+                className="mx-auto mb-6 lg:w-[300px] md:w-[200px] w-[200px]"
+              />
+
               <h2 className="lg:text-3xl md:text-2xl text-base whitespace-nowrap font-semibold text-gray-800 mb-4">
-                <span className="text-[rgba(69,94,255,1)] ">Interview <span className=" bg-[linear-gradient(64.98deg,#173D7E_26.21%,#C3E1FC_99.03%)] bg-clip-text">effortlessly</span></span>
+                <span className="text-[rgb(69,94,255)] flex items-center justify-center gap-1">
+                  <span>Interview</span>
+
+                  <motion.div className="overflow-hidden lg:h-[37px] md:h-[31px] h-[23px]">
+                    <motion.div
+                      animate={{ y: ["0%", "-100%", "-200%", "0%"] }}
+                      transition={{
+                        duration: 3,
+                        repeat: Infinity,
+                        ease: "easeInOut",
+                      }}
+                      className="flex flex-col"
+                    >
+                      <span className="text-transparent bg-[linear-gradient(55.21deg,#173D7E_34.16%,#C3E1FC_93.59%)] bg-clip-text">
+                        anytime
+                      </span>
+                      <span className="text-transparent bg-[linear-gradient(55.21deg,#173D7E_34.16%,#C3E1FC_93.59%)] bg-clip-text">
+                        anywhere
+                      </span>
+                      <span className="text-transparent bg-[linear-gradient(55.21deg,#173D7E_34.16%,#C3E1FC_93.59%)] bg-clip-text">
+                        effortlessly
+                      </span>
+                    </motion.div>
+                  </motion.div>
+                </span>
               </h2>
-              <Button size="lg" className="bg-[rgba(58,63,187,1)] text-[rgba(233,244,255,1)] font-medium md:px-8 md:py-3 px-5 py-2 rounded-lg lg:text-lg md:text-base text-sm hover:shadow-lg">
+
+              <Button
+                size="lg"
+                className="bg-[rgba(58,63,187,1)] text-[rgba(233,244,255,1)] font-medium md:px-8 md:py-3 px-5 py-2 rounded-lg lg:text-lg md:text-base text-sm hover:shadow-lg"
+              >
                 Take interviews
               </Button>
             </div>
 
             {/* Hire Section */}
             <div className="text-center">
-              <Image src="/main/hire.png" alt="Hire Illustration" width={300} height={200} className="mx-auto mb-6 lg:w-[300px] md:w-[200px] w-[200px]" />
+              <Image
+                src="/main/hire.png"
+                alt="Hire Illustration"
+                width={300}
+                height={200}
+                className="mx-auto mb-6 lg:w-[300px] md:w-[200px] w-[200px]"
+              />
+
               <h2 className="lg:text-3xl md:text-2xl text-base whitespace-nowrap font-semibold text-gray-800 mb-4">
-                <span className="text-[rgba(69,94,255,1)] ">Hire</span> <span className=" bg-[linear-gradient(64.98deg,#173D7E_26.21%,#C3E1FC_99.03%)] bg-clip-text">Smarter</span>
+                <span className="text-[rgba(69,94,255,1)] flex items-center justify-center gap-1">
+                  <span>Hire</span>
+                  <motion.div className="overflow-hidden lg:h-[37px] md:h-[31px] h-[23px]">
+                    <motion.div
+                      animate={{ y: ["0%", "-100%", "-200%", "0%"] }}
+                      transition={{
+                        duration: 3,
+                        repeat: Infinity,
+                        ease: "easeInOut",
+                      }}
+                      className="flex flex-col"
+                    >
+                      <span className="text-transparent bg-[linear-gradient(55.21deg,#173D7E_34.16%,#C3E1FC_93.59%)] bg-clip-text">
+                        faster
+                      </span>
+                      <span className="text-transparent bg-[linear-gradient(55.21deg,#173D7E_34.16%,#C3E1FC_93.59%)] bg-clip-text">
+                        fairer
+                      </span>
+                      <span className="text-transparent bg-[linear-gradient(55.21deg,#173D7E_34.16%,#C3E1FC_93.59%)] bg-clip-text">
+                        smarter
+                      </span>
+                    </motion.div>
+                  </motion.div>
+                </span>
               </h2>
-              <Button size="lg" className="bg-[rgba(58,63,187,1)] text-[rgba(233,244,255,1)] font-medium md:px-8 md:py-3 px-5 py-2 rounded-lg lg:text-lg md:text-base text-sm hover:shadow-lg">
+
+              <Button
+                size="lg"
+                className="bg-[rgba(58,63,187,1)] text-[rgba(233,244,255,1)] font-medium md:px-8 md:py-3 px-5 py-2 rounded-lg lg:text-lg md:text-base text-sm hover:shadow-lg"
+              >
                 Schedule a demo
               </Button>
             </div>
+
           </div>
         </div>
       </main>
+
 
       {/* Bottom Section */}
       <section className="mt-2 bg-[linear-gradient(68.04deg,rgba(58,63,187,0.9)_-8.15%,rgba(107,124,255,0.9)_66.87%)] text-white lg:py-20 md:py-10 lg:px-6 md:px-20  px-10 py-8">
@@ -272,33 +377,86 @@ export default function Home() {
             </p>
           </div>
           {/* Steps Container */}
-          <div className="flex flex-col md:flex-row w-6/10 md:w-full mx-auto justify-between items-start gap-8 mb-12">
-            {hiringTeamSteps.map((step, index) => (
-              <div key={index} className="flex-1">
-                <Card className={`${step.bgColor} p-0  border ${step.borderColor} rounded-3xl lg:mb-3 md:mb-1`}>
-                  <CardContent className="flex items-center justify-center lg:p-4 md:p-3 p-2">
-                    <div className="flex items-center justify-center gap-4">
-                      <div className="md:w-12 md:h-12 h-6 w-6 rounded-full bg-[rgba(224,245,255,1)] border border-[rgba(94, 114, 255, 0.5)] border-2 border-[rgba(108,132,255,1)] flex items-center justify-center">
-                        <span className="lg:text-lg md:text-base text-sm font-bold text-[rgba(58,63,187,1)] ">{step.number}</span>
+          <div className="max-w-6xl mx-auto mb-12 px-4">
+            <div className="flex flex-col md:flex-row lg:items-start items-center justify-between gap-12">
+
+              {hiringTeamSteps.map((step, index) => (
+                <div
+                  key={index}
+                  className="flex-1 flex flex-col items-center relative"
+                >
+                  {/* Header + Connector Wrapper */}
+                  <div className="relative flex items-center justify-center w-full">
+
+                    {/* Step Card */}
+                    <Card
+                      className={`${step.bgColor} ${step.borderColor} border rounded-3xl 
+            w-[280px] h-[72px] `}
+                    >
+                      <CardContent className="flex items-center justify-center h-full px-6">
+                        <div className="flex items-center gap-4">
+                          <div className="w-10 h-10 rounded-full bg-[rgba(224,245,255,1)] border-2 border-[rgba(108,132,255,1)] flex items-center justify-center">
+                            <span className="text-sm font-bold text-[rgba(58,63,187,1)]">
+                              {step.number}
+                            </span>
+                          </div>
+                          <h3 className="text-sm md:text-base font-semibold text-[rgba(224,245,255,1)] whitespace-nowrap">
+                            {step.title}
+                          </h3>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    {/* Connector Line */}
+                    {index < hiringTeamSteps.length - 1 && (
+                      <div className="hidden xl:block absolute right-[-57px] top-1/2 -translate-y-1/2 xl:w-[80px] w-[65px]">
+                        <div className="h-2 rounded-full bg-gray-200 overflow-hidden">
+                          <motion.div
+                            className="h-full bg-[linear-gradient(90deg,#00D7FF,#3A3FBB)] origin-left"
+                            initial={{ scaleX: 0.2 }}
+                            animate={{ scaleX: [0.2, 0.5, 1, 0.2] }}
+                            transition={{
+                              duration: 2.5,
+                              repeat: Infinity,
+                              ease: "easeInOut",
+                            }}
+                          />
+                        </div>
                       </div>
-                      <h3 className="lg:text-lg md:text-base text-sm  font-semibold text-[rgba(224,245,255,1)]">{step.title}</h3>
-                    </div>
-                  </CardContent>
-                </Card>
-                <p className="text-center text-[rgba(6,15,100,0.9)] md:text-sm text-xs lg:text-base  p-2">
-                  {step.description}
-                </p>
-                {step.hasImageContainer ? (
-                  <div className="m-4 rounded-2xl md:py-12 lg:py-17 py-10 lg:w-[350px]      shadow-md px-5 bg-[rgba(249,255,255,1)]">
-                    <Image className="rounded-lg" src={step.image} alt={step.imageAlt} width={330} height={110} />
+                    )}
                   </div>
-                ) : (
-                  <Image className="rounded-2xl m-4" src={step.image} alt={step.imageAlt} width={350} height={230} />
-                )}
-              </div>
-            ))}
+
+
+                  {/* Description */}
+                  <p className="text-center text-[rgba(6,15,100,0.5)] text-sm font-semibold mt-4">
+                    {step.description}
+                  </p>
+
+                  {/* Image */}
+                  <div className="mt-10 w-full flex justify-center">
+                    <div className="rounded-2xl shadow-md bg-white p-4">
+                      {step.hasImageContainer ? (
+                        <div className=" rounded-2xl md:py-12 lg:py-12 py-10 lg:w-[300px]      shadow-md px-5 bg-[rgba(249,255,255,1)]">
+                          <Image className="rounded-lg" src={step.image} alt={step.imageAlt} width={330} height={150} />
+                        </div>
+                      ) : (
+                        <Image
+                          src={step.image}
+                          alt={step.imageAlt}
+                          width={350}
+                          height={230}
+                          className="rounded-xl object-contain"
+                        />)}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
+
         </div>
+
+        {/*  */}
 
 
         {/* CTA Section */}
@@ -352,7 +510,7 @@ export default function Home() {
         <section className="py-10 px-6 bg-[rgba(243,255,190,0.15)]">
 
 
-          <div className="max-w-7xl mx-auto  min-h-36">
+          <div className="max-w-7xl mx-auto   min-h-36">
             <div className="flex flex-col-reverse  md:items-center  md:flex-row  gap-4">
               {/* Left Content - Feature Cards */}
               <div className="flex-1 flex flex-col gap-6">
@@ -362,8 +520,8 @@ export default function Home() {
                       <div className="flex items-start p-2 space-x-4">
                         <Image src={feature.icon} alt={feature.title} className="rounded-full" width={40} height={40} />
                         <div>
-                          <h3 className="lg:text-lg md:text-base text-sm  font-semibold text-[rgba(116,130,248,1)]  mb-2">{feature.title}</h3>
-                          <p className="lg:text-base md:text-sm text-xs text-[rgba(116,130,248,0.7)] font-semibold ">{feature.description}</p>
+                          <h3 className="lg:text-lg md:text-base text-sm font-semibold text-[rgba(58,63,187,1)]  mb-2">{feature.title}</h3>
+                          <p className="lg:text-base md:text-sm text-xs text-[rgba(58,63,187,0.7)] font-medium ">{feature.description}</p>
                         </div>
                       </div>
                     </CardContent>
@@ -372,7 +530,7 @@ export default function Home() {
               </div>
               <div className="space-y-4 my-4">
                 <div className="max-w-xl md:max-w-2xl w-full mt-2 mx-0 md:ml-0 text-left md:text-right">
-                  <p className="text-base font-semibold leading-tight text-[rgba(116,130,248,0.85)] lg:text-4xl md:text-2xl">
+                  <p className="text-base font-semibold leading-tight text-[rgba(116,130,248,0.85)] lg:text-[32px] md:text-2xl">
                     <span className="block">Prepare for</span>
                     <span className="block">any interview—</span>
                     <span className="block">AI-powered or traditional</span>
@@ -390,43 +548,87 @@ export default function Home() {
 
         {/* How it Works */}
         <section className="  bg-[rgba(243,255,190,0.15)]]">
+          <div className="lg:max-w-6xl md:max-w-3xl mx-auto px-3 p-2">
 
+            <div className="lg:text-4xl md:text-2xl text-base md:mb-4 mb-0 text-center text-[rgba(58,63,187,1)]">How it works</div>
 
-          <div className="lg:text-4xl md:text-2xl text-base md:mb-4 mb-0 text-center text-[rgba(58,63,187,1)]">How it works</div>
+            <div className="md:w-xl w-[200px] mx-auto p-4 mb-2">
+              <Separator className="bg-[rgba(201,231,81,0.7)]" />
+            </div>
 
-          <div className="md:w-xl w-[200px] mx-auto p-4 mb-2">
-            <Separator className="bg-[rgba(201,231,81,0.7)]" />
-          </div>
+            <div className="max-w-6xl mx-auto mb-12 px-4">
+              <div className="flex flex-col md:flex-row lg:items-start items-center justify-between gap-12">
+                {jobSeekerSteps.map((step, index) => (
+                  <div
+                    key={index}
+                    className="flex-1 flex flex-col items-center relative"
+                  >
+                    {/* Header + Connector Wrapper */}
+                    <div className="relative flex items-center justify-center w-full">
 
+                      {/* Step Card */}
+                      <Card
+                        className={`${step.bgColor} ${step.borderColor} border rounded-3xl 
+            w-[280px] h-[72px] `}
+                      >
+                        <CardContent className="flex items-center justify-center h-full px-6">
+                          <div className="flex items-center gap-4">
+                            <div className="w-10 h-10 rounded-full bg-[rgba(224,245,255,1)] border-2 border-[rgba(108,132,255,1)] flex items-center justify-center">
+                              <span className="text-sm font-bold text-[rgba(107,124,255,1)]">
+                                {step.number}
+                              </span>
+                            </div>
+                            <h3 className="text-sm md:text-base font-semibold text-[rgba(224,245,255,1)] whitespace-nowrap">
+                              {step.title}
+                            </h3>
+                          </div>
+                        </CardContent>
+                      </Card>
 
-
-          <div className="md:max-w-6xl   mx-auto">
-            {/* Steps Container */}
-            <div className="flex  flex-col md:flex-row md:w-full w-6/10 mx-auto justify-between items-start gap-8 mb-12 lg:max-w-6xl md:max-w-3xl">
-              {jobSeekerSteps.map((step, index) => (
-                <div key={index} className="flex-1">
-                  <Card className="bg-[rgba(107,124,255,1)] p-0  border border-[rgba(107,124,255,1)] rounded-3xl mb-6">
-                    <CardContent className="flex items-center justify-center lg:p-4 md:p-3 p-2">
-                      <div className="flex items-center justify-center gap-4">
-                        <div className="md:w-12 md:h-12 h-6 w-6 rounded-full bg-[rgba(224,245,255,1)]  border-2 border-[rgba(107,124,255,1)] flex items-center justify-center">
-                          <span className="lg:text-lg md:text-base text-sm font-medium text-[rgba(107,124,255,1)]">{step.number}</span>
+                      {/* Connector Line */}
+                      {index < jobSeekerSteps.length - 1 && (
+                        <div className="hidden xl:block absolute right-[-57px] top-1/2 -translate-y-1/2 xl:w-[80px] w-[65px]">
+                          <div className="h-2 rounded-full bg-gray-200 overflow-hidden">
+                            <motion.div
+                              className="h-full bg-[linear-gradient(90deg,#00D7FF,#3A3FBB)] origin-left"
+                              initial={{ scaleX: 0.2 }}
+                              animate={{ scaleX: [0.2, 0.5, 1, 0.2] }}
+                              transition={{
+                                duration: 2.5,
+                                repeat: Infinity,
+                                ease: "easeInOut",
+                              }}
+                            />
+                          </div>
                         </div>
-                        <h3 className="lg:text-lg md:text-base text-sm font-semibold text-[rgba(245,248,245,1)]">{step.title}</h3>
-                      </div>
-                    </CardContent>
-                  </Card>
-                  <p className="text-center text-[rgba(6,15,100,0.5)] text-sm font-semibold">
-                    {step.description}
-                  </p>
-                  {step.hasImageContainer ? (
-                    <div className="flex items-center justify-center my-4 rounded-4xl py-6 h-[220px] shadow-md px-2 bg-[rgba(249,255,255,1)]">
-                      <Image className="rounded-lg" src={step.image} alt={step.imageAlt} width={300} height={450} />
+                      )}
                     </div>
-                  ) : (
-                    <Image className="rounded-4xl m-4" src={step.image} alt={step.imageAlt} width={350} height={230} />
-                  )}
-                </div>
-              ))}
+
+                    {/* Description */}
+                    <p className="text-center text-[rgba(6,15,100,0.5)] text-sm font-semibold mt-4">
+                      {step.description}
+                    </p>
+
+                    {/* Image */}
+                    <div className="mt-10 w-full flex justify-center">
+                      <div className="rounded-2xl shadow-md bg-white p-4">
+                        {step.hasImageContainer ? (
+                          <div className=" rounded-2xl md:py-12 lg:py-12 py-10 lg:w-[300px]      shadow-md px-5 bg-[rgba(249,255,255,1)]">
+                            <Image className="rounded-lg" src={step.image} alt={step.imageAlt} width={330} height={150} />
+                          </div>
+                        ) : (
+                          <Image
+                            src={step.image}
+                            alt={step.imageAlt}
+                            width={350}
+                            height={230}
+                            className="rounded-xl object-contain"
+                          />)}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </section>
@@ -457,7 +659,7 @@ export default function Home() {
           </div>
         </section>
 
-              <Footer />
+        <Footer />
       </section>
 
     </div>

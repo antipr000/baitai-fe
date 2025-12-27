@@ -204,7 +204,7 @@ export default function PricingPage() {
               </TabsContent>
               <TabsContent value="consumer">
                 <div className="w-full flex items-center justify-center text-sm">
-                  <div className=" flex  lg:mx-20   lg:px-0  md:flex-col lg:flex-row flex-col justify-center md:gap-20 gap-5  lg:items-start ">
+                  <div className=" flex  lg:mx-25   lg:px-0  md:flex-col lg:flex-row flex-col justify-center md:gap-20 gap-5  lg:items-start ">
                     {consumerPlans.map((plan, idx) => (
                       <Card
                         key={plan.name}
