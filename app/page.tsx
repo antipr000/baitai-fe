@@ -241,7 +241,7 @@ export default function Home() {
                         repeat: Infinity,
                         ease: "easeInOut",
                       }}
-                      className="flex flex-col"
+                      className="flex flex-col lg:h-[37px] md:h-[31px] h-[23px]"
                     >
                       <span className="text-transparent bg-[linear-gradient(55.21deg,#173D7E_34.16%,#C3E1FC_93.59%)] bg-clip-text">
                         anytime
@@ -286,7 +286,7 @@ export default function Home() {
                         repeat: Infinity,
                         ease: "easeInOut",
                       }}
-                      className="flex flex-col"
+                      className="flex flex-col lg:h-[37px] md:h-[31px] h-[23px]"
                     >
                       <span className="text-transparent bg-[linear-gradient(55.21deg,#173D7E_34.16%,#C3E1FC_93.59%)] bg-clip-text">
                         faster
