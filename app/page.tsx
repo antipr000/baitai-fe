@@ -11,29 +11,10 @@ import { MobileNavBar } from "@/components/mobile-navbar";
 import { Footer } from "@/components/footer";
 import { motion } from "motion/react";
 import { Progress } from "@/components/ui/progress";
-import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { useState } from "react";
-import { toast } from "sonner";
-import api from "@/lib/api/client";
+import { WaitlistForm } from "@/components/waitlist-form";
 
 export default function Home() {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [isOpen, setIsOpen] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      await api.post('/api/v1/waitlist/', { name, email });
-      toast.success("Successfully joined the waitlist!");
-      setName("");
-      setEmail("");
-      setIsOpen(false);
-    } catch (error) {
-      toast.error("Failed to join waitlist.");
-    }
-  };
 
   const hiringFeatures = [
     {
@@ -181,14 +162,13 @@ export default function Home() {
           </div>
 
           <div className="hidden md:flex items-center space-x-4">
-            <Button variant="ghost" className="lg:text-base rounded-full text-sm bg-[linear-gradient(106.03deg,rgba(239,246,254,0.5)_0%,rgba(163,217,248,0.5)_238.47%)]  text-[rgba(108,132,255,1)] hover:opacity-70 border font-medium  border-[rgba(108,132,255,0.9)]">Sign in</Button>
+            <WaitlistForm><Button variant="ghost" className="lg:text-base rounded-full text-sm hover:bg-[linear-gradient(106.03deg,rgba(239,246,254,0.5)_0%,rgba(163,217,248,0.5)_238.47%)]  hover:opacity-80 bg-[linear-gradient(106.03deg,rgba(239,246,254,0.5)_0%,rgba(163,217,248,0.5)_238.47%)]  text-[rgba(108,132,255,1)]  border font-medium  border-[rgba(108,132,255,0.9)]">Sign in</Button></WaitlistForm>
             <Button className="flex rounded-full items-center overflow-hidden p-5 lg:text-base text-sm  bg-[linear-gradient(106.03deg,#677CFF_0%,#A3D9F8_238.47%)] hover:opacity-70 text-[rgba(238,246,251,1)] font-medium ">
               Request a demo
             </Button>
           </div>
           <div className="md:hidden  justify-around items-center">
             <MobileNavBar />
-
           </div>
 
         </nav>
@@ -278,42 +258,14 @@ export default function Home() {
                   </motion.div>
                 </span>
               </h2>
-              <Dialog open={isOpen} onOpenChange={setIsOpen}>
-                <DialogTrigger asChild>
-                  <Button
-                    size="lg"
-                    className="bg-[rgba(58,63,187,1)] hover:bg-[rgba(58,63,187,1)] hover:opacity-80 text-[rgba(233,244,255,1)] font-medium md:px-8 md:py-3 px-5 py-2 rounded-lg lg:text-lg md:text-base text-sm hover:shadow-lg"
-                  >
-                    Take interviews
-                  </Button>
-                </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader className="items-center">
-                    <DialogTitle className="text-2xl font-bold text-center mb-2 text-[rgba(58,63,187,1)]">Join Early Access</DialogTitle>
-                    <DialogDescription className="text-center font-medium mb-4">
-                      Join the waitlist and get <span className="text-blue-600 font-semibold">5 extra credits—up to 2 interviews</span>,<br />
-                      available only to our earliest users
-                    </DialogDescription>
-                  </DialogHeader>
-                  <form className="flex flex-col gap-4 mt-2 w-full max-w-md mx-auto" onSubmit={handleSubmit}>
-                    <div className="flex flex-col gap-1 text-left">
-                      <label htmlFor="waitlist-name" className="font-medium flex items-center gap-2">
-                      <Image src="/main/waitlist/user.svg" alt="User Icon" width={20} height={20} />
-                        <span className="-translate-y-px text-[rgba(10,13,26,0.9)]">Full Name</span>
-                      </label>
-                      <Input className="border md:placeholder:text-base placeholder:text-sm    border-[rgba(107,124,255,0.2)]" id="waitlist-name" name="name" type="text" placeholder="John Smith" required value={name} onChange={(e) => setName(e.target.value)} />
-                    </div>
-                    <div className="flex flex-col gap-1 text-left">
-                      <label htmlFor="waitlist-email" className="font-medium flex items-center gap-2">
-                      <Image src="/main/waitlist/mail.svg" alt="Mail Icon" width={20} height={20} />
-                        <span className="-translate-y-px text-[rgba(10,13,26,0.9)]">Email</span>
-                      </label>
-                      <Input className="border md:placeholder:text-base placeholder:text-sm  border-[rgba(107,124,255,0.2)]"  id="waitlist-email"  name="email" type="email" placeholder="you@gmail.com"  value={email} onChange={(e) => setEmail(e.target.value)} />
-                    </div>
-                    <Button type="submit" className="mt-4 w-full bg-[rgba(58,63,187,1)] hover:bg-[rgba(69,94,255,0.9)] text-white font-semibold rounded-md py-3 text-lg transition-colors">Join Waitlist</Button>
-                  </form>
-                </DialogContent>
-              </Dialog>
+              <WaitlistForm>
+                <Button
+                  size="lg"
+                  className="bg-[rgba(58,63,187,1)] hover:bg-[rgba(58,63,187,1)] hover:opacity-80 text-[rgba(233,244,255,1)] font-medium md:px-8 md:py-3 px-5 py-2 rounded-lg lg:text-lg md:text-base text-sm hover:shadow-lg"
+                >
+                  Take interviews
+                </Button>
+              </WaitlistForm>
 
             </div>
 
@@ -700,9 +652,11 @@ export default function Home() {
 
               </div>
               <div className="flex flex-row gap-4 mt-2">
-                <Button className="rounded-xl px-8 lg:py-6 md:py-4   lg:text-2xl  md:text-xl font-semibold bg-[rgba(83,118,219,1)] hover:bg-[rgba(83,118,219,1)] hover:opacity-90 border-[rgba(99,112,227,1)]  text-[rgba(234,253,161,1)]">
+                <WaitlistForm>
+                   <Button className="rounded-xl px-8 lg:py-6 md:py-4   lg:text-2xl  md:text-xl font-semibold bg-[rgba(83,118,219,1)] hover:bg-[rgba(83,118,219,1)] hover:opacity-90 border-[rgba(99,112,227,1)]  text-[rgba(234,253,161,1)]">
                   Create a free account
                 </Button>
+                </WaitlistForm>               
                 <Button className="rounded-xl px-8 lg:py-6 md:py-4  lg:text-2xl  md:text-xl font-semibold hover:opacity-90 hover:bg-[rgba(234,253,161,1)]   bg-[rgba(234,253,161,1)]  border-2 border-[rgba(83,118,219,1)] text-[rgba(83,118,219,1)] ">
                   How it works
                 </Button>
