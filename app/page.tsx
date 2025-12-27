@@ -11,8 +11,30 @@ import { MobileNavBar } from "@/components/mobile-navbar";
 import { Footer } from "@/components/footer";
 import { motion } from "motion/react";
 import { Progress } from "@/components/ui/progress";
+import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { useState } from "react";
+import { toast } from "sonner";
+import api from "@/lib/api/client";
 
 export default function Home() {
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [isOpen, setIsOpen] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      await api.post('/api/v1/waitlist/', { name, email });
+      toast.success("Successfully joined the waitlist!");
+      setName("");
+      setEmail("");
+      setIsOpen(false);
+    } catch (error) {
+      toast.error("Failed to join waitlist.");
+    }
+  };
+
   const hiringFeatures = [
     {
       bgColor: "bg-[rgba(253,203,80,0.3)]",
@@ -179,16 +201,16 @@ export default function Home() {
 
         {/* Content */}
         <div className="relative z-10 lg:max-w-7xl md:max-w-4xl w-full mx-auto text-center">
-        {/* Grid Overlay */}
-        <div
-          className="
+          {/* Grid Overlay */}
+          <div
+            className="
       pointer-events-none
       absolute inset-0
       bg-[linear-gradient(to_right,rgba(0,0,0,0.05)_1px,transparent_1px),linear-gradient(to_bottom,rgba(0,0,0,0.05)_1px,transparent_1px)]
-      bg-[length:80px_80px]
+      bg-size-[80px_80px]
       mask-[radial-gradient(circle_at_center,black_60%,transparent_100%)]
       "
-        />
+          />
 
           {/* AI Badge */}
           <Badge className="bg-[linear-gradient(91deg,rgba(15,2,53,1)_-107.69%,rgba(43,5,155,1)_80.08%)] text-white px-6 py-2 mb-8 mt-5 text-sm">
@@ -256,13 +278,43 @@ export default function Home() {
                   </motion.div>
                 </span>
               </h2>
+              <Dialog open={isOpen} onOpenChange={setIsOpen}>
+                <DialogTrigger asChild>
+                  <Button
+                    size="lg"
+                    className="bg-[rgba(58,63,187,1)] hover:bg-[rgba(58,63,187,1)] hover:opacity-80 text-[rgba(233,244,255,1)] font-medium md:px-8 md:py-3 px-5 py-2 rounded-lg lg:text-lg md:text-base text-sm hover:shadow-lg"
+                  >
+                    Take interviews
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader className="items-center">
+                    <DialogTitle className="text-2xl font-bold text-center mb-2 text-[rgba(58,63,187,1)]">Join Early Access</DialogTitle>
+                    <DialogDescription className="text-center font-medium mb-4">
+                      Join the waitlist and get <span className="text-blue-600 font-semibold">5 extra credits—up to 2 interviews</span>,<br />
+                      available only to our earliest users
+                    </DialogDescription>
+                  </DialogHeader>
+                  <form className="flex flex-col gap-4 mt-2 w-full max-w-md mx-auto" onSubmit={handleSubmit}>
+                    <div className="flex flex-col gap-1 text-left">
+                      <label htmlFor="waitlist-name" className="font-medium flex items-center gap-2">
+                      <Image src="/main/waitlist/user.svg" alt="User Icon" width={20} height={20} />
+                        <span className="-translate-y-px text-[rgba(10,13,26,0.9)]">Full Name</span>
+                      </label>
+                      <Input className="border md:placeholder:text-base placeholder:text-sm    border-[rgba(107,124,255,0.2)]" id="waitlist-name" name="name" type="text" placeholder="John Smith" required value={name} onChange={(e) => setName(e.target.value)} />
+                    </div>
+                    <div className="flex flex-col gap-1 text-left">
+                      <label htmlFor="waitlist-email" className="font-medium flex items-center gap-2">
+                      <Image src="/main/waitlist/mail.svg" alt="Mail Icon" width={20} height={20} />
+                        <span className="-translate-y-px text-[rgba(10,13,26,0.9)]">Email</span>
+                      </label>
+                      <Input className="border md:placeholder:text-base placeholder:text-sm  border-[rgba(107,124,255,0.2)]"  id="waitlist-email"  name="email" type="email" placeholder="you@gmail.com"  value={email} onChange={(e) => setEmail(e.target.value)} />
+                    </div>
+                    <Button type="submit" className="mt-4 w-full bg-[rgba(58,63,187,1)] hover:bg-[rgba(69,94,255,0.9)] text-white font-semibold rounded-md py-3 text-lg transition-colors">Join Waitlist</Button>
+                  </form>
+                </DialogContent>
+              </Dialog>
 
-              <Button
-                size="lg"
-                className="bg-[rgba(58,63,187,1)] text-[rgba(233,244,255,1)] font-medium md:px-8 md:py-3 px-5 py-2 rounded-lg lg:text-lg md:text-base text-sm hover:shadow-lg"
-              >
-                Take interviews
-              </Button>
             </div>
 
             {/* Hire Section */}
@@ -409,7 +461,7 @@ export default function Home() {
 
                     {/* Connector Line */}
                     {index < hiringTeamSteps.length - 1 && (
-                      <div className="hidden xl:block absolute right-[-57px] top-1/2 -translate-y-1/2 xl:w-[80px] w-[65px]">
+                      <div className="hidden xl:block absolute right-[-57px] top-1/2 -translate-y-1/2 xl:w-20 w-[65px]">
                         <div className="h-2 rounded-full bg-gray-200 overflow-hidden">
                           <motion.div
                             className="h-full bg-[linear-gradient(90deg,#00D7FF,#3A3FBB)] origin-left"
@@ -587,7 +639,7 @@ export default function Home() {
 
                       {/* Connector Line */}
                       {index < jobSeekerSteps.length - 1 && (
-                        <div className="hidden xl:block absolute right-[-57px] top-1/2 -translate-y-1/2 xl:w-[80px] w-[65px]">
+                        <div className="hidden xl:block absolute right-[-57px] top-1/2 -translate-y-1/2 xl:w-20 w-[65px]">
                           <div className="h-2 rounded-full bg-gray-200 overflow-hidden">
                             <motion.div
                               className="h-full bg-[linear-gradient(90deg,#00D7FF,#3A3FBB)] origin-left"
