@@ -46,7 +46,10 @@ export default function AboutPage() {
                 </Button>
                 <div className="w-full px-5">
                     <div className="flex sm:hidden  mb-5">
-                        <Image src="/pricing/home.svg" alt="Home" width={20} height={20} />
+                        <Link href="/" className="flex items-center space-x-2">
+                            <Image className="size-[20px]" src="/main/logo.png" alt="Bait AI Logo" width={40} height={40} />
+                            <span className="lg:text-3xl md:text-2xl text-base font-bold bg-clip-text text-transparent bg-[linear-gradient(106.63deg,rgba(16,81,171,1)_0%,rgba(28,15,111,1)_144.25%)]">bAIt</span>
+                        </Link>
 
                         <MobileNavBar />
                     </div>
@@ -66,7 +69,7 @@ export default function AboutPage() {
                     />
 
                     <ViewMore />
-                  
+
                     <p className="md:text-xl sm:block hidden max-w-6xl text-sm text-center text-[rgba(58,63,187,1)]">
                         <span className="font-bold text-[#3d4fcf]">Bait AI</span> is an <span className="font-bold">AI-interview</span > platform designed to make hiring faster, fairer, and more effective. We help organizations streamline screening and identify high-quality candidates through intelligent, structured AI interviews, while empowering candidates to practice and prepare with realistic mock interviews, instant feedback, and performance insights. By reducing bias, saving recruiter and interviewer time, and improving candidate readiness, BAIT AI bridges the gap between talent and opportunity—turning interviews into a skill-first, confidence-driven experience where true potential stands out.
                     </p>
