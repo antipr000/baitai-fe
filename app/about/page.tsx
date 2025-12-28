@@ -41,7 +41,7 @@ export default function AboutPage() {
     return (
         <div className="min-h-screen bg-[linear-gradient(112.45deg,#F5F7FF_11.62%,#E0F2FF_124.08%)] flex flex-col items-center  py-8">
             <div className="w-full bg-[linear-gradient(112.45deg,#F5F7FF_11.62%,#E0F2FF_124.08%)]">
-                <Button variant="ghost" className="mb-6 sm:flex justify-start hidden text-[rgba(93,111,223,1)] font-semibold" asChild>
+                <Button variant="ghost" className="mb-6 sm:flex justify-start hidden text-[rgba(93,111,223,1)] hover:text-[rgba(93,111,223,1)] hover:opacity-80 font-semibold" asChild>
                     <Link href="/" className="flex items-center mx-7 gap-2"><Image src="/about/arrow.svg" alt="back" width={10} height={10} /><span>Back to home</span></Link>
                 </Button>
                 <div className="w-full px-5">

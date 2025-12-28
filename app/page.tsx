@@ -154,18 +154,17 @@ export default function Home() {
             <span className="lg:text-3xl md:text-2xl text-base font-bold bg-clip-text text-transparent bg-[linear-gradient(106.63deg,rgba(16,81,171,1)_0%,rgba(28,15,111,1)_144.25%)]">bAIt</span>
           </div>
           <div className="hidden md:flex items-center lg:space-x-8 space-x-4">
-            <Link href="#" className="text-[rgba(69,94,255,0.8)] hover:opacity-70 font-medium">About us</Link>
-            <Link href="#" className="text-[rgba(69,94,255,0.8)] hover:opacity-70 font-medium">For Hiring Teams</Link>
-            <Link href="#" className="text-[rgba(69,94,255,0.8)] hover:opacity-70 font-medium">For Job Seekers</Link>
-            <Link href="#" className="text-[rgba(69,94,255,0.8)] hover:opacity-70 font-medium">For Job Seekers</Link>
-            <Link href="#" className="text-[rgba(69,94,255,0.8)] hover:opacity-70 font-medium">Pricing</Link >
+            <Link href="/about" className="text-[rgba(69,94,255,0.8)] hover:opacity-70 font-medium">About us</Link>
+            <Link href="#hiring-teams" className="text-[rgba(69,94,255,0.8)] hover:opacity-70 font-medium">For Hiring Teams</Link>
+            <Link href="#job-seekers" className="text-[rgba(69,94,255,0.8)] hover:opacity-70 font-medium">For Job Seekers</Link>
+            <Link href="/pricing" className="text-[rgba(69,94,255,0.8)] hover:opacity-70 font-medium">Pricing</Link >
           </div>
 
           <div className="hidden md:flex items-center space-x-4">
-            <WaitlistForm><Button variant="ghost" className="lg:text-base rounded-full text-sm hover:bg-[linear-gradient(106.03deg,rgba(239,246,254,0.5)_0%,rgba(163,217,248,0.5)_238.47%)]  hover:opacity-80 bg-[linear-gradient(106.03deg,rgba(239,246,254,0.5)_0%,rgba(163,217,248,0.5)_238.47%)]  text-[rgba(108,132,255,1)]  border font-medium  border-[rgba(108,132,255,0.9)]">Sign in</Button></WaitlistForm>
-            <Button className="flex rounded-full items-center overflow-hidden p-5 lg:text-base text-sm  bg-[linear-gradient(106.03deg,#677CFF_0%,#A3D9F8_238.47%)] hover:opacity-70 text-[rgba(238,246,251,1)] font-medium ">
+            <WaitlistForm><Button variant="ghost" className="lg:text-base rounded-full text-sm hover:bg-[linear-gradient(106.03deg,rgba(239,246,254,0.5)_0%,rgba(163,217,248,0.5)_238.47%)]  hover:opacity-80 bg-[linear-gradient(106.03deg,rgba(239,246,254,0.5)_0%,rgba(163,217,248,0.5)_238.47%)]  text-[rgba(108,132,255,1)] hover:text-[rgba(108,132,255,1)] border font-medium  border-[rgba(108,132,255,0.9)]">Sign in</Button></WaitlistForm>
+            <WaitlistForm><Button className="flex rounded-full items-center overflow-hidden p-5 lg:text-base text-sm  bg-[linear-gradient(106.03deg,#677CFF_0%,#A3D9F8_238.47%)] hover:opacity-70 text-[rgba(238,246,251,1)] font-medium ">
               Request a demo
-            </Button>
+            </Button></WaitlistForm>
           </div>
           <div className="md:hidden  justify-around items-center">
             <MobileNavBar />
@@ -306,12 +305,15 @@ export default function Home() {
                 </span>
               </h2>
 
-              <Button
-                size="lg"
-                className="bg-[rgba(58,63,187,1)] text-[rgba(233,244,255,1)] font-medium md:px-8 md:py-3 px-5 py-2 rounded-lg lg:text-lg md:text-base text-sm hover:shadow-lg"
-              >
-                Schedule a demo
-              </Button>
+              <WaitlistForm>
+                <Button
+                  size="lg"
+                  className="bg-[rgba(58,63,187,1)] hover:bg-[rgba(58,63,187,1)] hover:opacity-80 text-[rgba(233,244,255,1)] font-medium md:px-8 md:py-3 px-5 py-2 rounded-lg lg:text-lg md:text-base text-sm hover:shadow-lg"
+                >
+                  Schedule a demo
+                </Button>
+              </WaitlistForm>
+
             </div>
 
           </div>
@@ -339,8 +341,8 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Features Section */}
-      <section className="py-10 lg:px-6 md:px-10 px-5 bg-[linear-gradient(106.66deg,#DCF4FF_3.3%,#E6F5FF_98.34%)]">
+      {/* For Hiring Teams Section */}
+      <section id="hiring-teams" className="scroll-mt-[120px] py-10 lg:px-6 md:px-10 px-5 bg-[linear-gradient(106.66deg,#DCF4FF_3.3%,#E6F5FF_98.34%)]">
         <div className="lg:max-w-6xl md:max-w-3xl mx-auto">
           <div className="flex flex-col items-center  md:flex-row gap-8">
             {/* Left Content */}
@@ -477,21 +479,25 @@ export default function Home() {
 
               </div>
               <div className="flex  gap-4 mt-2 md:max-w-3xl lg:max-w-6xl">
-                <Button className="rounded-xl px-8 lg:py-6 md:py-4  lg:text-2xl  md:text-xl font-semibold bg-[rgba(0,12,134,0.9)] hover:bg-[rgba(0,12,134,0.9)] hover:opacity-90 border-2 border-[rgba(99,112,227,1)] hover:text-white shadow-[0px_4px_4px_0px_rgba(0,0,0,0.08)] text-[rgba(224,244,255,0.9)]">
-                  Schedule a Demo
-                </Button>
-                <Button className="rounded-xl px-8 lg:py-6 md:py-4 lg:text-2xl md:text-xl  font-semibold hover:opacity-90 hover:text-white bg-[rgba(68,102,198,1)] border-2 border-[rgba(224,244,255,1)] text-[rgba(224,244,255,0.9)] hover:bg-[rgba(255,255,255,0.1)]">
-                  View Pricing
-                </Button>
+                <WaitlistForm>
+                  <Button className="rounded-xl px-8 lg:py-6 md:py-4  lg:text-2xl  md:text-xl font-semibold bg-[rgba(0,12,134,0.9)] hover:bg-[rgba(0,12,134,0.9)] hover:opacity-90 border-2 border-[rgba(99,112,227,1)] hover:text-white shadow-[0px_4px_4px_0px_rgba(0,0,0,0.08)] text-[rgba(224,244,255,0.9)]">
+                    Schedule a Demo
+                  </Button>
+                  </WaitlistForm>
+                  <Link href="/pricing">
+                    <Button className="rounded-xl px-8 lg:py-6 md:py-4 lg:text-2xl md:text-xl  font-semibold hover:opacity-90 hover:text-white bg-[rgba(68,102,198,1)] border-2 border-[rgba(224,244,255,1)] text-[rgba(224,244,255,0.9)] hover:bg-[rgba(255,255,255,0.1)]">
+                      View Pricing
+                    </Button>
+                  </Link>
+                  </div>
               </div>
             </div>
-          </div>
         </section>
 
       </section>
       <section className="bg-[rgba(243,255,190,0.15)]">
         {/* Job Seekers Section */}
-        <section className="mt-15 bg-[linear-gradient(91.27deg,rgba(231,255,125,0.6)_2.28%,rgba(243,255,191,0.6)_108.31%)] text-white md:py-12 py-8 px-6">
+        <section id="job-seekers" className="scroll-mt-[120px] mt-15 bg-[linear-gradient(91.27deg,rgba(231,255,125,0.6)_2.28%,rgba(243,255,191,0.6)_108.31%)] text-white md:py-12 py-8 px-6">
           <div className="lg:max-w-5xl md:max-w-3xl mx-auto">
             <div className="flex justify-between items-center">
               <div className="">
@@ -551,7 +557,7 @@ export default function Home() {
 
 
         {/* How it Works */}
-        <section className="  bg-[rgba(243,255,190,0.15)]]">
+        <section id="how-it-works" className=" scroll-mt-[120px] bg-[rgba(243,255,190,0.15)]]">
           <div className="lg:max-w-6xl md:max-w-3xl mx-auto px-3 p-2">
 
             <div className="lg:text-4xl md:text-2xl text-base md:mb-4 mb-0 text-center text-[rgba(58,63,187,1)]">How it works</div>
@@ -653,13 +659,15 @@ export default function Home() {
               </div>
               <div className="flex flex-row gap-4 mt-2">
                 <WaitlistForm>
-                   <Button className="rounded-xl px-8 lg:py-6 md:py-4   lg:text-2xl  md:text-xl font-semibold bg-[rgba(83,118,219,1)] hover:bg-[rgba(83,118,219,1)] hover:opacity-90 border-[rgba(99,112,227,1)]  text-[rgba(234,253,161,1)]">
-                  Create a free account
-                </Button>
-                </WaitlistForm>               
+                  <Button className="rounded-xl px-8 lg:py-6 md:py-4   lg:text-2xl  md:text-xl font-semibold bg-[rgba(83,118,219,1)] hover:bg-[rgba(83,118,219,1)] hover:opacity-90 border-[rgba(99,112,227,1)]  text-[rgba(234,253,161,1)]">
+                    Create a free account
+                  </Button>
+                </WaitlistForm>
+                <Link href="/#how-it-works">
                 <Button className="rounded-xl px-8 lg:py-6 md:py-4  lg:text-2xl  md:text-xl font-semibold hover:opacity-90 hover:bg-[rgba(234,253,161,1)]   bg-[rgba(234,253,161,1)]  border-2 border-[rgba(83,118,219,1)] text-[rgba(83,118,219,1)] ">
                   How it works
                 </Button>
+                </Link>
               </div>
             </div>
           </div>

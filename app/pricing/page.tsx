@@ -132,7 +132,7 @@ export default function PricingPage() {
 
         <div className="w-full ">
           <div className="flex sm:hidden mb-5">
-            <Image src="/pricing/home.svg" alt="Home" width={20} height={20} />
+            <Image src="/main/logo.svg" alt="Home" width={20} height={20} />
             <MobileNavBar />
           </div>
           <div className="justify-between  flex w-full">
