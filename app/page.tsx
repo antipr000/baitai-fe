@@ -234,7 +234,7 @@ export default function Home() {
                 <span className="text-[rgb(69,94,255)] flex items-center justify-center gap-1">
                   <span>Interview</span>
 
-                  <motion.div className="overflow-hidden lg:h-[37px] md:h-[31px] h-[23px]">
+                  <motion.div className="overflow-hidden lg:h-[37px] md:h-[31px]  h-[25px]">
                     <motion.div
                       animate={{ y: ["0%", "-100%", "-200%", "0%"] }}
                       transition={{
@@ -242,7 +242,7 @@ export default function Home() {
                         repeat: Infinity,
                         ease: "easeInOut",
                       }}
-                      className="flex flex-col lg:h-[37px] md:h-[31px] h-[23px]"
+                      className="flex flex-col lg:h-[37px] md:h-[31px]  h-[25px]"
                     >
                       <span className="text-transparent bg-[linear-gradient(55.21deg,#173D7E_34.16%,#C3E1FC_93.59%)] bg-clip-text">
                         anytime
@@ -281,7 +281,7 @@ export default function Home() {
               <h2 className="lg:text-3xl md:text-2xl text-base whitespace-nowrap font-semibold text-gray-800 mb-4">
                 <span className="text-[rgba(69,94,255,1)] flex items-center justify-center gap-1">
                   <span>Hire</span>
-                  <motion.div className="overflow-hidden lg:h-[37px] md:h-[31px] h-[23px]">
+                  <motion.div className="overflow-hidden lg:h-[37px] md:h-[31px]  h-[25px]">
                     <motion.div
                       animate={{ y: ["0%", "-100%", "-200%", "0%"] }}
                       transition={{
@@ -289,7 +289,7 @@ export default function Home() {
                         repeat: Infinity,
                         ease: "easeInOut",
                       }}
-                      className="flex flex-col lg:h-[37px] md:h-[31px] h-[23px]"
+                      className="flex flex-col lg:h-[37px] md:h-[31px]  h-[25px]"
                     >
                       <span className="text-transparent bg-[linear-gradient(55.21deg,#173D7E_34.16%,#C3E1FC_93.59%)] bg-clip-text">
                         faster
@@ -672,7 +672,6 @@ export default function Home() {
             </div>
           </div>
         </section>
-
         <Footer />
       </section>
 

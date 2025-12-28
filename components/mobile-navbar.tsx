@@ -38,7 +38,7 @@ export const MobileNavBar = () => {
                     <div className="flex items-center gap-4 border-[rgba(121,153,253,0.05)] border p-1 px-2 ">
                         <Image src="/main/nav/briefcase.svg" alt="briefcase" width={15} height={15} />
                         <Link
-                            href="#hiring-teams"
+                            href="/#hiring-teams"
                             className=" text-[rgba(10,13,26,0.7)] hover:opacity-70 font-medium py-2"
                             onClick={() => setOpen(false)}
                         >
@@ -50,7 +50,7 @@ export const MobileNavBar = () => {
                         <Image src="/main/nav/people.svg" alt="people" width={15} height={15} />
 
                         <Link
-                            href="#job-seekers"
+                            href="/#job-seekers"
                             className=" text-[rgba(10,13,26,0.7)] hover:opacity-70 font-medium py-2"
                             onClick={() => setOpen(false)}
                         >
