@@ -131,7 +131,7 @@ export default function PricingPage() {
       <div className="max-w-7xl p-5 mx-auto w-full flex justify-between items-center mb-8">
 
         <div className="w-full ">
-          <div className="flex sm:hidden mb-5">
+          <div className="flex sm:hidden mb-5 -translate-y-4">
   <Link href="/" className="flex items-center space-x-2">
             <Image className="size-[20px]" src="/main/logo.png" alt="Bait AI Logo" width={40} height={40} />
             <span className="lg:text-3xl md:text-2xl text-base font-bold bg-clip-text text-transparent bg-[linear-gradient(106.63deg,rgba(16,81,171,1)_0%,rgba(28,15,111,1)_144.25%)]">bAIt</span>
