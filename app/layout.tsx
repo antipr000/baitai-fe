@@ -10,7 +10,7 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: "Bait AI ",
-  description: "",
+  description: "The AI-driven way to hire and prepare for job.",
 };
 
 export default function RootLayout({
