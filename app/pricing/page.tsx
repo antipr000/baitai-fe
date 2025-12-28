@@ -133,12 +133,11 @@ export default function PricingPage() {
         <div className="w-full ">
           <div className="flex sm:hidden mb-5">
             <Image src="/pricing/home.svg" alt="Home" width={20} height={20} />
-
             <MobileNavBar />
           </div>
           <div className="justify-between  flex w-full">
             <div className="max-w-6xl">
-              <h1 className=" md:text-4xl text-xl font-semibold  mb-2 text-transparent bg-clip-text bg-[linear-gradient(99.18deg,rgba(0,13,144,0.9)_-7.75%,#5D6BEE_98.02%)] w-[450px]">Choose your plan, evolve with AI</h1>
+              <h1 className=" md:text-4xl text-xl font-semibold  mb-2 text-transparent bg-clip-text bg-[linear-gradient(99.18deg,rgba(0,13,144,0.9)_-7.75%,#5D6BEE_98.02%)]">Choose your plan, evolve with AI</h1>
             </div>
             <div className="hidden sm:block">
               <Link href="/">
