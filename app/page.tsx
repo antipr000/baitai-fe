@@ -166,8 +166,8 @@ export default function Home() {
               Request a demo
             </Button></WaitlistForm>
           </div>
-          <div className="md:hidden h-[40px] items-center">
-              <MobileNavBar />
+          <div className="md:hidden  justify-around items-center">
+            <MobileNavBar />
           </div>
 
         </nav>
@@ -221,20 +221,26 @@ export default function Home() {
           <div className="grid grid-cols-2 gap-12 justify-start lg:max-w-6xl md:max-w-4xl mx-auto">
 
             {/* Interview Section */}
-            <div className="text-center">
+            <div className="text-center relative">
+              <Image
+                src="/main/ellipse.svg"
+                alt="Interview Illustration"
+                width={300}
+                height={200}
+                className="absolute inset-0 mx-auto lg:w-[300px] md:w-[200px] w-[200px] z-[-1]"
+              />
               <Image
                 src="/main/interview.png"
                 alt="Interview Illustration"
                 width={300}
                 height={200}
-                className="mx-auto mb-6 lg:w-[300px] md:w-[200px] w-[200px]"
+                className="mx-auto mb-6 lg:w-[300px] md:w-[200px] w-[200px] relative"
               />
-
               <h2 className="lg:text-3xl md:text-2xl text-base whitespace-nowrap font-semibold text-gray-800 mb-4">
                 <span className="text-[rgb(69,94,255)] flex items-center justify-center gap-1">
                   <span>Interview</span>
 
-                  <motion.div className="overflow-hidden lg:h-[37px] md:h-[31px] h-[23px]">
+                  <motion.div className="overflow-hidden lg:h-[37px] md:h-[31px]  h-[25px]">
                     <motion.div
                       animate={{ y: ["0%", "-100%", "-200%", "0%"] }}
                       transition={{
@@ -242,7 +248,7 @@ export default function Home() {
                         repeat: Infinity,
                         ease: "easeInOut",
                       }}
-                      className="flex flex-col lg:h-[37px] md:h-[31px] h-[25px]"
+                      className="flex flex-col lg:h-[37px] md:h-[31px]  h-[25px]"
                     >
                       <span className="text-transparent bg-[linear-gradient(55.21deg,#173D7E_34.16%,#C3E1FC_93.59%)] bg-clip-text">
                         anytime
@@ -269,19 +275,26 @@ export default function Home() {
             </div>
 
             {/* Hire Section */}
-            <div className="text-center">
+            <div className="text-center relative">
+              <Image
+                src="/main/ellipse2.svg"
+                alt="Hire Illustration"
+                width={300}
+                height={200}
+                className="absolute inset-0 mx-auto lg:w-[300px] md:w-[200px] w-[200px] z-[-1]"
+              />
               <Image
                 src="/main/hire.png"
                 alt="Hire Illustration"
                 width={300}
                 height={200}
-                className="mx-auto mb-6 lg:w-[300px] md:w-[200px] w-[200px]"
+                className="mx-auto mb-6 lg:w-[300px] md:w-[200px] w-[200px] relative"
               />
 
               <h2 className="lg:text-3xl md:text-2xl text-base whitespace-nowrap font-semibold text-gray-800 mb-4">
                 <span className="text-[rgba(69,94,255,1)] flex items-center justify-center gap-1">
                   <span>Hire</span>
-                  <motion.div className="overflow-hidden lg:h-[37px] md:h-[31px] h-[25px]">
+                  <motion.div className="overflow-hidden lg:h-[37px] md:h-[31px]  h-[25px]">
                     <motion.div
                       animate={{ y: ["0%", "-100%", "-200%", "0%"] }}
                       transition={{
@@ -289,7 +302,7 @@ export default function Home() {
                         repeat: Infinity,
                         ease: "easeInOut",
                       }}
-                      className="flex flex-col lg:h-[37px] md:h-[31px] h-[23px]"
+                      className="flex flex-col lg:h-[37px] md:h-[31px]  h-[25px]"
                     >
                       <span className="text-transparent bg-[linear-gradient(55.21deg,#173D7E_34.16%,#C3E1FC_93.59%)] bg-clip-text">
                         faster
@@ -483,15 +496,15 @@ export default function Home() {
                   <Button className="rounded-xl px-8 lg:py-6 md:py-4  lg:text-2xl  md:text-xl font-semibold bg-[rgba(0,12,134,0.9)] hover:bg-[rgba(0,12,134,0.9)] hover:opacity-90 border-2 border-[rgba(99,112,227,1)] hover:text-white shadow-[0px_4px_4px_0px_rgba(0,0,0,0.08)] text-[rgba(224,244,255,0.9)]">
                     Schedule a Demo
                   </Button>
-                  </WaitlistForm>
-                  <Link href="/pricing">
-                    <Button className="rounded-xl px-8 lg:py-6 md:py-4 lg:text-2xl md:text-xl  font-semibold hover:opacity-90 hover:text-white bg-[rgba(68,102,198,1)] border-2 border-[rgba(224,244,255,1)] text-[rgba(224,244,255,0.9)] hover:bg-[rgba(255,255,255,0.1)]">
-                      View Pricing
-                    </Button>
-                  </Link>
-                  </div>
+                </WaitlistForm>
+                <Link href="/pricing">
+                  <Button className="rounded-xl px-8 lg:py-6 md:py-4 lg:text-2xl md:text-xl  font-semibold hover:opacity-90 hover:text-white bg-[rgba(68,102,198,1)] border-2 border-[rgba(224,244,255,1)] text-[rgba(224,244,255,0.9)] hover:bg-[rgba(255,255,255,0.1)]">
+                    View Pricing
+                  </Button>
+                </Link>
               </div>
             </div>
+          </div>
         </section>
 
       </section>
@@ -664,15 +677,14 @@ export default function Home() {
                   </Button>
                 </WaitlistForm>
                 <Link href="/#how-it-works">
-                <Button className="rounded-xl px-8 lg:py-6 md:py-4  lg:text-2xl  md:text-xl font-semibold hover:opacity-90 hover:bg-[rgba(234,253,161,1)]   bg-[rgba(234,253,161,1)]  border-2 border-[rgba(83,118,219,1)] text-[rgba(83,118,219,1)] ">
-                  How it works
-                </Button>
+                  <Button className="rounded-xl px-8 lg:py-6 md:py-4  lg:text-2xl  md:text-xl font-semibold hover:opacity-90 hover:bg-[rgba(234,253,161,1)]   bg-[rgba(234,253,161,1)]  border-2 border-[rgba(83,118,219,1)] text-[rgba(83,118,219,1)] ">
+                    How it works
+                  </Button>
                 </Link>
               </div>
             </div>
           </div>
         </section>
-
         <Footer />
       </section>
 
