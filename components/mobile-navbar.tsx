@@ -79,10 +79,11 @@ export const MobileNavBar = () => {
                             Sign in
                         </Button>
                     </WaitlistForm>
-
+                    <WaitlistForm>
                     <Button className="w-full  bg-[linear-gradient(106.03deg,#677CFF_0%,#A3D9F8_238.47%)] hover:opacity-70 text-[rgba(238,246,251,1)] font-medium">
                         Request a demo
                     </Button>
+                    </WaitlistForm>
                 </div>
             </SheetContent></>
     </Sheet>
