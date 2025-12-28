@@ -166,8 +166,8 @@ export default function Home() {
               Request a demo
             </Button></WaitlistForm>
           </div>
-          <div className="md:hidden  justify-around items-center">
-            <MobileNavBar />
+          <div className="md:hidden h-[40px] items-center">
+              <MobileNavBar />
           </div>
 
         </nav>
