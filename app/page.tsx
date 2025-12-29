@@ -14,6 +14,14 @@ function getTimeLeft(targetDate: Date) {
   return { days, hours, minutes, seconds };
 }
 
+function setIntialProgress(launchDate: Date, initialNow: Date) {
+  const totalTime = launchDate.getTime() - initialNow.getTime();
+  const now = new Date();
+  const elapsed = now.getTime() - initialNow.getTime();
+  const progressPercent = (elapsed / totalTime) * 100;
+  return Math.max(0, Math.min(100, progressPercent));
+}
+
 export default function Home() {
   // Set your launch date here
   const launchDate = new Date("2026-01-01T10:00:00+05:30");
@@ -21,7 +29,7 @@ export default function Home() {
   const totalTime = launchDate.getTime() - initialNow.getTime();
   const [timeLeft, setTimeLeft] = useState(getTimeLeft(launchDate));
 
-  const [progress, setProgress] = useState(0);
+  const [progress, setProgress] = useState(setIntialProgress(launchDate, initialNow));
 
   useEffect(() => {
 
