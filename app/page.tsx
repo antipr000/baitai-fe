@@ -25,12 +25,10 @@ export default function Home() {
     minutes: 0,
     seconds: 0,
   });
-  const [mounted, setMounted] = useState(false);
 
   const [progress, setProgress] = useState(0);
 
   useEffect(() => {
-    setMounted(true);
 
     const timer = setInterval(() => {
       setTimeLeft(getTimeLeft(launchDate));
@@ -45,7 +43,6 @@ export default function Home() {
     return () => clearInterval(timer);
   }, []);
 
-  if (!mounted) return null;
 
   return (
     <div className="relative flex flex-col items-center w-full h-[78vh] pb-2 pt-16">
