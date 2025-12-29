@@ -1,6 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
-import { Footer } from "@/components/footer";
+import  { useEffect, useState } from "react";
 
 function getTimeLeft(targetDate: Date) {
   const now = new Date();
