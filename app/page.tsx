@@ -19,12 +19,7 @@ export default function Home() {
   const launchDate = new Date("2026-01-01T10:00:00+05:30");
   const initialNow = new Date("2025-12-29T02:00:00+05:30");
   const totalTime = launchDate.getTime() - initialNow.getTime();
-  const [timeLeft, setTimeLeft] = useState({
-    days: 0,
-    hours: 0,
-    minutes: 0,
-    seconds: 0,
-  });
+  const [timeLeft, setTimeLeft] = useState(getTimeLeft(launchDate));
 
   const [progress, setProgress] = useState(0);
 
