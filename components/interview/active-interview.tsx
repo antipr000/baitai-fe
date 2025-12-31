@@ -52,6 +52,13 @@ export default function ActiveInterview({ cameraStream, micStream, templateId }:
   const hasHeardSpeechThisListeningTurnRef = useRef(false)
   const noiseFloorRmsRef = useRef<number>(0.008)
 
+  // Video and screen recording refs
+  const screenStreamRef = useRef<MediaStream | null>(null)
+  const videoRecorderRef = useRef<MediaRecorder | null>(null)
+  const screenRecorderRef = useRef<MediaRecorder | null>(null)
+  const videoChunksRef = useRef<Blob[]>([])
+  const screenChunksRef = useRef<Blob[]>([])
+
   // Audio playback refs
   const audioPlaybackContextRef = useRef<AudioContext | null>(null)
   const audioQueueRef = useRef<ArrayBuffer[]>([])
@@ -473,10 +480,15 @@ export default function ActiveInterview({ cameraStream, micStream, templateId }:
       if (isCompleted) {
         console.log('[WebSocket] Interview completed - ending session')
         
-        // Stop recording
+        // Stop all recordings
         if (stopRecordingRef.current) {
           stopRecordingRef.current()
         }
+        stopVideoRecording()
+        stopScreenRecording()
+        
+        // Upload recordings before closing
+        uploadRecordings().catch(console.error)
         
         // Close WebSocket
         if (closeWebSocketRef.current) {
@@ -538,7 +550,7 @@ export default function ActiveInterview({ cameraStream, micStream, templateId }:
     }
   }, [handleAudioData, handleTextMessage])
 
-  const { isConnected, send, ws } = useWebSocket({
+  const { isConnected, send, ws, sessionId } = useWebSocket({
     templateId,
     onMessage: handleWebSocketMessage,
     onConnect: () => {
@@ -1041,39 +1053,51 @@ export default function ActiveInterview({ cameraStream, micStream, templateId }:
       return
     }
 
-    // Stop recording first
+    // Stop all recordings
     stopRecording()
+    stopVideoRecording()
+    stopScreenRecording()
+
+    // Upload recordings before closing
+    await uploadRecordings()
 
     // Close WebSocket
     closeWebSocket()
 
-    // Stop all media tracks with proper error handling
-    try {
-      if (cameraStream) {
-        cameraStream.getTracks().forEach(track => {
-          track.stop()
-          track.enabled = false
-        })
-      }
-      if (micStream) {
-        micStream.getTracks().forEach(track => {
-          track.stop()
-          track.enabled = false
-        })
-      }
+      // Stop all media tracks with proper error handling
+      try {
+        if (cameraStream) {
+          cameraStream.getTracks().forEach(track => {
+            track.stop()
+            track.enabled = false
+          })
+        }
+        if (micStream) {
+          micStream.getTracks().forEach(track => {
+            track.stop()
+            track.enabled = false
+          })
+        }
+        if (screenStreamRef.current) {
+          screenStreamRef.current.getTracks().forEach(track => {
+            track.stop()
+            track.enabled = false
+          })
+          screenStreamRef.current = null
+        }
 
-      // Also stop any tracks from video element if they exist
-      if (videoRef.current && videoRef.current.srcObject) {
-        const stream = videoRef.current.srcObject as MediaStream
-        stream.getTracks().forEach(track => {
-          track.stop()
-          track.enabled = false
-        })
-        videoRef.current.srcObject = null
+        // Also stop any tracks from video element if they exist
+        if (videoRef.current && videoRef.current.srcObject) {
+          const stream = videoRef.current.srcObject as MediaStream
+          stream.getTracks().forEach(track => {
+            track.stop()
+            track.enabled = false
+          })
+          videoRef.current.srcObject = null
+        }
+      } catch (error) {
+        console.error('[End Interview] Error stopping media tracks:', error)
       }
-    } catch (error) {
-      console.error('[End Interview] Error stopping media tracks:', error)
-    }
 
     // Clear video element
     if (videoRef.current) {
@@ -1103,6 +1127,183 @@ export default function ActiveInterview({ cameraStream, micStream, templateId }:
     }
   }
 
+  // Screen sharing functions
+  const startScreenShare = useCallback(async () => {
+    try {
+      const stream = await navigator.mediaDevices.getDisplayMedia({
+        video: true,
+        audio: false,
+      })
+      screenStreamRef.current = stream
+      setIsSharing(true)
+      console.log('[Screen Share] Screen sharing started')
+
+      // Start recording screen share
+      startScreenRecording(stream)
+
+      // Handle when user stops sharing via browser UI
+      stream.getVideoTracks()[0].addEventListener('ended', () => {
+        stopScreenShare()
+      })
+    } catch (error) {
+      console.error('[Screen Share] Error starting screen share:', error)
+      setError('Failed to start screen sharing')
+      setIsSharing(false)
+    }
+  }, [])
+
+  const stopScreenShare = useCallback(() => {
+    if (screenStreamRef.current) {
+      screenStreamRef.current.getTracks().forEach(track => track.stop())
+      screenStreamRef.current = null
+    }
+    setIsSharing(false)
+    stopScreenRecording()
+    console.log('[Screen Share] Screen sharing stopped')
+  }, [])
+
+  // Video recording functions
+  const startVideoRecording = useCallback(() => {
+    if (!cameraStream) {
+      console.warn('[Video Recording] No camera stream available')
+      return
+    }
+
+    try {
+      const mediaRecorder = new MediaRecorder(cameraStream, {
+        mimeType: 'video/webm;codecs=vp8,opus',
+      })
+
+      videoRecorderRef.current = mediaRecorder
+      videoChunksRef.current = []
+
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data && event.data.size > 0) {
+          videoChunksRef.current.push(event.data)
+          console.log(`[Video Recording] Video chunk available: ${event.data.size} bytes`)
+        }
+      }
+
+      mediaRecorder.onerror = (error) => {
+        console.error('[Video Recording] MediaRecorder error:', error)
+      }
+
+      mediaRecorder.onstop = () => {
+        console.log('[Video Recording] Video recording stopped')
+      }
+
+      mediaRecorder.start(1000) // Collect chunks every second
+      console.log('[Video Recording] Video recording started')
+    } catch (error) {
+      console.error('[Video Recording] Error starting video recording:', error)
+    }
+  }, [cameraStream])
+
+  const stopVideoRecording = useCallback(() => {
+    if (videoRecorderRef.current && videoRecorderRef.current.state !== 'inactive') {
+      videoRecorderRef.current.stop()
+      console.log('[Video Recording] Video recording stopped')
+    }
+  }, [])
+
+  // Screen recording functions
+  const startScreenRecording = useCallback((stream: MediaStream) => {
+    try {
+      const mediaRecorder = new MediaRecorder(stream, {
+        mimeType: 'video/webm;codecs=vp8',
+      })
+
+      screenRecorderRef.current = mediaRecorder
+      screenChunksRef.current = []
+
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data && event.data.size > 0) {
+          screenChunksRef.current.push(event.data)
+          console.log(`[Screen Recording] Screen chunk available: ${event.data.size} bytes`)
+        }
+      }
+
+      mediaRecorder.onerror = (error) => {
+        console.error('[Screen Recording] MediaRecorder error:', error)
+      }
+
+      mediaRecorder.onstop = () => {
+        console.log('[Screen Recording] Screen recording stopped')
+      }
+
+      mediaRecorder.start(1000) // Collect chunks every second
+      console.log('[Screen Recording] Screen recording started')
+    } catch (error) {
+      console.error('[Screen Recording] Error starting screen recording:', error)
+    }
+  }, [])
+
+  const stopScreenRecording = useCallback(() => {
+    if (screenRecorderRef.current && screenRecorderRef.current.state !== 'inactive') {
+      screenRecorderRef.current.stop()
+      console.log('[Screen Recording] Screen recording stopped')
+    }
+  }, [])
+
+  // Upload recordings function
+  const uploadRecordings = useCallback(async () => {
+    if (!sessionId) {
+      console.error('[Upload] No session ID available')
+      return
+    }
+
+    try {
+      const formData = new FormData()
+
+      // Upload audio (convert WebM chunks to WAV)
+      if (audioChunksRef.current.length > 0) {
+        try {
+          const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm;codecs=opus' })
+          // For now, upload as WebM - backend can handle conversion if needed
+          formData.append('audio', audioBlob, 'audio.webm')
+          console.log('[Upload] Added audio file:', audioBlob.size, 'bytes')
+        } catch (error) {
+          console.error('[Upload] Error preparing audio:', error)
+        }
+      }
+
+      // Upload video
+      if (videoChunksRef.current.length > 0) {
+        const videoBlob = new Blob(videoChunksRef.current, { type: 'video/webm;codecs=vp8,opus' })
+        formData.append('video', videoBlob, 'video.webm')
+        console.log('[Upload] Added video file:', videoBlob.size, 'bytes')
+      }
+
+      // Upload screen share
+      if (screenChunksRef.current.length > 0) {
+        const screenBlob = new Blob(screenChunksRef.current, { type: 'video/webm;codecs=vp8' })
+        formData.append('screen', screenBlob, 'screen.webm')
+        console.log('[Upload] Added screen file:', screenBlob.size, 'bytes')
+      }
+
+      // Only upload if we have at least one file
+      if (formData.has('audio') || formData.has('video') || formData.has('screen')) {
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9000'
+        const response = await fetch(`${apiUrl}/api/v1/interview-session/${sessionId}/media/upload/`, {
+          method: 'POST',
+          body: formData,
+        })
+
+        if (!response.ok) {
+          throw new Error(`Upload failed: ${response.statusText}`)
+        }
+
+        const result = await response.json()
+        console.log('[Upload] Upload successful:', result)
+      } else {
+        console.log('[Upload] No recordings to upload')
+      }
+    } catch (error) {
+      console.error('[Upload] Error uploading recordings:', error)
+      setError('Failed to upload recordings')
+    }
+  }, [sessionId])
+
   // Scroll to bottom when new messages arrive
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -1112,9 +1313,18 @@ export default function ActiveInterview({ cameraStream, micStream, templateId }:
   useEffect(() => {
     if (videoRef.current && cameraStream) {
       videoRef.current.srcObject = cameraStream
-
     }
   }, [cameraStream])
+
+  // Start video recording when interview starts
+  useEffect(() => {
+    if (isConnected && cameraStream) {
+      startVideoRecording()
+    }
+    return () => {
+      stopVideoRecording()
+    }
+  }, [isConnected, cameraStream, startVideoRecording, stopVideoRecording])
 
   // Cleanup on unmount
   useEffect(() => {
@@ -1124,6 +1334,8 @@ export default function ActiveInterview({ cameraStream, micStream, templateId }:
 
     return () => {
       stopRecording()
+      stopVideoRecording()
+      stopScreenRecording()
       closeWebSocket()
 
       // Cleanup all media tracks
@@ -1139,6 +1351,13 @@ export default function ActiveInterview({ cameraStream, micStream, templateId }:
             track.stop()
             track.enabled = false
           })
+        }
+        if (screenStreamRef.current) {
+          screenStreamRef.current.getTracks().forEach(track => {
+            track.stop()
+            track.enabled = false
+          })
+          screenStreamRef.current = null
         }
         if (videoElement && videoElement.srcObject) {
           const stream = videoElement.srcObject as MediaStream
@@ -1306,7 +1525,13 @@ export default function ActiveInterview({ cameraStream, micStream, templateId }:
 
         {/* Share Screen Button */}
         <Button
-          onClick={() => setIsSharing(!isSharing)}
+          onClick={() => {
+            if (isSharing) {
+              stopScreenShare()
+            } else {
+              startScreenShare()
+            }
+          }}
           className={cn(
             'rounded-full w-14 h-14 flex items-center justify-center transition-all',
             isSharing ? 'bg-green-600 hover:bg-green-700' : 'bg-gray-700 hover:bg-gray-600'

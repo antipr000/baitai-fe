@@ -20,6 +20,7 @@ export const useWebSocket = ({
     const hasCreatedSession = useRef(false);
     const [isConnected, setIsConnected] = useState(false);
     const [lastMessage, setLastMessage] = useState<any>(null);
+    const [sessionId, setSessionId] = useState<string | null>(null);
 
     useEffect(() => {
         if (hasCreatedSession.current) return; // prevent duplicate creations (StrictMode / re-renders)
@@ -51,6 +52,7 @@ export const useWebSocket = ({
                 }
 
                 const sessionId = session.id;
+                setSessionId(sessionId);
                 const apiUrl = process.env.NEXT_PUBLIC_API_URL;
                 if (!apiUrl) {
                     throw new Error('NEXT_PUBLIC_API_URL is not defined in environment variables');
@@ -123,5 +125,6 @@ export const useWebSocket = ({
         send,
         lastMessage,
         ws: ws.current,
+        sessionId,
     };
 };
