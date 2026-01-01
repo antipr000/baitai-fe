@@ -58,6 +58,18 @@ export default function ActiveInterview({ cameraStream, micStream, templateId }:
   const screenRecorderRef = useRef<MediaRecorder | null>(null)
   const videoChunksRef = useRef<Blob[]>([])
   const screenChunksRef = useRef<Blob[]>([])
+  
+  // Media upload tracking refs
+  const mediaUploadIntervalsRef = useRef<{
+    audio: NodeJS.Timeout | null
+    video: NodeJS.Timeout | null
+    screen: NodeJS.Timeout | null
+  }>({ audio: null, video: null, screen: null })
+  const lastSentIndexRef = useRef<{
+    audio: number
+    video: number
+    screen: number
+  }>({ audio: 0, video: 0, screen: 0 })
 
   // Audio playback refs
   const audioPlaybackContextRef = useRef<AudioContext | null>(null)
@@ -487,13 +499,19 @@ export default function ActiveInterview({ cameraStream, micStream, templateId }:
         stopVideoRecording()
         stopScreenRecording()
         
-        // Upload recordings before closing
-        uploadRecordings().catch(console.error)
+        // Stop media upload intervals
+        stopMediaUploadIntervals()
         
-        // Close WebSocket
-        if (closeWebSocketRef.current) {
-          closeWebSocketRef.current()
-        }
+        // Finalize all media uploads before closing
+        finalizeAllMedia()
+        
+        // Wait a bit for finalization to complete
+        setTimeout(() => {
+          // Close WebSocket
+          if (closeWebSocketRef.current) {
+            closeWebSocketRef.current()
+          }
+        }, 1000)
         
         // Add completion message to conversation
         const completionMessage: Message = {
@@ -1058,8 +1076,14 @@ export default function ActiveInterview({ cameraStream, micStream, templateId }:
     stopVideoRecording()
     stopScreenRecording()
 
-    // Upload recordings before closing
-    await uploadRecordings()
+    // Stop media upload intervals
+    stopMediaUploadIntervals()
+
+    // Finalize all media uploads before closing
+    finalizeAllMedia()
+
+    // Wait a bit for finalization to complete
+    await new Promise(resolve => setTimeout(resolve, 1000))
 
     // Close WebSocket
     closeWebSocket()
@@ -1245,64 +1269,166 @@ export default function ActiveInterview({ cameraStream, micStream, templateId }:
     }
   }, [])
 
-  // Upload recordings function
-  const uploadRecordings = useCallback(async () => {
-    if (!sessionId) {
-      console.error('[Upload] No session ID available')
+  // Send media chunk via WebSocket
+  const sendMediaChunk = useCallback(async (
+    recordingType: 'audio' | 'video' | 'screen',
+    chunks: Blob[],
+    isFinal: boolean = false
+  ) => {
+    if (!isConnected || !send || chunks.length === 0) {
       return
     }
 
     try {
-      const formData = new FormData()
+      // Combine chunks into a single blob
+      const blob = new Blob(chunks, {
+        type: recordingType === 'audio' 
+          ? 'audio/webm;codecs=opus'
+          : recordingType === 'video'
+          ? 'video/webm;codecs=vp8,opus'
+          : 'video/webm;codecs=vp8'
+      })
 
-      // Upload audio (convert WebM chunks to WAV)
-      if (audioChunksRef.current.length > 0) {
-        try {
-          const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm;codecs=opus' })
-          // For now, upload as WebM - backend can handle conversion if needed
-          formData.append('audio', audioBlob, 'audio.webm')
-          console.log('[Upload] Added audio file:', audioBlob.size, 'bytes')
-        } catch (error) {
-          console.error('[Upload] Error preparing audio:', error)
+      // Convert to base64
+      const reader = new FileReader()
+      const base64Promise = new Promise<string>((resolve, reject) => {
+        reader.onloadend = () => {
+          const base64String = (reader.result as string).split(',')[1]
+          resolve(base64String)
         }
+        reader.onerror = reject
+      })
+      reader.readAsDataURL(blob)
+
+      const base64Data = await base64Promise
+
+      // Send via WebSocket
+      const message = {
+        type: 'media_chunk',
+        recording_type: recordingType,
+        chunk: base64Data,
+        is_final: isFinal,
       }
 
-      // Upload video
-      if (videoChunksRef.current.length > 0) {
-        const videoBlob = new Blob(videoChunksRef.current, { type: 'video/webm;codecs=vp8,opus' })
-        formData.append('video', videoBlob, 'video.webm')
-        console.log('[Upload] Added video file:', videoBlob.size, 'bytes')
-      }
-
-      // Upload screen share
-      if (screenChunksRef.current.length > 0) {
-        const screenBlob = new Blob(screenChunksRef.current, { type: 'video/webm;codecs=vp8' })
-        formData.append('screen', screenBlob, 'screen.webm')
-        console.log('[Upload] Added screen file:', screenBlob.size, 'bytes')
-      }
-
-      // Only upload if we have at least one file
-      if (formData.has('audio') || formData.has('video') || formData.has('screen')) {
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9000'
-        const response = await fetch(`${apiUrl}/api/v1/interview-session/${sessionId}/media/upload/`, {
-          method: 'POST',
-          body: formData,
-        })
-
-        if (!response.ok) {
-          throw new Error(`Upload failed: ${response.statusText}`)
-        }
-
-        const result = await response.json()
-        console.log('[Upload] Upload successful:', result)
-      } else {
-        console.log('[Upload] No recordings to upload')
-      }
+      send(JSON.stringify(message))
+      console.log(
+        `[Media Upload] Sent ${recordingType} chunk: ${blob.size} bytes (final: ${isFinal})`
+      )
     } catch (error) {
-      console.error('[Upload] Error uploading recordings:', error)
-      setError('Failed to upload recordings')
+      console.error(`[Media Upload] Error sending ${recordingType} chunk:`, error)
     }
-  }, [sessionId])
+  }, [isConnected, send])
+
+  // Start periodic media upload intervals (every 2 minutes)
+  const startMediaUploadIntervals = useCallback(() => {
+    const UPLOAD_INTERVAL_MS = 2 * 60 * 1000 // 2 minutes
+
+    // Clear any existing intervals
+    if (mediaUploadIntervalsRef.current.audio) {
+      clearInterval(mediaUploadIntervalsRef.current.audio)
+    }
+    if (mediaUploadIntervalsRef.current.video) {
+      clearInterval(mediaUploadIntervalsRef.current.video)
+    }
+    if (mediaUploadIntervalsRef.current.screen) {
+      clearInterval(mediaUploadIntervalsRef.current.screen)
+    }
+
+    // Audio upload interval
+    mediaUploadIntervalsRef.current.audio = setInterval(() => {
+      const chunks = audioChunksRef.current.slice(lastSentIndexRef.current.audio)
+      if (chunks.length > 0) {
+        sendMediaChunk('audio', chunks, false).then(() => {
+          lastSentIndexRef.current.audio = audioChunksRef.current.length
+        })
+      }
+    }, UPLOAD_INTERVAL_MS)
+
+    // Video upload interval
+    mediaUploadIntervalsRef.current.video = setInterval(() => {
+      const chunks = videoChunksRef.current.slice(lastSentIndexRef.current.video)
+      if (chunks.length > 0) {
+        sendMediaChunk('video', chunks, false).then(() => {
+          lastSentIndexRef.current.video = videoChunksRef.current.length
+        })
+      }
+    }, UPLOAD_INTERVAL_MS)
+
+    // Screen upload interval
+    mediaUploadIntervalsRef.current.screen = setInterval(() => {
+      const chunks = screenChunksRef.current.slice(lastSentIndexRef.current.screen)
+      if (chunks.length > 0) {
+        sendMediaChunk('screen', chunks, false).then(() => {
+          lastSentIndexRef.current.screen = screenChunksRef.current.length
+        })
+      }
+    }, UPLOAD_INTERVAL_MS)
+
+    console.log('[Media Upload] Started periodic upload intervals (2 minutes)')
+  }, [sendMediaChunk])
+
+  // Stop media upload intervals
+  const stopMediaUploadIntervals = useCallback(() => {
+    if (mediaUploadIntervalsRef.current.audio) {
+      clearInterval(mediaUploadIntervalsRef.current.audio)
+      mediaUploadIntervalsRef.current.audio = null
+    }
+    if (mediaUploadIntervalsRef.current.video) {
+      clearInterval(mediaUploadIntervalsRef.current.video)
+      mediaUploadIntervalsRef.current.video = null
+    }
+    if (mediaUploadIntervalsRef.current.screen) {
+      clearInterval(mediaUploadIntervalsRef.current.screen)
+      mediaUploadIntervalsRef.current.screen = null
+    }
+    console.log('[Media Upload] Stopped periodic upload intervals')
+  }, [])
+
+  // Finalize all media uploads
+  const finalizeAllMedia = useCallback(() => {
+    if (!isConnected || !send) {
+      return
+    }
+
+    // Send any remaining unsent chunks first, then finalize
+    const finalize = async () => {
+      // Send remaining audio chunks
+      const remainingAudio = audioChunksRef.current.slice(lastSentIndexRef.current.audio)
+      if (remainingAudio.length > 0) {
+        await sendMediaChunk('audio', remainingAudio, true)
+        lastSentIndexRef.current.audio = audioChunksRef.current.length
+      } else {
+        // Send final empty chunk to signal finalization
+        await sendMediaChunk('audio', [], true)
+      }
+
+      // Send remaining video chunks
+      const remainingVideo = videoChunksRef.current.slice(lastSentIndexRef.current.video)
+      if (remainingVideo.length > 0) {
+        await sendMediaChunk('video', remainingVideo, true)
+        lastSentIndexRef.current.video = videoChunksRef.current.length
+      } else {
+        await sendMediaChunk('video', [], true)
+      }
+
+      // Send remaining screen chunks
+      const remainingScreen = screenChunksRef.current.slice(lastSentIndexRef.current.screen)
+      if (remainingScreen.length > 0) {
+        await sendMediaChunk('screen', remainingScreen, true)
+        lastSentIndexRef.current.screen = screenChunksRef.current.length
+      } else {
+        await sendMediaChunk('screen', [], true)
+      }
+
+      // Send finalize all message
+      send(JSON.stringify({ type: 'finalize_all_media' }))
+      console.log('[Media Upload] Sent finalize_all_media message')
+    }
+
+    finalize().catch(console.error)
+  }, [isConnected, send, sendMediaChunk])
+
+  // Old uploadRecordings function removed - now using WebSocket streaming uploads via finalizeAllMedia()
 
   // Scroll to bottom when new messages arrive
   useEffect(() => {
@@ -1325,6 +1451,83 @@ export default function ActiveInterview({ cameraStream, micStream, templateId }:
       stopVideoRecording()
     }
   }, [isConnected, cameraStream, startVideoRecording, stopVideoRecording])
+
+  // Start media upload intervals when connected
+  useEffect(() => {
+    if (isConnected) {
+      startMediaUploadIntervals()
+    }
+    return () => {
+      stopMediaUploadIntervals()
+    }
+  }, [isConnected, startMediaUploadIntervals, stopMediaUploadIntervals])
+
+  // Browser close handlers
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      // Send finalize message if WebSocket is still open
+      if (isConnected && send) {
+        // Use sendBeacon as fallback for reliability
+        const finalizeMessage = JSON.stringify({ type: 'finalize_all_media' })
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9000'
+        const sessionIdValue = sessionId
+        
+        if (sessionIdValue) {
+          // Try to send via WebSocket first (synchronous)
+          try {
+            send(finalizeMessage)
+          } catch (error) {
+            console.error('[Media Upload] Error sending finalize on beforeunload:', error)
+          }
+
+          // Also try sendBeacon as backup
+          try {
+            navigator.sendBeacon(
+              `${apiUrl}/api/v1/interview-session/${sessionIdValue}/media/finalize/`,
+              finalizeMessage
+            )
+          } catch (error) {
+            console.error('[Media Upload] Error sending beacon:', error)
+          }
+        }
+      }
+    }
+
+    const handleVisibilityChange = () => {
+      // When tab becomes hidden, send any pending chunks
+      if (document.hidden && isConnected && send) {
+        // Send pending chunks for each type
+        const sendPending = async () => {
+          const pendingAudio = audioChunksRef.current.slice(lastSentIndexRef.current.audio)
+          if (pendingAudio.length > 0) {
+            await sendMediaChunk('audio', pendingAudio, false)
+            lastSentIndexRef.current.audio = audioChunksRef.current.length
+          }
+
+          const pendingVideo = videoChunksRef.current.slice(lastSentIndexRef.current.video)
+          if (pendingVideo.length > 0) {
+            await sendMediaChunk('video', pendingVideo, false)
+            lastSentIndexRef.current.video = videoChunksRef.current.length
+          }
+
+          const pendingScreen = screenChunksRef.current.slice(lastSentIndexRef.current.screen)
+          if (pendingScreen.length > 0) {
+            await sendMediaChunk('screen', pendingScreen, false)
+            lastSentIndexRef.current.screen = screenChunksRef.current.length
+          }
+        }
+        sendPending().catch(console.error)
+      }
+    }
+
+    window.addEventListener('beforeunload', handleBeforeUnload)
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload)
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+    }
+  }, [isConnected, send, sessionId, sendMediaChunk])
 
   // Cleanup on unmount
   useEffect(() => {
