@@ -46,6 +46,10 @@ export default function Home() {
     return () => clearInterval(timer);
   }, []);
 
+  useEffect(() => {
+    console.log("BACKEND_API_URL", process.env.NEXT_PUBLIC_API_URL);
+  },[]);
+
 
   return (
     <div className="relative flex flex-col items-center w-full h-[78vh] pb-2 pt-16">
