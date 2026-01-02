@@ -1,4 +1,6 @@
 import axios from 'axios'
+import { auth } from '@/lib/firebase'
+import { getIdToken } from 'firebase/auth'
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000'
 
@@ -9,14 +11,18 @@ const api = axios.create({
   },
 })
 
-// Add request interceptor for authentication if needed
+// Add request interceptor for authentication
 api.interceptors.request.use(
-  (config) => {
-    // TODO: Add authentication token when auth is implemented in frontend
-    // const token = getToken()
-    // if (token) {
-    //   config.headers.Authorization = `Bearer ${token}`
-    // }
+  async (config) => {
+    console.log("currrent user:", auth.currentUser)
+    if (auth.currentUser) {
+      // Get Firebase ID token
+      const token = await getIdToken(auth.currentUser)
+      console.log('Firebase ID Token:', token)
+      console.log("auth.currentUser:", auth.currentUser)
+      // Send token to Django in Authorization header
+      config.headers.Authorization = `Bearer ${token}`
+    }
     return config
   },
   (error) => {

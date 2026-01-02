@@ -21,7 +21,7 @@ export function WaitlistForm({ children }: WaitlistFormProps) {
     e.preventDefault();
     setIsSubmitting(true);
     try {
-      await api.post('/api/v1/waitlist/', { name, email });
+      await api.post('/api/v1/waitlist/', { name: name.trim(), email: email.trim() });
       toast.success("Successfully joined the waitlist!");
       setName("");
       setEmail("");
