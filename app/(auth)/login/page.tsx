@@ -1,5 +1,4 @@
-// https://rohitbels.medium.com/building-a-next-js-authentication-system-with-firebase-ddec21727db8
-
+//https://hackernoon.com/using-firebase-authentication-with-the-latest-nextjs-features
 
 
 
@@ -42,7 +41,13 @@ export default function LoginPage() {
         try {
             await auth.setPersistence(rememberMe ? browserLocalPersistence : browserSessionPersistence);
             await signInWithEmailAndPassword(auth, email, password);
-            router.push("/candidate/dashboard");
+            const idToken = await auth.currentUser?.getIdToken();
+            await fetch("/api/login", {
+                headers: {
+                    Authorization: `Bearer ${idToken}`,
+                },
+            });
+            router.push("/test");
         } catch (err) {
             console.log(err);
             setError("Something went wrong");

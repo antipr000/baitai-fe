@@ -161,10 +161,10 @@ export default function Home() {
           </div>
 
           <div className="hidden md:flex items-center space-x-4">
-            <WaitlistForm><Button variant="ghost" className="lg:text-base rounded-full text-sm hover:bg-[linear-gradient(106.03deg,rgba(239,246,254,0.5)_0%,rgba(163,217,248,0.5)_238.47%)]  hover:opacity-80 bg-[linear-gradient(106.03deg,rgba(239,246,254,0.5)_0%,rgba(163,217,248,0.5)_238.47%)]  text-[rgba(108,132,255,1)] hover:text-[rgba(108,132,255,1)] border font-medium  border-[rgba(108,132,255,0.9)]">Sign in</Button></WaitlistForm>
-            <WaitlistForm><Button className="flex rounded-full items-center overflow-hidden p-5 lg:text-base text-sm  bg-[linear-gradient(106.03deg,#677CFF_0%,#A3D9F8_238.47%)] hover:opacity-70 text-[rgba(238,246,251,1)] font-medium ">
-              Request a demo
-            </Button></WaitlistForm>
+            <Link href="/login"><Button className="flex rounded-full items-center overflow-hidden p-5 lg:text-base text-sm  bg-[linear-gradient(106.03deg,#677CFF_0%,#A3D9F8_238.47%)] hover:opacity-70 text-[rgba(238,246,251,1)] font-medium ">
+              Login
+            </Button></Link>
+             <Link href="/signup"><Button variant="ghost" className="lg:text-base rounded-full text-sm hover:bg-[linear-gradient(106.03deg,rgba(239,246,254,0.5)_0%,rgba(163,217,248,0.5)_238.47%)]  hover:opacity-80 bg-[linear-gradient(106.03deg,rgba(239,246,254,0.5)_0%,rgba(163,217,248,0.5)_238.47%)]  text-[rgba(108,132,255,1)] hover:text-[rgba(108,132,255,1)] border font-medium  border-[rgba(108,132,255,0.9)]">Sign up</Button></Link>
           </div>
           <div className="md:hidden  justify-around items-center">
             <MobileNavBar />
@@ -688,6 +688,6 @@ export default function Home() {
         <Footer />
       </section>
 
-    </div>
+    </div >
   );
 }
