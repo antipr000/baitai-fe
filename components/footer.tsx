@@ -29,7 +29,7 @@ export const Footer = () => {
                </div>
  
                <div className="text-primary lg:text-base text-xs  md:text-sm">
-                 Copyright © 2025 Bait AI | All Rights Reserved
+                 Copyright © 2026 Bait AI | All Rights Reserved
                </div>
              </div>
            </div>
