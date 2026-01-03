@@ -3,7 +3,7 @@
 
 
 "use client";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { auth } from "@/lib/firebase";
 import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, browserLocalPersistence, browserSessionPersistence, sendPasswordResetEmail } from "firebase/auth";
@@ -20,6 +20,7 @@ import api from "@/lib/api/client";
 export default function LoginPage() {
     const router = useRouter();
     const [email, setEmail] = useState("");
+    
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
@@ -32,14 +33,18 @@ export default function LoginPage() {
 
         try {
             await auth.setPersistence(rememberMe ? browserLocalPersistence : browserSessionPersistence);
-            await signInWithEmailAndPassword(auth, email, password);
-            const idToken = await auth.currentUser?.getIdToken();
-            await fetch("/api/login", {
-                headers: {
-                    Authorization: `Bearer ${idToken}`,
-                },
-            });
-            router.push("/candidate/dashboard");
+            const credentials =  await signInWithEmailAndPassword(auth, email, password);
+            if(credentials.user.emailVerified){
+                const idToken = await credentials.user.getIdToken();
+                await fetch("/api/login", {
+                    headers: {
+                        Authorization: `Bearer ${idToken}`,
+                    },
+                });
+                router.push("/candidate/dashboard");
+            }else{
+                toast.error("Please verify your email");
+            }
         } catch (err) {
             console.log(err);
             setError("Something went wrong");
@@ -271,7 +276,7 @@ function ForgotPasswordModal() {
             </div>
 
             <DialogFooter className="mt-4">
-                <Button onClick={handleResetPassword} disabled={loading}>
+                <Button className="bg-[linear-gradient(92.1deg,#5A6CDB_-8.11%,#8D9DFD_148.24%)] hover:bg-[linear-gradient(92.1deg,#5A6CDB_-8.11%,#8D9DFD_148.24%)] hover:opacity-80" onClick={handleResetPassword} disabled={loading}>
                     {loading ? "Sending..." : "Send Reset Email"}
                 </Button>
             </DialogFooter>

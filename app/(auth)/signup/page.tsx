@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { auth } from "@/lib/firebase";
-import { GoogleAuthProvider, signInWithPopup, browserLocalPersistence, browserSessionPersistence, signInWithEmailAndPassword, signInWithCustomToken } from "firebase/auth";
+import { GoogleAuthProvider, signInWithPopup, browserLocalPersistence, browserSessionPersistence, signInWithEmailAndPassword, signInWithCustomToken, sendEmailVerification } from "firebase/auth";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -57,14 +57,19 @@ export default function SignupPage() {
                 full_name: fullName.trim()
             });
             const idToken = await auth.currentUser?.getIdToken();
-            await signInWithEmailAndPassword(auth, email.trim(), password);
-            await fetch("/api/login", {
-                headers: {
-                    Authorization: `Bearer ${idToken}`,
-                },
-            });
-            toast.success("Account created successfully!");
-            router.push("/candidate/dashboard");
+            const credential =await signInWithEmailAndPassword(auth, email.trim(), password);
+
+            await sendEmailVerification(credential.user);
+            toast.success("Verification email sent! Check your email")
+            // await fetch("/api/login", {
+            //     headers: {
+            //         Authorization: `Bearer ${idToken}`,
+            //     },
+            // });
+            
+
+            // toast.success("Account created successfully!");
+            // router.push("/candidate/dashboard");
         } catch (err) {
             console.log(err);
             setError("Something went wrong");
