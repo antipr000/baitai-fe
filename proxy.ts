@@ -3,9 +3,13 @@ import { authMiddleware, redirectToHome, redirectToLogin } from "next-firebase-a
 import { clientConfig, serverConfig } from "@/lib/auth/config";
 
 const AUTH_PAGES = ['/signup', '/login'];
-const PUBLIC_PATHS = ['/', '/about', '/pricing','/test', ...AUTH_PAGES];
+const PUBLIC_PATHS = ['/', '/about', '/pricing', '/test', ...AUTH_PAGES];
 
 export async function proxy(request: NextRequest) {
+  // TEMPORARILY DISABLED FOR TESTING - Remove comments to re-enable auth
+  return NextResponse.next();
+
+  /* 
   return authMiddleware(request, {
     loginPath: "/api/login",
     logoutPath: "/api/logout",
@@ -49,6 +53,7 @@ export async function proxy(request: NextRequest) {
       });
     }
   });
+  */
 }
 
 export const config = {
