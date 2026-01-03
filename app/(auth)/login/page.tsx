@@ -15,6 +15,7 @@ import Link from "next/link";
 import { toast } from "sonner";
 import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import Image from "next/image";
+import api from "@/lib/api/client";
 
 export default function LoginPage() {
     const router = useRouter();
@@ -23,15 +24,6 @@ export default function LoginPage() {
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
     const [rememberMe, setRememberMe] = useState(true);
-
-    useEffect(() => {
-        const unsubscribe = auth.onAuthStateChanged((user) => {
-            if (user) {
-                router.push("/candidate/dashboard");
-            }
-        });
-        return () => unsubscribe();
-    }, [router]);
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -47,7 +39,7 @@ export default function LoginPage() {
                     Authorization: `Bearer ${idToken}`,
                 },
             });
-            router.push("/test");
+            router.push("/candidate/dashboard");
         } catch (err) {
             console.log(err);
             setError("Something went wrong");
@@ -65,6 +57,20 @@ export default function LoginPage() {
         try {
             await auth.setPersistence(rememberMe ? browserLocalPersistence : browserSessionPersistence);
             const userCredential = await signInWithPopup(auth, provider);
+            // Get the Firebase ID token
+            const idToken = await userCredential.user.getIdToken();
+            // delay to patch the sync issue
+
+            // Send token to backend
+            await api.post('api/v1/user/signup/token/', {
+                token: idToken,
+            });
+
+            await fetch("/api/login", {
+                headers: {
+                    Authorization: `Bearer ${idToken}`,
+                },
+            });
             toast.success("Successfully logged in! Redirecting...");
             router.push("/candidate/dashboard");
         } catch (err) {

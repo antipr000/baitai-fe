@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { auth } from "@/lib/firebase";
-import { GoogleAuthProvider, signInWithPopup, browserLocalPersistence, browserSessionPersistence, signInWithEmailAndPassword } from "firebase/auth";
+import { GoogleAuthProvider, signInWithPopup, browserLocalPersistence, browserSessionPersistence, signInWithEmailAndPassword, signInWithCustomToken } from "firebase/auth";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -23,14 +23,6 @@ export default function SignupPage() {
     const [rememberMe, setRememberMe] = useState(true);
     const [agreedToTerms, setAgreedToTerms] = useState(false);
 
-    useEffect(() => {
-        const unsubscribe = auth.onAuthStateChanged((user) => {
-            if (user) {
-                router.push("/candidate/dashboard");
-            }
-        });
-        return () => unsubscribe();
-    }, [router]);
 
     const handleSignup = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -64,7 +56,13 @@ export default function SignupPage() {
                 password,
                 full_name: fullName.trim()
             });
+            const idToken = await auth.currentUser?.getIdToken();
             await signInWithEmailAndPassword(auth, email.trim(), password);
+            await fetch("/api/login", {
+                headers: {
+                    Authorization: `Bearer ${idToken}`,
+                },
+            });
             toast.success("Account created successfully!");
             router.push("/candidate/dashboard");
         } catch (err) {
@@ -84,6 +82,22 @@ export default function SignupPage() {
         try {
             await auth.setPersistence(rememberMe ? browserLocalPersistence : browserSessionPersistence);
             const userCredential = await signInWithPopup(auth, provider);
+
+            // Get the Firebase ID token
+            const idToken = await userCredential.user.getIdToken();
+            // delay to patch the sync issue
+
+            // Send token to backend
+            await api.post('api/v1/user/signup/token/', {
+                token: idToken,
+            });
+
+            await fetch("/api/login", {
+                headers: {
+                    Authorization: `Bearer ${idToken}`,
+                },
+            });
+
             toast.success("Successfully signed up! Redirecting...");
             router.push("/candidate/dashboard");
         } catch (err) {

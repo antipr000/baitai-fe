@@ -1,16 +1,43 @@
 "use client"
 
 import { Menu } from 'lucide-react'
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Sheet, SheetContent, SheetTrigger } from './ui/sheet';
 import { Button } from './ui/button';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Separator } from './ui/separator';
-import { WaitlistForm } from './waitlist-form';
+import { auth } from '@/lib/firebase';
+import { onAuthStateChanged, signOut } from 'firebase/auth';
+import { useRouter } from 'next/navigation';
 
 export const MobileNavBar = () => {
     const [open, setOpen] = useState(false);
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
+    const router = useRouter();
+
+    useEffect(() => {
+        const unsubscribe = onAuthStateChanged(auth, (user) => {
+            setIsAuthenticated(!!user);
+            setIsLoading(false);
+        });
+
+        return () => unsubscribe();
+    }, []);
+
+    async function handleLogout() {
+        try {
+            await signOut(auth);
+            await fetch("/api/logout");
+            setOpen(false);
+            router.push("/login");
+        } catch (error) {
+            console.error("Logout failed:", error);
+            router.push("/login");
+        }
+    }
+
     return (<Sheet open={open} onOpenChange={setOpen}>
         <><SheetTrigger asChild className="">
             <Button variant="ghost" size="icon" className="text-[rgba(69,94,255,0.8)] ml-auto">
@@ -73,17 +100,33 @@ export const MobileNavBar = () => {
                     <Separator className="my-2" />
 
                 </nav>
-                <div className="flex flex-col gap-4 border-[rgba(121,153,253,0.05)] border  px-2 p-1">
-                    <WaitlistForm>
-                        <Button variant="ghost" className="w-full bg-[linear-gradient(106.03deg,rgba(239,246,254,0.5)_0%,rgba(163,217,248,0.5)_238.47%)] text-[rgba(108,132,255,1)] hover:opacity-70 border font-medium border-[rgba(108,132,255,0.9)]">
-                            Sign in
-                        </Button>
-                    </WaitlistForm>
-                    <WaitlistForm>
-                    <Button className="w-full  bg-[linear-gradient(106.03deg,#677CFF_0%,#A3D9F8_238.47%)] hover:opacity-70 text-[rgba(238,246,251,1)] font-medium">
-                        Request a demo
-                    </Button>
-                    </WaitlistForm>
+                <div className="flex flex-col gap-4 border-[rgba(121,153,253,0.05)] border px-2 p-1">
+                    {!isLoading && (
+                        <>
+                            {isAuthenticated ? (
+                                <Button
+                                    onClick={handleLogout}
+                                    className="w-full bg-[linear-gradient(106.03deg,#677CFF_0%,#A3D9F8_238.47%)] hover:opacity-70 text-[rgba(238,246,251,1)] font-medium"
+                                >
+                                    Logout
+                                </Button>
+                            ) : (
+                                <>
+                                    <Link href="/login">
+                                        <Button className="w-full bg-[linear-gradient(106.03deg,#677CFF_0%,#A3D9F8_238.47%)] hover:opacity-70 text-[rgba(238,246,251,1)] font-medium">
+                                            Login
+                                        </Button>
+                                    </Link>
+
+                                    <Link href="/signup">
+                                        <Button variant="ghost" className="w-full bg-[linear-gradient(106.03deg,rgba(239,246,254,0.5)_0%,rgba(163,217,248,0.5)_238.47%)] text-[rgba(108,132,255,1)] hover:opacity-70 border font-medium border-[rgba(108,132,255,0.9)]">
+                                            Sign Up
+                                        </Button>
+                                    </Link>
+                                </>
+                            )}
+                        </>
+                    )}
                 </div>
             </SheetContent></>
     </Sheet>
