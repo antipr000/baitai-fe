@@ -71,7 +71,7 @@ async function getData(): Promise<Result[]> {
 
 
 
-export default async function Results() {
+export default async function ResultsPage() {
     const data = await getData()
     return (
         <div>
