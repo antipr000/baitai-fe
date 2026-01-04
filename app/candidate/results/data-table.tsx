@@ -5,9 +5,10 @@ import {
     flexRender,
     getCoreRowModel,
     getFilteredRowModel,
+    getSortedRowModel,
     useReactTable,
     ColumnFiltersState,
-    GlobalFilterTableState,
+    SortingState,
 } from "@tanstack/react-table"
 
 import {
@@ -36,19 +37,23 @@ export function DataTable<TData, TValue>({
 }: DataTableProps<TData, TValue>) {
     const [globalFilter, setGlobalFilter] = useState("")
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
-    
+    const [sorting, setSorting] = useState<SortingState>([])
+
     const table = useReactTable({
         data,
         columns,
         getCoreRowModel: getCoreRowModel(),
         getFilteredRowModel: getFilteredRowModel(),
+        getSortedRowModel: getSortedRowModel(),
         globalFilterFn: "includesString",
         state: {
             globalFilter,
             columnFilters,
+            sorting,
         },
         onGlobalFilterChange: setGlobalFilter,
         onColumnFiltersChange: setColumnFilters,
+        onSortingChange: setSorting,
     })
 
     return (
@@ -56,7 +61,7 @@ export function DataTable<TData, TValue>({
             <div className="f py-4 2-full ">
                 <div className="w-[85%] flex gap-4 items-center">
                     <InputGroup className="bg-white w-full">
-                        <InputGroupInput  placeholder="Search..."
+                        <InputGroupInput placeholder="Search..."
                             value={globalFilter ?? ""}
                             onChange={(event) => setGlobalFilter(event.target.value)}
                             className=" font-medium  placeholder:text-muted-foreground/70"
@@ -75,17 +80,14 @@ export function DataTable<TData, TValue>({
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="start" className="w-40">
-                            <DropdownMenuItem onClick={() => table.getColumn("difficulty")?.setFilterValue("")}>
+                            <DropdownMenuItem onClick={() => table.getColumn("interviewType")?.setFilterValue("")}>
                                 All
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => table.getColumn("difficulty")?.setFilterValue("Easy")}>
-                                Easy
+                            <DropdownMenuItem onClick={() => table.getColumn("interviewType")?.setFilterValue("Practice")}>
+                                Practice
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => table.getColumn("difficulty")?.setFilterValue("Medium")}>
-                                Medium
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => table.getColumn("difficulty")?.setFilterValue("Difficult")}>
-                                Difficult
+                            <DropdownMenuItem onClick={() => table.getColumn("interviewType")?.setFilterValue("Interview")}>
+                                Interview
                             </DropdownMenuItem>
                         </DropdownMenuContent>
                     </DropdownMenu>
@@ -99,7 +101,7 @@ export function DataTable<TData, TValue>({
                             <TableRow key={headerGroup.id}>
                                 {headerGroup.headers.map((header) => {
                                     return (
-                                        <TableHead key={header.id} className="p-4 px-3">
+                                        <TableHead key={header.id} className="p-4 px-3 font-semibold">
                                             {header.isPlaceholder
                                                 ? null
                                                 : flexRender(
