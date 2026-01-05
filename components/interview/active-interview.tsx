@@ -1359,11 +1359,31 @@ export default function ActiveInterview({ cameraStream, micStream, templateId }:
     chunks: Blob[],
     isFinal: boolean = false
   ) => {
-    if (!isConnected || !send || chunks.length === 0) {
+    if (!isConnected || !send) {
+      return
+    }
+    
+    // Allow empty chunks only if isFinal is true (for finalization signal)
+    if (chunks.length === 0 && !isFinal) {
       return
     }
 
     try {
+      // For empty chunks with isFinal, send a minimal message to trigger finalization
+      if (chunks.length === 0 && isFinal) {
+        const message = {
+          type: 'media_chunk',
+          recording_type: recordingType,
+          chunk: '', // Empty base64 string
+          is_final: true,
+        }
+        send(JSON.stringify(message))
+        console.log(
+          `[Media Upload] Sent finalization signal for ${recordingType} (no chunks)`
+        )
+        return
+      }
+
       // Combine chunks into a single blob
       const blob = new Blob(chunks, {
         type: recordingType === 'audio' 
