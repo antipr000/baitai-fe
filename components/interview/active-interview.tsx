@@ -1300,7 +1300,7 @@ export default function ActiveInterview({ cameraStream, micStream, templateId }:
         console.log('[Video Recording] Video recording stopped')
       }
 
-      mediaRecorder.start(1000) // Collect chunks every second
+      mediaRecorder.start(500) // Collect chunks every 500ms for more frequent uploads
       console.log('[Video Recording] Video recording started')
     } catch (error) {
       console.error('[Video Recording] Error starting video recording:', error)
@@ -1339,7 +1339,7 @@ export default function ActiveInterview({ cameraStream, micStream, templateId }:
         console.log('[Screen Recording] Screen recording stopped')
       }
 
-      mediaRecorder.start(1000) // Collect chunks every second
+      mediaRecorder.start(500) // Collect chunks every 500ms for more frequent uploads
       console.log('[Screen Recording] Screen recording started')
     } catch (error) {
       console.error('[Screen Recording] Error starting screen recording:', error)
@@ -1425,7 +1425,7 @@ export default function ActiveInterview({ cameraStream, micStream, templateId }:
 
   // Start periodic media upload intervals (every 2 minutes)
   const startMediaUploadIntervals = useCallback(() => {
-    const UPLOAD_INTERVAL_MS = 2 * 60 * 1000 // 2 minutes
+    const UPLOAD_INTERVAL_MS = 5 * 1000 // 5 seconds - send chunks more frequently
 
     // Clear any existing intervals
     if (mediaUploadIntervalsRef.current.audio) {
@@ -1468,7 +1468,7 @@ export default function ActiveInterview({ cameraStream, micStream, templateId }:
       }
     }, UPLOAD_INTERVAL_MS)
 
-    console.log('[Media Upload] Started periodic upload intervals (2 minutes)')
+    console.log('[Media Upload] Started periodic upload intervals (5 seconds)')
   }, [sendMediaChunk])
 
   // Stop media upload intervals
