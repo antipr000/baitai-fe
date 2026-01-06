@@ -51,6 +51,13 @@ export default function ActiveInterview({ cameraStream, micStream, templateId }:
   const audioChunksRef = useRef<Blob[]>([])
   const hasHeardSpeechThisListeningTurnRef = useRef(false)
   const noiseFloorRmsRef = useRef<number>(0.008)
+  
+  // Mixed audio recording refs (for capturing both user mic and AI audio)
+  const mixedAudioContextRef = useRef<AudioContext | null>(null)
+  const mixedAudioDestinationRef = useRef<MediaStreamAudioDestinationNode | null>(null)
+  const mixedAudioStreamRef = useRef<MediaStream | null>(null)
+  const micSourceNodeRef = useRef<MediaStreamAudioSourceNode | null>(null)
+  const aiAudioGainNodeRef = useRef<GainNode | null>(null)
 
   // Video and screen recording refs
   const screenStreamRef = useRef<MediaStream | null>(null)
@@ -81,6 +88,7 @@ export default function ActiveInterview({ cameraStream, micStream, templateId }:
   const isProcessingTokensRef = useRef(false) // Whether we're currently processing the queue
   const expectedAudioChunkRef = useRef<{ chunkIndex: number; text: string } | null>(null) // Track expected audio chunk
   const sentenceCompleteRef = useRef<Map<number, string>>(new Map()) // Track completed sentences by chunk index
+  const currentAISourceNodeRef = useRef<AudioBufferSourceNode | null>(null) // Track current AI audio source for mixing
 
   // UI refs
   const videoRef = useRef<HTMLVideoElement | null>(null)
@@ -175,6 +183,45 @@ export default function ActiveInterview({ cameraStream, micStream, templateId }:
     }
   }, [])
 
+  // Initialize mixed audio context for recording both user mic and AI audio
+  const initializeMixedAudioContext = useCallback(async (micStream: MediaStream): Promise<void> => {
+    try {
+      // Create or reuse mixed audio context
+      if (!mixedAudioContextRef.current || mixedAudioContextRef.current.state === 'closed') {
+        mixedAudioContextRef.current = new AudioContext({ sampleRate: 16000 })
+      }
+      
+      if (mixedAudioContextRef.current.state === 'suspended') {
+        await mixedAudioContextRef.current.resume()
+      }
+
+      // Create destination node for mixed audio recording
+      if (!mixedAudioDestinationRef.current) {
+        mixedAudioDestinationRef.current = mixedAudioContextRef.current.createMediaStreamDestination()
+        mixedAudioStreamRef.current = mixedAudioDestinationRef.current.stream
+      }
+
+      // Connect mic input to mixed destination
+      if (micSourceNodeRef.current) {
+        micSourceNodeRef.current.disconnect()
+      }
+      micSourceNodeRef.current = mixedAudioContextRef.current.createMediaStreamSource(micStream)
+      micSourceNodeRef.current.connect(mixedAudioDestinationRef.current)
+
+      // Create gain node for AI audio (to control volume in mix)
+      if (!aiAudioGainNodeRef.current) {
+        aiAudioGainNodeRef.current = mixedAudioContextRef.current.createGain()
+        aiAudioGainNodeRef.current.gain.value = 1.0 // Full volume
+        aiAudioGainNodeRef.current.connect(mixedAudioDestinationRef.current)
+      }
+
+      console.log('[Mixed Audio] Initialized mixed audio context for recording')
+    } catch (error) {
+      console.error('[Mixed Audio] Error initializing mixed audio context:', error)
+      throw error
+    }
+  }, [])
+
   const playNextAudio = useCallback(async () => {
     if (isPlayingRef.current || audioQueueRef.current.length === 0) {
       return
@@ -189,16 +236,27 @@ export default function ActiveInterview({ cameraStream, micStream, templateId }:
     console.log('[Audio Playback] Starting AI audio playback')
 
     try {
-      if (!audioPlaybackContextRef.current) {
-        audioPlaybackContextRef.current = new AudioContext()
+      // Use mixed audio context if available, otherwise create a new playback context
+      let playbackContext = mixedAudioContextRef.current
+      if (!playbackContext || playbackContext.state === 'closed') {
+        if (!audioPlaybackContextRef.current || audioPlaybackContextRef.current.state === 'closed') {
+          audioPlaybackContextRef.current = new AudioContext()
+        }
+        playbackContext = audioPlaybackContextRef.current
+      }
+
+      if (playbackContext.state === 'suspended') {
+        await playbackContext.resume()
       }
 
       const audioData = audioQueueRef.current.shift()!
-      const audioBuffer = await audioPlaybackContextRef.current.decodeAudioData(audioData)
-      const source = audioPlaybackContextRef.current.createBufferSource()
+      const audioBuffer = await playbackContext.decodeAudioData(audioData)
+      const source = playbackContext.createBufferSource()
       source.buffer = audioBuffer
+      currentAISourceNodeRef.current = source
 
       source.onended = () => {
+        currentAISourceNodeRef.current = null
         isPlayingRef.current = false
         setIsAISpeaking(false)
         console.log('[Audio Playback] AI finished speaking, checking for more audio...')
@@ -240,10 +298,19 @@ export default function ActiveInterview({ cameraStream, micStream, templateId }:
         }
       }
 
-      source.connect(audioPlaybackContextRef.current.destination)
+      // Connect to both speakers (for user to hear) and mixed destination (for recording)
+      source.connect(playbackContext.destination) // Play to speakers
+      if (aiAudioGainNodeRef.current && playbackContext === mixedAudioContextRef.current) {
+        // Also connect to mixed audio destination for recording (only if using mixed context)
+        source.connect(aiAudioGainNodeRef.current)
+        console.log('[Audio Playback] AI audio routed to both speakers and recording mix')
+      } else {
+        console.log('[Audio Playback] AI audio routed to speakers only (mixed context not initialized)')
+      }
       source.start(0)
     } catch (error) {
       console.error('[Audio Playback] Error playing audio:', error)
+      currentAISourceNodeRef.current = null
       isPlayingRef.current = false
       setIsAISpeaking(false)
       // Try next audio
@@ -989,9 +1056,15 @@ export default function ActiveInterview({ cameraStream, micStream, templateId }:
     }
 
     try {
-      console.log('[Recording] Starting user audio recording...')
-      // Create MediaRecorder
-      const mediaRecorder = new MediaRecorder(stream!, {
+      // Initialize mixed audio context (for recording both user mic and AI audio)
+      await initializeMixedAudioContext(stream)
+      
+      // Use mixed audio stream for recording (includes both user mic and AI audio)
+      const recordingStream = mixedAudioStreamRef.current || stream
+      console.log('[Recording] Starting mixed audio recording (user mic + AI audio)...')
+      
+      // Create MediaRecorder using mixed stream
+      const mediaRecorder = new MediaRecorder(recordingStream, {
         mimeType: 'audio/webm;codecs=opus',
       })
 
@@ -1037,7 +1110,7 @@ export default function ActiveInterview({ cameraStream, micStream, templateId }:
       console.error('[Recording] Error starting recording:', error)
       setError('Failed to start recording')
     }
-  }, [setupSilenceDetection, stopSilenceDetection])
+  }, [setupSilenceDetection, stopSilenceDetection, initializeMixedAudioContext])
 
   // Store startRecording in ref
   useEffect(() => {
@@ -1057,6 +1130,17 @@ export default function ActiveInterview({ cameraStream, micStream, templateId }:
     }
 
     stopSilenceDetection()
+    
+    // Cleanup mixed audio nodes (but keep context for potential reuse)
+    if (micSourceNodeRef.current) {
+      micSourceNodeRef.current.disconnect()
+      micSourceNodeRef.current = null
+    }
+    if (currentAISourceNodeRef.current) {
+      currentAISourceNodeRef.current.disconnect()
+      currentAISourceNodeRef.current = null
+    }
+    
     console.log('[Recording] AudioContext closed')
   }, [stopSilenceDetection])
 
@@ -1216,7 +1300,7 @@ export default function ActiveInterview({ cameraStream, micStream, templateId }:
         console.log('[Video Recording] Video recording stopped')
       }
 
-      mediaRecorder.start(1000) // Collect chunks every second
+      mediaRecorder.start(500) // Collect chunks every 500ms for more frequent uploads
       console.log('[Video Recording] Video recording started')
     } catch (error) {
       console.error('[Video Recording] Error starting video recording:', error)
@@ -1255,7 +1339,7 @@ export default function ActiveInterview({ cameraStream, micStream, templateId }:
         console.log('[Screen Recording] Screen recording stopped')
       }
 
-      mediaRecorder.start(1000) // Collect chunks every second
+      mediaRecorder.start(500) // Collect chunks every 500ms for more frequent uploads
       console.log('[Screen Recording] Screen recording started')
     } catch (error) {
       console.error('[Screen Recording] Error starting screen recording:', error)
@@ -1275,11 +1359,31 @@ export default function ActiveInterview({ cameraStream, micStream, templateId }:
     chunks: Blob[],
     isFinal: boolean = false
   ) => {
-    if (!isConnected || !send || chunks.length === 0) {
+    if (!isConnected || !send) {
+      return
+    }
+    
+    // Allow empty chunks only if isFinal is true (for finalization signal)
+    if (chunks.length === 0 && !isFinal) {
       return
     }
 
     try {
+      // For empty chunks with isFinal, send a minimal message to trigger finalization
+      if (chunks.length === 0 && isFinal) {
+        const message = {
+          type: 'media_chunk',
+          recording_type: recordingType,
+          chunk: '', // Empty base64 string
+          is_final: true,
+        }
+        send(JSON.stringify(message))
+        console.log(
+          `[Media Upload] Sent finalization signal for ${recordingType} (no chunks)`
+        )
+        return
+      }
+
       // Combine chunks into a single blob
       const blob = new Blob(chunks, {
         type: recordingType === 'audio' 
@@ -1321,7 +1425,7 @@ export default function ActiveInterview({ cameraStream, micStream, templateId }:
 
   // Start periodic media upload intervals (every 2 minutes)
   const startMediaUploadIntervals = useCallback(() => {
-    const UPLOAD_INTERVAL_MS = 2 * 60 * 1000 // 2 minutes
+    const UPLOAD_INTERVAL_MS = 5 * 1000 // 5 seconds - send chunks more frequently
 
     // Clear any existing intervals
     if (mediaUploadIntervalsRef.current.audio) {
@@ -1364,7 +1468,7 @@ export default function ActiveInterview({ cameraStream, micStream, templateId }:
       }
     }, UPLOAD_INTERVAL_MS)
 
-    console.log('[Media Upload] Started periodic upload intervals (2 minutes)')
+    console.log('[Media Upload] Started periodic upload intervals (5 seconds)')
   }, [sendMediaChunk])
 
   // Stop media upload intervals
@@ -1580,6 +1684,28 @@ export default function ActiveInterview({ cameraStream, micStream, templateId }:
       if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
         audioContextRef.current.close().catch(console.error)
       }
+      // Cleanup mixed audio context
+      if (micSourceNodeRef.current) {
+        micSourceNodeRef.current.disconnect()
+        micSourceNodeRef.current = null
+      }
+      if (currentAISourceNodeRef.current) {
+        currentAISourceNodeRef.current.disconnect()
+        currentAISourceNodeRef.current = null
+      }
+      if (aiAudioGainNodeRef.current) {
+        aiAudioGainNodeRef.current.disconnect()
+        aiAudioGainNodeRef.current = null
+      }
+      if (mixedAudioDestinationRef.current) {
+        mixedAudioDestinationRef.current.disconnect()
+        mixedAudioDestinationRef.current = null
+      }
+      if (mixedAudioContextRef.current && mixedAudioContextRef.current.state !== 'closed') {
+        mixedAudioContextRef.current.close().catch(console.error)
+        mixedAudioContextRef.current = null
+      }
+      mixedAudioStreamRef.current = null
       if (thinkingTimerRef.current) {
         clearTimeout(thinkingTimerRef.current)
       }
