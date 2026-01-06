@@ -90,7 +90,6 @@ export default function SignupPage() {
 
             // Get the Firebase ID token
             const idToken = await userCredential.user.getIdToken();
-            // delay to patch the sync issue
 
             // Send token to backend
             await api.post('api/v1/user/signup/token/', {
@@ -102,7 +101,6 @@ export default function SignupPage() {
                     Authorization: `Bearer ${idToken}`,
                 },
             });
-
             toast.success("Successfully signed up! Redirecting...");
             router.push("/candidate/dashboard");
         } catch (err) {

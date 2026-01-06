@@ -1,11 +1,12 @@
 "use client"
 
-import { ArrowLeft, TrendingUp, Trophy, BarChart3, Target } from "lucide-react"
+import { TrendingUp } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { ChartContainer } from "@/components/ui/chart"
-import { RadialBarChart, RadialBar, PolarAngleAxis } from "recharts"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent } from "@/components/ui/chart"
+import { Progress } from "@/components/ui/progress"
+import { RadialBarChart, RadialBar, PolarAngleAxis, LineChart, Line, XAxis, YAxis, BarChart, Bar, CartesianGrid, Cell } from "recharts"
 import Link from "next/link"
 import Image from "next/image"
 import { BackButton } from "@/components/ui/back-button"
@@ -24,6 +25,32 @@ export default function ResultPage() {
 
     const chartData = [{ name: "score", value: score, fill: "url(#scoreGradient)" }]
     const chartConfig = { score: { label: "Score", color: "" } }
+
+    // Performance Trend Data
+    const performanceTrendData = [
+        { month: "Jan", score: 65 },
+        { month: "Feb", score: 68 },
+        { month: "Mar", score: 75 },
+        { month: "Apr", score: 82 },
+        { month: "May", score: 78 },
+        { month: "Jun", score: 85 },
+    ]
+
+    // Skill Metrics Data
+    const skillMetricsData = [
+        { skill: "Technical", score: 76 },
+        { skill: "Problem-Solving", score: 85 },
+        { skill: "Communication", score: 90 },
+        { skill: "Cultural Fit", score: 79 },
+    ]
+
+    // Skill Cards Data
+    const skillCards = [
+        { title: "Technical Skills", score: 76, description: "Excellent problem-solving approach and clean code", },
+        { title: "Communication", score: 90, description: "Clear explanations, could be more concise", },
+        { title: "Problem Solving", score: 85, description: "Strong analytical thinking and edge case handling", },
+        { title: "Cultural Fit", score: 79, description: "Good alignment with team values", },
+    ]
 
     return (
         <div className="min-h-screen bg-[rgba(245,247,255,1)]">
@@ -82,7 +109,9 @@ export default function ResultPage() {
                                             </linearGradient>
                                         </defs>
                                         <PolarAngleAxis type="number" domain={[0, maxScore]} tick={false} />
-                                        <RadialBar dataKey="value" background cornerRadius={10} />
+                                        {/* <RadialBar dataKey="value" background cornerRadius={10} /> */}
+                                        <RadialBar dataKey="value" cornerRadius={10} />
+
                                     </RadialBarChart>
                                 </ChartContainer>
                                 <div className="absolute inset-0 flex flex-col items-center justify-center">
@@ -147,6 +176,124 @@ export default function ResultPage() {
                             </div>
                         </CardContent>
                     </Card>
+                </div>
+
+                {/* Charts Row */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    {/* Performance Trend */}
+                    <Card className="bg-[rgba(196,240,0,0.1)] border border-[rgba(196,240,0,0.05)]">
+                        <CardHeader className="pb-2">
+                            <CardTitle className="flex items-center gap-2 text-base font-semibold">
+                                <Image src="/candidate/results/trend.svg" alt="trend" width={20} height={20} className="mr-1 mt-2 h-6 w-6" />
+                                Performance Trend
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <ChartContainer config={{ score: { label: "Score", color: "#3B82F6" } }} className="h-[200px] w-full">
+                                <LineChart data={performanceTrendData}>
+                                    <defs>
+                                        <linearGradient id="lineGradient" x1="0" y1="0" x2="1" y2="0">
+                                            <stop offset="0%" stopColor="rgba(107,124,255,1)" />
+                                            <stop offset="100%" stopColor="rgba(98,117,252,1)" />
+                                        </linearGradient>
+                                    </defs>
+                                    <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: "" }} />
+                                    <YAxis hide domain={[50, 100]} />
+                                    <ChartTooltip
+                                        content={<ChartTooltipContent className="bg-white! backdrop-blur-sm! !border-gray-200" />}
+                                    />
+                                    <Line
+                                        type="monotone"
+                                        dataKey="score"
+                                        stroke="url(#lineGradient)"
+                                        strokeWidth={3}
+                                        dot={false}
+                                    />
+                                </LineChart>
+                            </ChartContainer>
+                        </CardContent>
+                    </Card>
+
+                    {/* Skill Metrics */}
+                    <Card className="bg-[rgba(107,124,255,0.05)] border-[rgba(102,120,253,0.1)]">
+                        <CardHeader className="pb-2">
+                            <CardTitle className="flex items-center gap-2 text-base font-semibold">
+                                <Image src="/candidate/results/trend.svg" alt="trend" width={20} height={20} className="mr-1 mt-2 h-6 w-6" />
+                                Skill Metrics
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <ChartContainer
+                                config={{
+                                    Technical: { label: "Technical", color: "#818CF8" },
+                                    "Problem-Solving": { label: "Problem-Solving", color: "#86EFAC" },
+                                    Communication: { label: "Communication", color: "#F472B6" },
+                                    "Cultural Fit": { label: "Cultural Fit", color: "#FDBA74" },
+                                }}
+                                className="h-[180px] w-full"
+                            >
+                                <BarChart data={skillMetricsData} barSize={16}>
+                                    <defs>
+                                        <linearGradient id="technicalGradient" x1="0" y1="1" x2="0" y2="0">
+                                            <stop offset="0%" stopColor="#818CF8" />
+                                            <stop offset="100%" stopColor="#C7D2FE" />
+                                        </linearGradient>
+                                        <linearGradient id="problemGradient" x1="0" y1="1" x2="0" y2="0">
+                                            <stop offset="0%" stopColor="#86EFAC" />
+                                            <stop offset="100%" stopColor="#D1FAE5" />
+                                        </linearGradient>
+                                        <linearGradient id="communicationGradient" x1="0" y1="1" x2="0" y2="0">
+                                            <stop offset="0%" stopColor="#F472B6" />
+                                            <stop offset="100%" stopColor="#FBCFE8" />
+                                        </linearGradient>
+                                        <linearGradient id="culturalGradient" x1="0" y1="1" x2="0" y2="0">
+                                            <stop offset="0%" stopColor="#FDBA74" />
+                                            <stop offset="100%" stopColor="#FED7AA" />
+                                        </linearGradient>
+                                    </defs>
+                                    <YAxis hide domain={[0, 100]} />
+                                    <XAxis dataKey="skill" hide />
+                                    <ChartTooltip
+                                        content={<ChartTooltipContent className="!bg-white !backdrop-blur-sm !border-gray-200" />}
+                                    />
+                                    <Bar dataKey="score" radius={[20, 20, 20, 20]} background={{ fill: "#FFFFFF", radius: 20 }}>
+                                        {skillMetricsData.map((entry, index) => {
+                                            const gradients = ["url(#technicalGradient)", "url(#problemGradient)", "url(#communicationGradient)", "url(#culturalGradient)"]
+                                            return <Cell key={`cell-${index}`} fill={gradients[index]} />
+                                        })}
+                                    </Bar>
+                                    <ChartLegend
+                                        payload={[
+                                            { value: "Technical", type: "rect", color: "#818CF8" },
+                                            { value: "Problem-Solving", type: "rect", color: "#86EFAC" },
+                                            { value: "Communication", type: "rect", color: "#F472B6" },
+                                            { value: "Cultural Fit", type: "rect", color: "#FDBA74" },
+                                        ]}
+                                        content={<ChartLegendContent />}
+                                    />
+                                </BarChart>
+                            </ChartContainer>
+                        </CardContent>
+                    </Card>
+                </div>
+
+                {/* Skill Cards Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-8 px-10 rounded-3xl bg-[linear-gradient(94.46deg,rgba(119,198,255,0.3)_-27.34%,#F5F7FF_202.83%)]">
+                    {skillCards.map((skill, index) => (
+                        <Card key={index} className="bg-white border border-[rgba(75,179,255,0.1)]">
+                            <CardContent className="p-6">
+                                <div className="flex justify-between items-center mb-3">
+                                    <h3 className="font-semibold text-[rgba(10,13,26,0.9)]">{skill.title}</h3>
+                                    <span className="text-lg ">
+                                        <span className="text-[rgba(45,166,255,0.9)] font-semibold">{skill.score}</span>
+                                        <span className="text-[rgba(10,13,26,0.9)] font-semibold">/100</span>
+                                    </span>
+                                </div>
+                                <Progress value={skill.score} indicatorColor="linear-gradient(90.14deg,rgba(45,166,255,0.9) -4.79%,#B9E1FF 161.26%)" className="h-2 mb-3" />
+                                <p className="text-sm text-[rgba(10,13,26,0.46)]">{skill.description}</p>
+                            </CardContent>
+                        </Card>
+                    ))}
                 </div>
             </div>
         </div>
