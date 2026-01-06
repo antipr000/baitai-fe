@@ -1,4 +1,7 @@
+'use client'
+
 import React from 'react'
+import { useRouter } from 'next/navigation'
 import { PracticeInterviewCard } from './practice-interview-card'
 import { ArrowRight } from 'lucide-react'
 
@@ -11,8 +14,7 @@ interface PracticeInterview {
 
 interface PracticeInterviewsSectionProps {
   interviews?: PracticeInterview[]
-  onViewMore?: () => void
-  onStartInterview?: (interviewId: string) => void
+  viewMoreHref?: string
 }
 
 const defaultInterviews = [
@@ -38,18 +40,23 @@ const defaultInterviews = [
 
 export function PracticeInterviewsSection({
   interviews = defaultInterviews,
-  onViewMore,
-  onStartInterview
+  viewMoreHref = '/candidate/practice-interviews'
 }: PracticeInterviewsSectionProps) {
+  const router = useRouter()
+
+  const handleStartInterview = (interviewId: string) => {
+    router.push(`/interview/${interviewId}`)
+  }
+
   return (
     <div>
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-2xl font-semibold text-[rgba(117,134,253,1)]">Practice Interviews</h2>
         <button
           className="text-[rgba(255,100,27,0.9)]  font-semibold hover:underline flex items-center gap-2"
-          onClick={onViewMore}
+          onClick={() => router.push(viewMoreHref)}
         >
-          <span>View more</span> <span className='translate-y-0.5'><ArrowRight className="w- h-5" /></span>
+          <span>View more</span> <span className='translate-y-0.5'><ArrowRight className="w-5 h-5" /></span>
         </button>
       </div>
 
@@ -60,7 +67,7 @@ export function PracticeInterviewsSection({
             company={interview.company}
             difficulty={interview.difficulty}
             duration={interview.duration}
-            onStartClick={() => onStartInterview?.(interview.id)}
+            onStartClick={() => handleStartInterview(interview.id)}
           />
         ))}
       </div>

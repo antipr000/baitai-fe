@@ -1,25 +1,29 @@
-'use client'
-
 import React from 'react'
-import { useRouter } from 'next/navigation'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import Image from 'next/image'
 import { RecentResultsSection } from '@/components/candidate/dashboard/recent-results-section'
 import { InterviewInvitesSection } from '@/components/candidate/dashboard/interview-invites-section'
 import { PracticeInterviewsSection } from '@/components/candidate/dashboard/practice-interviews-section'
+import { serverFetch } from '@/lib/api/server'
 
-export default function DashboardPage() {
-    const router = useRouter()
+interface InterviewStats {
+    average_score: number
+    total_time: number
+    completed: number
+    pending: number
+}
 
-    const handleInterviewStart = (interviewId: string) => {
-        router.push(`/interview/${interviewId}`)
-    }
+function formatTime(minutes: number): string {
+    if (minutes < 60) return `${minutes}m`
+    const hours = Math.floor(minutes / 60)
+    const mins = minutes % 60
+    return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`
+}
 
-    const handlePracticeStart = (interviewId: string) => {
-        router.push(`/interview/${interviewId}`)
-    }
-
+export default async function DashboardPage() {
+    const stats = await serverFetch<InterviewStats>('/api/v1/user/interview/stats/')
+        ?? { average_score: 0, total_time: 0, completed: 0, pending: 0 }
 
     return (
         <div className='w-full min-h-screen bg-[rgba(248,250,255,1)]'>
@@ -47,53 +51,47 @@ export default function DashboardPage() {
                                 <div className="group flex items-center justify-center gap-5">
                                     <Image src="/candidate/dashboard/complete.svg" alt="Completed" width={50} height={50} />
                                     <div>
-                                        <p className="  font-medium text-muted-foreground mb-2 transition-all duration-400 group-hover:-translate-y-1.5">Completed</p>
-                                        <p className="text-center text-2xl font-bold text-[rgba(104,100,247,1)] transition-all duration-400 group-hover:scale-[1.3]">6</p>
+                                        <p className="font-medium text-muted-foreground mb-2 transition-all duration-400 group-hover:-translate-y-1.5">Completed</p>
+                                        <p className="text-center text-2xl font-bold text-[rgba(104,100,247,1)] transition-all duration-400 group-hover:scale-[1.3]">{stats.completed}</p>
                                     </div>
                                 </div>
                             </CardContent>
                         </Card>
 
                         {/* Pending */}
-
                         <Card className="bg-[rgba(254,118,168,0.1)] border border-[rgba(252,183,50,0.5)]">
                             <CardContent className="pt-6">
                                 <div className="group flex items-center justify-center gap-5">
                                     <Image src="/candidate/dashboard/pending.svg" className='group-hover:-rotate-10 transition-all duration-400' alt="Pending" width={50} height={50} />
                                     <div>
-                                        <p className="font-medium  text-muted-foreground mb-2 transition-all duration-400 group-hover:-translate-y-1.5">Pending</p>
-                                        <p className="text-center text-2xl font-bold text-[rgba(104,100,247,1)] transition-all duration-400 group-hover:scale-[1.3]">2</p>
+                                        <p className="font-medium text-muted-foreground mb-2 transition-all duration-400 group-hover:-translate-y-1.5">Pending</p>
+                                        <p className="text-center text-2xl font-bold text-[rgba(104,100,247,1)] transition-all duration-400 group-hover:scale-[1.3]">{stats.pending}</p>
                                     </div>
                                 </div>
                             </CardContent>
                         </Card>
 
-
                         {/* Average Score */}
-
                         <Card className="bg-[rgba(252,183,50,0.1)] border border-[rgba(252,183,50,0.5)]">
                             <CardContent className="pt-6">
                                 <div className="group flex items-center justify-center gap-5">
                                     <Image src="/candidate/dashboard/score.svg" className='group-hover:-rotate-10 transition-all duration-400' alt="score" width={50} height={50} />
                                     <div>
                                         <p className="font-medium text-muted-foreground mb-2 transition-all duration-400 group-hover:-translate-y-1.5">Average Score</p>
-                                        <p className="text-center text-2xl font-bold text-[rgba(104,100,247,1)] transition-all duration-400 group-hover:scale-[1.3]">82%</p>
+                                        <p className="text-center text-2xl font-bold text-[rgba(104,100,247,1)] transition-all duration-400 group-hover:scale-[1.3]">{stats.average_score}%</p>
                                     </div>
                                 </div>
                             </CardContent>
                         </Card>
 
-
-
                         {/* Total Time */}
-
                         <Card className="bg-[rgba(224,83,83,0.1)] border border-[rgba(224,83,83,0.5)]">
                             <CardContent className="pt-6">
                                 <div className="group flex items-center justify-center gap-5">
                                     <Image src="/candidate/dashboard/time.svg" className='group-hover:-rotate-10 transition-all duration-400' alt="time" width={50} height={50} />
                                     <div>
                                         <p className="font-medium text-muted-foreground mb-2 transition-all duration-400 group-hover:-translate-y-1.5">Total Time</p>
-                                        <p className="text-center text-2xl font-bold text-[rgba(104,100,247,1)] transition-all duration-400 group-hover:scale-[1.3]">7h</p>
+                                        <p className="text-center text-2xl font-bold text-[rgba(104,100,247,1)] transition-all duration-400 group-hover:scale-[1.3]">{formatTime(stats.total_time)}</p>
                                     </div>
                                 </div>
                             </CardContent>
@@ -102,12 +100,12 @@ export default function DashboardPage() {
 
                     {/* Main Content - Two Columns */}
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-15">
-                        <InterviewInvitesSection onStartInterview={handleInterviewStart} onViewMore={()=>router.push("/candidate/company-interviews")} />
-                        <PracticeInterviewsSection onStartInterview={handlePracticeStart} onViewMore={()=>router.push("/candidate/practice-interviews")}/>
+                        <InterviewInvitesSection viewMoreHref="/candidate/company-interviews" />
+                        <PracticeInterviewsSection viewMoreHref="/candidate/practice-interviews" />
                     </div>
 
                     {/* Recent Results Section */}
-                    <RecentResultsSection />
+                    <RecentResultsSection viewMoreHref="/candidate/results" />
                 </div>
             </div>
         </div>

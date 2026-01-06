@@ -1,6 +1,8 @@
+"use client"
 import React from 'react'
 import { ResultItem } from './result-item'
 import { Button } from '@/components/ui/button'
+import { useRouter } from 'next/navigation'
 
 interface Result {
   id: string
@@ -11,8 +13,7 @@ interface Result {
 
 interface RecentResultsSectionProps {
   results?: Result[]
-  onViewMore?: () => void
-  onViewDetails?: (resultId: string) => void
+  viewMoreHref?: string
 }
 
 const defaultResults = [
@@ -44,9 +45,14 @@ const defaultResults = [
 
 export function RecentResultsSection({
   results = defaultResults,
-  onViewMore,
-  onViewDetails
+  viewMoreHref = '/candidate/results'
 }: RecentResultsSectionProps) {
+  const router = useRouter()
+
+  const handleViewDetails = (resultId: string) => {
+    router.push(`/candidate/results/${resultId}`)
+  }
+
   return (
     <div>
       <div className="flex justify-between items-center mb-6 ">
@@ -61,7 +67,7 @@ export function RecentResultsSection({
               title={result.title}
               timeAgo={result.timeAgo}
               score={result.score}
-              onViewDetails={() => onViewDetails?.(result.id)}
+              onViewDetails={() => handleViewDetails(result.id)}
             />
           ))}
         </div>
@@ -70,7 +76,7 @@ export function RecentResultsSection({
           <Button
             variant="outline"
             className="border-[rgba(104,100,247,0.5)] font-bold hover:text-[rgba(104,100,247,1)] hover:border-2 text-[rgba(104,100,247,1)] hover:bg-[rgba(104, 100, 247,0.1)]"
-            onClick={onViewMore}
+            onClick={() => router.push(viewMoreHref)}
           >
             View more
           </Button>

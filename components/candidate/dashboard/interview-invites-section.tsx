@@ -1,4 +1,7 @@
+'use client'
+
 import React from 'react'
+import { useRouter } from 'next/navigation'
 import { InterviewInviteCard } from './interview-invite-card'
 import { ArrowRight } from 'lucide-react'
 
@@ -11,8 +14,7 @@ interface Interview {
 
 interface InterviewInvitesSectionProps {
     interviews?: Interview[]
-    onViewMore?: () => void
-    onStartInterview?: (interviewId: string) => void
+    viewMoreHref?: string
 }
 
 const defaultInterviews = [
@@ -32,16 +34,21 @@ const defaultInterviews = [
 
 export function InterviewInvitesSection({
     interviews = defaultInterviews,
-    onViewMore,
-    onStartInterview
+    viewMoreHref = '/candidate/company-interviews'
 }: InterviewInvitesSectionProps) {
+    const router = useRouter()
+
+    const handleStartInterview = (interviewId: string) => {
+        router.push(`/interview/${interviewId}`)
+    }
+
     return (
         <div>
             <div className="flex justify-between items-center mb-4">
                 <h2 className="text-2xl font-semibold text-[rgba(117,134,253,1)]">Interview Invites</h2>
                 <button
                     className="text-[rgba(255,100,27,0.9)]  font-semibold hover:underline flex items-center gap-2"
-                    onClick={onViewMore}
+                    onClick={() => router.push(viewMoreHref)}
                 >
                     <span>View more</span> <span className='translate-y-0.5'><ArrowRight className="w-5 h-5" /></span>
                 </button>
@@ -54,7 +61,7 @@ export function InterviewInvitesSection({
                         company={interview.company}
                         position={interview.position}
                         dueIn={interview.dueIn}
-                        onStartClick={() => onStartInterview?.(interview.id)}
+                        onStartClick={() => handleStartInterview(interview.id)}
                     />
                 ))}
             </div>
