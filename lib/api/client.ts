@@ -14,15 +14,12 @@ const api = axios.create({
 // Add request interceptor for authentication
 api.interceptors.request.use(
   async (config) => {
-    // console.log("currrent user:", auth.currentUser)
-    // if (auth.currentUser) {
-    //   // Get Firebase ID token
-    //   const token = await getIdToken(auth.currentUser)
-    //   console.log('Firebase ID Token:', token)
-    //   console.log("auth.currentUser:", auth.currentUser)
-    //   // Send token to Django in Authorization header
-    //   config.headers.Authorization = `Bearer ${token}`
-    // }
+    if (auth.currentUser) {
+      // Get Firebase ID token
+      const token = await getIdToken(auth.currentUser)
+      // Send token to Django in Authorization header
+      config.headers.Authorization = `Bearer ${token}`
+    }
     return config
   },
   (error) => {
