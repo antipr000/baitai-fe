@@ -10,12 +10,12 @@ type InterviewSectionProps = {
     cameras: MediaDeviceInfo[]
     microphones: MediaDeviceInfo[]
     speakers: MediaDeviceInfo[]
-    selectedCamera: string
-    selectedMic: string
-    selectedSpeaker: string
-    setSelectedCamera: (id: string) => void
-    setSelectedMic: (id: string) => void
-    setSelectedSpeaker: (id: string) => void
+    selectedCamera: string | null
+    selectedMic: string | null
+    selectedSpeaker: string | null
+    setSelectedCamera: (id: string | null) => void
+    setSelectedMic: (id: string | null) => void
+    setSelectedSpeaker: (id: string | null) => void
     saveSelection: (key: string, value: string) => void
     startInterview: () => void
     onCameraStream?: (stream: MediaStream) => void
@@ -70,7 +70,7 @@ export default function InterviewSection({
     keepCameraStreamOnUnmount,
     keepMicStreamOnUnmount,
     permission,
-    
+
 }: InterviewSectionProps) {
     const [isMicTesting, setIsMicTesting] = useState(false)
     const [audioLevel, setAudioLevel] = useState(0)
@@ -95,7 +95,7 @@ export default function InterviewSection({
             audioContextRef.current = audioContext
             analyserRef.current = analyser
 
-            
+
             const buffer = new Uint8Array(analyser.frequencyBinCount)
             const updateLevel = () => {
                 analyser.getByteFrequencyData(buffer)
@@ -123,8 +123,12 @@ export default function InterviewSection({
 
     const startMicStream = async () => {
         try {
-            const stream = await navigator.mediaDevices.getUserMedia({ 
-                audio: selectedMic ? { deviceId: { exact: selectedMic } } : true
+            // Use 'ideal' instead of 'exact' to allow fallback if device unavailable
+            const audioConstraints = selectedMic
+                ? { deviceId: { ideal: selectedMic } }
+                : true
+            const stream = await navigator.mediaDevices.getUserMedia({
+                audio: audioConstraints
             })
             micStreamRef.current = stream
             // surface mic stream to parent for reuse (e.g., ActiveInterview)
@@ -137,26 +141,30 @@ export default function InterviewSection({
     const startSpeakerTest = () => {
         const audio = new Audio('/interview/test.wav')
         audio.play().catch(err => console.error('Audio play error:', err))
-        
+
         setIsSpeakerTesting(true)
         setTimeout(() => {
             setIsSpeakerTesting(false)
             audio.pause()
             audio.currentTime = 0
-        }, 2000);  
+        }, 2000);
     }
 
     const startCamera = async () => {
         try {
-            const stream = await navigator.mediaDevices.getUserMedia({ 
-                video: selectedCamera ? { deviceId: { exact: selectedCamera } } : true 
+            // Use 'ideal' instead of 'exact' to allow fallback if device unavailable
+            const videoConstraints = selectedCamera
+                ? { deviceId: { ideal: selectedCamera } }
+                : true
+            const stream = await navigator.mediaDevices.getUserMedia({
+                video: videoConstraints
             })
-            
+
             // Stop old stream only after new one is ready
             if (cameraStreamRef.current) {
                 cameraStreamRef.current.getTracks().forEach(track => track.stop())
             }
-            
+
             cameraStreamRef.current = stream
             // surface camera stream to parent for reuse (e.g., ActiveInterview)
             onCameraStream?.(stream)
@@ -177,7 +185,7 @@ export default function InterviewSection({
         // Initial mount - start both streams
         startCamera()
         startMicStream()
-        
+
         return () => {
             // Only fully stop mic test if we're not keeping the stream
             if (!keepMicStreamOnUnmount) {
@@ -191,7 +199,7 @@ export default function InterviewSection({
                 setIsMicTesting(false)
                 setAudioLevel(0)
             }
-            
+
             // optionally keep mic stream alive for reuse on ActiveInterview
             if (!keepMicStreamOnUnmount && micStreamRef.current) {
                 micStreamRef.current.getTracks().forEach(track => track.stop())
@@ -210,13 +218,13 @@ export default function InterviewSection({
         if (selectedCamera && cameraStreamRef.current) {
             startCamera()
         }
-        if(selectedMic && micStreamRef.current) {
+        if (selectedMic && micStreamRef.current) {
             startMicStream()
         }
     }, [selectedCamera, selectedMic])
 
     return (
-        <motion.div 
+        <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5 }}
@@ -275,7 +283,7 @@ export default function InterviewSection({
                                         ))}
                                     </SelectContent>
                                 </Select>
-                                <button 
+                                <button
                                     onClick={isMicTesting ? stopMicTest : startMicTest}
                                     className="text-xs text-green-600 hover:underline cursor-pointer"
                                 >
@@ -306,7 +314,7 @@ export default function InterviewSection({
                                         )}
                                     </SelectContent>
                                 </Select>
-                                <button 
+                                <button
                                     onClick={isSpeakerTesting ? undefined : startSpeakerTest}
                                     disabled={isSpeakerTesting}
                                     className="text-xs text-green-600 hover:underline cursor-pointer disabled:opacity-50"
@@ -335,7 +343,7 @@ export default function InterviewSection({
                                         ))}
                                     </SelectContent>
                                 </Select>
-                                <button 
+                                <button
                                     onClick={restartCamera}
                                     className="text-xs text-green-600 hover:underline cursor-pointer"
                                 >

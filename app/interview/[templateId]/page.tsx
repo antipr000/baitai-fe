@@ -6,6 +6,7 @@ import UploadSection from "@/components/interview/upload-section"
 import ActiveInterview from "@/components/interview/active-interview"
 import { useEffect, useState } from "react"
 import { useParams } from "next/navigation"
+import { toast } from "sonner"
 
 
 type MediaDevice = MediaDeviceInfo;
@@ -15,7 +16,7 @@ type PermissionStatus = "pending" | "granted" | "denied";
 export default function InterviewPage() {
     const params = useParams()
     const templateId = params.templateId as string || 'it_nrc1zpkq1o738ajl' // fallback for development
-    
+
     const [activeSection, setActiveSection] = useState<'upload' | 'interview'>('upload')
     const [isInterviewActive, setIsInterviewActive] = useState(false)
     const [cameras, setCameras] = useState<MediaDevice[]>([]);
@@ -23,10 +24,9 @@ export default function InterviewPage() {
     const [speakers, setSpeakers] = useState<MediaDevice[]>([]);
 
     const [permission, setPermission] = useState<PermissionStatus>("pending");
-    const [error, setError] = useState<string | null>(null);
-    const [selectedCamera, setSelectedCamera] = useState<string>("default");
-    const [selectedMic, setSelectedMic] = useState<string>("default");
-    const [selectedSpeaker, setSelectedSpeaker] = useState<string>("default");
+    const [selectedCamera, setSelectedCamera] = useState<string | null>(null);
+    const [selectedMic, setSelectedMic] = useState<string | null>(null);
+    const [selectedSpeaker, setSelectedSpeaker] = useState<string | null>(null);
     const [cameraStream, setCameraStream] = useState<MediaStream | null>(null);
     const [micStream, setMicStream] = useState<MediaStream | null>(null);
     const [resumeUploaded, setResumeUploaded] = useState(false);
@@ -62,26 +62,85 @@ export default function InterviewPage() {
                 console.log(defaults);
             } catch (err) {
                 console.error(err);
-                setPermission("denied");  /// Need to show error to user appropriately
+                setPermission("denied");
+
+                // Handle specific error types with appropriate messages
                 if (err instanceof DOMException) {
                     if (err.name === "NotAllowedError") {
-                        setError("Permission denied. Please allow camera & microphone access.");
+                        const errorMsg = "Permission denied. Please allow camera & microphone access.";
+                        console.warn(errorMsg);
+                        toast.error(errorMsg);
                     } else if (err.name === "NotFoundError") {
-                        setError("No camera or microphone found.");
+                        const errorMsg = "No camera or microphone found.";
+                        console.warn(errorMsg);
+                        toast.error(errorMsg);
+                    } else if (err.name === "OverconstrainedError") {
+                        const errorMsg = "Camera constraints not supported. Try a different camera.";
+                        console.warn(errorMsg);
+                        toast.error(errorMsg);
+                    } else if (err.name === "NotReadableError") {
+                        const errorMsg = "Camera or microphone is already in use by another application.";
+                        console.warn(errorMsg);
+                        toast.error(errorMsg);
                     } else {
-                        setError("Unable to access media devices.");
+                        const errorMsg = "Unable to access media devices.";
+                        console.warn(errorMsg);
+                        toast.error(errorMsg);
                     }
+                } else {
+                    const errorMsg = "An unexpected error occurred while accessing media devices.";
+                    console.warn(errorMsg);
+                    toast.error(errorMsg);
                 }
             }
         }
         initDevices();
 
     }, [])
-    
+
+    // Monitor permission changes - detect when user revokes access
+    useEffect(() => {
+        async function monitorPermissions() {
+            try {
+                // Warn if Permissions API is not supported (desktop-only app)
+                if (!navigator.permissions) {
+                    console.warn('Permissions API not supported. Please use Chrome or Edge for the best experience.');
+                    return;
+                }
+
+                const cameraPermission = await navigator.permissions.query({ name: 'camera' as PermissionName });
+                const micPermission = await navigator.permissions.query({ name: 'microphone' as PermissionName });
+
+                const handlePermissionChange = () => {
+                    if (cameraPermission.state === 'denied' || micPermission.state === 'denied') {
+                        setPermission("denied");
+                        const errorMsg = "Camera or microphone access was revoked. Please grant permissions again.";
+                        console.warn(errorMsg);
+                        toast.error(errorMsg);
+                    } else if (cameraPermission.state === 'granted' && micPermission.state === 'granted') {
+                        setPermission("granted");
+                    }
+                };
+
+                cameraPermission.addEventListener('change', handlePermissionChange);
+                micPermission.addEventListener('change', handlePermissionChange);
+
+                return () => {
+                    cameraPermission.removeEventListener('change', handlePermissionChange);
+                    micPermission.removeEventListener('change', handlePermissionChange);
+                };
+            } catch (err) {
+                console.error('Permission monitoring not supported:', err);
+            }
+        }
+
+        monitorPermissions();
+    }, [])
+
     if (isInterviewActive && permission === 'granted' && templateId) {  // could check for resume uploaded also if want to make it mandatory
         return <ActiveInterview cameraStream={cameraStream} micStream={micStream} templateId={templateId} />
     }
-    
+
     return (
         <div className="min-h-screen max-w-full md:max-w-4xl lg:max-w-5xl xl:max-w-7xl mx-auto flex gap-6 md:flex-row flex-col">
             <div className="bg-white rounded-xl text-center mx-auto w-[80%] md:w-[450px] shrink-0">
