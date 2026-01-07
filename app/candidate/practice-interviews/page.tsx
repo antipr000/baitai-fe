@@ -5,81 +5,51 @@ import Image from 'next/image'
 import React from 'react'
 import { DataTable } from './data-table'
 import { columns, PracticeInterview } from './columns'
+import { serverFetch } from '@/lib/api/server'
 
+interface ApiPracticeInterview {
+    id: string
+    title: string
+    role: string
+    difficulty_level: string
+    duration: number
+}
+
+interface ApiResponse {
+    items: ApiPracticeInterview[]
+    total: number
+    page: number
+    page_size: number
+    total_pages: number
+}
+
+function capitalize(str: string): string {
+    if (!str) return ''
+    return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase()
+}
 
 async function getData(): Promise<PracticeInterview[]> {
-    return [
-        {
-            id: "1",
-            title: "Software Engineer Practice",
-            category: "General",
-            difficulty: "Easy",
-            duration: "45 min",
-        },
-        {
-            id: "2",
-            title: "Frontend Developer Assessment",
-            category: "Frontend",
-            difficulty: "Medium",
-            duration: "30 min",
-        },
-        {
-            id: "3",
-            title: "Full Stack Challenge",
-            category: "Full Stack",
-            difficulty: "Difficult",
-            duration: "30 min",
-        },
-        {
-            id: "4",
-            title: "Software Engineer Practice",
-            category: "General",
-            difficulty: "Easy",
-            duration: "45 min",
-        },
-        {
-            id: "5",
-            title: "Software Engineer Practice",
-            category: "General",
-            difficulty: "Easy",
-            duration: "45 min",
-        },
-        {
-            id: "6",
-            title: "Frontend Developer Assessment",
-            category: "Frontend",
-            difficulty: "Medium",
-            duration: "30 min",
-        },
-        {
-            id: "7",
-            title: "Frontend Developer Assessment",
-            category: "Frontend",
-            difficulty: "Medium",
-            duration: "30 min",
-        },
-        {
-            id: "8",
-            title: "Frontend Developer Assessment",
-            category: "Frontend",
-            difficulty: "Medium",
-            duration: "30 min",
-        },
-        {
-            id: "9",
-            title: "Frontend Developer Assessment",
-            category: "Frontend",
-            difficulty: "Medium",
-            duration: "30 min",
-        },
-        {
-            id: "10",
-            title: "Full Stack Challenge",
-            category: "Full Stack",
-            difficulty: "Difficult",
-            duration: "30 min",
-        },
-    ]
+    const response = await serverFetch<ApiResponse>('/api/v1/user/interview/practice/filter/', {
+        method: 'POST',
+        body: {
+            page: 1,
+            page_size: 20,
+            role: '',
+            difficulty_level: null
+        }
+    })
+
+    if (!response || !response.items) {
+        return []
+    }
+
+    return response.items.map((item) => ({
+        id: item.id,
+        title: item.title,
+        category: item.role || 'General',
+        difficulty: capitalize(item.difficulty_level) as PracticeInterview['difficulty'],
+        duration: `${item.duration} min`,
+    }))
 }
 
 

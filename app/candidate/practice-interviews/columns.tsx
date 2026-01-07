@@ -1,12 +1,10 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
-import { DropdownMenu,DropdownMenuItem, DropdownMenuContent, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { ColumnDef } from "@tanstack/react-table"
-import { MoreHorizontal } from "lucide-react"
 import Image from "next/image"
+import Link from "next/link"
 
-    
 
 // This type is used to define the shape of our data.
 // You can use a Zod schema here if you want.
@@ -85,9 +83,11 @@ export const columns: ColumnDef<PracticeInterview>[] = [
         cell: ({ row }) => {
             const interview = row.original
             return (
-                <Button className="bg-[rgba(184,255,179,0.7)] hover:bg-white border-2 border-[rgba(19,232,4,0.1)]  hover:border-[rgba(8,102,2,0.8)] text-[rgba(8,102,2,0.9)] px-4 py-2 rounded-md" >
-                    <Image src="/candidate/company-interviews/play.svg" alt="Start" width={14} height={14} /> <span className="font-medium">Start</span>
-                </Button>
+                <Link href={`/interview/${interview.id}`}>
+                    <Button className="bg-[rgba(184,255,179,0.7)] hover:bg-white border-2 border-[rgba(19,232,4,0.1)]  hover:border-[rgba(8,102,2,0.8)] text-[rgba(8,102,2,0.9)] px-4 py-2 rounded-md" >
+                        <Image src="/candidate/company-interviews/play.svg" alt="Start" width={14} height={14} /> <span className="font-medium">Start</span>
+                    </Button>
+                </Link>
             )
         },
     }

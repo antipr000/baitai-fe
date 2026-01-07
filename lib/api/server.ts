@@ -4,7 +4,12 @@ import { clientConfig, serverConfig } from '@/lib/auth/config'
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000'
 
-export async function serverFetch<T>(url: string): Promise<T | null> {
+interface FetchOptions {
+    method?: 'GET' | 'POST' | 'PUT' | 'DELETE'
+    body?: Record<string, unknown>
+}
+
+export async function serverFetch<T>(url: string, options?: FetchOptions): Promise<T | null> {
     const tokens = await getTokens(await cookies(), {
         apiKey: clientConfig.apiKey,
         cookieName: serverConfig.cookieName,
@@ -19,10 +24,12 @@ export async function serverFetch<T>(url: string): Promise<T | null> {
 
     try {
         const response = await fetch(`${API_BASE_URL}${url}`, {
+            method: options?.method || 'GET',
             headers: {
                 'Authorization': `Bearer ${tokens.token}`,
                 'Content-Type': 'application/json',
             },
+            body: options?.body ? JSON.stringify(options.body) : undefined,
             cache: 'no-store',
         })
 
