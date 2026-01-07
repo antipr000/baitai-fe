@@ -64,7 +64,7 @@ export default function ResultPage() {
                         </h1>
                     </div>
                     <Link href="/candidate/dashboard">
-                        <Button variant="outline" className="text-[rgba(104,100,247,1)] hover:text-[rgba(104,100,247,1)]">Back to Dashboard</Button>
+                        <Button variant="outline" className="text-[rgba(104,100,247,1)] font-semibold hover:bg-white border-[rgba(142,158,254,0.6)] hover:border-[rgba(142, 158, 254, 0.6)] hover:opacity-80 hover:text-[rgba(104,100,247,1)]">Back to Dashboard</Button>
                     </Link>
                 </div>
 
@@ -124,7 +124,7 @@ export default function ResultPage() {
                 </Card>
 
                 {/* Stats Cards Row */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-25 mx-3">
+                <div className="mt-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-25 mx-3">
                     {/* Improvement */}
                     <Card className="bg-[linear-gradient(104.37deg,rgba(246,251,255,0.1)_-20.97%,rgba(75,179,255,0.1)_129.56%)] border border-[rgba(75,179,255,0.5)]">
                         <CardContent>
@@ -179,7 +179,7 @@ export default function ResultPage() {
                 </div>
 
                 {/* Charts Row */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-12">
                     {/* Performance Trend */}
                     <Card className="bg-[rgba(196,240,0,0.1)] border border-[rgba(196,240,0,0.05)]">
                         <CardHeader className="pb-2">
@@ -278,7 +278,7 @@ export default function ResultPage() {
                 </div>
 
                 {/* Skill Cards Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-8 px-10 rounded-3xl bg-[linear-gradient(94.46deg,rgba(119,198,255,0.3)_-27.34%,#F5F7FF_202.83%)]">
+                <div className="mt-12 grid grid-cols-1 md:grid-cols-2 gap-6 p-8 px-10 rounded-3xl bg-[linear-gradient(94.46deg,rgba(119,198,255,0.3)_-27.34%,#F5F7FF_202.83%)]">
                     {skillCards.map((skill, index) => (
                         <Card key={index} className="bg-white border border-[rgba(75,179,255,0.1)]">
                             <CardContent className="p-6">
@@ -294,6 +294,67 @@ export default function ResultPage() {
                             </CardContent>
                         </Card>
                     ))}
+                </div>
+
+                {/* Key Strengths & Scope of Improvement */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-15 mx-5 mt-12">
+                    {/* Key Strengths */}
+                    <Card className="bg-[rgba(5,187,54,0.05)] border-[rgba(25,192,71,0.5)]">
+                        <CardContent className="p-8 px-10">
+                            <div className="flex items-center gap-2 mb-4">
+                                <Image src="/candidate/results/fire.svg" alt="Key Strengths" width={20} height={20} />
+                                <h3 className="text-lg font-semibold text-[rgba(3,187,52,0.9)]">Key Strengths</h3>
+                            </div>
+                            <ul className="space-y-3 text-sm text-[rgba(10,13,26,0.5)] font-medium">
+                                <li className="flex items-start gap-2">
+                                    <span className="mt-2 h-1 w-1 rounded-full bg-[rgba(10,13,26,0.7)] shrink-0" />
+                                    Strong technical knowledge and problem-solving skills
+                                </li>
+                                <li className="flex items-start gap-2">
+                                    <span className="mt-2 h-1 w-1 rounded-full bg-[rgba(10,13,26,0.7)] shrink-0" />
+                                    Good code quality and best practices
+                                </li>
+                                <li className="flex items-start gap-2">
+                                    <span className="mt-2 h-1 w-1 rounded-full bg-[rgba(10,13,26,0.7)] shrink-0" />
+                                    Clear thinking process and logical approach
+                                </li>
+                            </ul>
+                        </CardContent>
+                    </Card>
+
+                    {/* Scope of Improvement */}
+                    <Card className="bg-[rgba(253,125,160,0.05)] border-[rgba(253,125,160,0.5)]">
+                        <CardContent className="p-8 px-10">
+                            <div className="flex items-center gap-2 mb-4">
+                                <Image src="/candidate/results/improve.svg" alt="Scope of Improvement" className="w-6 h-6" width={24} height={24} />
+                                <h3 className="text-lg font-semibold text-[rgba(220,80,120,1)]">Scope of Improvement</h3>
+                            </div>
+                            <ul className="space-y-3 text-sm text-[rgba(10,13,26,0.5)] font-medium">
+                                <li className="flex items-start gap-2">
+                                    <span className="mt-2 h-1 w-1 rounded-full bg-[rgba(10,13,26,0.7)] shrink-0" />
+                                    Consider edge cases earlier in the problem-solving process
+                                </li>
+                                <li className="flex items-start gap-2">
+                                    <span className="mt-2 h-1 w-1 rounded-full bg-[rgba(10,13,26,0.7)] shrink-0" />
+                                    Be more concise in explanations
+                                </li>
+                                <li className="flex items-start gap-2">
+                                    <span className="mt-2 h-1 w-1 rounded-full bg-[rgba(10,13,26,0.7)] shrink-0" />
+                                    Practice system design fundamentals
+                                </li>
+                            </ul>
+                        </CardContent>
+                    </Card>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex items-center my-12  gap-6 pb-8 mx-18">
+                    <Button className="p-6 flex-1  h-14 rounded-xl bg-[linear-gradient(92.27deg,rgba(62,84,251,0.82)_18.18%,rgba(143,164,255,0.738)_110.61%)] hover:opacity-80 text-[rgba(248,250,255,1)] font-semibold text-xl">
+                        Retake Interview
+                    </Button>
+                    <Button variant="outline" className="p-6 flex-1 h-14 rounded-xl border-2 border-[rgba(58,76,207,0.5)] text-[rgba(58,76,207,1)] hover:bg-[rgba(58,76,207,1)] hover:text-[rgba(248,250,255,1)] hover:border-[rgba(58,76,207,1)]  font-semibold text-xl">
+                        Try Another Interview
+                    </Button>
                 </div>
             </div>
         </div>
