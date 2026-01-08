@@ -14,10 +14,11 @@ interface InterviewStats {
     pending: number
 }
 
-function formatTime(minutes: number): string {
-    if (minutes < 60) return `${minutes}m`
-    const hours = Math.floor(minutes / 60)
-    const mins = minutes % 60
+function formatTime(seconds: number): string {
+    const totalMinutes = Math.floor(seconds / 60)
+    if (totalMinutes < 60) return `${totalMinutes}m`
+    const hours = Math.floor(totalMinutes / 60)
+    const mins = totalMinutes % 60
     return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`
 }
 

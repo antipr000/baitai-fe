@@ -5,74 +5,83 @@ import Image from 'next/image'
 import React from 'react'
 import { DataTable } from './data-table'
 import { columns, Result } from './columns'
+import { serverFetch } from '@/lib/api/server'
 
-
-async function getData(): Promise<Result[]> {
-    return [
-        {
-            id: "1",
-            jobRole: "Software Engineer",
-            interviewType: "Practice",
-            company: "------",
-            date: "2025-11-14",
-            score: "85%",
-        },
-        {
-            id: "2",
-            jobRole: "Backend Developer",
-            interviewType: "Interview",
-            company: "Mindtrix",
-            date: "2025-11-12",
-            score: "82%",
-        },
-        {
-            id: "3",
-            jobRole: "UI/UX Designer",
-            interviewType: "Practice",
-            company: "------",
-            date: "2025-11-10",
-            score: "80%",
-        },
-        {
-            id: "4",
-            jobRole: "Database Fundamentals",
-            interviewType: "Practice",
-            company: "------",
-            date: "2025-11-05",
-            score: "79%",
-        },
-        {
-            id: "5",
-            jobRole: "Software Engineer",
-            interviewType: "Interview",
-            company: "Mindtrix",
-            date: "2025-11-04",
-            score: "75%",
-        },
-        {
-            id: "6",
-            jobRole: "Software Engineer",
-            interviewType: "Interview",
-            company: "Mindtrix",
-            date: "2025-11-02",
-            score: "65%",
-        },
-        {
-            id: "7",
-            jobRole: "UI/UX Designer",
-            interviewType: "Interview",
-            company: "Mindtrix",
-            date: "2025-11-01",
-            score: "60%",
-        },
-    ]
+interface ApiResultItem {
+    session_id: string
+    template_id: string
+    template_title: string
+    role: string
+    interview_type: string
+    company_name: string
+    date: string
+    score: number
+    status: string
+    started_at: string
+    ended_at: string
 }
 
+interface ApiResponse {
+    items: ApiResultItem[]
+    total: number
+    page: number
+    page_size: number
+    total_pages: number
+}
 
+function formatDate(dateString: string): string {
+    const date = new Date(dateString)
+    return date.toLocaleDateString('en-CA') // Returns YYYY-MM-DD format
+}
 
+function capitalize(str: string): string {
+    if (!str) return ''
+    return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase()
+}
+
+async function getData(): Promise<Result[]> {
+    const response = await serverFetch<ApiResponse>('/api/v1/user/interview/results/filter/', {
+        method: 'POST',
+        body: {
+            status: 'completed'
+        }
+    })
+
+    if (!response || !response.items) {
+        console.warn('Failed to fetch results data')
+        return []
+    }
+
+    return response.items.map((item) => ({
+        id: item.session_id,
+        jobRole: item.role || 'General',
+        interviewType: capitalize(item.interview_type) as Result['interviewType'],
+        company: item.company_name || '------',
+        date: formatDate(item.date),
+        score: `${item.score}%`,
+    }))
+}
+
+interface StatsResponse {
+    total_interviews: number
+    practice_interviews: number
+    interview_invites: number
+    avg_score: number
+}
+
+async function getStats(): Promise<StatsResponse> {
+    const response = await serverFetch<StatsResponse>('/api/v1/user/interview/results/stats/')
+
+    if (!response) {
+        console.warn('Failed to fetch results stats')
+        return { total_interviews: 0, practice_interviews: 0, interview_invites: 0, avg_score: 0 }
+    }
+
+    return response
+}
 
 export default async function ResultsPage() {
-    const data = await getData()
+    const [data, stats] = await Promise.all([getData(), getStats()])
     return (
         <div>
             <div className='w-full min-h-screen bg-[rgba(248,250,255,1)]'>
@@ -99,7 +108,7 @@ export default async function ResultsPage() {
                                         </div>
                                         <div className=''>
                                             <p className="text-xl font-medium text-muted-foreground/70 ">Total Interviews</p>
-                                            <p className="text-2xl font-bold text-[rgba(104,100,247,1)] ">19</p>
+                                            <p className="text-2xl font-bold text-[rgba(104,100,247,1)] ">{stats.total_interviews}</p>
                                         </div>
                                     </div>
                                 </CardContent>
@@ -114,7 +123,7 @@ export default async function ResultsPage() {
                                         </div>
                                         <div className=''>
                                             <p className="text-xl font-medium text-muted-foreground/70 ">Practice Interviews</p>
-                                            <p className="text-2xl font-bold text-[rgba(104,100,247,1)]">10</p>
+                                            <p className="text-2xl font-bold text-[rgba(104,100,247,1)]">{stats.practice_interviews}</p>
                                         </div>
                                     </div>
                                 </CardContent>
@@ -129,7 +138,7 @@ export default async function ResultsPage() {
                                         </div>
                                         <div className=''>
                                             <p className="text-xl font-medium text-muted-foreground/70 ">Interview Invites</p>
-                                            <p className="text-2xl font-bold text-[rgba(104,100,247,1)]">9</p>
+                                            <p className="text-2xl font-bold text-[rgba(104,100,247,1)]">{stats.interview_invites}</p>
                                         </div>
                                     </div>
                                 </CardContent>
@@ -144,7 +153,7 @@ export default async function ResultsPage() {
                                         </div>
                                         <div className=''>
                                             <p className="text-xl font-medium text-muted-foreground/70 ">Avg Score</p>
-                                            <p className="text-2xl font-bold text-[rgba(104,100,247,1)]">82%</p>
+                                            <p className="text-2xl font-bold text-[rgba(104,100,247,1)]">{stats.avg_score.toFixed(1)}%</p>
                                         </div>
                                     </div>
                                 </CardContent>

@@ -1,17 +1,17 @@
 import React from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { cn } from '@/lib/utils'
 import { Clock } from 'lucide-react'
+import Link from 'next/link'
 
 interface ResultItemProps {
   title: string
   timeAgo: string
   score: number
-  onViewDetails?: () => void
+  href: string
 }
 
-export function ResultItem({ title, timeAgo, score, onViewDetails }: ResultItemProps) {
+export function ResultItem({ title, timeAgo, score, href }: ResultItemProps) {
   return (
     <Card className="bg-[rgba(0,215,255,0.03)] border border-[rgba(108,110,118,0.05)] hover:shadow-md transition-shadow ">
       <CardContent className="pt-6 ">
@@ -31,9 +31,9 @@ export function ResultItem({ title, timeAgo, score, onViewDetails }: ResultItemP
             <Button
               variant="ghost"
               className='font-semibold text-[rgba(10,13,26,0.9)] hover:bg-[rgba(113,131,252,1)] hover:text-white'
-              onClick={onViewDetails}
+              asChild
             >
-              View Details
+              <Link href={href}>View Details</Link>
             </Button>
           </div>
         </div>
