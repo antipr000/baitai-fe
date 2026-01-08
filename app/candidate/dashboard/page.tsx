@@ -22,8 +22,13 @@ function formatTime(minutes: number): string {
 }
 
 export default async function DashboardPage() {
-    const stats = await serverFetch<InterviewStats>('/api/v1/user/interview/stats/')
-        ?? { average_score: 0, total_time: 0, completed: 0, pending: 0 }
+    const response = await serverFetch<InterviewStats>('/api/v1/user/interview/stats/')
+
+    if (!response) {
+        console.warn('Failed to fetch interview stats')
+    }
+
+    const stats = response ?? { average_score: 0, total_time: 0, completed: 0, pending: 0 }
 
     return (
         <div className='w-full min-h-screen bg-[rgba(248,250,255,1)]'>

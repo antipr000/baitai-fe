@@ -23,6 +23,13 @@ interface ApiResponse {
     total_pages: number
 }
 
+interface MetadataResponse {
+    total: number
+    easy: number
+    medium: number
+    difficult: number
+}
+
 function capitalize(str: string): string {
     if (!str) return ''
     return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase()
@@ -40,6 +47,7 @@ async function getData(): Promise<PracticeInterview[]> {
     })
 
     if (!response || !response.items) {
+        console.warn('Failed to fetch practice interviews data')
         return []
     }
 
@@ -52,11 +60,19 @@ async function getData(): Promise<PracticeInterview[]> {
     }))
 }
 
+async function getMetadata(): Promise<MetadataResponse> {
+    const response = await serverFetch<MetadataResponse>('/api/v1/user/interview/practice/metadata/')
 
+    if (!response) {
+        console.warn('Failed to fetch practice interviews metadata')
+        return { total: 0, easy: 0, medium: 0, difficult: 0 }
+    }
 
+    return response
+}
 
 export default async function PracticeInterviews() {
-    const data = await getData()
+    const [data, metadata] = await Promise.all([getData(), getMetadata()])
     return (
         <div>
             <div className='w-full min-h-screen bg-[rgba(248,250,255,1)]'>
@@ -81,7 +97,7 @@ export default async function PracticeInterviews() {
                                         <Image src="/candidate/practice-interviews/up.svg" className='translate-y-1' alt="Company" width={30} height={30} />
                                         <div className=''>
                                             <p className="text-xl font-medium text-muted-foreground/70 ">Total Practice</p>
-                                            <p className="text-2xl font-bold text-[rgba(104,100,247,1)] ">10</p>
+                                            <p className="text-2xl font-bold text-[rgba(104,100,247,1)] ">{metadata.total}</p>
                                         </div>
                                     </div>
                                 </CardContent>
@@ -94,7 +110,7 @@ export default async function PracticeInterviews() {
                                         <Image src="/candidate/practice-interviews/target-green.svg" className="translate-y-1" alt="positions" width={30} height={30} />
                                         <div className=''>
                                             <p className="text-xl font-medium text-muted-foreground/70 ">Easy</p>
-                                            <p className="text-2xl font-bold text-[rgba(104,100,247,1)]">3</p>
+                                            <p className="text-2xl font-bold text-[rgba(104,100,247,1)]">{metadata.easy}</p>
                                         </div>
                                     </div>
                                 </CardContent>
@@ -107,7 +123,7 @@ export default async function PracticeInterviews() {
                                         <Image src="/candidate/practice-interviews/target-yellow.svg" className="translate-y-1" alt="positions" width={30} height={30} />
                                         <div className=''>
                                             <p className="text-xl font-medium text-muted-foreground/70 ">Medium</p>
-                                            <p className="text-2xl font-bold text-[rgba(104,100,247,1)]">5</p>
+                                            <p className="text-2xl font-bold text-[rgba(104,100,247,1)]">{metadata.medium}</p>
                                         </div>
                                     </div>
                                 </CardContent>
@@ -121,7 +137,7 @@ export default async function PracticeInterviews() {
                                         <Image src="/candidate/practice-interviews/target-red.svg" className="translate-y-1" alt="positions" width={30} height={30} />
                                         <div className=''>
                                             <p className="text-xl font-medium text-muted-foreground/70 ">Difficult</p>
-                                            <p className="text-2xl font-bold text-[rgba(104,100,247,1)]">2</p>
+                                            <p className="text-2xl font-bold text-[rgba(104,100,247,1)]">{metadata.difficult}</p>
                                         </div>
                                     </div>
                                 </CardContent>
