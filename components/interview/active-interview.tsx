@@ -166,6 +166,7 @@ export default function ActiveInterview({ cameraStream, micStream, templateId }:
   const startRecordingRef = useRef<((enableSilenceDetection?: boolean) => Promise<void>) | null>(null)
   const stopRecordingRef = useRef<(() => void) | null>(null)
   const isConnectedRef = useRef(false)
+  const cameraStreamRef = useRef<MediaStream | null>(null)
   const micStreamRef = useRef<MediaStream | null>(null)
   const isMicOnRef = useRef(true)
   const hasSentEndOfTurnRef = useRef(false)
@@ -766,6 +767,10 @@ export default function ActiveInterview({ cameraStream, micStream, templateId }:
   useEffect(() => {
     micStreamRef.current = micStream || null
   }, [micStream])
+
+  useEffect(() => {
+    cameraStreamRef.current = cameraStream || null
+  }, [cameraStream])
 
   useEffect(() => {
     isMicOnRef.current = isMicOn
@@ -1952,8 +1957,6 @@ export default function ActiveInterview({ cameraStream, micStream, templateId }:
   // Cleanup on unmount
   useEffect(() => {
     const videoElement = videoRef.current
-    const cameraStreamCopy = cameraStream
-    const micStreamCopy = micStream
 
     return () => {
       stopRecording()
@@ -1961,16 +1964,18 @@ export default function ActiveInterview({ cameraStream, micStream, templateId }:
       stopScreenRecording()
       closeWebSocket()
 
-      // Cleanup all media tracks
+      // Cleanup all media tracks - use refs for latest values
       try {
-        if (cameraStreamCopy) {
-          cameraStreamCopy.getTracks().forEach(track => {
+        if (cameraStreamRef.current) {
+          console.log('[Cleanup] Stopping camera stream')
+          cameraStreamRef.current.getTracks().forEach(track => {
             track.stop()
             track.enabled = false
           })
         }
-        if (micStreamCopy) {
-          micStreamCopy.getTracks().forEach(track => {
+        if (micStreamRef.current) {
+          console.log('[Cleanup] Stopping mic stream')
+          micStreamRef.current.getTracks().forEach(track => {
             track.stop()
             track.enabled = false
           })
@@ -2035,7 +2040,7 @@ export default function ActiveInterview({ cameraStream, micStream, templateId }:
       tokenQueueRef.current = []
       isProcessingTokensRef.current = false
     }
-  }, [closeWebSocket, stopRecording, cameraStream, micStream])
+  }, []) 
 
   return (
     <div className="flex flex-col h-screen bg-gray-900">
