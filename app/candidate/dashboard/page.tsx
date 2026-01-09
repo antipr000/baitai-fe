@@ -1,6 +1,6 @@
 import React from 'react'
+import Link from 'next/link'
 import { Card, CardContent } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
 import Image from 'next/image'
 import { RecentResultsSection } from '@/components/candidate/dashboard/recent-results-section'
 import { InterviewInvitesSection } from '@/components/candidate/dashboard/interview-invites-section'
@@ -44,9 +44,9 @@ export default async function DashboardPage() {
                             </div>
                             <h1 className="text-2xl tracking-wide font-bold bg-[linear-gradient(91.24deg,#3E54FB_-35.23%,#C3CEFF_202.55%)] bg-clip-text text-transparent">My Dashboard</h1>
                         </div>
-                        <Button variant="default" className="gap-2  bg-[linear-gradient(91.24deg,#3E54FB_-35.23%,#C3CEFF_202.55%)]">
+                        <Link href="/candidate/results" className="flex items-center gap-2 px-4 py-2 rounded-md text-white bg-[linear-gradient(91.24deg,#3E54FB_-35.23%,#C3CEFF_202.55%)] hover:opacity-90 transition-opacity">
                             <Image src="/candidate/dashboard/note.svg" alt="Results" width={20} height={20} /> <span className='font-semibold'>View all Results</span>
-                        </Button>
+                        </Link>
                     </div>
 
                     {/* Stats Cards */}
