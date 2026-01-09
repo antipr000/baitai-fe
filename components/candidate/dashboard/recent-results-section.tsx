@@ -71,29 +71,49 @@ export async function RecentResultsSection({
         <h2 className="text-2xl font-semibold">Recent Results</h2>
       </div>
 
-      <div className="bg-white rounded-lg p-6 shadow-sm">
-        <div className="space-y-4">
-          {results.map((result) => (
-            <ResultItem
-              key={result.id}
-              title={result.title}
-              timeAgo={result.timeAgo}
-              score={result.score}
-              href={`/candidate/results/${result.id}`}
-            />
-          ))}
-        </div>
-
-        <div className="flex justify-end mt-6">
-          <Button
-            variant="outline"
-            className="border-[rgba(104,100,247,0.5)] font-bold hover:text-[rgba(104,100,247,1)] hover:border-2 text-[rgba(104,100,247,1)] hover:bg-[rgba(104, 100, 247,0.1)]"
-            asChild
+      {results.length === 0 ? (
+        <div className="flex items-center justify-between p-6 bg-white rounded-lg shadow-sm">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-full bg-[rgba(104,100,247,0.1)] flex items-center justify-center">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="rgba(104,100,247,0.6)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" /><polyline points="14 2 14 8 20 8" /></svg>
+            </div>
+            <div>
+              <h3 className="text-base font-medium text-slate-700">No Results Yet</h3>
+              <p className="text-sm text-muted-foreground">Complete an interview to see your results</p>
+            </div>
+          </div>
+          <Link
+            href="/candidate/practice-interviews"
+            className="px-4 py-2 text-sm font-medium text-white rounded-lg bg-[linear-gradient(92.34deg,rgba(104,100,247,1)_17.04%,rgba(140,137,255,1)_122.22%)] hover:opacity-90 transition-opacity"
           >
-            <Link href={viewMoreHref}>View more</Link>
-          </Button>
+            Start Practice
+          </Link>
         </div>
-      </div>
+      ) : (
+        <div className="bg-white rounded-lg p-6 shadow-sm">
+          <div className="space-y-4">
+            {results.map((result) => (
+              <ResultItem
+                key={result.id}
+                title={result.title}
+                timeAgo={result.timeAgo}
+                score={result.score}
+                href={`/candidate/results/${result.id}`}
+              />
+            ))}
+          </div>
+
+          <div className="flex justify-end mt-6">
+            <Button
+              variant="outline"
+              className="border-[rgba(104,100,247,0.5)] font-bold hover:text-[rgba(104,100,247,1)] hover:border-2 text-[rgba(104,100,247,1)] hover:bg-[rgba(104, 100, 247,0.1)]"
+              asChild
+            >
+              <Link href={viewMoreHref}>View more</Link>
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

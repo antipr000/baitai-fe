@@ -84,7 +84,7 @@ export default async function DashboardPage() {
                                     <Image src="/candidate/dashboard/score.svg" className='group-hover:-rotate-10 transition-all duration-400' alt="score" width={50} height={50} />
                                     <div>
                                         <p className="font-medium text-muted-foreground mb-2 transition-all duration-400 group-hover:-translate-y-1.5">Average Score</p>
-                                        <p className="text-center text-2xl font-bold text-[rgba(104,100,247,1)] transition-all duration-400 group-hover:scale-[1.3]">{stats.average_score}%</p>
+                                        <p className="text-center text-2xl font-bold text-[rgba(104,100,247,1)] transition-all duration-400 group-hover:scale-[1.3]">{stats.average_score.toFixed(1)}%</p>
                                     </div>
                                 </div>
                             </CardContent>

@@ -77,7 +77,12 @@ async function getStats(): Promise<StatsResponse> {
         return { total_interviews: 0, practice_interviews: 0, interview_invites: 0, avg_score: 0 }
     }
 
-    return response
+    return {
+        total_interviews: response.total_interviews ?? 0,
+        practice_interviews: response.practice_interviews ?? 0,
+        interview_invites: response.interview_invites ?? 0,
+        avg_score: response.avg_score ?? 0  // returns null when no data is available
+    }
 }
 
 export default async function ResultsPage() {
@@ -161,7 +166,7 @@ export default async function ResultsPage() {
                         </div>
 
                         {/*Data table  */}
-                        <DataTable columns={columns} data={data} />
+                            <DataTable columns={columns} data={data} />
                     </div>
                 </div>
             </div>
