@@ -1,15 +1,15 @@
 import React from 'react'
+import Link from 'next/link'
 import { Card, CardContent } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 import Image from 'next/image'
 
 interface PracticeInterviewCardProps {
-  company: string
+  title: string
   difficulty: 'Easy' | 'Medium' | 'Difficult'
   duration: string
-  onStartClick?: () => void
+  interviewId: string
 }
 
 const difficultyStyles = {
@@ -31,10 +31,10 @@ const difficultyStyles = {
 }
 
 export function PracticeInterviewCard({
-  company,
+  title,
   difficulty,
   duration,
-  onStartClick
+  interviewId
 }: PracticeInterviewCardProps) {
   const style = difficultyStyles[difficulty]
 
@@ -43,7 +43,7 @@ export function PracticeInterviewCard({
       <CardContent className="pt-6">
         <div className="space-y-4">
           <div>
-            <h3 className="font-medium text-lg">{company}</h3>
+            <h3 className="font-medium text-lg">{title}</h3>
             <div className="flex items-center gap-4 mt-1">
               <Badge className={cn(style.bg, style.text, style.border, "p-1 px-7 border")}>
                 {difficulty}
@@ -54,12 +54,12 @@ export function PracticeInterviewCard({
               </span>
             </div>
           </div>
-          <Button
-            className="w-full border-2 border-[rgba(82,86,184,1)] font-semibold hover:bg-[rgba(82,86,184,1)] text-[rgba(83,87,184,1)] hover:text-white bg-white"
-            onClick={onStartClick}
+          <Link
+            href={`/interview/${interviewId}`}
+            className="block w-full text-center py-2 rounded-md border-2 border-[rgba(82,86,184,1)] font-semibold hover:bg-[rgba(82,86,184,1)] text-[rgba(83,87,184,1)] hover:text-white bg-white transition-colors"
           >
             Start Interview
-          </Button>
+          </Link>
         </div>
       </CardContent>
     </Card>

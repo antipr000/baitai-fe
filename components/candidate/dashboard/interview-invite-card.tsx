@@ -1,6 +1,6 @@
 import React from 'react'
+import Link from 'next/link'
 import { Card, CardContent } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 
@@ -8,14 +8,14 @@ interface InterviewInviteCardProps {
     company: string
     position: string
     dueIn: string
-    onStartClick?: () => void
+    interviewId: string
 }
 
 export function InterviewInviteCard({
     company,
     position,
     dueIn,
-    onStartClick
+    interviewId
 }: InterviewInviteCardProps) {
     return (
         <Card className="bg-white border-2 border-[rgba(255,147,96,0.1)] hover:border-[rgba(255,147,96,1)] transition-border">
@@ -37,14 +37,15 @@ export function InterviewInviteCard({
                         </Badge>
                     </div>
 
-                    <Button
-                        className="w-full hover:opacity-70 transition-opacity duration-100 text-[rgba(248, 250, 255, 1)] font-semibold bg-[linear-gradient(92.34deg,rgba(255,103,32,1)_17.04%,rgba(255,140,86,1)_122.22%)] hover: border border-[rgba(255,147,96,0.1)] text-[rgba(248,250,255,1)]"
-                        onClick={onStartClick}
+                    <Link
+                        href={`/interview/${interviewId}`}
+                        className="block w-full text-center py-2 rounded-md hover:opacity-70 transition-opacity duration-100 text-[rgba(248,250,255,1)] font-semibold bg-[linear-gradient(92.34deg,rgba(255,103,32,1)_17.04%,rgba(255,140,86,1)_122.22%)] border border-[rgba(255,147,96,0.1)]"
                     >
                         Start Interview
-                    </Button>
+                    </Link>
                 </div>
             </CardContent>
         </Card>
     )
 }
+
