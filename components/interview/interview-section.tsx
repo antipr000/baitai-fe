@@ -186,7 +186,40 @@ export default function InterviewSection({
         startCamera()
         startMicStream()
 
+        // Force cleanup on browser back/forward navigation
+        const stopAllStreams = () => {
+            console.log('[InterviewSection Cleanup] Stopping all streams');
+            if (micStreamRef.current) {
+                micStreamRef.current.getTracks().forEach(track => track.stop())
+                micStreamRef.current = null
+            }
+            if (cameraStreamRef.current) {
+                cameraStreamRef.current.getTracks().forEach(track => track.stop())
+                cameraStreamRef.current = null
+            }
+            animationFrameRef.current && cancelAnimationFrame(animationFrameRef.current)
+            audioContextRef.current?.close()
+            audioContextRef.current = null
+            analyserRef.current = null
+        }
+
+        const handlePopState = () => {
+            console.log('[InterviewSection] popstate - stopping streams');
+            stopAllStreams();
+        }
+
+        const handleBeforeUnload = () => {
+            console.log('[InterviewSection] beforeunload - stopping streams');
+            stopAllStreams();
+        }
+
+        window.addEventListener('popstate', handlePopState);
+        window.addEventListener('beforeunload', handleBeforeUnload);
+
         return () => {
+            window.removeEventListener('popstate', handlePopState);
+            window.removeEventListener('beforeunload', handleBeforeUnload);
+
             // Only fully stop mic test if we're not keeping the stream
             if (!keepMicStreamOnUnmount) {
                 stopMicTest()

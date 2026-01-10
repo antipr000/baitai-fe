@@ -4,7 +4,7 @@ import LeftSection from "@/components/interview/left-section"
 import InterviewSection from "@/components/interview/interview-section"
 import UploadSection from "@/components/interview/upload-section"
 import ActiveInterview from "@/components/interview/active-interview"
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 import { useParams } from "next/navigation"
 import { toast } from "sonner"
 
@@ -30,6 +30,65 @@ export default function InterviewPage() {
     const [cameraStream, setCameraStream] = useState<MediaStream | null>(null);
     const [micStream, setMicStream] = useState<MediaStream | null>(null);
     const [resumeUploaded, setResumeUploaded] = useState(false);
+
+    // Use refs to track streams for cleanup on unmount only
+    const cameraStreamRef = useRef<MediaStream | null>(null);
+    const micStreamRef = useRef<MediaStream | null>(null);
+
+    // Keep refs in sync with state
+    useEffect(() => {
+        cameraStreamRef.current = cameraStream;
+    }, [cameraStream]);
+
+    useEffect(() => {
+        micStreamRef.current = micStream;
+    }, [micStream]);
+
+    // Cleanup media streams ONLY when component unmounts (e.g., when navigating back)
+    // Also handle browser back button via popstate and page unload
+    useEffect(() => {
+        const stopAllStreams = () => {
+            // Stop camera stream using ref (has latest value)
+            if (cameraStreamRef.current) {
+                console.log('[Page Cleanup] Stopping camera stream');
+                cameraStreamRef.current.getTracks().forEach(track => {
+                    track.stop();
+                    track.enabled = false;
+                });
+                cameraStreamRef.current = null;
+            }
+            // Stop mic stream using ref (has latest value)
+            if (micStreamRef.current) {
+                console.log('[Page Cleanup] Stopping mic stream');
+                micStreamRef.current.getTracks().forEach(track => {
+                    track.stop();
+                    track.enabled = false;
+                });
+                micStreamRef.current = null;
+            }
+        };
+
+        // Handle browser back/forward navigation
+        const handlePopState = () => {
+            console.log('[Page Cleanup] popstate event - stopping streams');
+            stopAllStreams();
+        };
+
+        // Handle page unload (closing tab, refresh, etc.)
+        const handleBeforeUnload = () => {
+            console.log('[Page Cleanup] beforeunload event - stopping streams');
+            stopAllStreams();
+        };
+
+        window.addEventListener('popstate', handlePopState);
+        window.addEventListener('beforeunload', handleBeforeUnload);
+
+        return () => {
+            window.removeEventListener('popstate', handlePopState);
+            window.removeEventListener('beforeunload', handleBeforeUnload);
+            stopAllStreams();
+        };
+    }, []); // Empty dependency array - only runs on mount/unmount
 
 
     function saveSelection(key: string, value: string) {
