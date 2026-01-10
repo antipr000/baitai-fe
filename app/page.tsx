@@ -194,14 +194,14 @@ export default async function Home() {
                 </span>
               </h2>
 
-              <WaitlistForm>
+              <Link href="https://cal.com/soham-mukherjee-8yzald/30min" target="_blank" rel="noopener noreferrer">
                 <Button
                   size="lg"
                   className="bg-[rgba(58,63,187,1)] hover:bg-[rgba(58,63,187,1)] hover:opacity-80 text-[rgba(233,244,255,1)] font-medium md:px-8 md:py-3 px-5 py-2 rounded-lg lg:text-lg md:text-base text-sm hover:shadow-lg"
                 >
                   Schedule a demo
                 </Button>
-              </WaitlistForm>
+              </Link>
 
             </div>
 
@@ -368,11 +368,11 @@ export default async function Home() {
 
               </div>
               <div className="flex  gap-4 mt-2 md:max-w-3xl lg:max-w-6xl">
-                <WaitlistForm>
+                <Link href="https://cal.com/soham-mukherjee-8yzald/30min" target="_blank" rel="noopener noreferrer">
                   <Button className="rounded-xl px-8 lg:py-6 md:py-4  lg:text-2xl  md:text-xl font-semibold bg-[rgba(0,12,134,0.9)] hover:bg-[rgba(0,12,134,0.9)] hover:opacity-90 border-2 border-[rgba(99,112,227,1)] hover:text-white shadow-[0px_4px_4px_0px_rgba(0,0,0,0.08)] text-[rgba(224,244,255,0.9)]">
                     Schedule a Demo
                   </Button>
-                </WaitlistForm>
+                </Link>
                 <Link href="/pricing">
                   <Button className="rounded-xl px-8 lg:py-6 md:py-4 lg:text-2xl md:text-xl  font-semibold hover:opacity-90 hover:text-white bg-[rgba(68,102,198,1)] border-2 border-[rgba(224,244,255,1)] text-[rgba(224,244,255,0.9)] hover:bg-[rgba(255,255,255,0.1)]">
                     View Pricing
@@ -547,11 +547,11 @@ export default async function Home() {
 
               </div>
               <div className="flex flex-row gap-4 mt-2">
-                <WaitlistForm>
+                <Link href="/signup">
                   <Button className="rounded-xl px-8 lg:py-6 md:py-4   lg:text-2xl  md:text-xl font-semibold bg-[rgba(83,118,219,1)] hover:bg-[rgba(83,118,219,1)] hover:opacity-90 border-[rgba(99,112,227,1)]  text-[rgba(234,253,161,1)]">
                     Create a free account
                   </Button>
-                </WaitlistForm>
+                </Link>
                 <Link href="/#how-it-works">
                   <Button className="rounded-xl px-8 lg:py-6 md:py-4  lg:text-2xl  md:text-xl font-semibold hover:opacity-90 hover:bg-[rgba(234,253,161,1)]   bg-[rgba(234,253,161,1)]  border-2 border-[rgba(83,118,219,1)] text-[rgba(83,118,219,1)] ">
                     How it works
