@@ -6,10 +6,7 @@ const AUTH_PAGES = ['/signup', '/login'];
 const PUBLIC_PATHS = ['/', '/about', '/pricing', '/test', ...AUTH_PAGES];
 
 export async function proxy(request: NextRequest) {
-  // TEMPORARILY DISABLED FOR TESTING - Remove comments to re-enable auth
-  return NextResponse.next();
 
-  /* 
   return authMiddleware(request, {
     loginPath: "/api/login",
     logoutPath: "/api/logout",
@@ -53,7 +50,7 @@ export async function proxy(request: NextRequest) {
       });
     }
   });
-  */
+  
 }
 
 export const config = {
