@@ -1,56 +1,92 @@
-"use client"
-
-import { TrendingUp } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent } from "@/components/ui/chart"
 import { Progress } from "@/components/ui/progress"
-import { RadialBarChart, RadialBar, PolarAngleAxis, LineChart, Line, XAxis, YAxis, BarChart, Bar, CartesianGrid, Cell } from "recharts"
 import Link from "next/link"
 import Image from "next/image"
 import { BackButton } from "@/components/ui/back-button"
+import { ScoreChart, PerformanceTrendChart, SkillMetricsChart } from "./result-charts"
+import { serverFetch } from "@/lib/api/server"
+import { notFound } from "next/navigation"
 
-export default function ResultPage() {
-    // Sample data - replace with actual data from API
-    const score = 85
+// API Response Types
+interface PerformanceTrendItem {
+    session_id: string
+    score: number
+    date: string
+}
+
+interface SectionScore {
+    section_id: string
+    section_name: string
+    score: number
+}
+
+interface AggregatesResponse {
+    session_id: string
+    template_id: string
+    interview_title: string
+    current_score: number
+    improvement_percent: number
+    improvement_points: number
+    best_score: number
+    average_score: number
+    total_attempts: number
+    performance_trend: PerformanceTrendItem[]
+    section_scores: SectionScore[]
+    key_strengths: string[]
+    areas_for_improvement: string[]
+}
+
+function getPerformanceLevel(score: number): string {
+    if (score >= 90) return "Excellent Performance"
+    if (score >= 80) return "Great Performance"
+    if (score >= 70) return "Good Performance"
+    if (score >= 60) return "Fair Performance"
+    return "Needs Improvement"
+}
+
+function formatDateToMonth(dateString: string): string {
+    const date = new Date(dateString)
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+}
+
+async function getAggregates(sessionId: string): Promise<AggregatesResponse | null> {
+    return await serverFetch<AggregatesResponse>(`/api/v1/user/interview/results/${sessionId}/aggregates/`)
+}
+
+interface PageProps {
+    params: Promise<{ id: string }>
+}
+
+export default async function ResultPage({ params }: PageProps) {
+    const { id } = await params
+    const data = await getAggregates(id)
+
+    if (!data) {
+        notFound()
+    }
+
     const maxScore = 100
-    const improvement = 13
-    const bestScore = 85
-    const average = 78
-    const attempts = 5
-    const pointsFromLast = 3
-    const interviewTitle = "Software Engineer Interview - Practice"
-    const performanceLevel = "Excellent Performance"
+    const performanceLevel = getPerformanceLevel(data.current_score)
 
-    const chartData = [{ name: "score", value: score, fill: "url(#scoreGradient)" }]
-    const chartConfig = { score: { label: "Score", color: "" } }
+    // Transform performance trend data for chart
+    const performanceTrendData = data.performance_trend.map(item => ({
+        month: formatDateToMonth(item.date),
+        score: item.score
+    }))
 
-    // Performance Trend Data
-    const performanceTrendData = [
-        { month: "Jan", score: 65 },
-        { month: "Feb", score: 68 },
-        { month: "Mar", score: 75 },
-        { month: "Apr", score: 82 },
-        { month: "May", score: 78 },
-        { month: "Jun", score: 85 },
-    ]
+    // Transform section scores for skill metrics chart
+    const skillMetricsData = data.section_scores.map(section => ({
+        skill: section.section_name,
+        score: section.score
+    }))
 
-    // Skill Metrics Data
-    const skillMetricsData = [
-        { skill: "Technical", score: 76 },
-        { skill: "Problem-Solving", score: 85 },
-        { skill: "Communication", score: 90 },
-        { skill: "Cultural Fit", score: 79 },
-    ]
-
-    // Skill Cards Data
-    const skillCards = [
-        { title: "Technical Skills", score: 76, description: "Excellent problem-solving approach and clean code", },
-        { title: "Communication", score: 90, description: "Clear explanations, could be more concise", },
-        { title: "Problem Solving", score: 85, description: "Strong analytical thinking and edge case handling", },
-        { title: "Cultural Fit", score: 79, description: "Good alignment with team values", },
-    ]
+    // Transform section scores for skill cards
+    const skillCards = data.section_scores.map(section => ({
+        title: section.section_name,
+        score: section.score,
+    }))
 
     return (
         <div className="min-h-screen bg-[rgba(245,247,255,1)]">
@@ -80,45 +116,23 @@ export default function ResultPage() {
                                 </Badge>
 
                                 <div className="flex items-baseline gap-1">
-                                    <span className="text-5xl font-bold text-[rgba(64,158,227,1)]">{score}</span>
+                                    <span className="text-5xl font-bold text-[rgba(64,158,227,1)]">{data.current_score}</span>
                                     <span className="text-2xl font-semibold text-muted-foreground">/{maxScore}</span>
                                 </div>
 
-                                <p className="text-sm text-muted-foreground">{interviewTitle}</p>
+                                <p className="text-sm text-muted-foreground">{data.interview_title}</p>
 
-                                <div className="flex items-center  text-sm ">
-                                    <Image src="/candidate/results/up.svg" alt="Up" width={20} height={20} className="mr-1 mt-2 h-8 w-8" />
-                                    <span className="text-[rgba(1,103,23,1)]">+{pointsFromLast} points from last attempt</span>
-                                </div>
+                                {data.total_attempts > 1 && (
+                                    <div className="flex items-center  text-sm ">
+                                        <Image src="/candidate/results/up.svg" alt="Up" width={20} height={20} className="mr-1 mt-2 h-8 w-8" />
+                                        <span className="text-[rgba(1,103,23,1)]">+{data.improvement_points} points from last attempt</span>
+                                    </div>
+                                )}
+
                             </div>
 
                             {/* Right - Circular Chart */}
-                            <div className="relative">
-                                <ChartContainer config={chartConfig} className="h-[180px] w-[180px]">
-                                    <RadialBarChart
-                                        data={chartData}
-                                        startAngle={90}
-                                        endAngle={90 + (score / maxScore) * 360}
-                                        innerRadius={60}
-                                        outerRadius={75}
-                                    >
-                                        <defs>
-                                            <linearGradient id="scoreGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                                                <stop offset="0%" stopColor="rgba(58, 63, 187, 0.81)" />
-                                                <stop offset="100%" stopColor="rgba(0, 215, 255, 0.81)" />
-                                            </linearGradient>
-                                        </defs>
-                                        <PolarAngleAxis type="number" domain={[0, maxScore]} tick={false} />
-                                        {/* <RadialBar dataKey="value" background cornerRadius={10} /> */}
-                                        <RadialBar dataKey="value" cornerRadius={10} />
-
-                                    </RadialBarChart>
-                                </ChartContainer>
-                                <div className="absolute inset-0 flex flex-col items-center justify-center">
-                                    <div className="text-3xl font-bold text-transparent bg-clip-text bg-[linear-gradient(124.24deg,rgba(58,63,187,0.81)_-6.24%,rgba(0,215,255,0.81)_174.3%)]">{score}</div>
-                                    <div className="text-xs text-muted-foreground">Score</div>
-                                </div>
-                            </div>
+                            <ScoreChart score={data.current_score} maxScore={maxScore} />
                         </div>
                     </CardContent>
                 </Card>
@@ -132,7 +146,7 @@ export default function ResultPage() {
                                 <Image src="/candidate/results/up2.svg" alt="Up" width={20} height={20} className="mr-1 mt-2 h-8 w-8" />
                                 <div>
                                     <p className="text-sm text-muted-foreground">Improvement</p>
-                                    <p className="text-xl font-bold">+{improvement}%</p>
+                                    <p className="text-xl font-bold">{data.total_attempts > 1 ? `+${data.improvement_percent}%` : 'N/A'}</p>
                                 </div>
                             </div>
                         </CardContent>
@@ -145,7 +159,7 @@ export default function ResultPage() {
                                 <Image src="/candidate/results/note2.svg" alt="note" width={20} height={20} className="mr-1 mt-2 h-8 w-8" />
                                 <div>
                                     <p className="text-sm text-muted-foreground">Best Score</p>
-                                    <p className="text-xl font-bold">{bestScore}%</p>
+                                    <p className="text-xl font-bold">{data.best_score}%</p>
                                 </div>
                             </div>
                         </CardContent>
@@ -158,7 +172,7 @@ export default function ResultPage() {
                                 <Image src="/candidate/results/graph.svg" alt="graph" width={20} height={20} className="mr-1 mt-2 h-8 w-8" />
                                 <div>
                                     <p className="text-sm text-muted-foreground">Average</p>
-                                    <p className="text-xl font-bold">{average}%</p>
+                                    <p className="text-xl font-bold">{data.average_score}%</p>
                                 </div>
                             </div>
                         </CardContent>
@@ -171,7 +185,7 @@ export default function ResultPage() {
                                 <Image src="/candidate/results/thunder.svg" alt="attempt" width={20} height={20} className="mr-1 mt-2 h-8 w-8" />
                                 <div>
                                     <p className="text-sm text-muted-foreground">Attempts</p>
-                                    <p className="text-xl font-bold">{attempts}</p>
+                                    <p className="text-xl font-bold">{data.total_attempts}</p>
                                 </div>
                             </div>
                         </CardContent>
@@ -189,28 +203,7 @@ export default function ResultPage() {
                             </CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <ChartContainer config={{ score: { label: "Score", color: "#3B82F6" } }} className="h-[200px] w-full">
-                                <LineChart data={performanceTrendData}>
-                                    <defs>
-                                        <linearGradient id="lineGradient" x1="0" y1="0" x2="1" y2="0">
-                                            <stop offset="0%" stopColor="rgba(107,124,255,1)" />
-                                            <stop offset="100%" stopColor="rgba(98,117,252,1)" />
-                                        </linearGradient>
-                                    </defs>
-                                    <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: "" }} />
-                                    <YAxis hide domain={[50, 100]} />
-                                    <ChartTooltip
-                                        content={<ChartTooltipContent className="bg-white! backdrop-blur-sm! !border-gray-200" />}
-                                    />
-                                    <Line
-                                        type="monotone"
-                                        dataKey="score"
-                                        stroke="url(#lineGradient)"
-                                        strokeWidth={3}
-                                        dot={false}
-                                    />
-                                </LineChart>
-                            </ChartContainer>
+                            <PerformanceTrendChart data={performanceTrendData} />
                         </CardContent>
                     </Card>
 
@@ -223,56 +216,7 @@ export default function ResultPage() {
                             </CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <ChartContainer
-                                config={{
-                                    Technical: { label: "Technical", color: "#818CF8" },
-                                    "Problem-Solving": { label: "Problem-Solving", color: "#86EFAC" },
-                                    Communication: { label: "Communication", color: "#F472B6" },
-                                    "Cultural Fit": { label: "Cultural Fit", color: "#FDBA74" },
-                                }}
-                                className="h-[180px] w-full"
-                            >
-                                <BarChart data={skillMetricsData} barSize={16}>
-                                    <defs>
-                                        <linearGradient id="technicalGradient" x1="0" y1="1" x2="0" y2="0">
-                                            <stop offset="0%" stopColor="#818CF8" />
-                                            <stop offset="100%" stopColor="#C7D2FE" />
-                                        </linearGradient>
-                                        <linearGradient id="problemGradient" x1="0" y1="1" x2="0" y2="0">
-                                            <stop offset="0%" stopColor="#86EFAC" />
-                                            <stop offset="100%" stopColor="#D1FAE5" />
-                                        </linearGradient>
-                                        <linearGradient id="communicationGradient" x1="0" y1="1" x2="0" y2="0">
-                                            <stop offset="0%" stopColor="#F472B6" />
-                                            <stop offset="100%" stopColor="#FBCFE8" />
-                                        </linearGradient>
-                                        <linearGradient id="culturalGradient" x1="0" y1="1" x2="0" y2="0">
-                                            <stop offset="0%" stopColor="#FDBA74" />
-                                            <stop offset="100%" stopColor="#FED7AA" />
-                                        </linearGradient>
-                                    </defs>
-                                    <YAxis hide domain={[0, 100]} />
-                                    <XAxis dataKey="skill" hide />
-                                    <ChartTooltip
-                                        content={<ChartTooltipContent className="!bg-white !backdrop-blur-sm !border-gray-200" />}
-                                    />
-                                    <Bar dataKey="score" radius={[20, 20, 20, 20]} background={{ fill: "#FFFFFF", radius: 20 }}>
-                                        {skillMetricsData.map((entry, index) => {
-                                            const gradients = ["url(#technicalGradient)", "url(#problemGradient)", "url(#communicationGradient)", "url(#culturalGradient)"]
-                                            return <Cell key={`cell-${index}`} fill={gradients[index]} />
-                                        })}
-                                    </Bar>
-                                    <ChartLegend
-                                        payload={[
-                                            { value: "Technical", type: "rect", color: "#818CF8" },
-                                            { value: "Problem-Solving", type: "rect", color: "#86EFAC" },
-                                            { value: "Communication", type: "rect", color: "#F472B6" },
-                                            { value: "Cultural Fit", type: "rect", color: "#FDBA74" },
-                                        ]}
-                                        content={<ChartLegendContent />}
-                                    />
-                                </BarChart>
-                            </ChartContainer>
+                            <SkillMetricsChart data={skillMetricsData} />
                         </CardContent>
                     </Card>
                 </div>
@@ -289,8 +233,7 @@ export default function ResultPage() {
                                         <span className="text-[rgba(10,13,26,0.9)] font-semibold">/100</span>
                                     </span>
                                 </div>
-                                <Progress value={skill.score} indicatorColor="linear-gradient(90.14deg,rgba(45,166,255,0.9) -4.79%,#B9E1FF 161.26%)" className="h-2 mb-3" />
-                                <p className="text-sm text-[rgba(10,13,26,0.46)]">{skill.description}</p>
+                                <Progress value={skill.score} indicatorColor="linear-gradient(90.14deg,rgba(45,166,255,0.9) -4.79%,#B9E1FF 161.26%)" className="h-2" />
                             </CardContent>
                         </Card>
                     ))}
@@ -306,18 +249,12 @@ export default function ResultPage() {
                                 <h3 className="text-lg font-semibold text-[rgba(3,187,52,0.9)]">Key Strengths</h3>
                             </div>
                             <ul className="space-y-3 text-sm text-[rgba(10,13,26,0.5)] font-medium">
-                                <li className="flex items-start gap-2">
-                                    <span className="mt-2 h-1 w-1 rounded-full bg-[rgba(10,13,26,0.7)] shrink-0" />
-                                    Strong technical knowledge and problem-solving skills
-                                </li>
-                                <li className="flex items-start gap-2">
-                                    <span className="mt-2 h-1 w-1 rounded-full bg-[rgba(10,13,26,0.7)] shrink-0" />
-                                    Good code quality and best practices
-                                </li>
-                                <li className="flex items-start gap-2">
-                                    <span className="mt-2 h-1 w-1 rounded-full bg-[rgba(10,13,26,0.7)] shrink-0" />
-                                    Clear thinking process and logical approach
-                                </li>
+                                {data.key_strengths.map((strength, index) => (
+                                    <li key={index} className="flex items-start gap-2">
+                                        <span className="mt-2 h-1 w-1 rounded-full bg-[rgba(10,13,26,0.7)] shrink-0" />
+                                        {strength}
+                                    </li>
+                                ))}
                             </ul>
                         </CardContent>
                     </Card>
@@ -330,18 +267,12 @@ export default function ResultPage() {
                                 <h3 className="text-lg font-semibold text-[rgba(220,80,120,1)]">Scope of Improvement</h3>
                             </div>
                             <ul className="space-y-3 text-sm text-[rgba(10,13,26,0.5)] font-medium">
-                                <li className="flex items-start gap-2">
-                                    <span className="mt-2 h-1 w-1 rounded-full bg-[rgba(10,13,26,0.7)] shrink-0" />
-                                    Consider edge cases earlier in the problem-solving process
-                                </li>
-                                <li className="flex items-start gap-2">
-                                    <span className="mt-2 h-1 w-1 rounded-full bg-[rgba(10,13,26,0.7)] shrink-0" />
-                                    Be more concise in explanations
-                                </li>
-                                <li className="flex items-start gap-2">
-                                    <span className="mt-2 h-1 w-1 rounded-full bg-[rgba(10,13,26,0.7)] shrink-0" />
-                                    Practice system design fundamentals
-                                </li>
+                                {data.areas_for_improvement.map((area, index) => (
+                                    <li key={index} className="flex items-start gap-2">
+                                        <span className="mt-2 h-1 w-1 rounded-full bg-[rgba(10,13,26,0.7)] shrink-0" />
+                                        {area}
+                                    </li>
+                                ))}
                             </ul>
                         </CardContent>
                     </Card>
@@ -349,12 +280,16 @@ export default function ResultPage() {
 
                 {/* Action Buttons */}
                 <div className="flex items-center my-12  gap-6 pb-8 mx-18">
-                    <Button className="p-6 flex-1  h-14 rounded-xl bg-[linear-gradient(92.27deg,rgba(62,84,251,0.82)_18.18%,rgba(143,164,255,0.738)_110.61%)] hover:opacity-80 text-[rgba(248,250,255,1)] font-semibold text-xl">
-                        Retake Interview
-                    </Button>
-                    <Button variant="outline" className="p-6 flex-1 h-14 rounded-xl border-2 border-[rgba(58,76,207,0.5)] text-[rgba(58,76,207,1)] hover:bg-[rgba(58,76,207,1)] hover:text-[rgba(248,250,255,1)] hover:border-[rgba(58,76,207,1)]  font-semibold text-xl">
-                        Try Another Interview
-                    </Button>
+                    <Link href={`/interview/${data.template_id}`} className="flex-1">
+                        <Button className="p-6 w-full h-14 rounded-xl bg-[linear-gradient(92.27deg,rgba(62,84,251,0.82)_18.18%,rgba(143,164,255,0.738)_110.61%)] hover:opacity-80 text-[rgba(248,250,255,1)] font-semibold text-xl">
+                            Retake Interview
+                        </Button>
+                    </Link>
+                    <Link href="/candidate/practice-interviews" className="flex-1">
+                        <Button variant="outline" className="p-6 w-full h-14 rounded-xl border-2 border-[rgba(58,76,207,0.5)] text-[rgba(58,76,207,1)] hover:bg-[rgba(58,76,207,1)] hover:text-[rgba(248,250,255,1)] hover:border-[rgba(58,76,207,1)]  font-semibold text-xl">
+                            Try Another Interview
+                        </Button>
+                    </Link>
                 </div>
             </div>
         </div>
