@@ -40,7 +40,7 @@ export default function ActiveInterview({ cameraStream, micStream, templateId }:
   const [isAISpeaking, setIsAISpeaking] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [showEndConfirm, setShowEndConfirm] = useState(false)
-  
+
   // Recording status state
   const [isVideoRecording, setIsVideoRecording] = useState(false)
   const [isScreenRecording, setIsScreenRecording] = useState(false)
@@ -59,7 +59,7 @@ export default function ActiveInterview({ cameraStream, micStream, templateId }:
   const audioChunksRef = useRef<Blob[]>([])
   const hasHeardSpeechThisListeningTurnRef = useRef(false)
   const noiseFloorRmsRef = useRef<number>(0.008)
-  
+
   // Mixed audio recording refs (for capturing both user mic and AI audio)
   const mixedAudioContextRef = useRef<AudioContext | null>(null)
   const mixedAudioDestinationRef = useRef<MediaStreamAudioDestinationNode | null>(null)
@@ -73,7 +73,7 @@ export default function ActiveInterview({ cameraStream, micStream, templateId }:
   const screenRecorderRef = useRef<MediaRecorder | null>(null)
   const videoChunksRef = useRef<Blob[]>([])
   const screenChunksRef = useRef<Blob[]>([])
-  
+
   // Media upload tracking refs
   const mediaUploadIntervalsRef = useRef<{
     audio: NodeJS.Timeout | null
@@ -85,40 +85,40 @@ export default function ActiveInterview({ cameraStream, micStream, templateId }:
     video: number
     screen: number
   }>({ audio: 0, video: 0, screen: 0 })
-  
+
   // Upload session tracking - track which sessions have been initialized
   const uploadSessionsInitializedRef = useRef<{
     video: boolean
     screen: boolean
   }>({ video: false, screen: false })
-  
+
   // Retry tracking for failed uploads
   const uploadRetryCountRef = useRef<{
     video: number
     screen: number
   }>({ video: 0, screen: 0 })
   const MAX_RETRIES = 3
-  
+
   // Refs for state values used in callbacks
   const isVideoRecordingRef = useRef(false)
   const isScreenRecordingRef = useRef(false)
   const videoUploadStatusRef = useRef<'idle' | 'uploading' | 'complete' | 'error'>('idle')
   const screenUploadStatusRef = useRef<'idle' | 'uploading' | 'complete' | 'error'>('idle')
   const startMediaUploadSessionRef = useRef<((recordingType: 'video' | 'screen') => Promise<boolean>) | null>(null)
-  
+
   // Keep refs in sync with state
   useEffect(() => {
     isVideoRecordingRef.current = isVideoRecording
   }, [isVideoRecording])
-  
+
   useEffect(() => {
     isScreenRecordingRef.current = isScreenRecording
   }, [isScreenRecording])
-  
+
   useEffect(() => {
     videoUploadStatusRef.current = videoUploadStatus
   }, [videoUploadStatus])
-  
+
   useEffect(() => {
     screenUploadStatusRef.current = screenUploadStatus
   }, [screenUploadStatus])
@@ -170,6 +170,7 @@ export default function ActiveInterview({ cameraStream, micStream, templateId }:
   const micStreamRef = useRef<MediaStream | null>(null)
   const isMicOnRef = useRef(true)
   const hasSentEndOfTurnRef = useRef(false)
+  const hasNavigatedAwayRef = useRef(false) // Prevent recording restart after navigation
   const conversationStateRef = useRef<ConversationState>('listening')
 
   // Keep an imperative ref in sync with UI state
@@ -238,7 +239,7 @@ export default function ActiveInterview({ cameraStream, micStream, templateId }:
       if (!mixedAudioContextRef.current || mixedAudioContextRef.current.state === 'closed') {
         mixedAudioContextRef.current = new AudioContext({ sampleRate: 16000 })
       }
-      
+
       if (mixedAudioContextRef.current.state === 'suspended') {
         await mixedAudioContextRef.current.resume()
       }
@@ -271,7 +272,8 @@ export default function ActiveInterview({ cameraStream, micStream, templateId }:
   }, [])
 
   const playNextAudio = useCallback(async () => {
-    if (isPlayingRef.current || audioQueueRef.current.length === 0) {
+    // Don't play if we've navigated away, stopped, or have no audio
+    if (hasNavigatedAwayRef.current || isPlayingRef.current || audioQueueRef.current.length === 0) {
       return
     }
 
@@ -295,10 +297,19 @@ export default function ActiveInterview({ cameraStream, micStream, templateId }:
 
       if (playbackContext.state === 'suspended') {
         await playbackContext.resume()
+        // Check if we navigated away while resuming
+        if (hasNavigatedAwayRef.current) return
       }
 
       const audioData = audioQueueRef.current.shift()!
       const audioBuffer = await playbackContext.decodeAudioData(audioData)
+
+      // CRITICAL: Check if we navigated away while decoding
+      if (hasNavigatedAwayRef.current) {
+        console.log('[Audio Playback] Decoded audio but navigated away - aborting')
+        return
+      }
+
       const source = playbackContext.createBufferSource()
       source.buffer = audioBuffer
       currentAISourceNodeRef.current = source
@@ -322,7 +333,7 @@ export default function ActiveInterview({ cameraStream, micStream, templateId }:
           // IMPORTANT: Do NOT clear `audioChunksRef` while a MediaRecorder session is active.
           // WebM requires the init segment/header from the start of the session; clearing mid-stream corrupts decoding.
           // To start a fresh "turn" buffer, restart the recorder.
-          if (isConnectedRef.current && isMicOnRef.current && startRecordingRef.current) {
+          if (isConnectedRef.current && isMicOnRef.current && startRecordingRef.current && !hasNavigatedAwayRef.current) {
             const recorder = mediaRecorderRef.current
             const recorderActive = recorder && recorder.state !== 'inactive'
             if (recorderActive) {
@@ -369,7 +380,7 @@ export default function ActiveInterview({ cameraStream, micStream, templateId }:
         setConversationState('listening')
         hasSentEndOfTurnRef.current = false
         hasHeardSpeechThisListeningTurnRef.current = false
-        if (isConnectedRef.current && isMicOnRef.current && startRecordingRef.current) {
+        if (isConnectedRef.current && isMicOnRef.current && startRecordingRef.current && !hasNavigatedAwayRef.current) {
           const recorder = mediaRecorderRef.current
           const recorderActive = recorder && recorder.state !== 'inactive'
           if (recorderActive) {
@@ -410,7 +421,7 @@ export default function ActiveInterview({ cameraStream, micStream, templateId }:
     if (expectedAudioChunkRef.current) {
       const chunkInfo = expectedAudioChunkRef.current
       const chunkIndex = chunkInfo.chunkIndex
-      
+
       // Verify this matches a completed sentence for better sync
       const sentenceText = sentenceCompleteRef.current.get(chunkIndex)
       if (sentenceText && sentenceText === chunkInfo.text) {
@@ -438,7 +449,7 @@ export default function ActiveInterview({ cameraStream, micStream, templateId }:
 
     // Queue audio for playback - start playing immediately for better sync
     audioQueueRef.current.push(audioData)
-    
+
     // Start playing immediately for synchronized playback
     if (playNextAudioRef.current) {
       playNextAudioRef.current()
@@ -525,23 +536,23 @@ export default function ActiveInterview({ cameraStream, micStream, templateId }:
       // Queue the token for gradual display
       const aiId = currentAiMessageIdRef.current
       if (!aiId) return
-      
+
       const token = message.text || ''
       tokenQueueRef.current.push(token)
-      
+
       // Start processing the queue if not already processing
       processTokenQueue()
     } else if (message.type === 'response.text.complete') {
       // Finalize streaming AI message
       const aiId = currentAiMessageIdRef.current
-      
+
       // Wait for queue to finish processing, then finalize
       const waitForQueueAndFinalize = () => {
         if (tokenQueueRef.current.length > 0 || isProcessingTokensRef.current) {
           setTimeout(waitForQueueAndFinalize, 50)
           return
         }
-        
+
         if (aiId) {
           const finalText = message.text || aiStreamBufferRef.current
           setMessages((prev) =>
@@ -553,7 +564,7 @@ export default function ActiveInterview({ cameraStream, micStream, templateId }:
         // This is *text* stream completion, not necessarily audio playback completion
         if (!isPlayingRef.current) setIsAISpeaking(false)
       }
-      
+
       waitForQueueAndFinalize()
     } else if (message.type === 'response.sentence.complete') {
       // Sentence complete signal - text is ready, audio will follow
@@ -561,7 +572,7 @@ export default function ActiveInterview({ cameraStream, micStream, templateId }:
       const sentenceText = message.text || ''
       sentenceCompleteRef.current.set(chunkIndex, sentenceText)
       console.log(`[WebSocket] Sentence ${chunkIndex} complete: "${sentenceText.substring(0, 50)}..." - expecting audio chunk`)
-      
+
       // Ensure we're in speaking state when sentence completes
       if (chunkIndex === 0 && !isAISpeaking) {
         setIsAISpeaking(true)
@@ -574,7 +585,7 @@ export default function ActiveInterview({ cameraStream, micStream, templateId }:
       const chunkText = message.text || ''
       expectedAudioChunkRef.current = { chunkIndex, text: chunkText }
       console.log(`[WebSocket] Audio chunk ${chunkIndex} metadata received, expecting binary data for: "${chunkText.substring(0, 30)}..."`)
-      
+
       // Check if this sentence was already marked as complete
       const sentenceText = sentenceCompleteRef.current.get(chunkIndex)
       if (sentenceText && sentenceText === chunkText) {
@@ -600,26 +611,26 @@ export default function ActiveInterview({ cameraStream, micStream, templateId }:
     } else if (message.type === 'response.completed') {
       console.log('[WebSocket] Response completed - status:', message.status, 'next_action:', message.next_action)
       setIsProcessing(false)
-      
+
       // Check if interview has completed
       const isCompleted = message.status === 'completed' || message.next_action === 'END_INTERVIEW'
-      
+
       if (isCompleted) {
         console.log('[WebSocket] Interview completed - ending session')
-        
+
         // Stop all recordings
         if (stopRecordingRef.current) {
           stopRecordingRef.current()
         }
         stopVideoRecording()
         stopScreenRecording()
-        
+
         // Stop media upload intervals
         stopMediaUploadIntervals()
-        
+
         // Finalize all media uploads before closing
         finalizeAllMedia()
-        
+
         // Wait a bit for finalization to complete
         setTimeout(() => {
           // Close WebSocket
@@ -627,7 +638,7 @@ export default function ActiveInterview({ cameraStream, micStream, templateId }:
             closeWebSocketRef.current()
           }
         }, 1000)
-        
+
         // Add completion message to conversation
         const completionMessage: Message = {
           id: `completion-${Date.now()}`,
@@ -636,7 +647,7 @@ export default function ActiveInterview({ cameraStream, micStream, templateId }:
           timestamp: new Date(),
         }
         setMessages((prev) => [...prev, completionMessage])
-        
+
         // Redirect to dashboard after a short delay to show the completion message
         setTimeout(() => {
           router.push('/candidate/dashboard')
@@ -726,6 +737,9 @@ export default function ActiveInterview({ cameraStream, micStream, templateId }:
 
   // Handle WebSocket messages
   const handleWebSocketMessage = useCallback((data: ArrayBuffer | string) => {
+    // Stop processing messages if we've navigated away
+    if (hasNavigatedAwayRef.current) return
+
     if (data instanceof ArrayBuffer) {
       // Binary audio data
       handleAudioData(data)
@@ -1143,6 +1157,12 @@ export default function ActiveInterview({ cameraStream, micStream, templateId }:
       return
     }
 
+    // Don't start if we've navigated away
+    if (hasNavigatedAwayRef.current) {
+      console.log('[Recording] Cannot start recording - navigated away')
+      return
+    }
+
     // Don't start if already recording
     if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
       console.log('[Recording] Already recording, skipping start')
@@ -1167,11 +1187,11 @@ export default function ActiveInterview({ cameraStream, micStream, templateId }:
     try {
       // Initialize mixed audio context (for recording both user mic and AI audio)
       await initializeMixedAudioContext(stream)
-      
+
       // Use mixed audio stream for recording (includes both user mic and AI audio)
       const recordingStream = mixedAudioStreamRef.current || stream
       console.log('[Recording] Starting mixed audio recording (user mic + AI audio)...')
-      
+
       // Create MediaRecorder using mixed stream
       const mediaRecorder = new MediaRecorder(recordingStream, {
         mimeType: 'audio/webm;codecs=opus',
@@ -1239,7 +1259,7 @@ export default function ActiveInterview({ cameraStream, micStream, templateId }:
     }
 
     stopSilenceDetection()
-    
+
     // Cleanup mixed audio nodes (but keep context for potential reuse)
     if (micSourceNodeRef.current) {
       micSourceNodeRef.current.disconnect()
@@ -1249,7 +1269,7 @@ export default function ActiveInterview({ cameraStream, micStream, templateId }:
       currentAISourceNodeRef.current.disconnect()
       currentAISourceNodeRef.current = null
     }
-    
+
     console.log('[Recording] AudioContext closed')
   }, [stopSilenceDetection])
 
@@ -1281,40 +1301,40 @@ export default function ActiveInterview({ cameraStream, micStream, templateId }:
     // Close WebSocket
     closeWebSocket()
 
-      // Stop all media tracks with proper error handling
-      try {
-        if (cameraStream) {
-          cameraStream.getTracks().forEach(track => {
-            track.stop()
-            track.enabled = false
-          })
-        }
-        if (micStream) {
-          micStream.getTracks().forEach(track => {
-            track.stop()
-            track.enabled = false
-          })
-        }
-        if (screenStreamRef.current) {
-          screenStreamRef.current.getTracks().forEach(track => {
-            track.stop()
-            track.enabled = false
-          })
-          screenStreamRef.current = null
-        }
-
-        // Also stop any tracks from video element if they exist
-        if (videoRef.current && videoRef.current.srcObject) {
-          const stream = videoRef.current.srcObject as MediaStream
-          stream.getTracks().forEach(track => {
-            track.stop()
-            track.enabled = false
-          })
-          videoRef.current.srcObject = null
-        }
-      } catch (error) {
-        console.error('[End Interview] Error stopping media tracks:', error)
+    // Stop all media tracks with proper error handling
+    try {
+      if (cameraStream) {
+        cameraStream.getTracks().forEach(track => {
+          track.stop()
+          track.enabled = false
+        })
       }
+      if (micStream) {
+        micStream.getTracks().forEach(track => {
+          track.stop()
+          track.enabled = false
+        })
+      }
+      if (screenStreamRef.current) {
+        screenStreamRef.current.getTracks().forEach(track => {
+          track.stop()
+          track.enabled = false
+        })
+        screenStreamRef.current = null
+      }
+
+      // Also stop any tracks from video element if they exist
+      if (videoRef.current && videoRef.current.srcObject) {
+        const stream = videoRef.current.srcObject as MediaStream
+        stream.getTracks().forEach(track => {
+          track.stop()
+          track.enabled = false
+        })
+        videoRef.current.srcObject = null
+      }
+    } catch (error) {
+      console.error('[End Interview] Error stopping media tracks:', error)
+    }
 
     // Clear video element
     if (videoRef.current) {
@@ -1368,15 +1388,15 @@ export default function ActiveInterview({ cameraStream, micStream, templateId }:
       }
       send(JSON.stringify(message))
       console.log(`[Media Upload] Started upload session for ${recordingType}`)
-      
+
       // Mark as initialized optimistically (will be confirmed by backend response)
       // Backend will set _active_media_type which routes binary chunks correctly
       uploadSessionsInitializedRef.current[recordingType] = true
-      
+
       // Small delay to allow backend to process the message
       // In practice, the backend processes this quickly, but we add a small buffer
       await new Promise(resolve => setTimeout(resolve, 50))
-      
+
       return true
     } catch (error) {
       console.error(`[Media Upload] Error starting ${recordingType} upload session:`, error)
@@ -1384,7 +1404,7 @@ export default function ActiveInterview({ cameraStream, micStream, templateId }:
       return false
     }
   }, [isConnected, send])
-  
+
   // Store startMediaUploadSession in ref for use in error handlers
   useEffect(() => {
     startMediaUploadSessionRef.current = startMediaUploadSession
@@ -1558,7 +1578,7 @@ export default function ActiveInterview({ cameraStream, micStream, templateId }:
     if (!isConnected || !send) {
       return
     }
-    
+
     // Allow empty chunks only if isFinal is true (for finalization signal)
     if (chunks.length === 0 && !isFinal) {
       return
@@ -1603,7 +1623,7 @@ export default function ActiveInterview({ cameraStream, micStream, templateId }:
 
         // Convert to ArrayBuffer for binary upload
         const arrayBuffer = await blob.arrayBuffer()
-        
+
         // Update upload status
         if (recordingType === 'video') {
           setVideoUploadStatus('uploading')
@@ -1690,7 +1710,7 @@ export default function ActiveInterview({ cameraStream, micStream, templateId }:
       }
     } catch (error) {
       console.error(`[Media Upload] Error sending ${recordingType} chunk:`, error)
-      
+
       // Update error status
       if (recordingType === 'video') {
         setVideoUploadStatus('error')
@@ -1857,7 +1877,7 @@ export default function ActiveInterview({ cameraStream, micStream, templateId }:
   // Recording duration timer
   useEffect(() => {
     let interval: NodeJS.Timeout | null = null
-    
+
     if (isVideoRecording || isScreenRecording) {
       interval = setInterval(() => {
         if (recordingStartTimeRef.current) {
@@ -1896,7 +1916,7 @@ export default function ActiveInterview({ cameraStream, micStream, templateId }:
         const finalizeMessage = JSON.stringify({ type: 'finalize_all_media' })
         const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9000'
         const sessionIdValue = sessionId
-        
+
         if (sessionIdValue) {
           // Try to send via WebSocket first (synchronous)
           try {
@@ -1954,51 +1974,161 @@ export default function ActiveInterview({ cameraStream, micStream, templateId }:
     }
   }, [isConnected, send, sessionId, sendMediaChunk])
 
-  // Cleanup on unmount
+  // Shared cleanup function for all exit paths (navigation, unmount, etc.)
+  const stopAllMediaStreams = useCallback(() => {
+    console.log('[ActiveInterview] Cleanup - stopping all streams');
+
+    // Set navigation flag to prevent any callbacks from restarting recording
+    hasNavigatedAwayRef.current = true
+
+    // Clear audio queue to prevent onended callbacks from firing
+    audioQueueRef.current = []
+
+    // Stop recordings using the same functions as handleEndInterview
+    if (stopRecordingRef.current) {
+      stopRecordingRef.current()
+    }
+
+    // Stop media upload intervals
+    if (mediaUploadIntervalsRef.current.audio) {
+      clearInterval(mediaUploadIntervalsRef.current.audio)
+      mediaUploadIntervalsRef.current.audio = null
+    }
+    if (mediaUploadIntervalsRef.current.video) {
+      clearInterval(mediaUploadIntervalsRef.current.video)
+      mediaUploadIntervalsRef.current.video = null
+    }
+    if (mediaUploadIntervalsRef.current.screen) {
+      clearInterval(mediaUploadIntervalsRef.current.screen)
+      mediaUploadIntervalsRef.current.screen = null
+    }
+
+    // Nullify all recorders to prevent stale events
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+      try { mediaRecorderRef.current.stop() } catch (e) { /* ignore */ }
+    }
+    mediaRecorderRef.current = null
+
+    if (videoRecorderRef.current && videoRecorderRef.current.state !== 'inactive') {
+      try { videoRecorderRef.current.stop() } catch (e) { /* ignore */ }
+    }
+    videoRecorderRef.current = null
+
+    if (screenRecorderRef.current && screenRecorderRef.current.state !== 'inactive') {
+      try { screenRecorderRef.current.stop() } catch (e) { /* ignore */ }
+    }
+    screenRecorderRef.current = null
+
+    // Stop camera stream
+    if (cameraStreamRef.current) {
+      cameraStreamRef.current.getTracks().forEach(track => {
+        track.stop()
+        track.enabled = false
+      })
+      cameraStreamRef.current = null
+    }
+
+    // Stop mic stream
+    if (micStreamRef.current) {
+      micStreamRef.current.getTracks().forEach(track => {
+        track.stop()
+        track.enabled = false
+      })
+      micStreamRef.current = null
+    }
+
+    // Stop screen stream
+    if (screenStreamRef.current) {
+      screenStreamRef.current.getTracks().forEach(track => {
+        track.stop()
+        track.enabled = false
+      })
+      screenStreamRef.current = null
+    }
+
+    // Close WebSocket
+    closeWebSocket()
+
+    // --- Additional Audio Context & Node Cleanup ---
+    // Close audio playback context (stops currently playing audio)
+    if (audioPlaybackContextRef.current && audioPlaybackContextRef.current.state !== 'closed') {
+      audioPlaybackContextRef.current.close().catch(console.error)
+    }
+
+    // Close recording audio context if separate
+    if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
+      audioContextRef.current.close().catch(console.error)
+    }
+
+    // Cleanup mixed audio context nodes
+    if (micSourceNodeRef.current) {
+      micSourceNodeRef.current.disconnect()
+      micSourceNodeRef.current = null
+    }
+    if (currentAISourceNodeRef.current) {
+      try { currentAISourceNodeRef.current.stop() } catch (e) { /* already stopped */ }
+      currentAISourceNodeRef.current.disconnect()
+      currentAISourceNodeRef.current = null
+    }
+    if (aiAudioGainNodeRef.current) {
+      aiAudioGainNodeRef.current.disconnect()
+      aiAudioGainNodeRef.current = null
+    }
+    if (mixedAudioDestinationRef.current) {
+      mixedAudioDestinationRef.current.disconnect()
+      mixedAudioDestinationRef.current = null
+    }
+
+    // Close mixed audio context
+    if (mixedAudioContextRef.current && mixedAudioContextRef.current.state !== 'closed') {
+      mixedAudioContextRef.current.close().catch(console.error)
+      mixedAudioContextRef.current = null
+    }
+    mixedAudioStreamRef.current = null
+
+    // Clear timers
+    if (thinkingTimerRef.current) {
+      clearTimeout(thinkingTimerRef.current)
+    }
+    if (silenceTimerRef.current) {
+      clearTimeout(silenceTimerRef.current)
+    }
+    if (silenceRAFRef.current !== null) {
+      cancelAnimationFrame(silenceRAFRef.current)
+    }
+
+    // Clear token queue
+    tokenQueueRef.current = []
+    isProcessingTokensRef.current = false
+  }, [closeWebSocket])
+
+  // Store stopAllMediaStreams in a ref so event listeners always call the latest version
+  const stopAllMediaStreamsRef = useRef(stopAllMediaStreams)
   useEffect(() => {
-    const videoElement = videoRef.current
+    stopAllMediaStreamsRef.current = stopAllMediaStreams
+  }, [stopAllMediaStreams])
+
+  // Handle browser back button and any navigation
+  useEffect(() => {
+    const handlePageHide = () => {
+      console.log('[ActiveInterview] pagehide event');
+      stopAllMediaStreamsRef.current()
+    }
+
+    window.addEventListener('pagehide', handlePageHide)
 
     return () => {
-      stopRecording()
-      stopVideoRecording()
-      stopScreenRecording()
-      closeWebSocket()
+      window.removeEventListener('pagehide', handlePageHide)
+    }
+  }, [])
 
-      // Cleanup all media tracks - use refs for latest values
-      try {
-        if (cameraStreamRef.current) {
-          console.log('[Cleanup] Stopping camera stream')
-          cameraStreamRef.current.getTracks().forEach(track => {
-            track.stop()
-            track.enabled = false
-          })
-        }
-        if (micStreamRef.current) {
-          console.log('[Cleanup] Stopping mic stream')
-          micStreamRef.current.getTracks().forEach(track => {
-            track.stop()
-            track.enabled = false
-          })
-        }
-        if (screenStreamRef.current) {
-          screenStreamRef.current.getTracks().forEach(track => {
-            track.stop()
-            track.enabled = false
-          })
-          screenStreamRef.current = null
-        }
-        if (videoElement && videoElement.srcObject) {
-          const stream = videoElement.srcObject as MediaStream
-          stream.getTracks().forEach(track => {
-            track.stop()
-            track.enabled = false
-          })
-          videoElement.srcObject = null
-        }
-      } catch (error) {
-        console.error('[Cleanup] Error stopping media tracks:', error)
-      }
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      // Use the shared cleanup function
+      stopAllMediaStreams()
 
+      // Additional audio context cleanup
       if (audioPlaybackContextRef.current && audioPlaybackContextRef.current.state !== 'closed') {
         audioPlaybackContextRef.current.close().catch(console.error)
       }
@@ -2011,6 +2141,7 @@ export default function ActiveInterview({ cameraStream, micStream, templateId }:
         micSourceNodeRef.current = null
       }
       if (currentAISourceNodeRef.current) {
+        try { currentAISourceNodeRef.current.stop() } catch (e) { /* already stopped */ }
         currentAISourceNodeRef.current.disconnect()
         currentAISourceNodeRef.current = null
       }
@@ -2040,7 +2171,7 @@ export default function ActiveInterview({ cameraStream, micStream, templateId }:
       tokenQueueRef.current = []
       isProcessingTokensRef.current = false
     }
-  }, []) 
+  }, [])
 
   return (
     <div className="flex flex-col h-screen bg-gray-900">
@@ -2235,7 +2366,7 @@ export default function ActiveInterview({ cameraStream, micStream, templateId }:
         <span className={`text-sm ${isConnected ? 'text-green-500' : 'text-red-500'}`}>
           {isConnected ? '● Connected' : '● Disconnected'}
         </span>
-        
+
         {/* Video Recording Status */}
         {isVideoRecording && (
           <div className="flex items-center gap-2 bg-gray-800/90 px-3 py-1.5 rounded-lg border border-gray-700">
@@ -2259,7 +2390,7 @@ export default function ActiveInterview({ cameraStream, micStream, templateId }:
             )}
           </div>
         )}
-        
+
         {/* Screen Recording Status */}
         {isScreenRecording && (
           <div className="flex items-center gap-2 bg-gray-800/90 px-3 py-1.5 rounded-lg border border-gray-700">

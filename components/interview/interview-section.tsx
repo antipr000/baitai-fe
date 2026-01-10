@@ -203,22 +203,17 @@ export default function InterviewSection({
             analyserRef.current = null
         }
 
-        const handlePopState = () => {
-            console.log('[InterviewSection] popstate - stopping streams');
-            stopAllStreams();
-        }
 
-        const handleBeforeUnload = () => {
+
+        const handlePageHide = () => {
             console.log('[InterviewSection] beforeunload - stopping streams');
             stopAllStreams();
         }
 
-        window.addEventListener('popstate', handlePopState);
-        window.addEventListener('beforeunload', handleBeforeUnload);
+    window.addEventListener('pagehide', handlePageHide) // popstate doesn't work
 
         return () => {
-            window.removeEventListener('popstate', handlePopState);
-            window.removeEventListener('beforeunload', handleBeforeUnload);
+            window.removeEventListener('pagehide', handlePageHide);
 
             // Only fully stop mic test if we're not keeping the stream
             if (!keepMicStreamOnUnmount) {

@@ -34,6 +34,8 @@ export default function InterviewPage() {
     // Use refs to track streams for cleanup on unmount only
     const cameraStreamRef = useRef<MediaStream | null>(null);
     const micStreamRef = useRef<MediaStream | null>(null);
+    // Track if we've navigated away (pagehide fired) to prevent re-requesting media on back
+    const hasNavigatedAwayRef = useRef(false);
 
     // Keep refs in sync with state
     useEffect(() => {
@@ -68,24 +70,17 @@ export default function InterviewPage() {
             }
         };
 
-        // Handle browser back/forward navigation
-        const handlePopState = () => {
-            console.log('[Page Cleanup] popstate event - stopping streams');
+        const handlePageHide = () => {
+            console.log('[Page Cleanup] pagehide event - stopping streams');
+            hasNavigatedAwayRef.current = true; // Mark that we've navigated away
             stopAllStreams();
         };
 
-        // Handle page unload (closing tab, refresh, etc.)
-        const handleBeforeUnload = () => {
-            console.log('[Page Cleanup] beforeunload event - stopping streams');
-            stopAllStreams();
-        };
 
-        window.addEventListener('popstate', handlePopState);
-        window.addEventListener('beforeunload', handleBeforeUnload);
+        window.addEventListener('pagehide', handlePageHide);
 
         return () => {
-            window.removeEventListener('popstate', handlePopState);
-            window.removeEventListener('beforeunload', handleBeforeUnload);
+            window.removeEventListener('pagehide', handlePageHide);
             stopAllStreams();
         };
     }, []); // Empty dependency array - only runs on mount/unmount
@@ -97,6 +92,12 @@ export default function InterviewPage() {
 
     useEffect(() => {
         async function initDevices() {
+            // Don't re-request media if we've navigated away (page restored from cache)
+            if (hasNavigatedAwayRef.current) {
+                console.log('[Page] Skipping initDevices - page was navigated away from');
+                return;
+            }
+
             try {
                 setPermission("pending");
 
