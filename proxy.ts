@@ -3,7 +3,7 @@ import { authMiddleware, redirectToHome, redirectToLogin } from "next-firebase-a
 import { clientConfig, serverConfig } from "@/lib/auth/config";
 
 const AUTH_PAGES = ['/signup', '/login'];
-const PUBLIC_PATHS = ['/', '/about', '/pricing', '/test', ...AUTH_PAGES];
+const PUBLIC_PATHS = ['/', '/about', '/pricing', ...AUTH_PAGES];
 
 export async function proxy(request: NextRequest) {
 

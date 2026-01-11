@@ -67,7 +67,7 @@ export default function LoginPage() {
             // delay to patch the sync issue
 
             // Send token to backend
-            await api.post('api/v1/user/signup/token/', {
+            await api.post('api/v1/user/login/', {
                 token: idToken,
             });
 
