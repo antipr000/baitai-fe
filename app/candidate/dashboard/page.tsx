@@ -39,9 +39,11 @@ export default async function DashboardPage() {
                     {/* Header */}
                     <div className="flex justify-between items-center ">
                         <div className='flex items-center justify-center gap-4'>
-                            <div className='bg-[rgba(98,117,252,0.82)]  p-2 px-1 rounded-md'>
-                                <Image src="/candidate/dashboard/left-arrow.svg" alt="Back" width={20} height={20} />
-                            </div>
+                            <Link href="/">
+                                <div className='bg-[rgba(98,117,252,0.82)]  p-2 px-1 rounded-md'>
+                                    <Image src="/candidate/dashboard/left-arrow.svg" alt="Back" width={20} height={20} />
+                                </div>
+                            </Link>
                             <h1 className="text-2xl tracking-wide font-bold bg-[linear-gradient(91.24deg,#3E54FB_-35.23%,#C3CEFF_202.55%)] bg-clip-text text-transparent">My Dashboard</h1>
                         </div>
                         <Link href="/candidate/results" className="flex items-center gap-2 px-4 py-2 rounded-md text-white bg-[linear-gradient(91.24deg,#3E54FB_-35.23%,#C3CEFF_202.55%)] hover:opacity-90 transition-opacity">

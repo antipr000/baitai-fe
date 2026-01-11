@@ -20,11 +20,11 @@ import api from "@/lib/api/client";
 export default function LoginPage() {
     const router = useRouter();
     const [email, setEmail] = useState("");
-    
+
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
-    const [rememberMe, setRememberMe] = useState(true);
+    const [rememberMe, setRememberMe] = useState(false);
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -33,8 +33,8 @@ export default function LoginPage() {
 
         try {
             await auth.setPersistence(rememberMe ? browserLocalPersistence : browserSessionPersistence);
-            const credentials =  await signInWithEmailAndPassword(auth, email, password);
-            if(credentials.user.emailVerified){
+            const credentials = await signInWithEmailAndPassword(auth, email, password);
+            if (credentials.user.emailVerified) {
                 const idToken = await credentials.user.getIdToken();
                 await fetch("/api/login", {
                     headers: {
@@ -42,7 +42,7 @@ export default function LoginPage() {
                     },
                 });
                 router.push("/candidate/dashboard");
-            }else{
+            } else {
                 toast.error("Please verify your email");
             }
         } catch (err) {
@@ -164,7 +164,7 @@ export default function LoginPage() {
 
                             {/* Remember me & Forgot password */}
                             <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-2">
+                                {/* <div className="flex items-center gap-2">
                                     <Checkbox
                                         id="remember"
                                         checked={rememberMe}
@@ -173,7 +173,7 @@ export default function LoginPage() {
                                     <label htmlFor="remember" className="text-sm text-gray-600 cursor-pointer">
                                         Keep me signed in
                                     </label>
-                                </div>
+                                </div> */}
                                 <Dialog>
                                     <DialogTrigger asChild>
                                         <button type="button" className="text-sm text-[rgba(96,117,232,1)] hover:underline">
@@ -184,7 +184,6 @@ export default function LoginPage() {
                                 </Dialog>
                             </div>
 
-                            {error && <p className="text-red-500 text-sm">{error}</p>}
 
                             {/* Sign in button */}
                             <div className="flex justify-center mt-10">
@@ -193,7 +192,7 @@ export default function LoginPage() {
                                     className="w-fit px-25 py-6 bg-[linear-gradient(92.1deg,#5A6CDB_-8.11%,#8D9DFD_148.24%)] hover:bg-[linear-gradient(92.1deg,#5A6CDB_-8.11%,#8D9DFD_148.24%)] text-xl text-[rgba(224,244,255,0.9)] font-medium rounded-lg"
                                     disabled={loading}
                                 >
-                                    {loading ? "Signing in..." : "Sign in"}
+                                    Sign in
                                 </Button>
                             </div>
                         </form>

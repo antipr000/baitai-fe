@@ -20,7 +20,7 @@ export default function SignupPage() {
     const [confirmPassword, setConfirmPassword] = useState("");
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
-    const [rememberMe, setRememberMe] = useState(true);
+    const [rememberMe, setRememberMe] = useState(false);
     const [agreedToTerms, setAgreedToTerms] = useState(false);
 
 
@@ -231,7 +231,7 @@ export default function SignupPage() {
                             </div>
 
                             {/* Remember me */}
-                            <div className="flex items-center gap-2">
+                            {/* <div className="flex items-center gap-2">
                                 <Checkbox
                                     id="remember"
                                     checked={rememberMe}
@@ -240,9 +240,9 @@ export default function SignupPage() {
                                 <label htmlFor="remember" className="text-sm text-gray-600 cursor-pointer">
                                     Keep me signed in
                                 </label>
-                            </div>
+                            </div> */}
 
-                            {error && <p className="text-red-500 text-sm">{error}</p>}
+                            {/* {error && <p className="text-red-500 text-sm">{error}</p>} */}
 
                             {/* Sign up button */}
                             <div className="flex justify-center mt-10">
@@ -251,7 +251,8 @@ export default function SignupPage() {
                                     className="w-fit px-25 py-6 bg-[linear-gradient(92.1deg,#5A6CDB_-8.11%,#8D9DFD_148.24%)] hover:bg-[linear-gradient(92.1deg,#5A6CDB_-8.11%,#8D9DFD_148.24%)] text-xl text-[rgba(224,244,255,0.9)] font-medium rounded-lg"
                                     disabled={loading}
                                 >
-                                    {loading ? "Signing up..." : "Sign up"}
+                                    Sign up
+                                    {/* {loading ? "Signing up..." : "Sign up"} */}
                                 </Button>
                             </div>
                         </form>

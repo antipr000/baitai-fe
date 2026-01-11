@@ -1,5 +1,6 @@
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { TrendingDown } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
 import Link from "next/link"
@@ -130,8 +131,12 @@ export default async function ResultPage({ params }: PageProps) {
 
                                 {data.total_attempts > 1 && (
                                     <div className="flex items-center  text-sm ">
-                                        <Image src="/candidate/results/up.svg" alt="Up" width={20} height={20} className="mr-1 mt-2 h-8 w-8" />
-                                        <span className="text-[rgba(1,103,23,1)]">+{data.improvement_points} points from last attempt</span>
+                                        {data.improvement_points >= 0 ? (
+                                            <Image src="/candidate/results/up.svg" alt="Up" width={20} height={20} className="mr-1 mt-2 h-8 w-8" />
+                                        ) : (
+                                            <TrendingDown className="mr-2 mt-1 h-7 w-7 text-red-500" />
+                                        )}
+                                        <span className={data.improvement_points >= 0 ? "text-[rgba(1,103,23,1)]" : "text-red-500"}>{data.improvement_points >= 0 ? '+' : ''}{data.improvement_points} points from last attempt</span>
                                     </div>
                                 )}
 
@@ -152,7 +157,7 @@ export default async function ResultPage({ params }: PageProps) {
                                 <Image src="/candidate/results/up2.svg" alt="Up" width={20} height={20} className="mr-1 mt-2 h-8 w-8" />
                                 <div>
                                     <p className="text-sm text-muted-foreground">Improvement</p>
-                                    <p className="text-xl font-bold">{data.total_attempts > 1 ? `+${data.improvement_percent}%` : 'N/A'}</p>
+                                    <p className="text-xl font-bold">{data.total_attempts > 1 ? `${data.improvement_percent >= 0 ? '+' : ''}${data.improvement_percent}%` : 'N/A'}</p>
                                 </div>
                             </div>
                         </CardContent>

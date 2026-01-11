@@ -104,12 +104,20 @@ export const MobileNavBar = () => {
                     {!isLoading && (
                         <>
                             {isAuthenticated ? (
-                                <Button
-                                    onClick={handleLogout}
-                                    className="w-full bg-[linear-gradient(106.03deg,#677CFF_0%,#A3D9F8_238.47%)] hover:opacity-70 text-[rgba(238,246,251,1)] font-medium"
-                                >
-                                    Logout
-                                </Button>
+                                <>
+                                    <Link href="/candidate/dashboard">
+                                        <Button className="w-full bg-[linear-gradient(106.03deg,#677CFF_0%,#A3D9F8_238.47%)] hover:opacity-70 text-[rgba(238,246,251,1)] font-medium">
+                                            Go to Dashboard
+                                        </Button>
+                                    </Link>
+                                    <Button
+                                        onClick={handleLogout}
+                                        variant="ghost"
+                                        className="w-full bg-[linear-gradient(106.03deg,rgba(239,246,254,0.5)_0%,rgba(163,217,248,0.5)_238.47%)] text-[rgba(108,132,255,1)] hover:opacity-70 border font-medium border-[rgba(108,132,255,0.9)]"
+                                    >
+                                        Logout
+                                    </Button>
+                                </>
                             ) : (
                                 <>
                                     <Link href="/login">
