@@ -9,6 +9,9 @@ import Image from "next/image";
 
 import Link from "next/link";
 import { ViewMore } from "@/components/about/view-more";
+import { getTokens } from "next-firebase-auth-edge";
+import { cookies } from "next/headers";
+import { clientConfig, serverConfig } from "@/lib/auth/config";
 
 const whyChooseUsCards = [
     {
@@ -37,7 +40,13 @@ const whyChooseUsCards = [
     }
 ];
 
-export default function AboutPage() {
+export default async function AboutPage() {
+    const tokens = await getTokens(await cookies(), {
+        apiKey: clientConfig.apiKey,
+        cookieName: serverConfig.cookieName,
+        cookieSignatureKeys: serverConfig.cookieSignatureKeys,
+        serviceAccount: serverConfig.serviceAccount,
+    });
     return (
         <div className="min-h-screen bg-[linear-gradient(112.45deg,#F5F7FF_11.62%,#E0F2FF_124.08%)] flex flex-col items-center  py-8">
             <div className="w-full bg-[linear-gradient(112.45deg,#F5F7FF_11.62%,#E0F2FF_124.08%)]">
@@ -51,7 +60,7 @@ export default function AboutPage() {
                             <span className="lg:text-3xl md:text-2xl text-base font-bold bg-clip-text text-transparent bg-[linear-gradient(106.63deg,rgba(16,81,171,1)_0%,rgba(28,15,111,1)_144.25%)]">bAIt</span>
                         </Link>
 
-                        <MobileNavBar />
+                        <MobileNavBar isAuthenticated={!!tokens} />
                     </div>
                 </div>
                 <div className="bg-[#3d4fcf] py-8 px-8 ">

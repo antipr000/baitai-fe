@@ -10,6 +10,9 @@ import { Separator } from "@radix-ui/react-separator";
 import { Menu } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { getTokens } from "next-firebase-auth-edge";
+import { cookies } from "next/headers";
+import { clientConfig, serverConfig } from "@/lib/auth/config";
 
 const plans = [
   {
@@ -124,17 +127,23 @@ const consumerPlans = [
   },
 ];
 
-export default function PricingPage() {
+export default async function PricingPage() {
+  const tokens = await getTokens(await cookies(), {
+    apiKey: clientConfig.apiKey,
+    cookieName: serverConfig.cookieName,
+    cookieSignatureKeys: serverConfig.cookieSignatureKeys,
+    serviceAccount: serverConfig.serviceAccount,
+  });
 
   return (
     <div className="min-h-screen bg-[linear-gradient(297.94deg,#E6FDFF_13.44%,#DDFBFE_108.79%)] flex flex-col items-center py-10 px-2">
       <div className="max-w-7xl p-5 mx-auto w-full flex justify-between items-center mb-8">
         <div className="w-full ">
           <div className="flex sm:hidden mb-5 -translate-y-4">
-  <Link href="/" className="flex items-center space-x-2">
-            <Image className="size-[20px]" src="/main/logo.png" alt="Bait AI Logo" width={40} height={40} />
-            <span className="lg:text-3xl md:text-2xl text-base font-bold bg-clip-text text-transparent bg-[linear-gradient(106.63deg,rgba(16,81,171,1)_0%,rgba(28,15,111,1)_144.25%)]">bAIt</span>
-          </Link>            <MobileNavBar />
+            <Link href="/" className="flex items-center space-x-2">
+              <Image className="size-[20px]" src="/main/logo.png" alt="Bait AI Logo" width={40} height={40} />
+              <span className="lg:text-3xl md:text-2xl text-base font-bold bg-clip-text text-transparent bg-[linear-gradient(106.63deg,rgba(16,81,171,1)_0%,rgba(28,15,111,1)_144.25%)]">bAIt</span>
+            </Link>            <MobileNavBar isAuthenticated={!!tokens} />
           </div>
           <div className="justify-between  flex w-full">
             <div className="max-w-6xl">
@@ -224,7 +233,7 @@ export default function PricingPage() {
                           <ul className="space-y-3 mb-4 sm:px-15  lg:px-0 mt-2">
                             {plan.features.map((feature, i) => (
                               <li key={i} className="flex items-center gap-3 sm:text-sm text-xs text-[rgba(32,5,117,1)] font-medium">
-                                <Image src={feature.icon} alt={typeof feature.text === 'string' ? feature.text : ''} width={20} height={20} className="w-6 h-6 object-contain"  />
+                                <Image src={feature.icon} alt={typeof feature.text === 'string' ? feature.text : ''} width={20} height={20} className="w-6 h-6 object-contain" />
                                 <span className="text-white">{feature.text}</span>
                               </li>
                             ))}
