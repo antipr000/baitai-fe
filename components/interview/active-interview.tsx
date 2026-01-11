@@ -668,7 +668,6 @@ export default function ActiveInterview({ cameraStream, micStream, templateId }:
         if (closeWebSocketRef.current) {
           closeWebSocketRef.current()
         }
-        toast.error("An error occurred")
       }
 
       // Reset flags on error
@@ -2250,20 +2249,7 @@ export default function ActiveInterview({ cameraStream, micStream, templateId }:
             </div>
           </div>
 
-          {/* Error Message */}
-          {error && (
-            <div className="fixed top-4 right-4 bg-red-600 text-white px-4 py-2 rounded-lg shadow-lg max-w-md">
-              <p className="text-sm">{error}</p>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setError(null)}
-                className="mt-2 text-white hover:bg-red-700"
-              >
-                Dismiss
-              </Button>
-            </div>
-          )}
+          
         </div>
       </div>
 
