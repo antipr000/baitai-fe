@@ -5,8 +5,7 @@ import { clientConfig, serverConfig } from "@/lib/auth/config";
 const AUTH_PAGES = ['/signup', '/login'];
 const PUBLIC_PATHS = ['/', '/about', '/pricing', ...AUTH_PAGES];
 
-export const runtime = 'edge';
-
+export const runtime = 'experimental-edge';
 export async function middleware(request: NextRequest) {
 
   return authMiddleware(request, {
