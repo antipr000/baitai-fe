@@ -7,9 +7,11 @@ import { ArrowLeft } from 'lucide-react'
 interface LeftSectionProps {
     activeSection: 'upload' | 'interview'
     setActiveSection: (section: 'upload' | 'interview') => void
+    title?: string
+    duration?: number
 }
 
-export default function LeftSection({ activeSection, setActiveSection }: LeftSectionProps) {
+export default function LeftSection({ activeSection, setActiveSection, title, duration }: LeftSectionProps) {
     return (
         <div className='bg-white flex-1 '>
             <div className="flex items-center justify-between px-6 py-4 ">
@@ -21,11 +23,11 @@ export default function LeftSection({ activeSection, setActiveSection }: LeftSec
                         </Button>
                     </Link>
                 </div>
-                
+
             </div>
             <div className="flex">
                 <div className="w-full p-6 space-y-8">
-                    <h1 className="text-lg font-semibold">Mindtrix Senior Software Engineer interview</h1>
+                    <h1 className="text-lg font-semibold text-left">{title}</h1>
 
                     {/* Progress Bar */}
                     <div className="w-full">
@@ -34,7 +36,7 @@ export default function LeftSection({ activeSection, setActiveSection }: LeftSec
 
                     <div className="space-y-6">
                         {/* Upload Resume Step */}
-                        <div 
+                        <div
                             className="flex items-center justify-between w-full p-4 rounded-lg cursor-pointer transition-all border-2 border-transparent hover:border-[rgba(98,117,252,0.6)]"
                             onClick={() => setActiveSection('upload')}>
                             <div className="flex items-center gap-3">
@@ -43,14 +45,14 @@ export default function LeftSection({ activeSection, setActiveSection }: LeftSec
                                     <h3 className="font-medium text-muted-foreground">Upload Resume</h3>
                                 </div>
                             </div>
-                            {activeSection==='upload'?    <div className="bg-[rgba(98,117,252,0.9)] p-1 rounded-full">
+                            {activeSection === 'upload' ? <div className="bg-[rgba(98,117,252,0.9)] p-1 rounded-full">
                                 <Image src="/interview/tick.svg" alt="check" width={16} height={16} />
-                            </div>:<div className="border border-[rgba(98,117,252,0.9)] p-3 rounded-full"/>
-                                }
+                            </div> : <div className="border border-[rgba(98,117,252,0.9)] p-3 rounded-full" />
+                            }
                         </div>
 
                         {/* Domain Expert Interview Step */}
-                        <div 
+                        <div
                             className="flex items-center justify-between w-full p-4 rounded-lg cursor-pointer transition-all border-2 border-transparent hover:border-[rgba(98,117,252,0.6)]"
                             onClick={() => setActiveSection('interview')}
                         >
@@ -60,10 +62,10 @@ export default function LeftSection({ activeSection, setActiveSection }: LeftSec
                                     <h3 className="font-medium text-muted-foreground">Domain Expert Interview</h3>
                                 </div>
                             </div>
-                           {activeSection==='interview'?    <div className="bg-[rgba(98,117,252,0.9)] p-1 rounded-full">
+                            {activeSection === 'interview' ? <div className="bg-[rgba(98,117,252,0.9)] p-1 rounded-full">
                                 <Image src="/interview/tick.svg" alt="check" width={16} height={16} />
-                            </div>:<div className="border border-[rgba(98,117,252,0.9)] p-3 rounded-full"/>
-                                }
+                            </div> : <div className="border border-[rgba(98,117,252,0.9)] p-3 rounded-full" />
+                            }
                         </div>
                     </div>
                 </div>

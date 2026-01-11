@@ -23,6 +23,8 @@ type InterviewSectionProps = {
     keepCameraStreamOnUnmount?: boolean
     keepMicStreamOnUnmount?: boolean
     permission?: "pending" | "granted" | "denied"
+    title?: string
+    duration?: number
 }
 
 const beforeYouBeginItems = [
@@ -70,6 +72,8 @@ export default function InterviewSection({
     keepCameraStreamOnUnmount,
     keepMicStreamOnUnmount,
     permission,
+    title,
+    duration,
 
 }: InterviewSectionProps) {
     const [isMicTesting, setIsMicTesting] = useState(false)
@@ -210,7 +214,7 @@ export default function InterviewSection({
             stopAllStreams();
         }
 
-    window.addEventListener('pagehide', handlePageHide) // popstate doesn't work
+        window.addEventListener('pagehide', handlePageHide) // popstate doesn't work
 
         return () => {
             window.removeEventListener('pagehide', handlePageHide);
@@ -268,8 +272,8 @@ export default function InterviewSection({
                 <div className="flex items-center px-6 py-4 justify-between mb-6">
                     <div>
                         <div className="relative">
-                            <h2 className="text-2xl font-semibold bg-linear-to-r from-[rgba(0,13,144,0.9)] to-[rgba(93,107,238,1)] bg-clip-text text-transparent mb-1">Domain Expert Interview</h2>
-                            <Badge className="absolute font-semibold text-muted-foreground -right-16 top-0 bg-[rgba(85,98,228,0.1)]" variant="secondary">30 min</Badge>
+                            <h2 className="text-2xl font-semibold bg-linear-to-r from-[rgba(0,13,144,0.9)] to-[rgba(93,107,238,1)] bg-clip-text text-transparent mb-1">{title || 'Interview'}</h2>
+                            <Badge className="absolute font-semibold text-muted-foreground -right-16 top-0 bg-[rgba(85,98,228,0.1)]" variant="secondary">{duration ? `${duration} min` : '...'}</Badge>
                         </div>
                         <p className="text-muted-foreground text-sm">AI-powered domain evaluation</p>
                     </div>
