@@ -43,7 +43,7 @@ export default async function Home() {
             <AuthButtons isAuthenticated={!!tokens} />
           </div>
           <div className="md:hidden justify-around items-center">
-            <MobileNavBar />
+            <MobileNavBar isAuthenticated={!!tokens} />
           </div>
 
         </nav>
