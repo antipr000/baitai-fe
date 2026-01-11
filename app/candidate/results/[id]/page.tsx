@@ -16,9 +16,8 @@ interface PerformanceTrendItem {
     date: string
 }
 
-interface SectionScore {
-    section_id: string
-    section_name: string
+interface CategoryScore {
+    category: string
     score: number
 }
 
@@ -33,7 +32,7 @@ interface AggregatesResponse {
     average_score: number
     total_attempts: number
     performance_trend: PerformanceTrendItem[]
-    section_scores: SectionScore[]
+    category_scores: CategoryScore[]
     key_strengths: string[]
     areas_for_improvement: string[]
 }
@@ -49,6 +48,13 @@ function getPerformanceLevel(score: number): string {
 function formatDateToMonth(dateString: string): string {
     const date = new Date(dateString)
     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+}
+
+function formatCategoryName(category: string): string {
+    return category
+        .split('_')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ')
 }
 
 async function getAggregates(sessionId: string): Promise<AggregatesResponse | null> {
@@ -76,16 +82,16 @@ export default async function ResultPage({ params }: PageProps) {
         score: item.score
     }))
 
-    // Transform section scores for skill metrics chart
-    const skillMetricsData = data.section_scores.map(section => ({
-        skill: section.section_name,
-        score: section.score
+    // Transform category scores for skill metrics chart
+    const skillMetricsData = data.category_scores.map(cat => ({
+        skill: formatCategoryName(cat.category),
+        score: cat.score
     }))
 
-    // Transform section scores for skill cards
-    const skillCards = data.section_scores.map(section => ({
-        title: section.section_name,
-        score: section.score,
+    // Transform category scores for skill cards
+    const skillCards = data.category_scores.map(cat => ({
+        title: formatCategoryName(cat.category),
+        score: cat.score,
     }))
 
     return (

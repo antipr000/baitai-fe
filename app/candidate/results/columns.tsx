@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button"
 import { ColumnDef } from "@tanstack/react-table"
 import { ArrowUpDown, Eye } from "lucide-react"
 import Image from "next/image"
+import Link from "next/link"
 
 // This type is used to define the shape of our data.
 export type Result = {
@@ -114,9 +115,11 @@ export const columns: ColumnDef<Result>[] = [
         cell: ({ row }) => {
             const result = row.original
             return (
-                <Button variant="ghost" className="text-muted-foreground hover:text-foreground px-4 py-2 rounded-md" >
-                    <Eye className="h-4 w-4 mr-2" /> <span className="font-medium">View</span>
-                </Button>
+                <Link href={`/candidate/results/${result.id}`}>
+                    <Button variant="ghost" className="text-muted-foreground hover:text-foreground px-4 py-2 rounded-md" >
+                        <Eye className="h-4 w-4 mr-2" /> <span className="font-medium">View</span>
+                    </Button>
+                </Link>
             )
         },
     }

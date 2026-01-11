@@ -45,9 +45,12 @@ interface PerformanceTrendChartProps {
 }
 
 export function PerformanceTrendChart({ data }: PerformanceTrendChartProps) {
+    // Added a starting point at 0 to show growth
+    const chartData = [{ month: "Start", score: 0 }, ...data]
+
     return (
         <ChartContainer config={{ score: { label: "Score", color: "#3B82F6" } }} className="h-[200px] w-full">
-            <LineChart data={data} margin={{ left: 10, right: 10 }}>
+            <LineChart data={chartData} margin={{ left: 10, right: 10 }}>
                 <defs>
                     <linearGradient id="lineGradient" x1="0" y1="0" x2="1" y2="0">
                         <stop offset="0%" stopColor="rgba(107,124,255,1)" />
@@ -55,7 +58,7 @@ export function PerformanceTrendChart({ data }: PerformanceTrendChartProps) {
                     </linearGradient>
                 </defs>
                 <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 12 }} padding={{ left: 20, right: 20 }} />
-                <YAxis hide domain={[50, 100]} />
+                <YAxis hide domain={[0, 100]} />
                 <ChartTooltip
                     content={<ChartTooltipContent className="" />}
                 />
@@ -64,7 +67,7 @@ export function PerformanceTrendChart({ data }: PerformanceTrendChartProps) {
                     dataKey="score"
                     stroke="url(#lineGradient)"
                     strokeWidth={3}
-                    dot={false}
+                    dot={true}
                 />
             </LineChart>
         </ChartContainer>
@@ -76,34 +79,41 @@ interface SkillMetricsChartProps {
 }
 
 export function SkillMetricsChart({ data }: SkillMetricsChartProps) {
+    // Define colors for each bar
+    const colors = ["#818CF8", "#86EFAC", "#F472B6", "#FDBA74"]
+    const gradientColors = [
+        { start: "#818CF8", end: "#C7D2FE" },
+        { start: "#86EFAC", end: "#D1FAE5" },
+        { start: "#F472B6", end: "#FBCFE8" },
+        { start: "#FDBA74", end: "#FED7AA" },
+    ]
+
+    // Build dynamic config from data
+    const config = data.reduce((acc, item, index) => {
+        acc[item.skill] = { label: item.skill, color: colors[index % colors.length] }
+        return acc
+    }, {} as Record<string, { label: string; color: string }>)
+
+    // Build dynamic legend payload from data
+    const legendPayload = data.map((item, index) => ({
+        value: item.skill,
+        type: "rect" as const,
+        color: colors[index % colors.length],
+    }))
+
     return (
         <ChartContainer
-            config={{
-                Technical: { label: "Technical", color: "#818CF8" },
-                "Problem-Solving": { label: "Problem-Solving", color: "#86EFAC" },
-                Communication: { label: "Communication", color: "#F472B6" },
-                "Cultural Fit": { label: "Cultural Fit", color: "#FDBA74" },
-            }}
+            config={config}
             className="h-[180px] w-full"
         >
             <BarChart data={data} barSize={16}>
                 <defs>
-                    <linearGradient id="technicalGradient" x1="0" y1="1" x2="0" y2="0">
-                        <stop offset="0%" stopColor="#818CF8" />
-                        <stop offset="100%" stopColor="#C7D2FE" />
-                    </linearGradient>
-                    <linearGradient id="problemGradient" x1="0" y1="1" x2="0" y2="0">
-                        <stop offset="0%" stopColor="#86EFAC" />
-                        <stop offset="100%" stopColor="#D1FAE5" />
-                    </linearGradient>
-                    <linearGradient id="communicationGradient" x1="0" y1="1" x2="0" y2="0">
-                        <stop offset="0%" stopColor="#F472B6" />
-                        <stop offset="100%" stopColor="#FBCFE8" />
-                    </linearGradient>
-                    <linearGradient id="culturalGradient" x1="0" y1="1" x2="0" y2="0">
-                        <stop offset="0%" stopColor="#FDBA74" />
-                        <stop offset="100%" stopColor="#FED7AA" />
-                    </linearGradient>
+                    {data.map((_, index) => (
+                        <linearGradient key={`gradient-${index}`} id={`barGradient${index}`} x1="0" y1="1" x2="0" y2="0">
+                            <stop offset="0%" stopColor={gradientColors[index % gradientColors.length].start} />
+                            <stop offset="100%" stopColor={gradientColors[index % gradientColors.length].end} />
+                        </linearGradient>
+                    ))}
                 </defs>
                 <YAxis hide domain={[0, 100]} />
                 <XAxis dataKey="skill" hide />
@@ -111,18 +121,12 @@ export function SkillMetricsChart({ data }: SkillMetricsChartProps) {
                     content={<ChartTooltipContent className="" />}
                 />
                 <Bar dataKey="score" radius={[20, 20, 20, 20]} background={{ fill: "#FFFFFF", radius: 20 }}>
-                    {data.map((entry, index) => {
-                        const gradients = ["url(#technicalGradient)", "url(#problemGradient)", "url(#communicationGradient)", "url(#culturalGradient)"]
-                        return <Cell key={`cell-${index}`} fill={gradients[index]} />
-                    })}
+                    {data.map((_, index) => (
+                        <Cell key={`cell-${index}`} fill={`url(#barGradient${index})`} />
+                    ))}
                 </Bar>
                 <ChartLegend
-                    payload={[
-                        { value: "Technical", type: "rect", color: "#818CF8" },
-                        { value: "Problem-Solving", type: "rect", color: "#86EFAC" },
-                        { value: "Communication", type: "rect", color: "#F472B6" },
-                        { value: "Cultural Fit", type: "rect", color: "#FDBA74" },
-                    ]}
+                    payload={legendPayload}
                     content={<ChartLegendContent />}
                 />
             </BarChart>
