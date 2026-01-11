@@ -1,4 +1,5 @@
 import Image from 'next/image'
+import Link from 'next/link'
 import { Progress } from '../ui/progress'
 import { Button } from '../ui/button'
 import { ArrowLeft } from 'lucide-react'
@@ -13,10 +14,12 @@ export default function LeftSection({ activeSection, setActiveSection }: LeftSec
         <div className='bg-white flex-1 '>
             <div className="flex items-center justify-between px-6 py-4 ">
                 <div className="flex items-center gap-4">
-                    <Button variant="outline" size="lg" className="flex text-[rgba(104,100,247,1)] hover:text-[rgba(142, 158, 254, 0.6)] items-center gap-2">
-                        <ArrowLeft className="w-4 h-4 " />
-                        <span className="font-semibold">Back to Job Listing</span>
-                    </Button>
+                    <Link href="/candidate/dashboard">
+                        <Button variant="outline" size="lg" className="flex text-[rgba(104,100,247,1)] hover:text-[rgba(142, 158, 254, 0.6)] items-center gap-2">
+                            <ArrowLeft className="w-4 h-4 " />
+                            <span className="font-semibold">Back to Dashboard</span>
+                        </Button>
+                    </Link>
                 </div>
                 
             </div>
