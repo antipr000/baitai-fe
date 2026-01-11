@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { Mic, MicOff, Video, VideoOff, Phone, ScreenShare, Loader2, Circle, CheckCircle2, AlertCircle } from 'lucide-react'
 import { useWebSocket } from '@/hooks/useWebSocket'
+import { toast } from 'sonner'
 
 type ActiveInterviewProps = {
   cameraStream?: MediaStream | null
@@ -647,7 +648,7 @@ export default function ActiveInterview({ cameraStream, micStream, templateId }:
           timestamp: new Date(),
         }
         setMessages((prev) => [...prev, completionMessage])
-
+        toast.message("Interview Completed")
         // Redirect to dashboard after a short delay to show the completion message
         setTimeout(() => {
           router.push('/candidate/dashboard')
@@ -667,10 +668,7 @@ export default function ActiveInterview({ cameraStream, micStream, templateId }:
         if (closeWebSocketRef.current) {
           closeWebSocketRef.current()
         }
-        // Optionally redirect or show a message
-        setTimeout(() => {
-          router.push('/candidate/dashboard')
-        }, 2000)
+        toast.error("An error occurred")
       }
 
       // Reset flags on error
