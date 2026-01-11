@@ -6,6 +6,7 @@ import React from 'react'
 import { DataTable } from './data-table'
 import { columns, Result } from './columns'
 import { serverFetch } from '@/lib/api/server'
+import { ScorePoller } from '@/components/candidate/dashboard/score-poller'
 
 interface ApiResultItem {
     session_id: string
@@ -17,6 +18,7 @@ interface ApiResultItem {
     date: string
     score: number
     status: string
+    is_scored: boolean
     started_at: string
     ended_at: string
 }
@@ -59,6 +61,7 @@ async function getData(): Promise<Result[]> {
         company: item.company_name || '------',
         date: formatDate(item.date),
         score: `${item.score}%`,
+        isScored: item.is_scored,
     }))
 }
 
@@ -87,8 +90,12 @@ async function getStats(): Promise<StatsResponse> {
 
 export default async function ResultsPage() {
     const [data, stats] = await Promise.all([getData(), getStats()])
+    const hasPending = data.some(r => !r.isScored)
+
     return (
         <div>
+            {hasPending && <ScorePoller />} 
+            {/* Score Poller will will reset  filters,pagination etc. Need to fix*/}
             <div className='w-full min-h-screen bg-[rgba(248,250,255,1)]'>
                 <div className="min-h-screen max-w-full md:max-w-4xl lg:max-w-5xl xl:max-w-7xl mx-auto  ">
                     <div className="max-w-7xl mx-auto p-6 space-y-8 mb-5">
@@ -166,7 +173,7 @@ export default async function ResultsPage() {
                         </div>
 
                         {/*Data table  */}
-                            <DataTable columns={columns} data={data} />
+                        <DataTable columns={columns} data={data} />
                     </div>
                 </div>
             </div>

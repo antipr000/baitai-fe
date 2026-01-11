@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button"
 import { ColumnDef } from "@tanstack/react-table"
-import { ArrowUpDown, Eye } from "lucide-react"
+import { ArrowUpDown, Eye, Loader2 } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 
@@ -14,6 +14,7 @@ export type Result = {
     company: string
     date: string
     score: string
+    isScored: boolean
 }
 
 export const columns: ColumnDef<Result>[] = [
@@ -102,6 +103,17 @@ export const columns: ColumnDef<Result>[] = [
         },
         cell: ({ row }) => {
             const score = row.getValue("score") as string
+            const isScored = row.original.isScored
+
+            if (!isScored) {
+                return (
+                    <div className="flex items-center gap-2">
+                        <Loader2 className="w-4 h-4 animate-spin text-[rgba(113,131,252,1)]" />
+                        <span className="font-semibold text-[rgba(113,131,252,1)]">Pending</span>
+                    </div>
+                )
+            }
+
             return (
                 <div className="font-semibold text-muted-foreground">
                     {score}
@@ -114,10 +126,19 @@ export const columns: ColumnDef<Result>[] = [
         header: "Action",
         cell: ({ row }) => {
             const result = row.original
+
+            if (!result.isScored) {
+                return (
+                    <Button variant="ghost" className="text-muted-foreground/50 px-4 py-2 rounded-md cursor-not-allowed" disabled>
+                        <Eye className="h-4 w-4 " /> <span className="font-medium">View</span>
+                    </Button>
+                )
+            }
+
             return (
                 <Link href={`/candidate/results/${result.id}`}>
                     <Button variant="ghost" className="text-muted-foreground hover:text-foreground px-4 py-2 rounded-md" >
-                        <Eye className="h-4 w-4 mr-2" /> <span className="font-medium">View</span>
+                        <Eye className="h-4 w-4 " /> <span className="font-medium">View</span>
                     </Button>
                 </Link>
             )

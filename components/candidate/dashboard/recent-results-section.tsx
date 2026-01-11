@@ -1,10 +1,10 @@
-import React from 'react'
+import { serverFetch } from '@/lib/api/server'
 import { ResultItem } from './result-item'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
-import { serverFetch } from '@/lib/api/server'
+import { ScorePoller } from './score-poller'
 
-interface ApiResultItem {
+interface ApiResultItem { 
   session_id: string
   template_id: string
   template_title: string
@@ -14,15 +14,9 @@ interface ApiResultItem {
   date: string
   score: number
   status: string
+  is_scored: boolean
   started_at: string
   ended_at: string
-}
-
-interface Result {
-  id: string
-  title: string
-  timeAgo: string
-  score: number
 }
 
 function formatTimeAgo(dateString: string): string {
@@ -40,22 +34,6 @@ function formatTimeAgo(dateString: string): string {
   return `${Math.floor(diffDays / 30)} months ago`
 }
 
-async function getRecentResults(): Promise<Result[]> {
-  const response = await serverFetch<ApiResultItem[]>('/api/v1/user/interview/results/recent/')
-
-  if (!response || !Array.isArray(response)) {
-    console.warn('Failed to fetch recent results')
-    return []
-  }
-
-  return response.map((item) => ({
-    id: item.session_id,
-    title: item.template_title || item.role,
-    timeAgo: formatTimeAgo(item.date),
-    score: item.score,
-  }))
-}
-
 interface RecentResultsSectionProps {
   viewMoreHref?: string
 }
@@ -63,13 +41,22 @@ interface RecentResultsSectionProps {
 export async function RecentResultsSection({
   viewMoreHref = '/candidate/results'
 }: RecentResultsSectionProps) {
-  const results = await getRecentResults()
+  const results = await serverFetch<ApiResultItem[]>('/api/v1/user/interview/results/recent/')
+
+  if (!results || !Array.isArray(results)) {
+    return null
+  }
+
+  const hasPending = results.some(r => !r.is_scored)
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-6 ">
+      <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-semibold">Recent Results</h2>
       </div>
+
+      {/* Poll for updates if any results are pending */}
+      {hasPending && <ScorePoller />}
 
       {results.length === 0 ? (
         <div className="flex items-center justify-between p-6 bg-white rounded-lg shadow-sm">
@@ -92,13 +79,14 @@ export async function RecentResultsSection({
       ) : (
         <div className="bg-white rounded-lg p-6 shadow-sm">
           <div className="space-y-4">
-            {results.map((result) => (
+            {results.map((item) => (
               <ResultItem
-                key={result.id}
-                title={result.title}
-                timeAgo={result.timeAgo}
-                score={result.score}
-                href={`/candidate/results/${result.id}`}
+                key={item.session_id}
+                title={item.template_title || item.role}
+                timeAgo={formatTimeAgo(item.date)}
+                score={item.score}
+                href={`/candidate/results/${item.session_id}`}
+                isScored={item.is_scored}
               />
             ))}
           </div>
@@ -117,4 +105,3 @@ export async function RecentResultsSection({
     </div>
   )
 }
-
