@@ -282,9 +282,10 @@ export default function ActiveInterview({ cameraStream, micStream, templateId, s
     isPlayingRef.current = true
     setIsAISpeaking(true)
     setConversationState('speaking')
-    // Ensure we never run silence detection while the AI is speaking
-    stopSilenceDetection()
-    // Keep recording running to avoid missing user speech; only silence detection is disabled.
+    // Stop recording and silence detection while the AI is speaking
+    if (stopRecordingRef.current) {
+      stopRecordingRef.current()
+    }
     console.log('[Audio Playback] Starting AI audio playback')
 
     try {
@@ -1363,10 +1364,13 @@ export default function ActiveInterview({ cameraStream, micStream, templateId, s
   }
 
   const handleMicToggle = () => {
-    setIsMicOn(!isMicOn)
-    if (!isMicOn && isConnected) {
-      // Restart recording if re-enabling mic
-      startRecording()
+    const newMicState = !isMicOn
+    setIsMicOn(newMicState)
+    if (newMicState && isConnected && conversationStateRef.current !== 'speaking') {
+      // Restart recording if re-enabling mic and AI is not speaking
+      if (startRecordingRef.current) {
+        startRecordingRef.current()
+      }
     }
   }
 
@@ -1387,6 +1391,7 @@ export default function ActiveInterview({ cameraStream, micStream, templateId, s
     }
 
     try {
+      /*
       // Send start_media_upload message
       const message = {
         type: 'start_media_upload',
@@ -1394,6 +1399,7 @@ export default function ActiveInterview({ cameraStream, micStream, templateId, s
       }
       send(JSON.stringify(message))
       console.log(`[Media Upload] Started upload session for ${recordingType}`)
+      */
 
       // Mark as initialized optimistically (will be confirmed by backend response)
       // Backend will set _active_media_type which routes binary chunks correctly
@@ -1593,6 +1599,7 @@ export default function ActiveInterview({ cameraStream, micStream, templateId, s
     try {
       // For video and screen, use binary uploads (more efficient)
       if (recordingType === 'video' || recordingType === 'screen') {
+        /*
         // Ensure upload session is initialized
         if (!uploadSessionsInitializedRef.current[recordingType] && !isFinal && isConnectedRef.current) {
           const initialized = await startMediaUploadSession(recordingType)
@@ -1665,6 +1672,8 @@ export default function ActiveInterview({ cameraStream, micStream, templateId, s
 
         // Reset retry count on successful send
         uploadRetryCountRef.current[recordingType] = 0
+        */
+        return; // Temporary disable
 
       } else {
         // For audio, continue using base64 (legacy format)
@@ -1760,16 +1769,7 @@ export default function ActiveInterview({ cameraStream, micStream, templateId, s
       clearInterval(mediaUploadIntervalsRef.current.screen)
     }
 
-    // Audio upload interval
-    mediaUploadIntervalsRef.current.audio = setInterval(() => {
-      const chunks = audioChunksRef.current.slice(lastSentIndexRef.current.audio)
-      if (chunks.length > 0) {
-        sendMediaChunk('audio', chunks, false).then(() => {
-          lastSentIndexRef.current.audio = audioChunksRef.current.length
-        })
-      }
-    }, UPLOAD_INTERVAL_MS)
-
+    /* 
     // Video upload interval
     mediaUploadIntervalsRef.current.video = setInterval(() => {
       const chunks = videoChunksRef.current.slice(lastSentIndexRef.current.video)
@@ -1789,6 +1789,7 @@ export default function ActiveInterview({ cameraStream, micStream, templateId, s
         })
       }
     }, UPLOAD_INTERVAL_MS)
+    */
 
     console.log('[Media Upload] Started periodic upload intervals (5 seconds)')
   }, [sendMediaChunk])
@@ -1818,16 +1819,7 @@ export default function ActiveInterview({ cameraStream, micStream, templateId, s
 
     // Send any remaining unsent chunks first, then finalize
     const finalize = async () => {
-      // Send remaining audio chunks
-      const remainingAudio = audioChunksRef.current.slice(lastSentIndexRef.current.audio)
-      if (remainingAudio.length > 0) {
-        await sendMediaChunk('audio', remainingAudio, true)
-        lastSentIndexRef.current.audio = audioChunksRef.current.length
-      } else {
-        // Send final empty chunk to signal finalization
-        await sendMediaChunk('audio', [], true)
-      }
-
+      /*
       // Send remaining video chunks
       const remainingVideo = videoChunksRef.current.slice(lastSentIndexRef.current.video)
       if (remainingVideo.length > 0) {
@@ -1847,6 +1839,7 @@ export default function ActiveInterview({ cameraStream, micStream, templateId, s
         // Finalize screen upload session (send empty final chunk)
         await sendMediaChunk('screen', [], true)
       }
+      */
 
       // Send finalize all message
       send(JSON.stringify({ type: 'finalize_all_media' }))
