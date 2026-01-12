@@ -901,7 +901,6 @@ export default function ActiveInterview({ cameraStream, micStream, templateId, s
     if (audioChunksRef.current.length === 0) {
       return
     }
-
     console.log('[Audio Flush] Periodic flush triggered - processing segments...')
 
     // 1. Snapshot and clear immediately to prevent race conditions with new incoming data
