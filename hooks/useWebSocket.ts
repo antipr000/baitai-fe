@@ -10,107 +10,81 @@ interface WebSocketOptions {
 }
 
 export const useWebSocket = ({
-    templateId,
+    sessionId, // changed from templateId
     onMessage,
     onConnect,
     onDisconnect,
     onError,
-}: WebSocketOptions) => {
+}: {
+    sessionId: string | null;
+    onMessage?: (data: any) => void;
+    onConnect?: () => void;
+    onDisconnect?: () => void;
+    onError?: (error: Event) => void;
+}) => {
     const ws = useRef<WebSocket | null>(null);
-    const hasCreatedSession = useRef(false);
     const [isConnected, setIsConnected] = useState(false);
     const [lastMessage, setLastMessage] = useState<any>(null);
-    const [sessionId, setSessionId] = useState<string | null>(null);
 
     useEffect(() => {
-        if (hasCreatedSession.current) return; // prevent duplicate creations (StrictMode / re-renders)
-        hasCreatedSession.current = true;
+        if (!sessionId) return;
 
-        const createInterviewSession = async () => {
-            if (!templateId) {
-                console.error('[WebSocket] No templateId provided');
-                onError?.(new Event('no_template_id'));
+        const connectWebSocket = () => {
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+            if (!apiUrl) {
+                console.error('NEXT_PUBLIC_API_URL is not defined');
+                onError?.(new Event('config_error'));
                 return;
             }
+            const wsUrl = `${apiUrl.replace('http', 'ws')}/ws/interview/${sessionId}/`;
+            console.log(`[WebSocket] Connecting to WebSocket: ${wsUrl}`);
 
-            const url = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/interview-session/${templateId}/create/`;
+            ws.current = new WebSocket(wsUrl);
+            ws.current.binaryType = "arraybuffer";
 
-            console.log(`[WebSocket] Creating interview session for template: ${templateId}`);
-            console.log(`[WebSocket] POST ${url}`);
+            ws.current.onopen = () => {
+                console.log('[WebSocket] WebSocket connected');
+                setIsConnected(true);
+                onConnect?.();
+            };
 
-            try {
-                // Create interview session
-                const response = await api.post(`/api/v1/interview-session/${templateId}/create/`)
+            ws.current.onmessage = (event) => {
+                // const data = JSON.parse(event.data);
+                setLastMessage(event.data);
+                onMessage?.(event.data);
+            };
 
-                const session = response.data;
-                console.log("[WebSocket] Interview session created:", session);
+            ws.current.onerror = (error) => {
+                console.error('[WebSocket] WebSocket error:', error);
+                onError?.(error);
+            };
 
-                if (!session.id) {
-                    console.error("[WebSocket] Session created but no ID returned:", session);
-                    onError?.(new Event('session_creation_failed'));
+            ws.current.onclose = (event) => {
+                console.log('[WebSocket] WebSocket disconnected', {
+                    code: event.code,
+                    reason: event.reason,
+                    wasClean: event.wasClean
+                });
+                setIsConnected(false);
+                onDisconnect?.();
+
+                // Don't attempt reconnection if it was a clean close or server-initiated
+                if (event.code === 4000 || event.code === 4001) {
+                    console.log('[WebSocket] Server closed connection, not reconnecting');
                     return;
                 }
-
-                const sessionId = session.id;
-                setSessionId(sessionId);
-                const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-                if (!apiUrl) {
-                    throw new Error('NEXT_PUBLIC_API_URL is not defined in environment variables');
-                }
-                const wsUrl = `${apiUrl.replace('http', 'ws')}/ws/interview/${sessionId}/`;
-                console.log(`[WebSocket] Connecting to WebSocket: ${wsUrl}`);
-
-                ws.current = new WebSocket(wsUrl);
-                ws.current.binaryType = "arraybuffer";
-
-                ws.current.onopen = () => {
-                    console.log('[WebSocket] WebSocket connected');
-                    setIsConnected(true);
-                    onConnect?.();
-                };
-
-                ws.current.onmessage = (event) => {
-                    // const data = JSON.parse(event.data);
-                    setLastMessage(event.data);
-                    onMessage?.(event.data);
-                };
-
-                ws.current.onerror = (error) => {
-                    console.error('[WebSocket] WebSocket error:', error);
-                    onError?.(error);
-                };
-
-                ws.current.onclose = (event) => {
-                    console.log('[WebSocket] WebSocket disconnected', {
-                        code: event.code,
-                        reason: event.reason,
-                        wasClean: event.wasClean
-                    });
-                    setIsConnected(false);
-                    onDisconnect?.();
-                    
-                    // Don't attempt reconnection if it was a clean close or server-initiated
-                    if (event.code === 4000 || event.code === 4001) {
-                        console.log('[WebSocket] Server closed connection, not reconnecting');
-                        return;
-                    }
-                };
-
-            } catch (error) {
-                console.error('[WebSocket] Error creating interview session:', error);
-                onError?.(new Event('session_creation_failed'));
-                return;
-            }
-
+            };
         }
-        createInterviewSession();
+
+        connectWebSocket();
+
         // Cleanup on unmount
         return () => {
             if (ws.current?.readyState === WebSocket.OPEN) {
                 ws.current.close();
             }
         };
-    }, [templateId, onMessage, onConnect, onDisconnect, onError]);
+    }, [sessionId, onMessage, onConnect, onDisconnect, onError]);
 
     const send = useCallback((data: any) => {
         if (ws.current?.readyState === WebSocket.OPEN) {
@@ -125,6 +99,5 @@ export const useWebSocket = ({
         send,
         lastMessage,
         ws: ws.current,
-        sessionId,
     };
 };

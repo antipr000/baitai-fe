@@ -80,6 +80,13 @@ export default function SignupPage() {
     };
 
     const handleGoogleSignIn = async () => {
+
+        if (!agreedToTerms) {
+            setError("You must agree to the terms and conditions.");
+            toast.error("You must agree to the terms and conditions.");
+            return;
+        }
+
         setError("");
         setLoading(true);
 

@@ -14,6 +14,7 @@ type ActiveInterviewProps = {
   cameraStream?: MediaStream | null
   micStream?: MediaStream | null
   templateId: string
+  sessionId: string
 }
 
 type Message = {
@@ -23,7 +24,7 @@ type Message = {
   timestamp: Date
 }
 
-export default function ActiveInterview({ cameraStream, micStream, templateId }: ActiveInterviewProps) {
+export default function ActiveInterview({ cameraStream, micStream, templateId, sessionId }: ActiveInterviewProps) {
   const router = useRouter()
   const [isMicOn, setIsMicOn] = useState(true)
   const [isVideoOn, setIsVideoOn] = useState(true)
@@ -751,8 +752,8 @@ export default function ActiveInterview({ cameraStream, micStream, templateId }:
     }
   }, [handleAudioData, handleTextMessage])
 
-  const { isConnected, send, ws, sessionId } = useWebSocket({
-    templateId,
+  const { isConnected, send, ws } = useWebSocket({
+    sessionId,
     onMessage: handleWebSocketMessage,
     onConnect: () => {
       console.log('[WebSocket] Connected - waiting for AI to start speaking')
@@ -2249,7 +2250,7 @@ export default function ActiveInterview({ cameraStream, micStream, templateId }:
             </div>
           </div>
 
-          
+
         </div>
       </div>
 

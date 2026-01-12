@@ -1,5 +1,7 @@
 "use client"
 
+import api from '@/lib/api/client';
+
 import LeftSection from "@/components/interview/left-section"
 import InterviewSection from "@/components/interview/interview-section"
 import UploadSection from "@/components/interview/upload-section"
@@ -45,6 +47,9 @@ export default function InterviewClient({ templateId, templateData }: InterviewC
     const micStreamRef = useRef<MediaStream | null>(null);
     // Track if we've navigated away (pagehide fired) to prevent re-requesting media on back
     const hasNavigatedAwayRef = useRef(false);
+
+    // Session state
+    const [sessionId, setSessionId] = useState<string | null>(null);
 
     // Keep refs in sync with state
     useEffect(() => {
@@ -206,8 +211,41 @@ export default function InterviewClient({ templateId, templateData }: InterviewC
         monitorPermissions();
     }, [])
 
-    if (isInterviewActive && permission === 'granted' && templateId) {  // could check for resume uploaded also if want to make it mandatory
-        return <ActiveInterview cameraStream={cameraStream} micStream={micStream} templateId={templateId} />
+
+
+
+    const handleStartInterview = async () => {
+        if (!templateId) {
+            toast.error('Template ID is missing');
+            return;
+        }
+
+        try {
+            console.log('[Interview Client] Creating interview session for template:', templateId);
+            const response = await api.post(`/api/v1/interview-session/${templateId}/create/`);
+            const session = response.data;
+
+            if (!session.id) {
+                console.error('Session created but no ID returned:', session);
+                toast.error('Failed to start interview: Invalid session data');
+                return;
+            }
+
+            console.log('[Interview Client] Session created:', session.id);
+            setSessionId(session.id);
+            setIsInterviewActive(true);
+        } catch (error: any) {
+            if (error.response?.status === 402) {
+                // Handled by global interceptor, but we can return early to prevent generic error
+                return;
+            }
+            console.error('[Interview Client] Error creating session:', error);
+            toast.error('Failed to start interview. Please try again.');
+        }
+    };
+
+    if (isInterviewActive && permission === 'granted' && templateId && sessionId) {  // could check for resume uploaded also if want to make it mandatory
+        return <ActiveInterview cameraStream={cameraStream} micStream={micStream} templateId={templateId} sessionId={sessionId} />
     }
 
     return (
@@ -238,7 +276,7 @@ export default function InterviewClient({ templateId, templateData }: InterviewC
                         setSelectedMic={setSelectedMic}
                         setSelectedSpeaker={setSelectedSpeaker}
                         saveSelection={saveSelection}
-                        startInterview={() => setIsInterviewActive(true)}
+                        startInterview={handleStartInterview}
                         onCameraStream={setCameraStream}
                         onMicStream={setMicStream}
                         keepCameraStreamOnUnmount
