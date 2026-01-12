@@ -1,3 +1,4 @@
+
 "use client"
 
 import api from '@/lib/api/client';
@@ -8,6 +9,7 @@ import UploadSection from "@/components/interview/upload-section"
 import ActiveInterview from "@/components/interview/active-interview"
 import { useEffect, useState, useRef } from "react"
 import { toast } from "sonner"
+
 
 type MediaDevice = MediaDeviceInfo;
 type PermissionStatus = "pending" | "granted" | "denied";
@@ -25,9 +27,10 @@ export type InterviewTemplateData = {
 interface InterviewClientProps {
     templateId: string
     templateData: InterviewTemplateData | null
+    authToken?: string
 }
 
-export default function InterviewClient({ templateId, templateData }: InterviewClientProps) {
+export default function InterviewClient({ templateId, templateData, authToken }: InterviewClientProps) {
     const [activeSection, setActiveSection] = useState<'upload' | 'interview'>('upload')
     const [isInterviewActive, setIsInterviewActive] = useState(false)
     const [cameras, setCameras] = useState<MediaDevice[]>([]);
@@ -42,14 +45,13 @@ export default function InterviewClient({ templateId, templateData }: InterviewC
     const [micStream, setMicStream] = useState<MediaStream | null>(null);
     const [resumeUploaded, setResumeUploaded] = useState(false);
 
+    const [sessionId, setSessionId] = useState<string | null>(null);
+
     // Use refs to track streams for cleanup on unmount only
     const cameraStreamRef = useRef<MediaStream | null>(null);
     const micStreamRef = useRef<MediaStream | null>(null);
     // Track if we've navigated away (pagehide fired) to prevent re-requesting media on back
     const hasNavigatedAwayRef = useRef(false);
-
-    // Session state
-    const [sessionId, setSessionId] = useState<string | null>(null);
 
     // Keep refs in sync with state
     useEffect(() => {
@@ -59,7 +61,6 @@ export default function InterviewClient({ templateId, templateData }: InterviewC
     useEffect(() => {
         micStreamRef.current = micStream;
     }, [micStream]);
-
 
     // Cleanup media streams ONLY when component unmounts (e.g., when navigating back)
     // Also handle browser back button via popstate and page unload
@@ -223,7 +224,8 @@ export default function InterviewClient({ templateId, templateData }: InterviewC
 
         try {
             console.log('[Interview Client] Creating interview session for template:', templateId);
-            const response = await api.post(`/api/v1/interview-session/${templateId}/create/`);
+            const headers = authToken ? { Authorization: `Bearer ${authToken} ` } : undefined;
+            const response = await api.post(`/api/v1/interview-session/${templateId}/create/`, {}, { headers });
             const session = response.data;
 
             if (!session.id) {

@@ -15,7 +15,7 @@ const api = axios.create({
 // Add request interceptor for authentication
 api.interceptors.request.use(
   async (config) => {
-    if (auth.currentUser) {
+    if (auth.currentUser && !config.headers.Authorization) {
       // Get Firebase ID token
       const token = await getIdToken(auth.currentUser)
       // Send token to Django in Authorization header
