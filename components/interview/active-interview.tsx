@@ -1861,7 +1861,7 @@ export default function ActiveInterview({ cameraStream, micStream, templateId, s
     if (videoRef.current && cameraStream) {
       videoRef.current.srcObject = cameraStream
     }
-  }, [cameraStream])
+  }, [cameraStream, isVideoOn])
 
   // Start video recording when interview starts
   useEffect(() => {
