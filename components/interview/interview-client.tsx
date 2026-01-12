@@ -208,13 +208,7 @@ export default function InterviewClient({ templateId, templateData }: InterviewC
     }, [])
 
 
-    const handleStartInterview=()=>{
-        if (templateData?.credits && templateData?.credits <=5) {
-            toast.error("Not enough credits. Please purchase more credits to continue.")
-            return
-        }
-        setIsInterviewActive(true)
-    }
+
 
     if (isInterviewActive && permission === 'granted' && templateId) {  // could check for resume uploaded also if want to make it mandatory
         return <ActiveInterview cameraStream={cameraStream} micStream={micStream} templateId={templateId} />
@@ -248,7 +242,7 @@ export default function InterviewClient({ templateId, templateData }: InterviewC
                         setSelectedMic={setSelectedMic}
                         setSelectedSpeaker={setSelectedSpeaker}
                         saveSelection={saveSelection}
-                        startInterview={handleStartInterview}
+                        startInterview={()=>setIsInterviewActive(true)}
                         onCameraStream={setCameraStream}
                         onMicStream={setMicStream}
                         keepCameraStreamOnUnmount
