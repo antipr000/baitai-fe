@@ -17,7 +17,7 @@ export type InterviewTemplateData = {
     role: string
     duration: number
     difficulty_level: string,
-    credits:number
+    credits: number
 }
 
 interface InterviewClientProps {
@@ -54,6 +54,7 @@ export default function InterviewClient({ templateId, templateData }: InterviewC
     useEffect(() => {
         micStreamRef.current = micStream;
     }, [micStream]);
+
 
     // Cleanup media streams ONLY when component unmounts (e.g., when navigating back)
     // Also handle browser back button via popstate and page unload
@@ -206,6 +207,15 @@ export default function InterviewClient({ templateId, templateData }: InterviewC
         monitorPermissions();
     }, [])
 
+
+    const handleStartInterview=()=>{
+        if (templateData?.credits && templateData?.credits <=5) {
+            toast.error("Not enough credits. Please purchase more credits to continue.")
+            return
+        }
+        setIsInterviewActive(true)
+    }
+
     if (isInterviewActive && permission === 'granted' && templateId) {  // could check for resume uploaded also if want to make it mandatory
         return <ActiveInterview cameraStream={cameraStream} micStream={micStream} templateId={templateId} />
     }
@@ -238,7 +248,7 @@ export default function InterviewClient({ templateId, templateData }: InterviewC
                         setSelectedMic={setSelectedMic}
                         setSelectedSpeaker={setSelectedSpeaker}
                         saveSelection={saveSelection}
-                        startInterview={() => setIsInterviewActive(true)}
+                        startInterview={handleStartInterview}
                         onCameraStream={setCameraStream}
                         onMicStream={setMicStream}
                         keepCameraStreamOnUnmount
