@@ -752,23 +752,31 @@ export default function ActiveInterview({ cameraStream, micStream, templateId, s
     }
   }, [handleAudioData, handleTextMessage])
 
+  const handleConnect = useCallback(() => {
+    console.log('[WebSocket] Connected - waiting for AI to start speaking')
+    isConnectedRef.current = true
+    // Don't start recording immediately - wait for AI to finish speaking
+  }, [])
+
+  const handleDisconnect = useCallback(() => {
+    console.log('[WebSocket] Disconnected')
+    isConnectedRef.current = false
+    if (stopRecordingRef.current) {
+      stopRecordingRef.current()
+    }
+  }, [])
+
+  const handleWSError = useCallback((error: Event) => {
+    console.error('[WebSocket] Error:', error)
+    setError('Connection error. Please try again.')
+  }, [])
+
   const { isConnected, send, ws } = useWebSocket({
     sessionId,
     onMessage: handleWebSocketMessage,
-    onConnect: () => {
-      console.log('[WebSocket] Connected - waiting for AI to start speaking')
-      isConnectedRef.current = true
-      // Don't start recording immediately - wait for AI to finish speaking
-    },
-    onDisconnect: () => {
-      console.log('[WebSocket] Disconnected')
-      isConnectedRef.current = false
-      stopRecording()
-    },
-    onError: (error) => {
-      console.error('[WebSocket] Error:', error)
-      setError('Connection error. Please try again.')
-    },
+    onConnect: handleConnect,
+    onDisconnect: handleDisconnect,
+    onError: handleWSError,
   })
 
   // Update refs when values change
