@@ -4,9 +4,10 @@ import { clientConfig, serverConfig } from "@/lib/auth/config";
 
 const AUTH_PAGES = ['/signup', '/login'];
 const PUBLIC_PATHS = ['/', '/about', '/pricing', ...AUTH_PAGES];
+export const runtime = 'experimental-edge';
 
 
-export async function proxy(request: NextRequest) {
+export async function middleware(request: NextRequest) {
 
   return authMiddleware(request, {
     loginPath: "/api/login",
