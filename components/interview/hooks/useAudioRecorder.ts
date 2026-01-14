@@ -462,6 +462,9 @@ export function useAudioRecorder(
 
     // Clear buffered audio - discard any recorded audio when AI starts responding
     audioChunksRef.current = []
+    
+    // Reset end of turn flag
+    store.getState().setHasSentEndOfTurn(false)
   }, [stopSilenceDetection])
 
   // ============================================

@@ -180,6 +180,19 @@ export default function ActiveInterviewRefactored({
       }
     },
     onInterviewEnd: () => {
+      // Stop all recordings
+      stopRecordingRef.current?.()
+      stopVideoRecording()
+      stopScreenRecording()
+      
+      // Finalize all media uploads
+      finalizeAllMedia()
+      
+      // Close WebSocket after a short delay for finalization
+      setTimeout(() => {
+        disconnectWebSocket()
+      }, 1000)
+      
       toast.message('Interview Completed')
       setTimeout(() => router.push('/candidate/dashboard'), 2000)
     },

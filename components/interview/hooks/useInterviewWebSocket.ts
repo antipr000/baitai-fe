@@ -78,22 +78,62 @@ export function useInterviewWebSocket(
       console.log('[WebSocket] Text message:', message.type)
 
       if (message.type === 'response.start') {
-        // AI is about to respond - stop recording and clear buffer
+        // Start of streaming AI response - stop user recording
         console.log('[WebSocket] AI starting response')
+        state.setIsProcessing(false)
+        state.setIsAISpeaking(true)
+        if (state.conversationState !== 'speaking') {
+          state.setConversationState('thinking')
+        }
+        
         onStopRecording?.()
 
-        // Create a pending message for the AI response using store method
+        // Add user message if transcript available
+        if (message.user_transcript && message.user_transcript !== '[Silence/Unintelligible]') {
+          state.addMessage({
+            speaker: 'candidate',
+            text: message.user_transcript,
+          })
+        }
+
+        // Clear previous streaming state and start new message
+        state.clearStreamingState()
+        state.setExpectedAudioChunk(null)
+        state.clearCompletedSentences()
         state.startStreamingMessage()
       } else if (message.type === 'response.text') {
-        // AI started speaking - signal to stop any ongoing recording
+        // Full AI response (legacy/non-streaming format)
         console.log('[WebSocket] AI response text received')
+        state.setIsProcessing(false)
+        state.setIsAISpeaking(true)
+        if (state.conversationState !== 'speaking') {
+          state.setConversationState('thinking')
+        }
+        
         onAISpeakingStart?.()
         onStopRecording?.()
+        
+        // Reset end of turn flag (audio buffers cleared by onStopRecording)
+        state.setHasSentEndOfTurn(false)
 
-        // Full text response (legacy format) - append to buffer
-        if (message.text) {
-          state.appendToStreamingBuffer(message.text)
+        // Add user message if transcript available
+        if (message.user_transcript && message.user_transcript !== '[Silence/Unintelligible]') {
+          state.addMessage({
+            speaker: 'candidate',
+            text: message.user_transcript,
+          })
         }
+
+        // Add AI message directly (not streaming)
+        if (message.text) {
+          state.addMessage({
+            speaker: 'ai',
+            text: message.text,
+          })
+        }
+        
+        // Clear any streaming state
+        state.clearStreamingState()
       } else if (message.type === 'response.text.chunk') {
         // Streaming text chunk - add to token queue for smooth display
         const chunk = message.text || ''
@@ -104,6 +144,30 @@ export function useInterviewWebSocket(
         // Audio is starting - this means AI is speaking
         console.log('[WebSocket] Audio response starting')
         state.setConversationState('speaking')
+      } else if (message.type === 'response.sentence.complete') {
+        // Sentence complete signal - text is ready, audio will follow
+        const chunkIndex = message.chunk_index ?? 0
+        const sentenceText = message.text || ''
+        state.addCompletedSentence(chunkIndex, sentenceText)
+        console.log(`[WebSocket] Sentence ${chunkIndex} complete: "${sentenceText.substring(0, 50)}..." - expecting audio chunk`)
+
+        // Ensure we're in speaking state when first sentence completes
+        if (chunkIndex === 0 && !state.isAISpeaking) {
+          state.setIsAISpeaking(true)
+          state.setConversationState('speaking')
+        }
+      } else if (message.type === 'response.audio.chunk') {
+        // Audio chunk metadata received - expect binary audio data next
+        const chunkIndex = message.chunk_index ?? 0
+        const chunkText = message.text || ''
+        state.setExpectedAudioChunk({ chunkIndex, text: chunkText })
+        console.log(`[WebSocket] Audio chunk ${chunkIndex} metadata received, expecting binary data for: "${chunkText.substring(0, 30)}..."`)
+
+        // Check if this sentence was already marked as complete
+        const sentenceText = state.getCompletedSentence(chunkIndex)
+        if (sentenceText && sentenceText === chunkText) {
+          console.log(`[WebSocket] Audio chunk ${chunkIndex} matches completed sentence - ready for synchronized playback`)
+        }
       } else if (message.type === 'response.text.complete') {
         // Text streaming complete - wait for token queue to finish then finalize
         console.log('[WebSocket] Text complete, waiting for token queue...')
@@ -126,10 +190,22 @@ export function useInterviewWebSocket(
         
         waitForQueueAndFinalize()
       } else if (message.type === 'response.wait') {
-        // Backend is processing
+        // Backend is processing user's speech
         console.log('[WebSocket] Backend processing...')
-        state.setIsProcessing(false)
-        state.setConversationState('thinking')
+        state.setIsProcessing(true)
+        state.setIsAISpeaking(false)
+        if (state.conversationState !== 'speaking') {
+          state.setConversationState('thinking')
+        }
+
+        // Add user message if transcript available
+        if (message.user_transcript && message.user_transcript !== '[Silence/Unintelligible]') {
+          state.addMessage({
+            speaker: 'candidate',
+            text: message.user_transcript,
+          })
+          console.log('[WebSocket] Added user message during wait:', message.user_transcript)
+        }
       } else if (message.type === 'response.completed') {
         // Interview completed
         console.log('[WebSocket] Interview completed')
@@ -258,7 +334,9 @@ export function useInterviewWebSocket(
       manager.disconnect()
       wsManagerRef.current = null
     }
-  }, [sessionId, templateId, handleTextMessage, handleAudioData, handleConnect, handleDisconnect, handleError])
+    // Only reconnect when sessionId changes - handlers use store.getState() for fresh state
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sessionId])
 
   // ============================================
   // Public API
