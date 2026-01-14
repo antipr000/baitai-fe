@@ -654,11 +654,16 @@ export default function ActiveInterview({ cameraStream, micStream, templateId, s
           timestamp: new Date(),
         }
         setMessages((prev) => [...prev, completionMessage])
-        toast.message("Interview Completed")
-        // Redirect to dashboard after a short delay to show the completion message
+
+        // Show processing feedback
+        toast.dismiss()
+        toast.loading("Processing interview results... Redirecting to dashboard.")
+
+        // Redirect to dashboard after 6 seconds
         setTimeout(() => {
+          toast.dismiss()
           router.push('/candidate/dashboard')
-        }, 2000)
+        }, 6000)
       } else {
         // No-op for state: we already transition speaking -> listening when playback ends.
       }
@@ -1403,6 +1408,9 @@ export default function ActiveInterview({ cameraStream, micStream, templateId, s
       return
     }
 
+    toast.dismiss()
+    toast.loading("Ending interview and processing results...")
+
     // Stop all recordings
     stopRecording()
     stopVideoRecording()
@@ -1414,8 +1422,8 @@ export default function ActiveInterview({ cameraStream, micStream, templateId, s
     // Finalize all media uploads before closing
     finalizeAllMedia()
 
-    // Wait a bit for finalization to complete
-    await new Promise(resolve => setTimeout(resolve, 1000))
+    // Wait a bit for finalization and to show processing state (5 seconds)
+    await new Promise(resolve => setTimeout(resolve, 5000))
 
     // Close WebSocket
     closeWebSocket()
@@ -1471,7 +1479,8 @@ export default function ActiveInterview({ cameraStream, micStream, templateId, s
       }
     }
 
-    // Navigate away (you can customize this)
+    // Navigate away
+    toast.dismiss()
     router.push('/candidate/dashboard')
   }
 
