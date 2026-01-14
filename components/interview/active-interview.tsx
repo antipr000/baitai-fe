@@ -657,7 +657,7 @@ export default function ActiveInterview({ cameraStream, micStream, templateId, s
 
         // Show processing feedback
         toast.dismiss()
-        toast.loading("Processing interview results... Redirecting to dashboard.")
+        toast.info("Interview Completed. Redirecting to dashboard.")
 
         // Redirect to dashboard after 6 seconds
         setTimeout(() => {
