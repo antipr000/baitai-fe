@@ -46,6 +46,7 @@ import { useMediaRecording } from './hooks'
 // Centralized actions
 import {
   handleMicToggle,
+  handleVideoToggle,
   handleEndInterview,
   startRecording,
   stopRecording,
@@ -173,7 +174,7 @@ export default function ActiveInterviewSimplified({
     if (videoRef.current && cameraStream) {
       videoRef.current.srcObject = cameraStream
     }
-  }, [cameraStream])
+  }, [cameraStream, isVideoOn])
 
   // -------------------------------------------------------------------------
   // Auto-scroll messages
@@ -247,8 +248,8 @@ export default function ActiveInterviewSimplified({
         }
       }, 1000)
     } else {
-      store.setRecordingDuration(0)
-      store.setRecordingStartTime(null)
+      store.setRecordingDuration(0)  //check
+      store.setRecordingStartTime(null) //check
     }
 
     return () => {
@@ -261,18 +262,20 @@ export default function ActiveInterviewSimplified({
   // -------------------------------------------------------------------------
   useEffect(() => {
     if (conversationState === 'thinking') {
-      if (thinkingTimerRef.current) clearTimeout(thinkingTimerRef.current)
+      if (thinkingTimerRef.current)
+        clearTimeout(thinkingTimerRef.current)
       stopSilenceDetection()
 
+      //Force state transition after 10 seconds
       thinkingTimerRef.current = setTimeout(() => {
         const store = useInterviewStore.getState()
         store.setIsProcessing(false)
         store.setHasSentEndOfTurn(false)
         store.setConversationState('listening')
 
-        if (store.connectionStatus === 'connected' && store.isMicOn) {
+        if (store.connectionStatus === 'connected' && store.isMicOn && !store.hasNavigatedAway) {
           if (!store.audio.isRecording) {
-            startRecording(true)
+            startRecording(true).catch(console.error)
           } else {
             enableSilenceDetection()
           }
@@ -348,7 +351,7 @@ export default function ActiveInterviewSimplified({
 
   const onMicToggle = () => handleMicToggle()
 
-  const onVideoToggle = () => useInterviewStore.getState().toggleVideo()
+  const onVideoToggle = () => handleVideoToggle()
 
   const onScreenShare = async () => {
     const store = useInterviewStore.getState()

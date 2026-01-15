@@ -409,7 +409,7 @@ export function useMediaRecording(
       console.log('[Screen Recording] Stopped')
       store.getState().setScreenRecording({ isRecording: false })
     }
-  }, [store])
+  }, [store])  // check might not need store dependency
 
   // -------------------------------------------------------------------------
   // Upload Intervals

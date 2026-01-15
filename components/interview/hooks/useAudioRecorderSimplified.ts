@@ -78,8 +78,10 @@ export function useAudioRecorderSimplified(
     if (analyserRef.current) {
       analyserRef.current = null
     }
-    if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
-      audioContextRef.current.close().catch(console.error)
+    if (audioContextRef.current) {
+      if (audioContextRef.current.state !== 'closed') {
+        audioContextRef.current.close().catch(console.error)
+      }
       audioContextRef.current = null
     }
   }, [])

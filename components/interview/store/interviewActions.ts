@@ -239,6 +239,15 @@ export async function handleMicToggle() {
 }
 
 /**
+ * Handle video toggle
+ */
+export function handleVideoToggle() {
+  const store = useInterviewStore.getState()
+  const newVideoState = !store.isVideoOn
+  store.setIsVideoOn(newVideoState)
+}
+
+/**
  * Handle end interview
  */
 export async function handleEndInterview(
