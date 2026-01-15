@@ -7,6 +7,7 @@
 
 import { useCallback, useEffect, useRef } from 'react'
 import { useInterviewStore } from '../store'
+import { registerMediaRecorderControls } from '../store/interviewActions'
 import type { MediaType, UploadStatus } from '../store/types'
 
 // ============================================================================
@@ -328,7 +329,7 @@ export function useMediaRecording(
         store.getState().setVideoRecording({ uploadStatus: 'error' })
       }
     },
-    [isConnected, initUploadSession, store]
+    [isConnected, initUploadSession]
   )
 
   const stopVideoRecording = useCallback(() => {
@@ -340,7 +341,7 @@ export function useMediaRecording(
       console.log('[Video Recording] Stopped')
       store.getState().setVideoRecording({ isRecording: false })
     }
-  }, [store])
+  }, [])
 
   // -------------------------------------------------------------------------
   // Screen Recording
@@ -397,7 +398,7 @@ export function useMediaRecording(
         store.getState().setScreenRecording({ uploadStatus: 'error' })
       }
     },
-    [isConnected, initUploadSession, store]
+    [isConnected, initUploadSession]
   )
 
   const stopScreenRecording = useCallback(() => {
@@ -409,7 +410,7 @@ export function useMediaRecording(
       console.log('[Screen Recording] Stopped')
       store.getState().setScreenRecording({ isRecording: false })
     }
-  }, [store])  // check might not need store dependency
+  }, [])  // store.getState() is used for fresh state, so no dependency needed
 
   // -------------------------------------------------------------------------
   // Upload Intervals
@@ -508,6 +509,24 @@ export function useMediaRecording(
 
     console.log('[Media Recording] Finalized all media uploads')
   }, [isConnected, sendMediaChunk, stopUploadIntervals])
+
+  // -------------------------------------------------------------------------
+  // Register Controls with Centralized Actions
+  // -------------------------------------------------------------------------
+
+  useEffect(() => {
+    registerMediaRecorderControls({
+      startVideo: startVideoRecording,
+      stopVideo: stopVideoRecording,
+      startScreen: startScreenRecording,
+      stopScreen: stopScreenRecording,
+      finalizeAll: finalizeAllMedia,
+    })
+
+    return () => {
+      registerMediaRecorderControls(null)
+    }
+  }, [startVideoRecording, stopVideoRecording, startScreenRecording, stopScreenRecording, finalizeAllMedia])
 
   // -------------------------------------------------------------------------
   // Cleanup on unmount

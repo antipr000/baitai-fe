@@ -197,7 +197,7 @@ export function useInterviewWebSocket(
     const chunkIndex = message.chunk_index ?? 0
     const sentenceText = message.text || ''
     state.addCompletedSentence(chunkIndex, sentenceText)
-    console.log(`[WebSocket] Sentence ${chunkIndex} complete`)
+    console.log(`[WebSocket] Sentence ${chunkIndex} complete: "${sentenceText.substring(0, 50)}..." - expecting audio chunk`)
 
     // Ensure we're in speaking state when first sentence completes (matches original)
     if (chunkIndex === 0 && !state.isAISpeaking) {
@@ -213,6 +213,12 @@ export function useInterviewWebSocket(
     const chunkText = message.text || ''
     state.setExpectedAudioChunk({ chunkIndex, text: chunkText })
     console.log(`[WebSocket] Audio chunk ${chunkIndex} metadata received`)
+
+    // Check if this sentence was already marked as complete (Sanity check)
+    const sentenceText = state.getCompletedSentence(chunkIndex)
+    if (sentenceText && sentenceText === chunkText) {
+      console.log(`[WebSocket] Audio chunk ${chunkIndex} matches completed sentence - ready for synchronized playback`)
+    }
   }
 
   function handleTextComplete(message: WebSocketTextMessage) {
@@ -287,7 +293,9 @@ export function useInterviewWebSocket(
         speaker: 'ai',
         text: 'Thank you, the interview is now concluded.',
       })
+      // maybe we can have an audio from the backend to play when the interview is completed
       
+
       // Callback will show toast and redirect
       onInterviewEnd?.()
     }

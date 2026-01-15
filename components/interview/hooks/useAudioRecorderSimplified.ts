@@ -460,7 +460,7 @@ export function useAudioRecorderSimplified(
     return () => {
       registerAudioRecorderControls(null)
     }
-  }, [startRecording, stopRecording, stopAndClearBuffer, flushAudio, sendEndOfTurnInternal, setupSilenceDetection])
+  }, [startRecording, stopRecording, stopAndClearBuffer, flushAudio, sendEndOfTurnInternal, setupSilenceDetection,stopSilenceDetection])
 
   // ============================================
   // Cleanup
