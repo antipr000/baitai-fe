@@ -206,7 +206,7 @@ export default function ActiveInterviewSimplified({
 
       processTokens()
     }
-  })
+  }) // check
 
   // -------------------------------------------------------------------------
   // Start recording when connected

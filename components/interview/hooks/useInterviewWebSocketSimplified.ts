@@ -52,7 +52,7 @@ export function useInterviewWebSocket(
   useEffect(() => {
     if (!sessionId) return
 
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9000'
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
     console.log('[WebSocket] Connecting to session:', sessionId)
 
     const manager = new WebSocketManager(

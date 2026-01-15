@@ -6,9 +6,9 @@ import api from '@/lib/api/client';
 import LeftSection from "@/components/interview/left-section"
 import InterviewSection from "@/components/interview/interview-section"
 import UploadSection from "@/components/interview/upload-section"
-import ActiveInterviewRefactored from "@/components/interview/ActiveInterviewRefactored"
 import { useEffect, useState, useRef } from "react"
 import { toast } from "sonner"
+import ActiveInterviewSimplified from './ActiveInterviewSimplified';
 
 
 type MediaDevice = MediaDeviceInfo;
@@ -248,7 +248,7 @@ export default function InterviewClient({ templateId, templateData, authToken }:
     };
 
     if (isInterviewActive && permission === 'granted' && templateId && sessionId) {  // could check for resume uploaded also if want to make it mandatory
-        return <ActiveInterviewRefactored cameraStream={cameraStream} micStream={micStream} templateId={templateId} sessionId={sessionId} />
+        return <ActiveInterviewSimplified cameraStream={cameraStream} micStream={micStream} templateId={templateId} sessionId={sessionId} />
     }
 
     return (
