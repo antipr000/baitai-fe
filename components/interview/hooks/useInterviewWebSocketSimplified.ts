@@ -17,6 +17,7 @@ import {
   stopVideoRecording,
   stopScreenRecording,
   finalizeAllMedia,
+  retryMediaUploadSession,
 } from '../store/interviewActions'
 import type { WebSocketTextMessage } from '../store/types'
 
@@ -223,19 +224,19 @@ export function useInterviewWebSocket(
 
   function handleTextComplete(message: WebSocketTextMessage) {
     console.log('[WebSocket] Text complete, waiting for token queue...')
-    
+
     const waitForQueueAndFinalize = () => {
       const currentState = store.getState()
       const { tokenQueue, isProcessingTokens } = currentState.streamingText
-      
+
       if (tokenQueue.length > 0 || isProcessingTokens) {
         setTimeout(waitForQueueAndFinalize, 50)
         return
       }
-      
+
       // Use message.text if provided, otherwise the accumulated buffer (matches original)
       currentState.finalizeStreamingMessage(message.text)
-      
+
       // This is *text* stream completion, not necessarily audio playback completion
       // Only set isAISpeaking to false if audio is not currently playing
       // Original uses: if (!isPlayingRef.current) setIsAISpeaking(false)
@@ -243,10 +244,10 @@ export function useInterviewWebSocket(
       if (!currentState.isAISpeaking) {
         currentState.setIsAISpeaking(false)
       }
-      
+
       console.log('[WebSocket] Text finalized after queue drain')
     }
-    
+
     waitForQueueAndFinalize()
   }
 
@@ -279,10 +280,10 @@ export function useInterviewWebSocket(
       stopRecording()
       stopVideoRecording()
       stopScreenRecording()
-      
+
       // Finalize all media uploads before closing
       finalizeAllMedia()
-      
+
       // Wait a bit for finalization to complete, then close WebSocket
       setTimeout(() => {
         wsManagerRef.current?.disconnect()
@@ -294,7 +295,7 @@ export function useInterviewWebSocket(
         text: 'Thank you, the interview is now concluded.',
       })
       // maybe we can have an audio from the backend to play when the interview is completed
-      
+
 
       // Callback will show toast and redirect
       onInterviewEnd?.()
@@ -327,8 +328,19 @@ export function useInterviewWebSocket(
       } else if (recordingType === 'screen') {
         state.setScreenRecording({ uploadStatus: 'uploading' })
       }
-    } else if (message.type === 'media_upload.error' || message.type === 'media_chunk.error') {
-      console.error(`[WebSocket] Media error for ${recordingType}:`, message.message)
+    } else if (message.type === 'media_upload.error') {
+      // Session-level error - reset and retry after delay (matches original)
+      console.error(`[WebSocket] Media upload session error for ${recordingType}:`, message.message)
+      if (recordingType === 'video') {
+        state.setVideoRecording({ uploadStatus: 'error' })
+        retryMediaUploadSession('video')
+      } else if (recordingType === 'screen') {
+        state.setScreenRecording({ uploadStatus: 'error' })
+        retryMediaUploadSession('screen')
+      }
+    } else if (message.type === 'media_chunk.error') {
+      // Chunk-level error - just mark error, no retry (original behavior)
+      console.error(`[WebSocket] Media chunk error for ${recordingType}:`, message.message)
       if (recordingType === 'video') {
         state.setVideoRecording({ uploadStatus: 'error' })
       } else if (recordingType === 'screen') {

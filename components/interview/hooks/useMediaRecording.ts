@@ -509,6 +509,37 @@ export function useMediaRecording(
 
     console.log('[Media Recording] Finalized all media uploads')
   }, [isConnected, sendMediaChunk, stopUploadIntervals])
+  // -------------------------------------------------------------------------
+  // Retry Support Functions
+  // -------------------------------------------------------------------------
+
+  const resetSessionInitialized = useCallback((type: 'video' | 'screen') => {
+    sessionsInitializedRef.current[type] = false
+    console.log(`[Media Recording] Reset ${type} session initialized flag`)
+  }, [])
+
+  const retryInitSession = useCallback(async (type: 'video' | 'screen') => {
+    const state = store.getState()
+
+    // Check if still recording and connected before retrying
+    const isRecording = type === 'video' ? state.video.isRecording : state.screen.isRecording
+    const connected = state.connectionStatus === 'connected'
+
+    if (!isRecording || !connected) {
+      console.log(`[Media Recording] Skipping ${type} retry - not recording or not connected`)
+      return
+    }
+
+    console.log(`[Media Recording] Retrying ${type} session initialization...`)
+
+    // Actually call initUploadSession to reinitialize
+    const success = await initUploadSession(type)
+    if (success) {
+      console.log(`[Media Recording] ${type} session reinitialized successfully`)
+    } else {
+      console.error(`[Media Recording] Failed to reinitialize ${type} session`)
+    }
+  }, [initUploadSession])
 
   // -------------------------------------------------------------------------
   // Register Controls with Centralized Actions
@@ -521,12 +552,14 @@ export function useMediaRecording(
       startScreen: startScreenRecording,
       stopScreen: stopScreenRecording,
       finalizeAll: finalizeAllMedia,
+      resetSessionInitialized,
+      retryInitSession,
     })
 
     return () => {
       registerMediaRecorderControls(null)
     }
-  }, [startVideoRecording, stopVideoRecording, startScreenRecording, stopScreenRecording, finalizeAllMedia])
+  }, [startVideoRecording, stopVideoRecording, startScreenRecording, stopScreenRecording, finalizeAllMedia, resetSessionInitialized, retryInitSession])
 
   // -------------------------------------------------------------------------
   // Cleanup on unmount
