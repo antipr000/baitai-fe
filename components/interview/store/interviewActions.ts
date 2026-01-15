@@ -36,6 +36,8 @@ let mediaRecorderControls: {
   startScreen: (stream: MediaStream) => Promise<void>
   stopScreen: () => void
   finalizeAll: () => Promise<void>
+  resetSessionInitialized: (type: 'video' | 'screen') => void
+  retryInitSession: (type: 'video' | 'screen') => Promise<void>
 } | null = null
 
 // ============================================
@@ -146,6 +148,20 @@ export async function finalizeAllMedia() {
   await mediaRecorderControls?.finalizeAll()
 }
 
+/**
+ * Retry media upload session after an error (matches original behavior)
+ * Resets the initialized flag and attempts to reinitialize after 2 seconds
+ */
+export function retryMediaUploadSession(type: 'video' | 'screen') {
+  // Reset the session initialized flag
+  mediaRecorderControls?.resetSessionInitialized(type)
+
+  // Schedule retry after 2 seconds (matches original)
+  setTimeout(() => {
+    mediaRecorderControls?.retryInitSession(type).catch(console.error)
+  }, 2000)
+}
+
 // ============================================
 // Combined Actions
 // ============================================
@@ -171,26 +187,26 @@ export function onAIResponseStart() {
  */
 export async function onAIPlaybackComplete() {
   const store = useInterviewStore.getState()
-  
+
   // Set state to listening and reset flags (like original onended)
   store.setConversationState('listening')
   store.setHasSentEndOfTurn(false)
   store.setHasHeardSpeech(false)
-  
+
   if (store.connectionStatus !== 'connected' || !store.isMicOn || store.hasNavigatedAway) {
     return
   }
-  
+
   // Stop current recording first to get fresh WebM headers
   stopRecording()
-  
+
   // Small delay then restart with silence detection
   await new Promise(resolve => setTimeout(resolve, 100))
-  
+
   const currentState = useInterviewStore.getState()
-  if (currentState.connectionStatus === 'connected' && 
-      currentState.isMicOn && 
-      !currentState.hasNavigatedAway) {
+  if (currentState.connectionStatus === 'connected' &&
+    currentState.isMicOn &&
+    !currentState.hasNavigatedAway) {
     await startRecording(true)
   }
 }
@@ -201,16 +217,16 @@ export async function onAIPlaybackComplete() {
 export async function onInterviewEnd() {
   const store = useInterviewStore.getState()
   store.setHasNavigatedAway(true)
-  
+
   // Stop all recordings
   stopRecording()
   stopPlayback()
   stopVideoRecording()
   stopScreenRecording()
-  
+
   // Finalize media uploads
   await finalizeAllMedia()
-  
+
   // Disconnect after short delay
   setTimeout(() => {
     disconnectWebSocket()
@@ -231,7 +247,7 @@ export async function handleMicToggle() {
   const store = useInterviewStore.getState()
   const wasMicOn = store.isMicOn
   store.toggleMic()
-  
+
   // If enabling mic and connected, start recording (no silence detection - matches original)
   if (!wasMicOn && store.connectionStatus === 'connected' && store.conversationState !== 'speaking') {
     await startRecording()
@@ -257,31 +273,31 @@ export async function handleEndInterview(
   onNavigate: () => void
 ) {
   const store = useInterviewStore.getState()
-  
+
   if (!store.showEndConfirm) {
     store.setShowEndConfirm(true)
     return
   }
-  
+
   store.setHasNavigatedAway(true)
-  
+
   // Stop all recordings
   stopRecording()
   stopPlayback()
   stopVideoRecording()
   stopScreenRecording()
-  
+
   // Finalize media
   await finalizeAllMedia()
-  
+
   // Disconnect WebSocket
   disconnectWebSocket()
-  
+
   // Stop all streams
   cameraStream?.getTracks().forEach(t => t.stop())
   micStream?.getTracks().forEach(t => t.stop())
   screenStream?.getTracks().forEach(t => t.stop())
-  
+
   // Navigate
   onNavigate()
 }
