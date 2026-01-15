@@ -25,3 +25,8 @@ export {
   type UseMediaRecordingOptions,
   type UseMediaRecordingReturn,
 } from './useMediaRecording'
+
+// Simplified versions using centralized actions
+export { useInterviewWebSocket as useInterviewWebSocketSimplified } from './useInterviewWebSocketSimplified'
+export { useAudioRecorderSimplified } from './useAudioRecorderSimplified'
+export { useAudioPlayerSimplified } from './useAudioPlayerSimplified'

@@ -62,3 +62,6 @@ export {
   getInterviewState,
   subscribeToInterview,
 } from './interviewStore'
+
+// Centralized Actions (for cross-module communication)
+export * from './interviewActions'
