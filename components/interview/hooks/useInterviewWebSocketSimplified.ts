@@ -76,9 +76,43 @@ export function useInterviewWebSocket(
         },
         onTextMessage: handleTextMessage,
         onBinaryMessage: (data) => {
-          if (!store.getState().hasNavigatedAway) {
-            enqueueAudio(data)
+          const state = store.getState()
+          if (state.hasNavigatedAway) return
+
+          // Validate audio data
+          if (!data || data.byteLength === 0) {
+            console.warn('[Audio] Received empty audio data, skipping')
+            return
           }
+
+          /* May be not needed */
+
+          // // Check if this is a streaming audio chunk (matches original handleAudioData)
+          // const expectedChunk = state.expectedAudioChunk
+          // if (expectedChunk) {
+          //   const chunkIndex = expectedChunk.chunkIndex
+
+          //   // Verify this matches a completed sentence for better sync
+          //   const sentenceText = state.getCompletedSentence(chunkIndex)
+          //   if (sentenceText && sentenceText === expectedChunk.text) {
+          //     console.log(
+          //       `[Audio] Received synchronized audio chunk ${chunkIndex} (${data.byteLength} bytes) for sentence: "${expectedChunk.text.substring(0, 30)}..."`
+          //     )
+          //     // Remove from tracking since we've received the audio
+          //     state.removeCompletedSentence(chunkIndex)
+          //   } else {
+          //     console.log(
+          //       `[Audio] Received audio chunk (out of sync) ${chunkIndex} (${data.byteLength} bytes) for: "${expectedChunk.text.substring(0, 30)}..."`
+          //     )
+          //   }
+          //   state.setExpectedAudioChunk(null)
+          // } else {
+          //   // Legacy complete audio (for backward compatibility)
+          //   console.log(`[Audio] Received complete audio (${data.byteLength} bytes)`)
+          // }
+
+          // Queue audio for playback
+          enqueueAudio(data)
         },
       }
     )
