@@ -51,11 +51,6 @@ import {
   startRecording,
   stopRecording,
   stopPlayback,
-  startVideoRecording,
-  stopVideoRecording,
-  startScreenRecording,
-  stopScreenRecording,
-  finalizeAllMedia,
   disconnectWebSocket,
   enableSilenceDetection,
   stopSilenceDetection,
@@ -133,7 +128,7 @@ export default function ActiveInterviewSimplified({
   // -------------------------------------------------------------------------
   // Setup hooks (they register their controls internally)
   // -------------------------------------------------------------------------
-  
+
   // WebSocket - handles all message routing
   const { isConnected: wsConnected } = useInterviewWebSocket({
     sessionId,
@@ -162,8 +157,8 @@ export default function ActiveInterviewSimplified({
   // Media recording
   const mediaRecording = useMediaRecording({
     sessionId,
-    sendBinary: () => {},
-    sendText: () => {},
+    sendBinary: () => { },
+    sendText: () => { },
     isConnected: wsConnected,
   })
 
@@ -187,27 +182,33 @@ export default function ActiveInterviewSimplified({
   // Token queue processing
   // -------------------------------------------------------------------------
   const isProcessingTokensRef = useRef(false)
-
+  // Subscribe to token queue changes (runs outside render cycle - no re-renders)
   useEffect(() => {
-    const store = useInterviewStore.getState()
-    if (store.streamingText.tokenQueue.length > 0 && !isProcessingTokensRef.current) {
-      isProcessingTokensRef.current = true
-      store.setIsProcessingTokens(true)
+    const unsubscribe = useInterviewStore.subscribe(
+      (state) => state.streamingText.tokenQueue.length,
+      (queueLength) => {
+        if (queueLength > 0 && !isProcessingTokensRef.current) {
+          isProcessingTokensRef.current = true
+          useInterviewStore.getState().setIsProcessingTokens(true)
 
-      const processTokens = () => {
-        const currentStore = useInterviewStore.getState()
-        const token = currentStore.processNextToken()
-        if (token !== null) {
-          setTimeout(processTokens, 20)
-        } else {
-          isProcessingTokensRef.current = false
-          currentStore.setIsProcessingTokens(false)
+          const processTokens = () => {
+            const currentStore = useInterviewStore.getState()
+            const token = currentStore.processNextToken()
+            if (token !== null) {
+              setTimeout(processTokens, 20)
+            } else {
+              isProcessingTokensRef.current = false
+              currentStore.setIsProcessingTokens(false)
+            }
+          }
+
+          processTokens()
         }
       }
+    )
 
-      processTokens()
-    }
-  }) // check
+    return () => unsubscribe()
+  }, [])
 
   // -------------------------------------------------------------------------
   // Start recording when connected
