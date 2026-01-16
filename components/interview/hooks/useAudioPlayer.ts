@@ -1,5 +1,5 @@
 /**
- * useAudioPlayer Hook (Simplified)
+ * useAudioPlayer Hook
  *
  * Manages AI audio playback with queue management.
  * Registers controls with centralized actions for cross-module calls.
@@ -8,8 +8,8 @@
 import { useEffect, useRef, useCallback } from 'react'
 import { useInterviewStore } from '../store'
 import { MixedAudioContext } from '../lib/audioUtils'
-import { 
-  registerAudioPlayerControls, 
+import {
+  registerAudioPlayerControls,
   onAIPlaybackComplete,
   stopRecording,  // Add this import
 } from '../store/interviewActions'
@@ -32,7 +32,7 @@ export interface UseAudioPlayerReturn {
 // Hook Implementation
 // ============================================
 
-export function useAudioPlayerSimplified(
+export function useAudioPlayer(
   options: UseAudioPlayerOptions = {}
 ): UseAudioPlayerReturn {
   const { onPlaybackStart, onError } = options
@@ -60,7 +60,7 @@ export function useAudioPlayerSimplified(
     isPlayingRef.current = true
     state.setIsAISpeaking(true)
     state.setConversationState('speaking')
-    
+
     // Stop recording while AI is speaking (matches original)
     stopRecording()
 
@@ -72,7 +72,7 @@ export function useAudioPlayerSimplified(
 
       audioContextRef.current = new AudioContext()
       playbackContext = audioContextRef.current
-      
+
 
       if (playbackContext.state === 'suspended') {
         await playbackContext.resume()
@@ -155,7 +155,7 @@ export function useAudioPlayerSimplified(
     if (currentSourceRef.current) {
       try {
         currentSourceRef.current.stop()
-      } catch {}
+      } catch { }
       currentSourceRef.current = null
     }
     audioQueueRef.current = []

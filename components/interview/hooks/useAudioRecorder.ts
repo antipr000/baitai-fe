@@ -1,5 +1,5 @@
 /**
- * useAudioRecorder Hook (Simplified)
+ * useAudioRecorder Hook
  *
  * Manages microphone audio recording with silence detection.
  * Registers controls with centralized actions for cross-module calls.
@@ -36,7 +36,7 @@ export interface UseAudioRecorderReturn {
 // Hook Implementation
 // ============================================
 
-export function useAudioRecorderSimplified(
+export function useAudioRecorder(
   options: UseAudioRecorderOptions
 ): UseAudioRecorderReturn {
   const { micStream, silenceConfig, onSpeechDetected, onError } = options
@@ -53,12 +53,12 @@ export function useAudioRecorderSimplified(
   const audioContextRef = useRef<AudioContext | null>(null)
   const analyserRef = useRef<AnalyserNode | null>(null)
   const audioChunksRef = useRef<Blob[]>([])
-  
+
   // Timers
   const silenceRAFRef = useRef<number | null>(null)
   const silenceTimerRef = useRef<NodeJS.Timeout | null>(null)
   const periodicFlushTimerRef = useRef<NodeJS.Timeout | null>(null)
-  
+
   // Noise floor (updates at 60fps)
   const noiseFloorRmsRef = useRef<number>(config.minNoiseFloor)
 

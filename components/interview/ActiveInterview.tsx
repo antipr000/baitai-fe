@@ -1,7 +1,7 @@
 'use client'
 
 /**
- * ActiveInterview Component (Simplified with Zustand Actions)
+ * ActiveInterview Component (with Zustand Actions)
  *
  * This is a highly simplified version that uses:
  * - Zustand store for all state
@@ -37,10 +37,10 @@ import {
   useRecordingState,
 } from './store'
 
-// Simplified hooks
-import { useInterviewWebSocket } from './hooks/useInterviewWebSocketSimplified'
-import { useAudioRecorderSimplified } from './hooks/useAudioRecorderSimplified'
-import { useAudioPlayerSimplified } from './hooks/useAudioPlayerSimplified'
+// Hooks
+import { useInterviewWebSocket } from './hooks/useInterviewWebSocket'
+import { useAudioRecorder } from './hooks/useAudioRecorder'
+import { useAudioPlayer } from './hooks/useAudioPlayer'
 import { useMediaRecording } from './hooks'
 
 // Centralized actions
@@ -74,7 +74,7 @@ type ActiveInterviewProps = {
 // Component
 // ============================================================================
 
-export default function ActiveInterviewSimplified({
+export default function ActiveInterview({
   cameraStream,
   micStream,
   templateId,
@@ -140,7 +140,7 @@ export default function ActiveInterviewSimplified({
   })
 
   // Audio recorder - registers controls for recording
-  const { isRecording, getMixedAudioContext } = useAudioRecorderSimplified({
+  const { isRecording, getMixedAudioContext } = useAudioRecorder({
     micStream: micStream || null,
     silenceConfig: {
       silenceDuration: 2000,
@@ -152,7 +152,7 @@ export default function ActiveInterviewSimplified({
   })
 
   // Audio player - registers controls for playback
-  const { isPlaying } = useAudioPlayerSimplified()
+  const { isPlaying } = useAudioPlayer()
 
   // Media recording
   const mediaRecording = useMediaRecording({

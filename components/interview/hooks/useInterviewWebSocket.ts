@@ -1,5 +1,5 @@
 /**
- * useInterviewWebSocket Hook (Simplified)
+ * useInterviewWebSocket Hook
  *
  * Manages WebSocket connection for real-time interview communication.
  * Uses Zustand store for state and centralized actions for cross-module calls.
