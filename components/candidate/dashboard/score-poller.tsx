@@ -11,6 +11,9 @@ export function ScorePoller() {
     const startTime = useRef(Date.now())
 
     useEffect(() => {
+        // Show a toast immediately when this component mounts (which happens when there are pending results)
+        toast.info('Processing results.please wait for it to finish')
+
         const interval = setInterval(() => {
             const elapsed = Date.now() - startTime.current
 
