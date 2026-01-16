@@ -68,18 +68,11 @@ export function useAudioPlayerSimplified(
     onPlaybackStart?.()
 
     try {
-      const mixedAudioCtx = MixedAudioContext.hasInstance() ? MixedAudioContext.getInstance() : null
       let playbackContext: AudioContext
-      const mixedCtx = mixedAudioCtx?.getAudioContext()
 
-      if (mixedCtx && mixedCtx.state !== 'closed') {
-        playbackContext = mixedCtx
-      } else {
-        if (!audioContextRef.current || audioContextRef.current.state === 'closed') {
-          audioContextRef.current = new AudioContext()
-        }
-        playbackContext = audioContextRef.current
-      }
+      audioContextRef.current = new AudioContext()
+      playbackContext = audioContextRef.current
+      
 
       if (playbackContext.state === 'suspended') {
         await playbackContext.resume()
@@ -101,25 +94,18 @@ export function useAudioPlayerSimplified(
       source.onended = () => {
         currentSourceRef.current = null
         isPlayingRef.current = false
-        store.getState().setIsAISpeaking(false)
 
         if (audioQueueRef.current.length > 0 && playNextRef.current) {
           playNextRef.current()
         } else {
           // All audio finished - trigger recording restart via centralized action
           // onAIPlaybackComplete handles: conversationState, hasSentEndOfTurn, hasHeardSpeech, recording restart
+          store.getState().setIsAISpeaking(false)
           console.log('[AudioPlayer] Playback complete')
           onAIPlaybackComplete()
         }
       }
-
       source.connect(playbackContext.destination)
-
-      const aiGainNode = mixedAudioCtx?.getAIGainNode()
-      if (aiGainNode && playbackContext === mixedCtx) {
-        source.connect(aiGainNode)
-      }
-
       source.start(0)
     } catch (error) {
       console.error('[AudioPlayer] Playback error:', error)

@@ -8,7 +8,7 @@
 import { useEffect, useRef, useCallback } from 'react'
 import { useInterviewStore } from '../store'
 import { convertWebMToRawPCM, MixedAudioContext } from '../lib/audioUtils'
-import { 
+import {
   registerAudioRecorderControls,
   sendAudio,
   sendEndOfTurnMessage,
@@ -203,7 +203,12 @@ export function useAudioRecorderSimplified(
     }
 
     console.log('[AudioRecorder] Flushing audio segments...')
-    const recorder = mediaRecorderRef.current!
+    const recorder = mediaRecorderRef.current
+
+    if (!recorder) {
+      console.error('[AudioRecorder] No media recorder found')
+      return
+    }
 
     const stoppedPromise = new Promise<void>((resolve) => {
       const onStop = () => {
@@ -214,8 +219,9 @@ export function useAudioRecorderSimplified(
     })
 
     try {
-      recorder.stop()
+      recorder.stop() // happens async in background
     } catch {
+      console.error('[AudioRecorder] Error stopping media recorder')
       return
     }
 
@@ -224,24 +230,32 @@ export function useAudioRecorderSimplified(
     const chunksToProcess = [...audioChunksRef.current]
     audioChunksRef.current = []
 
-    // Restart recorder
-    if (state.connectionStatus === 'connected' && !state.hasNavigatedAway) {
-      const shouldEnableSilence = state.conversationState === 'listening'
-      await startRecordingInternal(shouldEnableSilence)
-    }
+    // Get fresh state to determine if we should send and restart
+    const currentState = store.getState()
+    const isListening = currentState.conversationState === 'listening'
 
-    // Convert and send
-    try {
-      if (chunksToProcess.length > 0) {
+    // Only send audio to backend in 'listening' state (user speech)
+    if (isListening && chunksToProcess.length > 0) {
+      try {
         const pcmBuffer = await convertWebMToRawPCM(chunksToProcess)
         store.getState().setHasSentAudioSegments(true)
         sendAudio(pcmBuffer)
+      } catch (error) {
+        console.error('[AudioRecorder] Error converting audio:', error)
+        onError?.(error instanceof Error ? error : new Error(String(error)))
       }
-    } catch (error) {
-      console.error('[AudioRecorder] Error converting audio:', error)
-      onError?.(error instanceof Error ? error : new Error(String(error)))
+    } else if (!isListening) {
+      console.log('[AudioRecorder] Discarding audio chunks (AI is speaking/thinking)')
     }
-  }, [onError])
+
+    // Restart recorder only if still in listening state
+    const stateAfterSend = store.getState()
+    if (stateAfterSend.connectionStatus === 'connected' &&
+      !stateAfterSend.hasNavigatedAway &&
+      stateAfterSend.conversationState === 'listening') {
+      await startRecordingInternal(true)  // With silence detection for user turn
+    }
+  }, [onError])  // Note: startRecordingInternal intentionally omitted to avoid circular dependency
 
   // ============================================
   // Recording Control
@@ -274,6 +288,16 @@ export function useAudioRecorderSimplified(
       const mixedAudioCtx = MixedAudioContext.getInstance()
       const mixedStream = await mixedAudioCtx.initialize(stream, 16000)
 
+      // IMPORTANT: Nullify old recorder's event handlers to prevent stale ondataavailable
+      // events from adding chunks to the new session's buffer (causing WebM decoding errors)
+      const oldRecorder = mediaRecorderRef.current
+      if (oldRecorder) {
+        oldRecorder.ondataavailable = null
+        oldRecorder.onerror = null
+        oldRecorder.onstart = null
+        oldRecorder.onstop = null
+      }
+
       const mediaRecorder = new MediaRecorder(mixedStream, {
         mimeType: 'audio/webm;codecs=opus',
       })
@@ -286,11 +310,14 @@ export function useAudioRecorderSimplified(
       if (periodicFlushTimerRef.current) {
         clearInterval(periodicFlushTimerRef.current)
       }
-      periodicFlushTimerRef.current = setInterval(flushAudio, 40000)
+      periodicFlushTimerRef.current = setInterval(flushAudio, 10000)
 
       mediaRecorder.ondataavailable = (event) => {
         if (event.data && event.data.size > 0) {
           audioChunksRef.current.push(event.data)
+          const totalSize = audioChunksRef.current.reduce((sum, chunk) => sum + chunk.size, 0)
+          console.log(`[Recording] Audio chunk available: ${event.data.size} bytes (accumulated: ${audioChunksRef.current.length} chunks, total: ${totalSize} bytes)`)
+
         }
       }
 
@@ -374,6 +401,12 @@ export function useAudioRecorderSimplified(
 
     stopSilenceDetection()
 
+    // Clear periodic flush timer - we're stopping recording
+    if (periodicFlushTimerRef.current) {
+      clearInterval(periodicFlushTimerRef.current)
+      periodicFlushTimerRef.current = null
+    }
+
     // Stop recording and wait for chunks
     if (isRecording && mediaRecorderRef.current) {
       await new Promise<void>((resolve) => {
@@ -436,11 +469,8 @@ export function useAudioRecorderSimplified(
 
     state.setConversationState('thinking')
 
-    // Restart recording without silence detection
-    const currentState = store.getState()
-    if (currentState.connectionStatus === 'connected' && !currentState.hasNavigatedAway && currentState.isMicOn) {
-      await startRecordingInternal(false)
-    }
+    // Do NOT restart recording here - AI is about to speak
+    // Recording will be restarted by onAIPlaybackComplete when AI finishes speaking
   }, [stopSilenceDetection, startRecordingInternal])
 
   // ============================================
@@ -460,7 +490,7 @@ export function useAudioRecorderSimplified(
     return () => {
       registerAudioRecorderControls(null)
     }
-  }, [startRecording, stopRecording, stopAndClearBuffer, flushAudio, sendEndOfTurnInternal, setupSilenceDetection,stopSilenceDetection])
+  }, [startRecording, stopRecording, stopAndClearBuffer, flushAudio, sendEndOfTurnInternal, setupSilenceDetection, stopSilenceDetection])
 
   // ============================================
   // Cleanup
