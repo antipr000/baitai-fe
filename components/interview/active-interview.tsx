@@ -1311,7 +1311,7 @@ export default function ActiveInterview({ cameraStream, micStream, templateId, s
       }
 
       // Start periodic flush timer (10 seconds)
-      periodicFlushTimerRef.current = setInterval(flushAudioSegments, 40000)
+      periodicFlushTimerRef.current = setInterval(flushAudioSegments, 10000)
       console.log('[Recording] Started 40s periodic flush timer')
 
       mediaRecorder.ondataavailable = (event) => {
