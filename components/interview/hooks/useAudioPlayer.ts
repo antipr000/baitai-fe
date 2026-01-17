@@ -58,7 +58,7 @@ export function useAudioPlayer(
     }
 
     isPlayingRef.current = true
-    state.setIsAISpeaking(true)
+    // NOTE: isAISpeaking is derived from conversationState
     state.setConversationState('speaking')
 
     // Stop recording while AI is speaking (matches original)
@@ -83,7 +83,6 @@ export function useAudioPlayer(
       const audioBuffer = await playbackContext.decodeAudioData(audioData.slice(0))
 
       if (store.getState().hasNavigatedAway) {
-        store.getState().setIsAISpeaking(false)
         return
       }
 
@@ -100,7 +99,6 @@ export function useAudioPlayer(
         } else {
           // All audio finished - trigger recording restart via centralized action
           // onAIPlaybackComplete handles: conversationState, hasSentEndOfTurn, hasHeardSpeech, recording restart
-          store.getState().setIsAISpeaking(false)
           console.log('[AudioPlayer] Playback complete')
           onAIPlaybackComplete()
         }
@@ -111,7 +109,6 @@ export function useAudioPlayer(
       console.error('[AudioPlayer] Playback error:', error)
       currentSourceRef.current = null
       isPlayingRef.current = false
-      store.getState().setIsAISpeaking(false)
 
       onError?.(error instanceof Error ? error : new Error(String(error)))
 
@@ -160,7 +157,8 @@ export function useAudioPlayer(
     }
     audioQueueRef.current = []
     isPlayingRef.current = false
-    store.getState().setIsAISpeaking(false)
+    // NOTE: isAISpeaking is derived, set conversationState to listening
+    store.getState().setConversationState('listening')
   }, [])
 
   // ============================================
@@ -193,7 +191,12 @@ export function useAudioPlayer(
   // ============================================
   // Return
   // ============================================
-  const isPlaying = useInterviewStore((s) => s.isAISpeaking)
+  // isPlaying now uses the derived selector (conversationState === speaking || thinking with streaming)
+  const isPlaying = useInterviewStore(
+    (s) =>
+      s.conversationState === 'speaking' 
+      // || (s.conversationState === 'thinking' && s.streamingText.currentMessageId !== null)
+  )
 
   return {
     isPlaying,

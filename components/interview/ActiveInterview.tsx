@@ -35,6 +35,7 @@ import {
   useConversationUIState,
   useMediaControlsState,
   useRecordingState,
+  useIsAISpeaking,
 } from './store'
 
 // Hooks
@@ -89,10 +90,13 @@ export default function ActiveInterview({
     connectionStatus,
     conversationState,
     isProcessing,
-    isAISpeaking,
+    // NOTE: isAISpeaking removed from this selector - use useIsAISpeaking() directly
     error,
     showEndConfirm,
   } = useConversationUIState()
+
+  // isAISpeaking is now derived from conversationState + streamingText
+  const isAISpeaking = useIsAISpeaking()
 
   const { isMicOn, isVideoOn, isScreenSharing } = useMediaControlsState()
 

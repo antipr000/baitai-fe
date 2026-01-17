@@ -54,7 +54,6 @@ const createInitialState = (): InterviewState => ({
   conversationState: 'idle',
   messages: [],
   isProcessing: false,
-  isAISpeaking: false,
 
   // Streaming text
   streamingText: createInitialStreamingTextState(),
@@ -102,7 +101,7 @@ export const useInterviewStore = create<InterviewStore>()(
       set({
         sessionId,
         templateId,
-        conversationState: 'listening',
+        conversationState: 'thinking',
         connectionStatus: 'disconnected',
       }),
 
@@ -122,7 +121,7 @@ export const useInterviewStore = create<InterviewStore>()(
 
     setIsProcessing: (isProcessing: boolean) => set({ isProcessing }),
 
-    setIsAISpeaking: (isAISpeaking: boolean) => set({ isAISpeaking }),
+    // NOTE: setIsAISpeaking removed - isAISpeaking is now derived
 
     // ----------------------------------------
     // Messages
@@ -185,8 +184,8 @@ export const useInterviewStore = create<InterviewStore>()(
           // Also update the message in the messages array
           messages: messageId
             ? state.messages.map((m) =>
-                m.id === messageId ? { ...m, text: newBuffer } : m
-              )
+              m.id === messageId ? { ...m, text: newBuffer } : m
+            )
             : state.messages,
         }
       }),
@@ -200,25 +199,30 @@ export const useInterviewStore = create<InterviewStore>()(
       })),
 
     processNextToken: () => {
-      const state = get()
-      if (state.streamingText.tokenQueue.length === 0) {
-        return null
-      }
-      const [nextToken, ...remainingTokens] = state.streamingText.tokenQueue
-      const newBuffer = state.streamingText.buffer + nextToken
-      const messageId = state.streamingText.currentMessageId
+      let nextToken: string | null = null
 
-      set({
-        streamingText: {
-          ...state.streamingText,
-          buffer: newBuffer,
-          tokenQueue: remainingTokens,
-        },
-        messages: messageId
-          ? state.messages.map((m) =>
+      set((state) => {
+        if (state.streamingText.tokenQueue.length === 0) {
+          return state // No change
+        }
+
+        const [token, ...remainingTokens] = state.streamingText.tokenQueue
+        nextToken = token
+        const newBuffer = state.streamingText.buffer + token
+        const messageId = state.streamingText.currentMessageId
+
+        return {
+          streamingText: {
+            ...state.streamingText,
+            buffer: newBuffer,
+            tokenQueue: remainingTokens,
+          },
+          messages: messageId
+            ? state.messages.map((m) =>
               m.id === messageId ? { ...m, text: newBuffer } : m
             )
-          : state.messages,
+            : state.messages,
+        }
       })
 
       return nextToken
@@ -355,7 +359,14 @@ export const useConversationState = () =>
   useInterviewStore((s) => s.conversationState)
 export const useMessages = () => useInterviewStore((s) => s.messages)
 export const useIsProcessing = () => useInterviewStore((s) => s.isProcessing)
-export const useIsAISpeaking = () => useInterviewStore((s) => s.isAISpeaking)
+export const useIsAISpeaking = () =>
+  useInterviewStore(
+    (s) =>
+      s.conversationState === 'speaking' ||
+      (s.conversationState === 'thinking' && s.streamingText.currentMessageId !== null)
+  )
+
+
 
 // Streaming text
 export const useStreamingText = () =>
@@ -403,7 +414,7 @@ export const useConversationUIState = () =>
       connectionStatus: s.connectionStatus,
       conversationState: s.conversationState,
       isProcessing: s.isProcessing,
-      isAISpeaking: s.isAISpeaking,
+      // NOTE: isAISpeaking removed from this selector - use useIsAISpeaking() hook directly
       error: s.error,
       showEndConfirm: s.showEndConfirm,
     }))

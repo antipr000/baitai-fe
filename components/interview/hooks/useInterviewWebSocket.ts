@@ -14,6 +14,7 @@ import {
   onAIResponseStart,
   stopSilenceDetection,
   stopRecording,
+  startRecording,
   stopVideoRecording,
   stopScreenRecording,
   finalizeAllMedia,
@@ -61,13 +62,16 @@ export function useInterviewWebSocket(
       {
         onConnect: () => {
           console.log('[WebSocket] Connected')
-          store.getState().setConnectionStatus('connected')
+          // Status update handled by onStatusChange
         },
         onDisconnect: () => {
           console.log('[WebSocket] Disconnected')
-          store.getState().setConnectionStatus('disconnected')
+          // Status update handled by onStatusChange
           // Stop recording when disconnected (matches original)
           stopRecording()
+        },
+        onStatusChange: (status) => {
+          store.getState().setConnectionStatus(status)
         },
         onError: (error) => {
           console.error('[WebSocket] Error:', error)
@@ -142,9 +146,10 @@ export function useInterviewWebSocket(
       case 'response.start':
         handleResponseStart(message)
         break
-      case 'response.text':
-        handleResponseText(message)
-        break
+      // NOTE: response.text is not used by current backend (always streams)
+      // case 'response.text':
+      //   handleResponseText(message)
+      //   break
       case 'response.text.chunk':
         handleTextChunk(message)
         break
@@ -172,13 +177,26 @@ export function useInterviewWebSocket(
       case 'media_chunk.error':
         handleMediaUpload(message)
         break
+      // TODO: Handle real-time transcription display
+      case 'transcript.chunk':
+        console.log('[WebSocket] Real-time transcript:', message.text)
+        // Could update UI to show what user is saying in real-time
+        break
+      // Keep-alive response (no action needed)
+      case 'pong': // check
+        break
+      // Media finalization (could update UI if needed)
+      case 'media_finalized':
+      case 'all_media_finalized':
+        console.log('[WebSocket] Media finalized:', message)
+        break
     }
   }
 
   function handleResponseStart(message: WebSocketTextMessage) {
     const state = store.getState()
     state.setIsProcessing(false)
-    state.setIsAISpeaking(true)
+    // NOTE: isAISpeaking is now derived from conversationState + streamingText
     if (state.conversationState !== 'speaking') {
       state.setConversationState('thinking')
     }
@@ -197,28 +215,25 @@ export function useInterviewWebSocket(
     state.startStreamingMessage()
   }
 
-  function handleResponseText(message: WebSocketTextMessage) {
-    const state = store.getState()
-    state.setIsProcessing(false)
-    state.setIsAISpeaking(true)
-    if (state.conversationState !== 'speaking') {
-      state.setConversationState('thinking')
-    }
 
-    // Stop recording and clear buffer - this is the non-streaming (legacy) case
-    onAIResponseStart()
-    state.setHasSentEndOfTurn(false)
-
-    if (message.user_transcript && message.user_transcript !== '[Silence/Unintelligible]') {
-      state.addMessage({ speaker: 'candidate', text: message.user_transcript })
-    }
-
-    if (message.text) {
-      state.addMessage({ speaker: 'ai', text: message.text })
-    }
-
-    state.clearStreamingState()
-  }
+  // NOTE: handleResponseText is not used by current backend (always streams)
+  // Kept for potential future backward compatibility
+  // function handleResponseText(message: WebSocketTextMessage) {
+  //   const state = store.getState()
+  //   state.setIsProcessing(false)
+  //   if (state.conversationState !== 'speaking') {
+  //     state.setConversationState('thinking')
+  //   }
+  //   onAIResponseStart()
+  //   state.setHasSentEndOfTurn(false)
+  //   if (message.user_transcript && message.user_transcript !== '[Silence/Unintelligible]') {
+  //     state.addMessage({ speaker: 'candidate', text: message.user_transcript })
+  //   }
+  //   if (message.text) {
+  //     state.addMessage({ speaker: 'ai', text: message.text })
+  //   }
+  //   state.clearStreamingState()
+  // }
 
   function handleTextChunk(message: WebSocketTextMessage) {
     const chunk = message.text || ''
@@ -234,9 +249,9 @@ export function useInterviewWebSocket(
     state.addCompletedSentence(chunkIndex, sentenceText)
     console.log(`[WebSocket] Sentence ${chunkIndex} complete: "${sentenceText.substring(0, 50)}..." - expecting audio chunk`)
 
-    // Ensure we're in speaking state when first sentence completes (matches original)
-    if (chunkIndex === 0 && !state.isAISpeaking) {
-      state.setIsAISpeaking(true)
+    // Ensure we're in speaking state when first sentence completes
+    // isAISpeaking is derived, so just set conversationState
+    if (chunkIndex === 0 && state.conversationState !== 'speaking') {
       state.setConversationState('speaking')
       stopSilenceDetection()
     }
@@ -271,13 +286,7 @@ export function useInterviewWebSocket(
       // Use message.text if provided, otherwise the accumulated buffer (matches original)
       currentState.finalizeStreamingMessage(message.text)
 
-      // This is *text* stream completion, not necessarily audio playback completion
-      // Only set isAISpeaking to false if audio is not currently playing
-      // Original uses: if (!isPlayingRef.current) setIsAISpeaking(false)
-      // isAISpeaking in store mirrors isPlayingRef behavior (set false between chunks)
-      if (!currentState.isAISpeaking) {
-        currentState.setIsAISpeaking(false)
-      }
+      // NOTE: isAISpeaking is now derived, no need to set it manually
 
       console.log('[WebSocket] Text finalized after queue drain')
     }
@@ -287,16 +296,19 @@ export function useInterviewWebSocket(
 
   function handleResponseWait(message: WebSocketTextMessage) {
     const state = store.getState()
-    console.log('[WebSocket] Backend processing...')
-    state.setIsProcessing(true)
-    state.setIsAISpeaking(false)
-    if (state.conversationState !== 'speaking') {
-      state.setConversationState('thinking')
-    }
+    // Backend sends response.wait when candidate is "still thinking"
+    // This means: let user continue speaking, don't generate AI response yet
+    // NOTE: Don't add partial transcript here - only add final transcript from response.start
+    console.log('[WebSocket] User still thinking, resuming listening...')
 
-    if (message.user_transcript && message.user_transcript !== '[Silence/Unintelligible]') {
-      state.addMessage({ speaker: 'candidate', text: message.user_transcript })
-    }
+    // Go back to listening state so user can continue
+    state.setIsProcessing(false)
+    state.setConversationState('listening')
+    state.setHasSentEndOfTurn(false)
+    state.setHasHeardSpeech(false)
+
+    // Explicitly start recording with silence detection
+    startRecording(true).catch(console.error)
   }
 
   function handleResponseCompleted(message: WebSocketTextMessage) {
