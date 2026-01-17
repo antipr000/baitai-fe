@@ -42,20 +42,26 @@ export interface ChatMessage {
 // ============================================
 
 export type WebSocketMessageType =
-  | 'response.text'
+  // NOTE: response.text not used by current backend (always streams)
+  // | 'response.text'
   | 'response.start'
   | 'response.text.chunk'
   | 'response.text.complete'
-  | 'response.audio'
+  // NOTE: response.audio not used by current backend (uses response.audio.chunk instead)
+  // | 'response.audio'
   | 'response.audio.chunk'
   | 'response.sentence.complete'
   | 'response.wait'
   | 'response.completed'
   | 'error'
+  | 'transcript.chunk'  // TODO: Handle real-time transcription display
+  | 'pong'
   | 'media_upload.started'
   | 'media_upload.error'
   | 'media_chunk.ack'
   | 'media_chunk.error'
+  | 'media_finalized'
+  | 'all_media_finalized'
 
 export interface WebSocketTextMessage {
   type: WebSocketMessageType
@@ -156,10 +162,22 @@ export interface InterviewState {
   error: string | null
 
   // Conversation
+  /**
+   * Turn-taking state machine (source of truth for whose turn it is):
+   * - 'idle': Initial state before connection
+   * - 'listening': User's turn to speak (silence detection active)
+   * - 'thinking': Processing user input, waiting for AI response
+   * - 'speaking': AI audio is actively playing
+   */
   conversationState: ConversationState
   messages: ChatMessage[]
+  /**
+   * Backend is processing user's audio (waiting for response).
+   * True during 'thinking' state when no streaming has started yet.
+   */
   isProcessing: boolean
-  isAISpeaking: boolean
+  // NOTE: isAISpeaking is now derived from conversationState + streamingText.
+  // Use useIsAISpeakingDerived() selector instead.
 
   // Streaming text (replaces aiStreamBufferRef, currentAiMessageIdRef, tokenQueueRef, isProcessingTokensRef)
   streamingText: StreamingTextState
@@ -208,7 +226,7 @@ export interface InterviewActions {
   // Conversation state
   setConversationState: (state: ConversationState) => void
   setIsProcessing: (processing: boolean) => void
-  setIsAISpeaking: (speaking: boolean) => void
+  // NOTE: setIsAISpeaking removed - isAISpeaking is now derived
 
   // Messages
   addMessage: (message: Omit<ChatMessage, 'id' | 'timestamp'>) => void
