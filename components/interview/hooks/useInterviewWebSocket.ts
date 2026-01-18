@@ -19,6 +19,10 @@ import {
   stopScreenRecording,
   finalizeAllMedia,
   retryMediaUploadSession,
+  transitionToListening,
+  transitionToSpeaking,
+  onResponseStart,
+  transitionToListeningOnError,
 } from '../store/interviewActions'
 import type { WebSocketTextMessage } from '../store/types'
 
@@ -195,13 +199,12 @@ export function useInterviewWebSocket(
 
   function handleResponseStart(message: WebSocketTextMessage) {
     const state = store.getState()
-    state.setIsProcessing(false)
-    // NOTE: isAISpeaking is now derived from conversationState + streamingText
-    if (state.conversationState !== 'speaking') {
-      state.setConversationState('thinking')
-    }
 
-    // NOTE: Original does NOT stop recording here - that happens in response.text only
+    // Use transition helper for state changes
+    onResponseStart()
+
+    // Mark response as incomplete - audio chunks are expected
+    state.setIsResponseComplete(false)
     // response.start is for streaming - recording continues until AI starts speaking audio
 
     if (message.user_transcript && message.user_transcript !== '[Silence/Unintelligible]') {
@@ -250,10 +253,8 @@ export function useInterviewWebSocket(
     console.log(`[WebSocket] Sentence ${chunkIndex} complete: "${sentenceText.substring(0, 50)}..." - expecting audio chunk`)
 
     // Ensure we're in speaking state when first sentence completes
-    // isAISpeaking is derived, so just set conversationState
     if (chunkIndex === 0 && state.conversationState !== 'speaking') {
-      state.setConversationState('speaking')
-      stopSilenceDetection()
+      transitionToSpeaking()
     }
   }
 
@@ -295,19 +296,11 @@ export function useInterviewWebSocket(
   }
 
   function handleResponseWait(message: WebSocketTextMessage) {
-    const state = store.getState()
     // Backend sends response.wait when candidate is "still thinking"
     // This means: let user continue speaking, don't generate AI response yet
     // NOTE: Don't add partial transcript here - only add final transcript from response.start
-    console.log('[WebSocket] User still thinking, resuming listening...')
-
-    // Go back to listening state so user can continue
-    state.setIsProcessing(false)
-    state.setConversationState('listening')
-    state.setHasSentEndOfTurn(false)
-    state.setHasHeardSpeech(false)
-
-    // Explicitly start recording with silence detection
+    console.log('[WebSocket] response.wait received')
+    transitionToListening()
     startRecording(true).catch(console.error)
   }
 
@@ -315,6 +308,9 @@ export function useInterviewWebSocket(
     const state = store.getState()
     console.log('[WebSocket] Response completed - status:', message.status, 'next_action:', message.next_action)
     state.setIsProcessing(false)
+
+    // Mark response as complete - audio player can now transition to listening when queue empties
+    state.setIsResponseComplete(true)
 
     // Check if interview has completed
     const isCompleted = message.status === 'completed' || message.next_action === 'END_INTERVIEW'
@@ -350,12 +346,8 @@ export function useInterviewWebSocket(
   }
 
   function handleError(message: WebSocketTextMessage) {
-    const state = store.getState()
     console.error('[WebSocket] Error:', message.message)
-    state.setIsProcessing(false)
-    state.setConversationState('listening')
-    state.setError(message.message || 'An error occurred')
-    state.setHasSentEndOfTurn(false)
+    transitionToListeningOnError(message.message || 'An error occurred')
 
     if (message.error_type === 'session') {
       wsManagerRef.current?.disconnect()

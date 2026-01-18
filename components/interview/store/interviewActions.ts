@@ -163,6 +163,123 @@ export function retryMediaUploadSession(type: 'video' | 'screen') {
 }
 
 // ============================================
+// State Transition Helpers
+// ============================================
+// These functions handle all state changes for a given transition,
+// reducing the chance of forgetting to set a required flag.
+
+/**
+ * Transition to LISTENING state (user's turn to speak)
+ * Called when: AI finishes speaking, response.wait received
+ * 
+ * Sets:
+ * - conversationState: 'listening'
+ * - isProcessing: false
+ * - hasSentEndOfTurn: false
+ * - hasHeardSpeech: false
+ * 
+ * NOTE: Caller is responsible for starting recording if needed
+ */
+export function transitionToListening() {
+  const store = useInterviewStore.getState()
+  console.log('[State] → listening')
+
+  store.setConversationState('listening')
+  store.setIsProcessing(false)
+  store.setHasSentEndOfTurn(false)
+  store.setHasHeardSpeech(false)
+}
+
+
+
+/**
+ * Transition to THINKING state (processing user input)
+ * Called when: end_of_turn sent, waiting for AI response
+ * 
+ * Sets:
+ * - conversationState: 'thinking'
+ * - isProcessing: true (show "Processing..." UI)
+ * - hasSentEndOfTurn: true (guard against re-sending)
+ * - hasHeardSpeech: false (reset for next turn)
+ * 
+ * Actions:
+ * - Stops silence detection
+ */
+export function transitionToThinking() {
+  const store = useInterviewStore.getState()
+  console.log('[State] → thinking')
+
+  store.setConversationState('thinking')
+  store.setIsProcessing(true)
+  store.setHasSentEndOfTurn(true)
+  store.setHasHeardSpeech(false)
+
+  stopSilenceDetection()
+}
+
+/**
+ * Transition to SPEAKING state (AI is responding with audio)
+ * Called when: first sentence audio plays (handleSentenceComplete chunk 0)
+ * 
+ * Sets:
+ * - conversationState: 'speaking'
+ * 
+ * Does NOT set:
+ * - isProcessing (already false from onResponseStart)
+ * 
+ * Actions:
+ * - Stops silence detection
+ */
+export function transitionToSpeaking() {
+  const store = useInterviewStore.getState()
+  console.log('[State] → speaking')
+
+  store.setConversationState('speaking')
+  // Safety: Stop silence detection in case audio was queued directly 
+  // without a preceding response.start (which normally stops it)
+  stopSilenceDetection()
+}
+
+/**
+ * Transition to response received state (AI started responding but no audio yet)
+ * Called when: response.start received
+ * 
+ * Sets:
+ * - isProcessing: false (got response, no longer waiting)
+ * - conversationState: 'thinking' (if not already speaking)
+ * 
+ * Note: We stay in 'thinking' until audio plays, which triggers transitionToSpeaking
+ */
+export function onResponseStart() {
+  const store = useInterviewStore.getState()
+  console.log('[State] Response start received')
+
+  store.setIsProcessing(false)
+  // Only change to thinking if not already speaking (prevents going backward)
+  if (store.conversationState !== 'speaking') {
+    store.setConversationState('thinking')
+  }
+}
+
+/**
+ * Transition to LISTENING state on error
+ * Called when: WebSocket error, audio processing error
+ * 
+ * Same as transitionToListening but also sets error message
+ * and doesn't auto-start recording (let caller decide)
+ */
+export function transitionToListeningOnError(errorMessage: string) {
+  const store = useInterviewStore.getState()
+  console.log('[State] Error → listening:', errorMessage)
+
+  store.setConversationState('listening')
+  store.setIsProcessing(false)
+  store.setHasSentEndOfTurn(false)
+  store.setHasHeardSpeech(false)
+  store.setError(errorMessage)
+}
+
+// ============================================
 // Combined Actions
 // ============================================
 
@@ -179,19 +296,13 @@ export function onAIResponseStart() {
 
 /**
  * Called when AI finishes speaking - restarts recording with silence detection
- * This matches original behavior:
- * 1. Set conversationState to 'listening'
- * 2. Reset hasSentEndOfTurn = false
- * 3. Reset hasHeardSpeech = false
- * 4. Restart MediaRecorder for new user turn
  */
 export async function onAIPlaybackComplete() {
   const store = useInterviewStore.getState()
+  console.log('[State] AI playback complete → listening')
 
-  // Set state to listening and reset flags (like original onended)
-  store.setConversationState('listening')
-  store.setHasSentEndOfTurn(false)
-  store.setHasHeardSpeech(false)
+  // Use helper to set state
+  transitionToListening()
 
   if (store.connectionStatus !== 'connected' || !store.isMicOn || store.hasNavigatedAway) {
     return

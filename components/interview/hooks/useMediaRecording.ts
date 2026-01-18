@@ -282,6 +282,9 @@ export function useMediaRecording(
         return
       }
 
+      /// returning early for now 
+      return
+
       try {
         // Initialize upload session
         if (isConnected) {

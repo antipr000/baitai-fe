@@ -11,7 +11,9 @@ import { MixedAudioContext } from '../lib/audioUtils'
 import {
   registerAudioPlayerControls,
   onAIPlaybackComplete,
-  stopRecording,  // Add this import
+  stopRecording,
+  transitionToSpeaking,
+  transitionToListening,
 } from '../store/interviewActions'
 
 // ============================================
@@ -58,14 +60,13 @@ export function useAudioPlayer(
     }
 
     isPlayingRef.current = true
-    // NOTE: isAISpeaking is derived from conversationState
-    state.setConversationState('speaking')
-
-    // Stop recording while AI is speaking (matches original)
-    stopRecording()
-
-    console.log('[AudioPlayer] Starting playback')
-    onPlaybackStart?.()
+    // Only on first chunk: transition state, stop recording, notify
+    if (state.conversationState !== 'speaking') {
+      transitionToSpeaking()
+      stopRecording()
+      console.log('[AudioPlayer] Starting playback')
+      onPlaybackStart?.()
+    }
 
     try {
       let playbackContext: AudioContext
@@ -97,10 +98,46 @@ export function useAudioPlayer(
         if (audioQueueRef.current.length > 0 && playNextRef.current) {
           playNextRef.current()
         } else {
-          // All audio finished - trigger recording restart via centralized action
-          // onAIPlaybackComplete handles: conversationState, hasSentEndOfTurn, hasHeardSpeech, recording restart
-          console.log('[AudioPlayer] Playback complete')
-          onAIPlaybackComplete()
+          // Queue is empty - check if response is truly complete before transitioning
+          const currentState = store.getState()
+          if (currentState.isResponseComplete) {
+            // All audio finished - trigger recording restart via centralized action
+            // onAIPlaybackComplete handles: conversationState, hasSentEndOfTurn, hasHeardSpeech, recording restart
+            console.log('[AudioPlayer] Playback complete')
+            onAIPlaybackComplete()
+          } else {
+            // Response not complete yet - more audio chunks may arrive
+            // Poll until either more audio arrives or response completes
+            console.log('[AudioPlayer] Queue empty but response not complete, waiting...')
+            let pollCount = 0
+            const maxPolls = 50 // Max 5 seconds (50 * 100ms)
+
+            const checkForMore = () => {
+              const state = store.getState()
+              pollCount++
+
+              // Safety: stop polling if disconnected, navigated away, or timeout
+              if (state.hasNavigatedAway || state.connectionStatus !== 'connected' || pollCount > maxPolls) {
+                console.log('[AudioPlayer] Stopping poll - disconnected/navigated/timeout, transitioning to listening')
+                onAIPlaybackComplete()
+                return // implicit cleanup
+              }
+
+              if (audioQueueRef.current.length > 0 && playNextRef.current) {
+                // More audio arrived, continue playing
+                console.log('[AudioPlayer] More audio arrived, resuming playback')
+                playNextRef.current()
+              } else if (state.isResponseComplete) {
+                // Response completed while waiting
+                console.log('[AudioPlayer] Response now complete, transitioning to listening')
+                onAIPlaybackComplete()
+              } else {
+                // Keep waiting
+                setTimeout(checkForMore, 100)
+              }
+            }
+            setTimeout(checkForMore, 100)
+          }
         }
       }
       source.connect(playbackContext.destination)
@@ -157,8 +194,9 @@ export function useAudioPlayer(
     }
     audioQueueRef.current = []
     isPlayingRef.current = false
-    // NOTE: isAISpeaking is derived, set conversationState to listening
-    store.getState().setConversationState('listening')
+    // Emergency stop - just set listening state, don't restart recording
+    // transitionToListening() handles the state reset safely without side-effects
+    transitionToListening()
   }, [])
 
   // ============================================
@@ -194,8 +232,8 @@ export function useAudioPlayer(
   // isPlaying now uses the derived selector (conversationState === speaking || thinking with streaming)
   const isPlaying = useInterviewStore(
     (s) =>
-      s.conversationState === 'speaking' 
-      // || (s.conversationState === 'thinking' && s.streamingText.currentMessageId !== null)
+      s.conversationState === 'speaking'
+    // || (s.conversationState === 'thinking' && s.streamingText.currentMessageId !== null)
   )
 
   return {

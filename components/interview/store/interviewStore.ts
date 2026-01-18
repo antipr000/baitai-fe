@@ -81,6 +81,7 @@ const createInitialState = (): InterviewState => ({
   hasHeardSpeech: false,
   hasNavigatedAway: false,
   hasSentAudioSegments: false,
+  isResponseComplete: true, // Start as true (no pending response)
 
   // UI
   showEndConfirm: false,
@@ -330,6 +331,9 @@ export const useInterviewStore = create<InterviewStore>()(
 
     setHasSentAudioSegments: (hasSentAudioSegments: boolean) =>
       set({ hasSentAudioSegments }),
+
+    setIsResponseComplete: (isResponseComplete: boolean) =>
+      set({ isResponseComplete }),
 
     // ----------------------------------------
     // UI

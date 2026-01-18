@@ -12,6 +12,8 @@ import {
   registerAudioRecorderControls,
   sendAudio,
   sendEndOfTurnMessage,
+  transitionToListening,
+  transitionToThinking,
 } from '../store/interviewActions'
 import { DEFAULT_SILENCE_CONFIG } from '../store/types'
 import type { SilenceDetectionConfig } from '../store/types'
@@ -379,6 +381,7 @@ export function useAudioRecorder(
   // End of Turn
   // ============================================
 
+  // Only invoked for user's  end of turn
   const sendEndOfTurnInternal = useCallback(async (): Promise<void> => {
     const state = store.getState()
 
@@ -395,10 +398,10 @@ export function useAudioRecorder(
     }
 
     console.log('[AudioRecorder] Processing end of turn...')
+    // Set processing flag early to prevent duplicate calls (guard at line 388)
     state.setIsProcessing(true)
-    state.setHasSentEndOfTurn(true)
-    state.setHasHeardSpeech(false)
-
+    // Other flags will be set by transitionToThinking() after successful send
+    // Early failures call transitionToListening() which resets isProcessing
     stopSilenceDetection()
 
     // Clear periodic flush timer - we're stopping recording
@@ -441,17 +444,15 @@ export function useAudioRecorder(
       } catch (error) {
         audioChunksRef.current = []
         if (!hasSentSegments) {
-          state.setHasSentEndOfTurn(false)
-          state.setIsProcessing(false)
-          state.setConversationState('listening')
+          transitionToListening()
           await startRecordingInternal(true)
           return
         }
       }
-    } else if (!hasSentSegments) {
-      state.setHasSentEndOfTurn(false)
-      state.setIsProcessing(false)
-      state.setConversationState('listening')
+    } 
+    //Rare case: No audio chunks and no segments sent
+    else if (!hasSentSegments) {
+      transitionToListening()
       await startRecordingInternal(true)
       return
     }
@@ -460,14 +461,13 @@ export function useAudioRecorder(
     const sendSuccess = sendEndOfTurnMessage()
 
     if (!sendSuccess) {
-      state.setHasSentEndOfTurn(false)
-      state.setIsProcessing(false)
-      state.setConversationState('listening')
+      transitionToListening()
       await startRecordingInternal(true)
       return
     }
 
-    state.setConversationState('thinking')
+    // Successfully sent end_of_turn - transition to thinking
+    transitionToThinking()
 
     // Do NOT restart recording here - AI is about to speak
     // Recording will be restarted by onAIPlaybackComplete when AI finishes speaking

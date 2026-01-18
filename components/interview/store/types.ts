@@ -206,6 +206,11 @@ export interface InterviewState {
   hasHeardSpeech: boolean
   hasNavigatedAway: boolean
   hasSentAudioSegments: boolean
+  /**
+   * True when AI response is complete (all audio chunks received).
+   * Used to prevent premature transition to listening when audio queue is temporarily empty.
+   */
+  isResponseComplete: boolean
 
   // UI
   showEndConfirm: boolean
@@ -268,6 +273,7 @@ export interface InterviewActions {
   setHasHeardSpeech: (heard: boolean) => void
   setHasNavigatedAway: (navigated: boolean) => void
   setHasSentAudioSegments: (sent: boolean) => void
+  setIsResponseComplete: (complete: boolean) => void
 
   // UI
   setShowEndConfirm: (show: boolean) => void

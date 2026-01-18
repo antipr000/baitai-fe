@@ -56,6 +56,7 @@ import {
   enableSilenceDetection,
   stopSilenceDetection,
   cleanupAll,
+  transitionToListening,
 } from './store/interviewActions'
 
 import { MixedAudioContext } from './lib/audioUtils'
@@ -271,21 +272,13 @@ export default function ActiveInterview({
         clearTimeout(thinkingTimerRef.current)
       stopSilenceDetection()
 
-      //Force state transition after 10 seconds
-      thinkingTimerRef.current = setTimeout(() => {
-        const store = useInterviewStore.getState()
-        store.setIsProcessing(false)
-        store.setHasSentEndOfTurn(false)
-        store.setConversationState('listening')
-
-        if (store.connectionStatus === 'connected' && store.isMicOn && !store.hasNavigatedAway) {
-          if (!store.audio.isRecording) {
-            startRecording(true).catch(console.error)
-          } else {
-            enableSilenceDetection()
-          }
-        }
-      }, 10000)
+      // TODO: Re-enable with proper backend cancellation support
+      // Force state transition after 10 seconds - DISABLED to avoid conflicts with late server responses
+      // thinkingTimerRef.current = setTimeout(() => {
+      //   console.log('[ActiveInterview] 10s thinking timeout - forcing transition to listening')
+      //   transitionToListening()
+      //   startRecording(true).catch(console.error)
+      // }, 10000)
     } else if (conversationState === 'speaking') {
       // Never run silence detection while AI audio is playing
       if (thinkingTimerRef.current) {
