@@ -422,4 +422,7 @@ export function cleanupAll() {
   audioRecorderControls = null
   audioPlayerControls = null
   mediaRecorderControls = null
+
+  // Reset the Zustand store to initial state
+  useInterviewStore.getState().reset()
 }
