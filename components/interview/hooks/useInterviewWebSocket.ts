@@ -14,6 +14,7 @@ import {
   onAIResponseStart,
   stopSilenceDetection,
   stopRecording,
+  stopPlayback,
   startRecording,
   stopVideoRecording,
   stopScreenRecording,
@@ -318,8 +319,11 @@ export function useInterviewWebSocket(
     if (isCompleted) {
       console.log('[WebSocket] Interview completed - ending session')
 
-      // Stop all recordings (matches original)
+
+
+      // Stop all recordings and playback (consistent with handleEndInterview)
       stopRecording()
+      stopPlayback()
       stopVideoRecording()
       stopScreenRecording()
 
@@ -338,7 +342,8 @@ export function useInterviewWebSocket(
       })
       // maybe we can have an audio from the backend to play when the interview is completed
 
-
+      // Mark as navigated away to prevent further processing
+      state.setHasNavigatedAway(true)
       // Callback will show toast and redirect
       onInterviewEnd?.()
     }
