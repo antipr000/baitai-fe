@@ -22,22 +22,15 @@ export default function NotFound() {
                 <div className="flex flex-col items-center text-center space-y-6">
                     <div className="absolute -z-10 inset-0 overflow-hidden pointer-events-none">
                         {[...Array(50)].map((_, i) => (
-                            <motion.div
+                            <div
                                 key={i}
-                                className="absolute bg-white rounded-full "
-                                initial={{ opacity: 0.2 }}
-                                animate={{ opacity: [0.2, 1, 0.2] }}
-                                transition={{
-                                    duration: Math.random() * 5 + 3,
-                                    repeat: Infinity,
-                                    ease: "easeInOut",
-                                    delay: Math.random() * 5,
-                                }}
+                                className="absolute bg-white rounded-full opacity-60"
                                 style={{
                                     top: `${Math.random() * 100}%`,
                                     left: `${Math.random() * 100}%`,
                                     width: `3px`,
                                     height: `3px`,
+                                    animation: `twinkle ${Math.random() * 5 + 3}s infinite ease-in-out`
                                 }}
                             />
                         ))}
