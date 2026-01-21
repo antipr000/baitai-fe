@@ -8,7 +8,6 @@ export const runtime = 'experimental-edge';
 
 
 export async function middleware(request: NextRequest) {
-
   return authMiddleware(request, {
     loginPath: "/api/login",
     logoutPath: "/api/logout",

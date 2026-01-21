@@ -6,9 +6,9 @@ import api from '@/lib/api/client';
 import LeftSection from "@/components/interview/left-section"
 import InterviewSection from "@/components/interview/interview-section"
 import UploadSection from "@/components/interview/upload-section"
-import ActiveInterview from "@/components/interview/active-interview"
 import { useEffect, useState, useRef } from "react"
 import { toast } from "sonner"
+import ActiveInterview from './ActiveInterview';
 
 
 type MediaDevice = MediaDeviceInfo;
