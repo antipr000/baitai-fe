@@ -1,11 +1,11 @@
 "use client"
 
 import React from 'react'
-import { Header } from './_components/header'
-import { InterviewDetails } from './_components/interview-details'
-import { IntroductionSection } from './_components/introduction-section'
-import { SectionList } from './_components/section-list'
-import { ConclusionSection } from './_components/conclusion-section'
+import { Header } from '../../../components/company/create/header'
+import { InterviewDetails } from '../../../components/company/create/interview-details'
+import { IntroductionSection } from '../../../components/company/create/introduction-section'
+import { SectionList } from '../../../components/company/create/section-list'
+import { ConclusionSection } from '../../../components/company/create/conclusion-section'
 
 export default function CreateInterview() {
     return (
@@ -16,7 +16,7 @@ export default function CreateInterview() {
 
             {/* Interview Sections */}
             <div className="space-y-4">
-                <h2 className="text-xl font-semibold text-primary/80">Interview Sections</h2>
+                <h2 className="text-xl font-semibold text-[rgba(84,104,252,0.9)]">Interview Sections</h2>
 
                 <IntroductionSection />
 

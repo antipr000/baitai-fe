@@ -15,22 +15,23 @@ import {
 } from "@/components/ui/select"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Clock, GripVertical, Minus, Plus, FileText, PlusCircle } from 'lucide-react'
+import Image from 'next/image'
 
 export const SectionList = () => {
     return (
         <div className="space-y-4">
             {/* Section 1 */}
-            <Card className="border-0 shadow-sm bg-white">
+            <Card className="border border-[rgba(100,119,252,0.2)]">
                 <CardHeader className="pb-4">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                            <GripVertical className="h-5 w-5 text-muted-foreground/50" />
-                            <span className="text-lg font-medium text-primary">Section 1</span>
+                            <Image src="/company/create/section.svg" alt="section" width={20} height={20} />
+                            <span className="text-lg font-medium text-[rgba(84,104,252,0.7)]">Section 1</span>
                         </div>
 
                         <div className="flex items-center gap-6">
-                            <span className="text-sm font-medium text-muted-foreground">No of Questions</span>
-                            <div className="flex items-center gap-1 bg-white dark:bg-background rounded-md border border-gray-200 p-1">
+                            <span className="text-sm font-medium text-[rgba(10,13,26,0.82)]">No of Questions</span>
+                            <div className="flex items-center gap-1 rounded-md border border-[rgba(222,244,251,0.1)] bg-[rgba(150,162,253,0.2)]">
                                 <Button variant="ghost" size="icon" className="h-6 w-6 rounded-sm">
                                     <Minus className="h-3 w-3" />
                                 </Button>
@@ -41,8 +42,8 @@ export const SectionList = () => {
                             </div>
 
                             <div className="flex items-center gap-2 text-muted-foreground">
-                                <Clock className="h-4 w-4" />
-                                <span className="text-sm font-medium">30 min</span>
+                                <Clock className="h-4 w-4 text-[rgba(84,104,252,0.6)]" />
+                                <span className="text-sm font-medium text-[rgba(34,37,49,0.9)]">30 min</span>
                             </div>
                         </div>
                     </div>
@@ -51,15 +52,15 @@ export const SectionList = () => {
                 <CardContent className="space-y-6">
                     {/* Section Title */}
                     <div className="space-y-2">
-                        <label className="text-sm font-medium text-muted-foreground block">Section Title</label>
+                        <label className="text-sm font-medium text-[rgba(10,13,26,0.82)] block">Section Title</label>
                         <Input placeholder="e.g., Technical Skills Assessment" className="bg-indigo-50/20 border-gray-200" />
                     </div>
 
                     {/* Assessment Format */}
                     <div className="space-y-2">
-                        <label className="text-sm font-medium text-muted-foreground block">Assessment Format</label>
+                        <label className="text-sm font-medium text-[rgba(10,13,26,0.82)] block">Assessment Format</label>
                         <Select>
-                            <SelectTrigger className="bg-white dark:bg-background/50 border-gray-200">
+                            <SelectTrigger className="bg-white border-[rgba(55,58,70,0.05)]">
                                 <SelectValue placeholder="-Choose Format-" />
                             </SelectTrigger>
                             <SelectContent>
@@ -72,7 +73,7 @@ export const SectionList = () => {
 
                     {/* AI Guidelines */}
                     <div className="space-y-2">
-                        <label className="text-sm font-medium text-muted-foreground block">AI Guidelines</label>
+                        <label className="text-sm font-medium text-[rgba(10,13,26,0.82)] block">AI Guidelines</label>
                         <Textarea
                             placeholder="Provide guidelines to the AI Interviewer for this section"
                             className="min-h-[100px] bg-indigo-50/20 border-gray-200 resize-none"
@@ -82,51 +83,50 @@ export const SectionList = () => {
 
                     {/* Evaluation Criteria */}
                     <div className="space-y-2">
-                        <label className="text-sm font-medium text-muted-foreground block">Evaluation Criteria</label>
+                        <label className="text-sm font-medium text-[rgba(10,13,26,0.82)] block">Evaluation Criteria</label>
                         <Input placeholder="Introduction" className="bg-indigo-50/20 border-gray-200" />
                     </div>
 
                     {/* Weight & Scoring Scale */}
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
-                            <label className="text-sm font-medium text-muted-foreground block">Weight</label>
+                            <label className="text-sm font-medium text-[rgba(10,13,26,0.82)] block">Weight</label>
                             <Input placeholder="Introduction" className="bg-indigo-50/20 border-gray-200" />
                         </div>
                         <div className="space-y-2">
-                            <label className="text-sm font-medium text-muted-foreground block">Scoring Scale</label>
+                            <label className="text-sm font-medium text-[rgba(10,13,26,0.82)] block">Scoring Scale</label>
                             <Input placeholder="Introduction" className="bg-indigo-50/20 border-gray-200" />
                         </div>
                     </div>
 
                     {/* Question 1 Block */}
-                    <div className="pl-10 border-l-2 border-primary/20 space-y-6 mt-8">
+                    <div className="pl-10   space-y-6 mt-8">
                         <div className="flex items-center gap-2">
-                            <FileText className="h-5 w-5 text-primary" />
-                            <span className="text-base font-semibold text-primary">Question 1</span>
+                            <Image src="/company/create/page.svg" alt="page" width={20} height={20} className="h-5 w-5 " />
+                            <span className="text-base font-semibold text-[rgba(34,37,49,1)]">Question 1</span>
                         </div>
 
                         {/* Difficulty Level */}
-                        <div className="space-y-2">
-                            <Label>Difficulty Level</Label>
-                            <RadioGroup defaultValue="easy" className="flex items-center gap-6">
-                                <div className="flex items-center space-x-2">
-                                    <RadioGroupItem value="easy" id="easy" />
-                                    <Label htmlFor="easy" className="font-normal cursor-pointer">Easy</Label>
-                                </div>
-                                <div className="flex items-center space-x-2">
-                                    <RadioGroupItem value="medium" id="medium" />
-                                    <Label htmlFor="medium" className="font-normal cursor-pointer">Medium</Label>
-                                </div>
-                                <div className="flex items-center space-x-2">
-                                    <RadioGroupItem value="difficult" id="difficult" />
-                                    <Label htmlFor="difficult" className="font-normal cursor-pointer">Difficult</Label>
-                                </div>
-                            </RadioGroup>
-                        </div>
+                        <div className="pl-4 space-y-4">
+                                <Label>Difficulty Level</Label>
+                                <RadioGroup defaultValue="easy" className="flex items-center gap-6">
+                                    <div className="flex items-center space-x-2">
+                                        <RadioGroupItem value="easy" id="easy" />
+                                        <Label htmlFor="easy" className="font-normal cursor-pointer">Easy</Label>
+                                    </div>
+                                    <div className="flex items-center space-x-2">
+                                        <RadioGroupItem value="medium" id="medium" />
+                                        <Label htmlFor="medium" className="font-normal cursor-pointer">Medium</Label>
+                                    </div>
+                                    <div className="flex items-center space-x-2">
+                                        <RadioGroupItem value="difficult" id="difficult" />
+                                        <Label htmlFor="difficult" className="font-normal cursor-pointer">Difficult</Label>
+                                    </div>
+                                </RadioGroup>
 
                         {/* Nested AI Guidelines */}
                         <div className="space-y-2">
-                            <label className="text-sm font-medium text-muted-foreground block">AI Guidelines</label>
+                            <label className="text-sm font-medium text-[rgba(10,13,26,0.82)] block">AI Guidelines</label>
                             <Textarea
                                 placeholder="Provide guidelines to the AI Interviewer for this section"
                                 className="min-h-[100px] bg-indigo-50/20 border-gray-200 resize-none"
@@ -135,16 +135,17 @@ export const SectionList = () => {
 
                         {/* Context Hints */}
                         <div className="space-y-2">
-                            <label className="text-sm font-medium text-muted-foreground block">Context Hints</label>
+                            <label className="text-sm font-medium text-[rgba(10,13,26,0.82)] block">Context Hints</label>
                             <Input placeholder="Introduction" className="bg-indigo-50/20 border-gray-200" />
+                        </div>
                         </div>
 
                         {/* Follow-up Questions */}
-                        <div className="bg-indigo-50/10 p-4 rounded-lg space-y-4">
+                        <div className=" p-4 ml-8 rounded-lg space-y-2">
                             <div className="flex items-center justify-between">
-                                <span className="text-sm font-medium text-primary">Follow-up Questions</span>
+                                <span className="text-sm font-medium text-[rgba(150,162,253,0.9)]">Follow-up Questions</span>
                                 <div className="flex items-center gap-2">
-                                    <span className="text-xs text-muted-foreground">No of follow-up Questions</span>
+                                    <span className="text-xs text-[rgba(34,37,49,0.7)]">No of follow-up Questions</span>
                                     <div className="flex items-center gap-1 bg-white rounded-md border border-gray-200 p-0.5">
                                         <Button variant="ghost" size="icon" className="h-5 w-5 rounded-sm"><Minus className="h-3 w-3" /></Button>
                                         <span className="w-3 text-center text-xs font-medium">0</span>
@@ -153,19 +154,19 @@ export const SectionList = () => {
                                 </div>
                             </div>
 
-                            <div className="space-y-3">
+                            <div className="space-y-5">
                                 <Input placeholder="Mention Questions to be asked" className="bg-indigo-50/20 border-gray-200" />
 
                                 <div className="space-y-1">
-                                    <label className="text-xs font-medium text-muted-foreground block">Trigger Condition</label>
+                                    <label className="text-xs font-medium text-[rgba(10,13,26,0.82)] block">Trigger Condition</label>
                                     <Input placeholder="Introduction" className="bg-indigo-50/20 border-gray-200" />
                                 </div>
 
                                 <div className="space-y-1">
-                                    <label className="text-xs font-medium text-muted-foreground block">AI Guidelines</label>
+                                    <label className="text-xs font-medium text-[rgba(10,13,26,0.82)] block">AI Guidelines</label>
                                     <Textarea
                                         placeholder="Provide guidelines to the AI Interviewer for this section"
-                                        className="min-h-[80px] bg-indigo-50/20 border-gray-200 resize-none"
+                                        className="min-h-[100px] bg-indigo-50/20 border-gray-200 resize-none"
                                     />
                                 </div>
                             </div>
@@ -176,9 +177,9 @@ export const SectionList = () => {
 
             {/* Add Section Button */}
             <div className="flex justify-end">
-                <Button variant="outline" className="text-primary border-primary/30 hover:bg-primary/5 gap-2">
-                    <PlusCircle className="h-4 w-4" />
-                    Add Section
+                <Button variant="outline" className="text-primary border-[rgba(84,104,252,0.5)] gap-2">
+                    <PlusCircle className="h-4 w-4 text-[rgba(84,104,252,1)]" />
+                    <span className="text-[rgba(84,104,252,0.7)]">Add Section</span>
                 </Button>
             </div>
         </div>
