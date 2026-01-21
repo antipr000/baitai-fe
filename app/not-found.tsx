@@ -30,7 +30,6 @@ export default function NotFound() {
                                     left: `${Math.random() * 100}%`,
                                     width: `3px`,
                                     height: `3px`,
-                                    animation: `twinkle ${Math.random() * 5 + 3}s infinite ease-in-out`
                                 }}
                             />
                         ))}
