@@ -9,13 +9,15 @@ import { ConclusionSection } from '../../../components/company/create/conclusion
 
 export default function CreateInterview() {
     return (
-        <div className="container mx-auto max-w-5xl py-8 space-y-8 pb-20">
+        <div className="container mx-auto max-w-6xl py-8 space-y-8 pb-20">
             <Header />
 
+            <div className='max-w-5xl mx-auto'>
             <InterviewDetails />
+            </div>
 
             {/* Interview Sections */}
-            <div className="space-y-4">
+            <div className="space-y-4 max-w-5xl mx-auto">
                 <h2 className="text-xl font-semibold text-[rgba(84,104,252,0.9)]">Interview Sections</h2>
 
                 <IntroductionSection />

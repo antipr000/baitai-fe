@@ -108,36 +108,36 @@ export const SectionList = () => {
 
                         {/* Difficulty Level */}
                         <div className="pl-4 space-y-4">
-                                <Label>Difficulty Level</Label>
-                                <RadioGroup defaultValue="easy" className="flex items-center gap-6">
-                                    <div className="flex items-center space-x-2">
-                                        <RadioGroupItem value="easy" id="easy" />
-                                        <Label htmlFor="easy" className="font-normal cursor-pointer">Easy</Label>
-                                    </div>
-                                    <div className="flex items-center space-x-2">
-                                        <RadioGroupItem value="medium" id="medium" />
-                                        <Label htmlFor="medium" className="font-normal cursor-pointer">Medium</Label>
-                                    </div>
-                                    <div className="flex items-center space-x-2">
-                                        <RadioGroupItem value="difficult" id="difficult" />
-                                        <Label htmlFor="difficult" className="font-normal cursor-pointer">Difficult</Label>
-                                    </div>
-                                </RadioGroup>
+                            <Label>Difficulty Level</Label>
+                            <RadioGroup defaultValue="easy" className="flex items-center gap-6">
+                                <div className="flex items-center space-x-2">
+                                    <RadioGroupItem value="easy" id="easy" className="data-[state=checked]:border-[rgba(84,104,252,1)] [&_svg]:fill-[rgba(84,104,252,1)]" />
+                                    <Label htmlFor="easy" className="font-normal cursor-pointer">Easy</Label>
+                                </div>
+                                <div className="flex items-center space-x-2">
+                                    <RadioGroupItem value="medium" id="medium" className="data-[state=checked]:border-[rgba(84,104,252,1)] [&_svg]:fill-[rgba(84,104,252,1)]" />
+                                    <Label htmlFor="medium" className="font-normal cursor-pointer">Medium</Label>
+                                </div>
+                                <div className="flex items-center space-x-2">
+                                    <RadioGroupItem value="difficult" id="difficult" className="data-[state=checked]:border-[rgba(84,104,252,1)] [&_svg]:fill-[rgba(84,104,252,1)]" />
+                                    <Label htmlFor="difficult" className="font-normal cursor-pointer">Difficult</Label>
+                                </div>
+                            </RadioGroup>
 
-                        {/* Nested AI Guidelines */}
-                        <div className="space-y-2">
-                            <label className="text-sm font-medium text-[rgba(10,13,26,0.82)] block">AI Guidelines</label>
-                            <Textarea
-                                placeholder="Provide guidelines to the AI Interviewer for this section"
-                                className="min-h-[100px] bg-indigo-50/20 border-gray-200 resize-none"
-                            />
-                        </div>
+                            {/* Nested AI Guidelines */}
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium text-[rgba(10,13,26,0.82)] block">AI Guidelines</label>
+                                <Textarea
+                                    placeholder="Provide guidelines to the AI Interviewer for this section"
+                                    className="min-h-[100px] bg-indigo-50/20 border-gray-200 resize-none"
+                                />
+                            </div>
 
-                        {/* Context Hints */}
-                        <div className="space-y-2">
-                            <label className="text-sm font-medium text-[rgba(10,13,26,0.82)] block">Context Hints</label>
-                            <Input placeholder="Introduction" className="bg-indigo-50/20 border-gray-200" />
-                        </div>
+                            {/* Context Hints */}
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium text-[rgba(10,13,26,0.82)] block">Context Hints</label>
+                                <Input placeholder="Introduction" className="bg-indigo-50/20 border-gray-200" />
+                            </div>
                         </div>
 
                         {/* Follow-up Questions */}

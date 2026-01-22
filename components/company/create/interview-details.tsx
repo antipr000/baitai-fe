@@ -17,11 +17,11 @@ export const InterviewDetails = () => {
                     <div className="flex items-center gap-6">
                         <div className="flex items-center gap-2">
                             <span className="text-sm font-medium text-[rgba(10,13,26,0.82)]">Visibility</span>
-                            <Switch />
+                            <Switch className="data-[state=checked]:bg-[rgba(84,104,252,1)]" />
                         </div>
                         <div className="flex items-center gap-2">
                             <span className="text-sm font-medium text-[rgba(10,13,26,0.82)]">Screenshare</span>
-                            <Switch />
+                            <Switch className="data-[state=checked]:bg-[rgba(84,104,252,1)]" />
                         </div>
                     </div>
                 </div>
