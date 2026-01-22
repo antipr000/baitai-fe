@@ -60,12 +60,12 @@ export default function CreatorDashboard() {
                     </div>
 
                     {/* Stats Cards */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-16">
                         {/* Total Interviews */}
                         <Card className="bg-[rgba(104,100,247,0.1)] border border-[rgba(104,100,247,0.5)]">
-                            <CardContent className="pt-6">
+                            <CardContent className="pt-6 ">
                                 <div className="group flex items-center justify-center gap-5">
-                                    <Image src="/company/dashboard/note.svg" alt="note" width={48} height={48} className="h-8 w-8 " />
+                                    <Image src="/company/dashboard/note.svg" alt="note" width={48} height={48} className="h-12 w-12 group-hover:-rotate-10 transition-all duration-400" />
                                     <div>
                                         <p className="font-medium text-[rgba(10,13,26,0.46)] mb-2 transition-all duration-400 group-hover:-translate-y-1.5 whitespace-nowrap">Total Interviews</p>
                                         <p className="text-center text-2xl font-bold text-[rgba(104,100,247,1)] transition-all duration-400 group-hover:scale-[1.3]">12</p>
@@ -78,7 +78,7 @@ export default function CreatorDashboard() {
                         <Card className="bg-[rgba(253,96,80,0.1)] border border-[rgba(253,96,80,0.5)]">
                             <CardContent className="pt-6">
                                 <div className="group flex items-center justify-center gap-5">
-                                    <Image src="/company/dashboard/people.svg" alt="people" width={48} height={48} className="h-8 w-8 " />
+                                    <Image src="/company/dashboard/people.svg" alt="people" width={48} height={48} className="h-12 w-12 group-hover:-rotate-10 transition-all duration-400" />
 
                                     <div>
                                         <p className="font-medium text-[rgba(10,13,26,0.46)] mb-2 transition-all duration-400 group-hover:-translate-y-1.5">Candidates</p>
@@ -92,7 +92,7 @@ export default function CreatorDashboard() {
                         <Card className="bg-[rgba(51,204,204,0.1)] border border-[rgba(51,204,204,0.5)]">
                             <CardContent className="pt-6">
                                 <div className="group flex items-center justify-center gap-5">
-                                    <Image src="/company/dashboard/time.svg" alt="time" width={48} height={48} className="h-8 w-8 " />
+                                    <Image src="/company/dashboard/time.svg" alt="time" width={48} height={48} className="h-12 w-12 group-hover:-rotate-10 transition-all duration-400" />
 
                                     <div>
                                         <p className="font-medium text-[rgba(10,13,26,0.46)] mb-2 transition-all duration-400 group-hover:-translate-y-1.5">Avg Duration</p>
@@ -106,7 +106,7 @@ export default function CreatorDashboard() {
                         <Card className="bg-[rgba(113,184,108,0.1)] border border-[rgba(113,184,108,0.5)]">
                             <CardContent className="pt-6">
                                 <div className="group flex items-center justify-center gap-5">
-                                    <Image src="/company/dashboard/wheel.svg" alt="settings" width={48} height={48} className="h-8 w-8 " />
+                                    <Image src="/company/dashboard/wheel.svg" alt="settings" width={48} height={48} className="h-12 w-12 group-hover:-rotate-10 transition-all duration-400" />
 
                                     <div>
                                         <p className="font-medium text-[rgba(10,13,26,0.46)] mb-2 transition-all duration-400 group-hover:-translate-y-1.5">Active</p>
