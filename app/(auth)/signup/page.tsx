@@ -109,7 +109,7 @@ export default function SignupPage() {
                 },
             });
             toast.success("Successfully signed up! Redirecting...");
-            router.push("/candidate/dashboard");
+            window.location.href = "/candidate/dashboard";
         } catch (err) {
             console.log(err);
             setError("Google Sign-up failed");

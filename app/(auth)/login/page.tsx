@@ -41,7 +41,8 @@ export default function LoginPage() {
                         Authorization: `Bearer ${idToken}`,
                     },
                 });
-                router.push("/candidate/dashboard");
+                // window.location.href forces a full page reload to ensure server components (Header) update
+                window.location.href = "/candidate/dashboard";
             } else {
                 toast.error("Please verify your email");
             }
@@ -77,7 +78,9 @@ export default function LoginPage() {
                 },
             });
             toast.success("Successfully logged in! Redirecting...");
-            router.push("/candidate/dashboard");
+
+            // window.location.href forces a full page reload to ensure server components (Header) update
+            window.location.href = "/candidate/dashboard";
         } catch (err) {
             console.log(err);
             setError("Google Sign-in failed");
