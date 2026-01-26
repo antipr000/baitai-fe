@@ -370,6 +370,10 @@ export const useIsAISpeaking = () =>
       (s.conversationState === 'thinking' && s.streamingText.currentMessageId !== null)
   )
 
+// Audio-only: true only when actual audio is playing (not just text streaming)
+export const useIsAudioPlaying = () =>
+  useInterviewStore((s) => s.conversationState === 'speaking')
+
 
 
 // Streaming text

@@ -29,6 +29,7 @@ let audioRecorderControls: {
 let audioPlayerControls: {
   enqueue: (data: ArrayBuffer) => void
   stop: () => void
+  getAnalyser: () => AnalyserNode | null
 } | null = null
 let mediaRecorderControls: {
   startVideo: (stream: MediaStream) => void
@@ -122,6 +123,10 @@ export function enqueueAudio(data: ArrayBuffer) {
 
 export function stopPlayback() {
   audioPlayerControls?.stop()
+}
+
+export function getAudioAnalyser(): AnalyserNode | null {
+  return audioPlayerControls?.getAnalyser() ?? null
 }
 
 // ============================================

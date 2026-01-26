@@ -148,7 +148,7 @@ export const SectionList = () => {
                                     <span className="text-xs text-[rgba(34,37,49,0.7)]">No of follow-up Questions</span>
                                     <div className="flex items-center gap-1 bg-white rounded-md border border-gray-200 p-0.5">
                                         <Button variant="ghost" size="icon" className="h-5 w-5 rounded-sm"><Minus className="h-3 w-3" /></Button>
-                                        <span className="w-3 text-center text-xs font-medium">0</span>
+                                        <span className="w-3 text-center text-xs font-medium">1</span>
                                         <Button variant="ghost" size="icon" className="h-5 w-5 rounded-sm"><Plus className="h-3 w-3" /></Button>
                                     </div>
                                 </div>

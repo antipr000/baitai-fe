@@ -34,6 +34,7 @@ export {
   useMessages,
   useIsProcessing,
   useIsAISpeaking,
+  useIsAudioPlaying,
   useStreamingText,
   useCurrentStreamingMessageId,
   useAudioRecording,
