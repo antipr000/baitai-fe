@@ -26,8 +26,13 @@ import {
   Circle,
   CheckCircle2,
   AlertCircle,
+  Code2,
 } from 'lucide-react'
 import { toast } from 'sonner'
+
+// Code Editor
+import { CodeEditor, EditorToolbar } from '@/components/editor'
+import { useCodeEditorStore } from './store'
 
 // Zustand store
 import {
@@ -115,6 +120,11 @@ export default function ActiveInterview({
 
   const messages = useMessages()
   const isConnected = connectionStatus === 'connected'
+
+  // Code editor state
+  const isCodeEditorOpen = useCodeEditorStore((s) => s.isOpen)
+  const codeEditorContent = useCodeEditorStore((s) => s.content)
+  const codeEditorLanguage = useCodeEditorStore((s) => s.language)
 
   // -------------------------------------------------------------------------
   // UI Refs only
@@ -466,6 +476,26 @@ export default function ActiveInterview({
               <div ref={messagesEndRef} />
             </div>
           </div>
+
+          {/* Code Editor Panel - resizable with CSS */}
+          {isCodeEditorOpen && (
+            <div
+              className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[45vw] h-[75vh] bg-gray-800 rounded-lg border border-gray-700 shadow-xl flex flex-col overflow-hidden z-50"
+            >
+              <EditorToolbar
+                language={codeEditorLanguage}
+                onLanguageChange={(lang) => useCodeEditorStore.getState().setLanguage(lang)}
+                onCopy={() => navigator.clipboard.writeText(codeEditorContent)}
+              />
+              <div className="flex-1 overflow-hidden">
+                <CodeEditor
+                  value={codeEditorContent}
+                  onChange={(val) => useCodeEditorStore.getState().setContent(val)}
+                  language={codeEditorLanguage}
+                />
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
@@ -514,6 +544,18 @@ export default function ActiveInterview({
           title={isScreenSharing ? 'Stop Sharing' : 'Share Screen'}
         >
           <ScreenShare className="w-6 h-6 text-white" />
+        </Button>
+
+        {/* Code Editor Toggle */}
+        <Button
+          onClick={() => useCodeEditorStore.getState().toggleEditor()}
+          className={cn(
+            'rounded-full w-14 h-14 flex items-center justify-center transition-all',
+            isCodeEditorOpen ? 'bg-purple-600 hover:bg-purple-700' : 'bg-gray-700 hover:bg-gray-600'
+          )}
+          title="Code Editor"
+        >
+          <Code2 className="w-6 h-6 text-white" />
         </Button>
 
         {/* End Call Button */}

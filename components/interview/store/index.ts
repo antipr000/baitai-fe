@@ -66,3 +66,12 @@ export {
 
 // Centralized Actions (for cross-module communication)
 export * from './interviewActions'
+
+// Code Editor Store
+export {
+  useCodeEditorStore,
+  useIsCodeEditorOpen,
+  useCodeEditorContent,
+  useCodeEditorLanguage,
+} from './codeEditorStore'
+
