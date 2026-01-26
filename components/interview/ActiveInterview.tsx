@@ -12,6 +12,7 @@
 import React, { useEffect, useRef } from 'react'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
+import AIVisualization from './AIVisualization'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import {
@@ -36,6 +37,7 @@ import {
   useMediaControlsState,
   useRecordingState,
   useIsAISpeaking,
+  useIsAudioPlaying,
 } from './store'
 
 // Hooks
@@ -98,6 +100,8 @@ export default function ActiveInterview({
 
   // isAISpeaking is now derived from conversationState + streamingText
   const isAISpeaking = useIsAISpeaking()
+  // isAudioPlaying is true only when actual audio is playing (for visualization)
+  const isAudioPlaying = useIsAudioPlaying()
 
   const { isMicOn, isVideoOn, isScreenSharing } = useMediaControlsState()
 
@@ -399,14 +403,7 @@ export default function ActiveInterview({
       {/* Main Video Area */}
       <div className="flex-1 flex items-center justify-center relative bg-gray-800">
         <div className="relative">
-          <Image
-            src="/interview/logo.svg"
-            alt="Interviewer"
-            height={100}
-            width={100}
-            className="object-cover"
-            priority
-          />
+          <AIVisualization isPlaying={isAudioPlaying} />
 
           {/* Candidate Video Preview */}
           <div className="fixed bottom-30 right-6 w-60 h-50 bg-gray-700 rounded-lg overflow-hidden border-2 border-gray-600 shadow-lg">

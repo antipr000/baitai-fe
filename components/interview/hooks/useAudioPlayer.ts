@@ -28,6 +28,7 @@ export interface UseAudioPlayerOptions {
 export interface UseAudioPlayerReturn {
   isPlaying: boolean
   queueLength: number
+  getAnalyser: () => AnalyserNode | null
 }
 
 // ============================================
@@ -42,6 +43,7 @@ export function useAudioPlayer(
 
   // Refs for browser APIs
   const audioContextRef = useRef<AudioContext | null>(null)
+  const analyserRef = useRef<AnalyserNode | null>(null)
   const currentSourceRef = useRef<AudioBufferSourceNode | null>(null)
   const audioQueueRef = useRef<ArrayBuffer[]>([])
   const playNextRef = useRef<(() => Promise<void>) | null>(null)
@@ -60,19 +62,38 @@ export function useAudioPlayer(
     }
 
     isPlayingRef.current = true
-    // Only on first chunk: transition state, stop recording, notify
-    if (state.conversationState !== 'speaking') {
-      transitionToSpeaking()
-      stopRecording()
-      console.log('[AudioPlayer] Starting playback')
-      onPlaybackStart?.()
-    }
+    const isFirstChunk = state.conversationState !== 'speaking'
 
     try {
       let playbackContext: AudioContext
 
-      audioContextRef.current = new AudioContext()
-      playbackContext = audioContextRef.current
+      // Reuse existing AudioContext or create new one
+      if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
+        console.log('[AudioPlayer] Reusing existing AudioContext')
+        playbackContext = audioContextRef.current
+      } else {
+        console.log('[AudioPlayer] Creating new AudioContext')
+        audioContextRef.current = new AudioContext()
+        playbackContext = audioContextRef.current
+      }
+
+      // Ensure analyser exists (create if missing)
+      if (!analyserRef.current) {
+        console.log('[AudioPlayer] Creating new AnalyserNode')
+        const analyser = playbackContext.createAnalyser()
+        analyser.fftSize = 256
+        analyserRef.current = analyser
+      }
+      console.log('[AudioPlayer] analyserRef.current:', analyserRef.current)
+
+      // Only on first chunk: transition state, stop recording, notify
+      // Done AFTER analyser is created so visualization has access to it
+      if (isFirstChunk) {
+        transitionToSpeaking()
+        stopRecording()
+        console.log('[AudioPlayer] Starting playback, transitioned to speaking')
+        onPlaybackStart?.()
+      }
 
 
       if (playbackContext.state === 'suspended') {
@@ -140,7 +161,13 @@ export function useAudioPlayer(
           }
         }
       }
-      source.connect(playbackContext.destination)
+      // Connect through analyser for visualization
+      if (analyserRef.current) {
+        source.connect(analyserRef.current)
+        analyserRef.current.connect(playbackContext.destination)
+      } else {
+        source.connect(playbackContext.destination)
+      }
       source.start(0)
     } catch (error) {
       console.error('[AudioPlayer] Playback error:', error)
@@ -202,16 +229,22 @@ export function useAudioPlayer(
   // ============================================
   // Register Controls
   // ============================================
+  // Getter for analyser node (for visualization)
+  const getAnalyser = useCallback((): AnalyserNode | null => {
+    return analyserRef.current
+  }, [])
+
   useEffect(() => {
     registerAudioPlayerControls({
       enqueue: enqueueAudio,
       stop: stopPlayback,
+      getAnalyser,
     })
 
     return () => {
       registerAudioPlayerControls(null)
     }
-  }, [enqueueAudio, stopPlayback])
+  }, [enqueueAudio, stopPlayback, getAnalyser])
 
   // ============================================
   // Cleanup
@@ -239,5 +272,6 @@ export function useAudioPlayer(
   return {
     isPlaying,
     queueLength: audioQueueRef.current.length,
+    getAnalyser,
   }
 }

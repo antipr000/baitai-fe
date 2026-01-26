@@ -253,10 +253,8 @@ export function useInterviewWebSocket(
     state.addCompletedSentence(chunkIndex, sentenceText)
     console.log(`[WebSocket] Sentence ${chunkIndex} complete: "${sentenceText.substring(0, 50)}..." - expecting audio chunk`)
 
-    // Ensure we're in speaking state when first sentence completes
-    if (chunkIndex === 0 && state.conversationState !== 'speaking') {
-      transitionToSpeaking()
-    }
+    // NOTE: Don't transition to speaking here - the audio player handles this 
+    // when audio actually starts playing, ensuring the analyser exists first
   }
 
   function handleAudioChunk(message: WebSocketTextMessage) {
