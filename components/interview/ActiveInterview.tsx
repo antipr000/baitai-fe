@@ -64,6 +64,7 @@ import {
   stopSilenceDetection,
   cleanupAll,
   transitionToListening,
+  sendCodeEditorText,
 } from './store/interviewActions'
 
 import { MixedAudioContext } from './lib/audioUtils'
@@ -485,7 +486,10 @@ export default function ActiveInterview({
               <EditorToolbar
                 language={codeEditorLanguage}
                 onLanguageChange={(lang) => useCodeEditorStore.getState().setLanguage(lang)}
-                onCopy={() => navigator.clipboard.writeText(codeEditorContent)}
+                onCopy={() => {
+                  navigator.clipboard.writeText(codeEditorContent)
+                  sendCodeEditorText(codeEditorContent)  // for testing
+                }}
               />
               <div className="flex-1 overflow-hidden">
                 <CodeEditor

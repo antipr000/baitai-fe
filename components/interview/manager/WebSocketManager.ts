@@ -365,6 +365,17 @@ export class WebSocketManager {
   }
 
   /**
+   * Send code editor text to backend
+   */
+  sendCodeEditorText(text: string): boolean {
+    console.log('[WebSocketManager] Sending code editor text')
+    return this.send({
+      type: 'code_editor_text',
+      text,
+    })
+  }
+
+  /**
    * Send a finalize media message
    */
   sendFinalizeMedia(recordingType: 'video' | 'screen' | 'audio'): boolean {

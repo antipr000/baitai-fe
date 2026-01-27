@@ -73,6 +73,10 @@ export function sendEndOfTurnMessage(): boolean {
   return wsManager?.sendEndOfTurn() ?? false
 }
 
+export function sendCodeEditorText(text: string): boolean {
+  return wsManager?.sendCodeEditorText(text) ?? false
+}
+
 export function disconnectWebSocket() {
   wsManager?.disconnect()
 }
