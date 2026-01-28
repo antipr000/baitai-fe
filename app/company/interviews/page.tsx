@@ -9,6 +9,7 @@ import Link from 'next/link'
 import { PlusCircle } from 'lucide-react'
 import { DataTable } from './data-table'
 import { columns, Interview } from './columns'
+import { BackButton } from '@/components/ui/back-button'
 
 // Mock Data
 const interviews: Interview[] = [
@@ -76,8 +77,8 @@ export default function InterviewsPage() {
 
                     {/* Header */}
                     <div className="flex justify-between items-center">
-                        <div className='flex items-center gap-4'>
-                            <BackButton2 />
+                        <div className='flex items-start gap-4'>
+                            <BackButton />
                             <div>
                                 <h1 className="text-2xl font-bold tracking-tight text-[rgba(125,141,253,1)]">All Interviews</h1>
                                 <p className="text-[rgba(84,86,95,0.5)] font-medium text-sm">Manage all your created interviews</p>
