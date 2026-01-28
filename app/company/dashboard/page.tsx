@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Plus, ArrowLeft, FileText, Users, Hourglass, Settings, PenLine, Clock, List, PlusCircle } from 'lucide-react'
+import { Plus, ArrowLeft, FileText, Users, Hourglass, Settings, PenLine, Clock, List, PlusCircle, ArrowRight } from 'lucide-react'
 import { BackButton } from '@/components/ui/back-button'
 import { BackButton2 } from '@/components/ui/back-button2'
 import Image from 'next/image'
@@ -53,7 +53,7 @@ export default function CreatorDashboard() {
                         </div>
                         <Link href="/company/create">
                             <Button size={"lg"} className="bg-[linear-gradient(93.21deg,rgba(62,84,251,0.9)_-31.21%,rgba(195,206,255,0.9)_174.4%)] hover:opacity-80  text-white flex items-center gap-2 rounded-lg px-6">
-                                <PlusCircle className="h-14 w-14 translate-y-px" /> 
+                                <PlusCircle className="h-14 w-14 translate-y-px" />
                                 <span className="text-xl font-medium">New Interview</span>
                             </Button>
                         </Link>
@@ -119,7 +119,14 @@ export default function CreatorDashboard() {
 
                     {/* Your Interviews Section */}
                     <div className="space-y-6">
-                        <h2 className="text-xl font-semibold text-[rgba(10,13,26,0.7)]">Your Interviews</h2>
+                        <div className="flex justify-end">
+                            <Link
+                                href="/company/interviews"
+                                className="text-[rgba(255,100,27,0.9)] font-semibold hover:underline flex items-center gap-2"
+                            >
+                                <span>View more</span> <span className='translate-y-0.5'><ArrowRight className="w-5 h-5" /></span>
+                            </Link>
+                        </div>
 
                         <div className="space-y-4">
                             {interviews.map((interview) => (
@@ -150,7 +157,7 @@ export default function CreatorDashboard() {
                                         </div>
 
                                         <Button variant="outline" className="bg-[rgba(255,144,85,0.2)] hover:bg-[rgba(255,144,85,0.7)]  rounded-full border border-[rgba(255,241,234,0.1)]  text-[rgba(10,13,26,0.7)] gap-2">
-                                            <Image src="/company/dashboard/pencil.svg" alt='pencil' width={16} height={16} className="h-4 w-4" /> 
+                                            <Image src="/company/dashboard/pencil.svg" alt='pencil' width={16} height={16} className="h-4 w-4" />
                                             <span className="text-[rgba(10,13,26,0.7)] font-bold text-sm">Edit</span>
                                         </Button>
                                     </CardContent>

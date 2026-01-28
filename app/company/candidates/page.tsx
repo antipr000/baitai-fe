@@ -61,7 +61,7 @@ export default function CandidatesPage() {
                                     </div>
                                     <div>
                                         <p className="text-xl font-medium text-gray-500 mb-0.5">Invites Sent</p>
-                                        <p className="text-2xl font-bold text-gray-900">19</p>
+                                        <p className="text-2xl font-semibold text-[rgba(10,13,26,0.7)]">19</p>
                                     </div>
                                 </div>
                             </CardContent>
@@ -75,8 +75,8 @@ export default function CandidatesPage() {
                                         <Image src="/company/candidates/tick.svg" alt="tick" width={24} height={24} className="h-6 w-6" />
                                     </div>
                                     <div>
-                                        <p className="text-xl font-medium text-gray-500 mb-0.5">Appeared</p>
-                                        <p className="text-2xl font-bold text-gray-900">10</p>
+                                        <p className="text-xl font-medium text-[rgba(10,13,26,0.46)] mb-0.5">Appeared</p>
+                                        <p className="text-2xl font-semibold text-[rgba(10,13,26,0.7)]">10</p>
                                     </div>
                                 </div>
                             </CardContent>
@@ -90,8 +90,8 @@ export default function CandidatesPage() {
                                         <Image src="/company/candidates/clock.svg" alt="clock" width={24} height={24} className="h-6 w-6" />
                                     </div>
                                     <div>
-                                        <p className="text-xl font-medium text-gray-500 mb-0.5">Pending</p>
-                                        <p className="text-2xl font-bold text-gray-900">9</p>
+                                        <p className="text-xl font-medium text-[rgba(10,13,26,0.46)] mb-0.5">Pending</p>
+                                        <p className="text-2xl font-semibold text-[rgba(10,13,26,0.7)]">9</p>
                                     </div>
                                 </div>
                             </CardContent>
@@ -105,8 +105,8 @@ export default function CandidatesPage() {
                                         <Image src="/company/candidates/people.svg" alt="people" width={24} height={24} className="h-6 w-6" />
                                     </div>
                                     <div>
-                                        <p className="text-sm font-medium text-gray-500 mb-0.5">Avg Score</p>
-                                        <p className="text-2xl font-bold text-gray-900">90%</p>
+                                        <p className="text-xl font-medium text-[rgba(10,13,26,0.46)] mb-0.5">Avg Score</p>
+                                        <p className="text-2xl font-semibold text-[rgba(10,13,26,0.7)]">90%</p>
                                     </div>
                                 </div>
                             </CardContent>
