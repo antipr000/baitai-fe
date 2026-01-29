@@ -99,9 +99,11 @@ export default function SignupPage() {
             const idToken = await userCredential.user.getIdToken();
 
             // Send token to backend
-            await api.post('api/v1/user/signup/token/', {
+            await api.post('api/v1/company/hiring-managers/signup/token/', {
                 token: idToken,
             });
+
+            console.log("token", idToken)
 
             await fetch("/api/login", {
                 headers: {
@@ -109,7 +111,7 @@ export default function SignupPage() {
                 },
             });
             toast.success("Successfully signed up! Redirecting...");
-            window.location.href = "/candidate/dashboard";
+            router.push("/company/dashboard");
         } catch (err) {
             console.log(err);
             setError("Google Sign-up failed");
