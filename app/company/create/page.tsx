@@ -1,31 +1,32 @@
-"use client"
-
 import React from 'react'
-import { Header } from '../../../components/company/create/header'
-import { InterviewDetails } from '../../../components/company/create/interview-details'
-import { IntroductionSection } from '../../../components/company/create/introduction-section'
-import { SectionList } from '../../../components/company/create/section-list'
-import { ConclusionSection } from '../../../components/company/create/conclusion-section'
+import { cookies } from 'next/headers'
+import { getTokens } from 'next-firebase-auth-edge'
+import { clientConfig, serverConfig } from '@/lib/auth/config'
+import { serverFetch } from '@/lib/api/server'
+import { CreateInterviewForm } from '@/components/company/create/create-interview-form'
 
-export default function CreateInterview() {
+interface HiringManager {
+    id: string
+    name: string
+}
+
+export default async function CreateInterviewPage() {
+    // Get auth token from cookies
+    const tokens = await getTokens(await cookies(), {
+        apiKey: clientConfig.apiKey,
+        cookieName: serverConfig.cookieName,
+        cookieSignatureKeys: serverConfig.cookieSignatureKeys,
+        serviceAccount: serverConfig.serviceAccount,
+    })
+
+    // Fetch company details
+    const hiringManager = await serverFetch<HiringManager>('/api/v1/company/hiring-managers/company')
+    const companyId = hiringManager?.id
+
     return (
-        <div className="container mx-auto max-w-6xl py-8 space-y-8 pb-20">
-            <Header />
-
-            <div className='max-w-5xl mx-auto'>
-            <InterviewDetails />
-            </div>
-
-            {/* Interview Sections */}
-            <div className="space-y-4 max-w-5xl mx-auto">
-                <h2 className="text-xl font-semibold text-[rgba(84,104,252,0.9)]">Interview Sections</h2>
-
-                <IntroductionSection />
-
-                <SectionList />
-
-                <ConclusionSection />
-            </div>
-        </div>
+        <CreateInterviewForm
+            companyId={companyId}
+            authToken={tokens?.token}
+        />
     )
 }

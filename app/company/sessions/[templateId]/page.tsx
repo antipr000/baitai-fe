@@ -1,5 +1,3 @@
-"use client"
-
 import React from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -7,26 +5,66 @@ import { BackButton2 } from '@/components/ui/back-button2'
 import Image from 'next/image'
 import { DataTable } from './data-table'
 import { columns, Candidate } from './columns'
-import { Mail, Clock, CheckCircle2, Users } from 'lucide-react'
 import { BackButton } from '@/components/ui/back-button'
 import { InviteForm } from '@/components/invite-form'
+import { serverFetch } from '@/lib/api/server'
+import { formatDate } from '@/lib/utils'
 
-// Mock Data
-const candidates: Candidate[] = [
-    { id: "1", name: "Lisa Anderson", email: "lisa.a@email.com", status: "Completed", score: 92, appliedDate: "2025-11-14" },
-    { id: "2", name: "John Smith", email: "john.smith@email.com", status: "Completed", score: 85, appliedDate: "2025-11-10" },
-    { id: "3", name: "John Smith", email: "john.smith@email.com", status: "Completed", score: 85, appliedDate: "2025-11-10" },
-    { id: "4", name: "Michael Brown", email: "m.brown@email.com", status: "Completed", score: 80, appliedDate: "2025-11-09" },
-    { id: "5", name: "James Taylor", email: "j.taylor@email.com", status: "Completed", score: 72, appliedDate: "2025-11-07" },
-    { id: "6", name: "Souvik Agarwal", email: "s.agarwal@email.com", status: "In Progress", score: 72, appliedDate: "2025-11-06" },
-    { id: "7", name: "Souvik Agarwal", email: "s.agarwal@email.com", status: "In Progress", score: 72, appliedDate: "2025-11-06" },
-    { id: "8", name: "Emily Davis", email: "e.davis@email.com", status: "In Progress", score: 66, appliedDate: "2025-10-30" },
-    { id: "9", name: "Rachael Smith", email: "r.smith@email.com", status: "In Progress", score: 63, appliedDate: "2025-10-27" },
-    { id: "10", name: "David Wilson", email: "d.wilson@email.com", status: "Pending", score: 55, appliedDate: "2025-10-25" },
-    { id: "11", name: "Soham Chakraborty", email: "s.chakraborty@email.com", status: "Pending", score: 49, appliedDate: "2025-10-23" },
-]
+interface SessionItem {
+    id: string
+    name: string
+    email: string
+    status: string
+    score: number
+    applied_date: string
+    session_id: string
+}
 
-export default function CandidatesPage() {
+interface SessionListResponse {
+    items: SessionItem[]
+    total: number
+    page: number
+    page_size: number
+    total_pages: number
+}
+
+interface SessionStats {
+    invites_sent: number
+    appeared: number
+    pending: number
+    avg_score: number
+}
+
+async function getStats(templateId: string): Promise<SessionStats> {
+    const response = await serverFetch<SessionStats>(`/api/v1/company/sessions/${templateId}/stats`)
+    return response || { invites_sent: 0, appeared: 0, pending: 0, avg_score: 0 }
+}
+
+async function getSessions(templateId: string): Promise<Candidate[]> {
+    const response = await serverFetch<SessionListResponse>(`/api/v1/company/sessions/${templateId}/`, {
+        method: 'POST',
+        body: { page: 1, page_size: 100 }
+    })
+
+    if (!response?.items) return []
+
+    return response.items.map(item => ({
+        id: item.id,
+        name: item.name,
+        email: item.email,
+        status: (item.status.charAt(0).toUpperCase() + item.status.slice(1)) as "Completed" | "In Progress" | "Pending",
+        score: item.score,
+        appliedDate: formatDate(item.applied_date)
+    }))
+}
+
+export default async function SessionPage({ params }: { params: Promise<{ templateId: string }> }) {
+    const { templateId } = await params
+    const [candidates, stats] = await Promise.all([
+        getSessions(templateId),
+        getStats(templateId)
+    ])
+
     return (
         <div className='w-full min-h-screen bg-[rgba(248,250,255,1)]'>
             <div className="min-h-screen max-w-full md:max-w-4xl lg:max-w-5xl xl:max-w-7xl mx-auto">
@@ -61,7 +99,7 @@ export default function CandidatesPage() {
                                     </div>
                                     <div>
                                         <p className="text-xl font-medium text-gray-500 mb-0.5">Invites Sent</p>
-                                        <p className="text-2xl font-semibold text-[rgba(10,13,26,0.7)]">19</p>
+                                        <p className="text-2xl font-semibold text-[rgba(10,13,26,0.7)]">{stats.invites_sent}</p>
                                     </div>
                                 </div>
                             </CardContent>
@@ -76,7 +114,7 @@ export default function CandidatesPage() {
                                     </div>
                                     <div>
                                         <p className="text-xl font-medium text-[rgba(10,13,26,0.46)] mb-0.5">Appeared</p>
-                                        <p className="text-2xl font-semibold text-[rgba(10,13,26,0.7)]">10</p>
+                                        <p className="text-2xl font-semibold text-[rgba(10,13,26,0.7)]">{stats.appeared}</p>
                                     </div>
                                 </div>
                             </CardContent>
@@ -91,7 +129,7 @@ export default function CandidatesPage() {
                                     </div>
                                     <div>
                                         <p className="text-xl font-medium text-[rgba(10,13,26,0.46)] mb-0.5">Pending</p>
-                                        <p className="text-2xl font-semibold text-[rgba(10,13,26,0.7)]">9</p>
+                                        <p className="text-2xl font-semibold text-[rgba(10,13,26,0.7)]">{stats.pending}</p>
                                     </div>
                                 </div>
                             </CardContent>
@@ -106,7 +144,7 @@ export default function CandidatesPage() {
                                     </div>
                                     <div>
                                         <p className="text-xl font-medium text-[rgba(10,13,26,0.46)] mb-0.5">Avg Score</p>
-                                        <p className="text-2xl font-semibold text-[rgba(10,13,26,0.7)]">90%</p>
+                                        <p className="text-2xl font-semibold text-[rgba(10,13,26,0.7)]">{stats.avg_score}%</p>
                                     </div>
                                 </div>
                             </CardContent>

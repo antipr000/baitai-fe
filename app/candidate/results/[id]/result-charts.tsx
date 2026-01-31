@@ -19,8 +19,8 @@ export function ScoreChart({ score, maxScore }: ScoreChartProps) {
                     data={chartData}
                     startAngle={90}
                     endAngle={-270}
-                    innerRadius={60}
-                    outerRadius={75}
+                    innerRadius={85}
+                    outerRadius={101}
                 >
                     <defs>
                         <linearGradient id="scoreGradient" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -33,8 +33,8 @@ export function ScoreChart({ score, maxScore }: ScoreChartProps) {
                 </RadialBarChart>
             </ChartContainer>
             <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <div className="text-3xl font-bold text-transparent bg-clip-text bg-[linear-gradient(124.24deg,rgba(58,63,187,0.81)_-6.24%,rgba(0,215,255,0.81)_174.3%)]">{score}</div>
-                <div className="text-xs text-muted-foreground">Score</div>
+                <div className="text-5xl font-bold text-transparent bg-clip-text bg-[linear-gradient(124.24deg,rgba(58,63,187,0.81)_-6.24%,rgba(0,215,255,0.81)_174.3%)]">{score}</div>
+                <div className="text-sm text-muted-foreground">Score</div>
             </div>
         </div>
     )
@@ -127,7 +127,7 @@ export function SkillMetricsChart({ data }: SkillMetricsChartProps) {
                 </Bar>
                 <ChartLegend
                     payload={legendPayload}
-                    content={<ChartLegendContent />}
+                    content={<ChartLegendContent className="gap-12" />}
                 />
             </BarChart>
         </ChartContainer>

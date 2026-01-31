@@ -2,7 +2,6 @@
 
 import React from 'react'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import {
     Select,
@@ -11,10 +10,17 @@ import {
     SelectTrigger,
     SelectValue
 } from "@/components/ui/select"
-import { Clock, GripVertical, Minus, Plus } from 'lucide-react'
+import { Clock } from 'lucide-react'
 import Image from 'next/image'
+import { useInterviewStore, type Section, type ArtifactType } from '@/stores/interview-store'
 
 export const IntroductionSection = () => {
+    const { sections, updateSection } = useInterviewStore()
+    const sectionIndex = sections.findIndex(s => s.sectionType === 'intro')
+    const section = sections[sectionIndex]
+
+    if (!section) return null
+
     return (
         <Card className=" border border-[rgba(100,119,252,0.2)]">
             <CardHeader className="pb-4">
@@ -28,38 +34,36 @@ export const IntroductionSection = () => {
                         <div className="flex items-center gap-3">
                             <span className="text-sm font-medium text-[rgba(34,37,49,0.9)]">No of Questions</span>
                             <div className="flex items-center gap-1  rounded-md border border-[rgba(222,244,251,0.1)] bg-[rgba(150,162,253,0.2)]">
-                                <Button variant="ghost" size="icon" className="h-6 w-6 rounded-sm">
-                                    <Minus className="h-3 w-3" />
-                                </Button>
-                                <span className="w-4 text-center text-sm font-medium">1</span>
-                                <Button variant="ghost" size="icon" className="h-6 w-6 rounded-sm">
-                                    <Plus className="h-3 w-3 " />
-                                </Button>
+                                <span className="w-8 text-center text-sm font-medium">{section.maxQuestions}</span>
                             </div>
                         </div>
 
                         <div className="flex items-center gap-2 ">
                             <Clock className="h-4 w-4 text-[rgba(84,104,252,0.6)]" />
-                            <span className="text-sm font-medium text-[rgba(34,37,49,0.9)]">5 min</span>
+                            <span className="text-sm font-medium text-[rgba(34,37,49,0.9)]">{section.duration} min</span>
                         </div>
                     </div>
                 </div>
             </CardHeader>
 
             <CardContent className="space-y-6">
-                {/* Assessment Format */}
+                {/* Artifact Type */}
                 <div className="space-y-2">
                     <label className="text-sm font-medium text-[rgba(10,13,26,0.82)] block">
                         Assessment Format
                     </label>
-                    <Select>
+                    <Select
+                        value={section.artifactType || 'none'}
+                        onValueChange={(val: ArtifactType) => updateSection(sectionIndex, { artifactType: val })}
+                    >
                         <SelectTrigger className="bg-white border-[rgba(55,58,70,0.05)]">
                             <SelectValue placeholder="-Choose Format-" />
                         </SelectTrigger>
                         <SelectContent>
-                            <SelectItem value="text">Text only</SelectItem>
-                            <SelectItem value="voice">Voice only</SelectItem>
-                            <SelectItem value="video">Video</SelectItem>
+                            <SelectItem value="none">None</SelectItem>
+                            <SelectItem value="document">Document</SelectItem>
+                            <SelectItem value="diagram">Diagram</SelectItem>
+                            <SelectItem value="code">Code</SelectItem>
                         </SelectContent>
                     </Select>
                 </div>
@@ -67,9 +71,11 @@ export const IntroductionSection = () => {
                 {/* AI Guidelines */}
                 <div className="space-y-2">
                     <label className="text-sm font-medium text-[rgba(10,13,26,0.82)] block">
-                        AI Guidelines
+                        AI Guidelines <span className="text-red-500">*</span>
                     </label>
                     <Textarea
+                        value={section.aiInstructions}
+                        onChange={(e) => updateSection(sectionIndex, { aiInstructions: e.target.value })}
                         placeholder="Provide guidelines to the AI Interviewer for this section"
                         className="min-h-[150px] bg-white border-gray-200 resize-none"
                     />

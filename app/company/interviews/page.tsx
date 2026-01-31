@@ -1,8 +1,5 @@
-"use client"
-
-import React from 'react'
-import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
 import { BackButton2 } from '@/components/ui/back-button2'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -10,66 +7,38 @@ import { PlusCircle } from 'lucide-react'
 import { DataTable } from './data-table'
 import { columns, Interview } from './columns'
 import { BackButton } from '@/components/ui/back-button'
+import { serverFetch } from '@/lib/api/server'
 
-// Mock Data
-const interviews: Interview[] = [
-    {
-        id: "1",
-        title: "Software Engineer Interview",
-        sections: 5,
-        candidates: 25,
-        avgTime: "45 min",
-        status: "Active",
-        date: "01-03-25"
-    },
-    {
-        id: "2",
-        title: "Product Manager Assessment",
-        sections: 3,
-        candidates: 30,
-        avgTime: "35 min",
-        status: "Archived",
-        date: "05-02-25"
-    },
-    {
-        id: "3",
-        title: "Data Analyst Screening",
-        sections: 4,
-        candidates: 64,
-        avgTime: "40 min",
-        status: "Draft",
-        date: "19-01-25"
-    },
-    {
-        id: "4",
-        title: "UI Designer Interview",
-        sections: 3,
-        candidates: 30,
-        avgTime: "40 min",
-        status: "Draft",
-        date: "12-01-25"
-    },
-    {
-        id: "5",
-        title: "Backend Developer Assessment",
-        sections: 4,
-        candidates: 10,
-        avgTime: "45 min",
-        status: "Active",
-        date: "11-01-25"
-    },
-    {
-        id: "6",
-        title: "Fullstack Developer Interview",
-        sections: 4,
-        candidates: 10,
-        avgTime: "45 min",
-        status: "Active",
-        date: "11-01-25"
-    }
-]
+interface InterviewListResponse {
+    items: Interview[]
+    total: number
+    page: number
+    page_size: number
+    total_pages: number
+}
 
-export default function InterviewsPage() {
+interface InterviewStats {
+    total_interviews: number
+    active: number
+    candidates: number
+}
+
+async function getInterviews(): Promise<Interview[]> {
+    const response = await serverFetch<InterviewListResponse>('/api/v1/company/interviews/list/', {
+        method: 'POST',
+        body: { page: 1, page_size: 100 }
+    })
+    return response?.items || []
+}
+
+async function getStats(): Promise<InterviewStats> {
+    const response = await serverFetch<InterviewStats>('/api/v1/company/stats/')
+    return response || { total_interviews: 0, active: 0, candidates: 0 }
+}
+
+export default async function InterviewsPage() {
+    const [interviews, stats] = await Promise.all([getInterviews(), getStats()])
+
     return (
         <div className='w-full min-h-screen bg-[rgba(248,250,255,1)]'>
             <div className="min-h-screen max-w-full md:max-w-4xl lg:max-w-5xl xl:max-w-7xl mx-auto">
@@ -104,7 +73,7 @@ export default function InterviewsPage() {
                                     </div>
                                     <div>
                                         <p className="text-base font-medium text-[rgba(10,13,26,0.46)] ">Total Interviews</p>
-                                        <p className="text-3xl font-semibold text-[rgba(10,13,26,0.7)]">10</p>
+                                        <p className="text-3xl font-semibold text-[rgba(10,13,26,0.7)]">{stats.total_interviews}</p>
                                     </div>
                                 </div>
                             </CardContent>
@@ -119,7 +88,7 @@ export default function InterviewsPage() {
                                     </div>
                                     <div>
                                         <p className="text-base font-medium text-[rgba(10,13,26,0.46)] ">Active Interviews</p>
-                                        <p className="text-3xl font-semibold text-[rgba(10,13,26,0.7)]">6</p>
+                                        <p className="text-3xl font-semibold text-[rgba(10,13,26,0.7)]">{stats.active}</p>
                                     </div>
                                 </div>
                             </CardContent>
@@ -134,7 +103,7 @@ export default function InterviewsPage() {
                                     </div>
                                     <div>
                                         <p className="text-base font-medium text-[rgba(10,13,26,0.46)] ">Total Candidates</p>
-                                        <p className="text-3xl font-semibold text-[rgba(10,13,26,0.7)]">95</p>
+                                        <p className="text-3xl font-semibold text-[rgba(10,13,26,0.7)]">{stats.candidates}</p>
                                     </div>
                                 </div>
                             </CardContent>
