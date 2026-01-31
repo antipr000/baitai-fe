@@ -11,9 +11,10 @@ import Image from "next/image";
 
 interface WaitlistFormProps {
   children: React.ReactNode;
+  templateId: string;
 }
 
-export function InviteForm({ children }: WaitlistFormProps) {
+export function InviteForm({ children, templateId }: WaitlistFormProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [emails, setEmails] = useState("");
   const [message, setMessage] = useState("");
@@ -23,15 +24,26 @@ export function InviteForm({ children }: WaitlistFormProps) {
     e.preventDefault();
     setIsSubmitting(true);
     try {
-      // API integration would go here. Using a mock delay for now as per plan.
-      // await api.post('/api/v1/invites/', { emails: emails.split(',').map(e => e.trim()), message });
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const emailList = emails.split(',').map(e => e.trim()).filter(e => e.length > 0);
 
-      // toast.success("Invites sent !");
+      if (emailList.length === 0) {
+        toast.error("Please enter at least one valid email address");
+        setIsSubmitting(false);
+        return;
+      }
+
+      await api.post('/api/v1/company/interviews/invites/', {
+        template_id: templateId,
+        emails: emailList,
+        message
+      });
+
+      toast.success("Invites sent successfully!");
       setEmails("");
       setMessage("");
       setIsOpen(false);
     } catch (error) {
+      console.error(error);
       toast.error("Failed to send invites. Please try again.");
     } finally {
       setIsSubmitting(false);

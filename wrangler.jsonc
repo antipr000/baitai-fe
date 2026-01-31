@@ -10,6 +10,13 @@
     "directory": ".open-next/assets",
     "binding": "ASSETS"
   },
+  // Add your routes here when you have the domain configured
+  // Uncomment and update with your actual domain
+  // "routes": [
+  //   { "pattern": "baitai.com/*", "zone_name": "baitai.com" },
+  //   { "pattern": "www.baitai.com/*", "zone_name": "baitai.com" },
+  //   { "pattern": "company.baitai.com/*", "zone_name": "baitai.com" }
+  // ],
   "observability": {
     "logs": {
       "enabled": true,

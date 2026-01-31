@@ -79,7 +79,7 @@ export default async function SessionPage({ params }: { params: Promise<{ templa
                                 <p className="text-[rgba(84,86,95,0.5)]  font-medium">Interview Dashboard</p>
                             </div>
                         </div>
-                        <InviteForm>
+                        <InviteForm templateId={templateId}>
                             <Button size="lg" className="bg-[linear-gradient(93.21deg,rgba(242,129,68,0.9)_-31.21%,rgba(255,178,136,0.9)_174.4%)] hover:opacity-90 text-white flex items-center gap-2 rounded-lg px-6 ">
                                 <Image src="/company/candidates/mail.svg" alt="Mail" width={20} height={20} className="h-4 w-4" />
                                 <span className="font-semibold">Send Invites</span>

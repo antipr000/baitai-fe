@@ -6,6 +6,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { ArrowRight, PlusCircle } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
+import { LogoutButton } from '@/components/company/logout-button'
 
 interface CompanyStats {
     total_interviews: number
@@ -75,18 +76,23 @@ export default async function CompanyDashboard() {
             <div className="min-h-screen max-w-full md:max-w-4xl lg:max-w-5xl xl:max-w-7xl mx-auto">
                 <div className="max-w-7xl mx-auto p-6 space-y-10">
 
+
                     {/* Header */}
                     <div className="flex justify-between items-center">
                         <div className='flex items-center gap-4'>
                             <BackButton2 />
                             <h1 className="text-3xl tracking-tight font-semibold text-transparent bg-clip-text bg-[linear-gradient(91.24deg,#3E54FB_-35.23%,#C3CEFF_202.55%)]">Creator Dashboard</h1>
                         </div>
-                        <Link href="/company/create">
-                            <Button size={"lg"} className="bg-[linear-gradient(93.21deg,rgba(62,84,251,0.9)_-31.21%,rgba(195,206,255,0.9)_174.4%)] hover:opacity-80  text-white flex items-center gap-2 rounded-lg px-6">
-                                <PlusCircle className="h-14 w-14 translate-y-px" />
-                                <span className="text-xl font-medium">New Interview</span>
-                            </Button>
-                        </Link>
+                        <div className="flex items-center gap-4">
+                            <Link href="/company/create">
+                                <Button size={"lg"} className="bg-[linear-gradient(93.21deg,rgba(62,84,251,0.9)_-31.21%,rgba(195,206,255,0.9)_174.4%)] hover:opacity-80  text-white flex items-center gap-2 rounded-lg px-6">
+                                    <PlusCircle className="h-14 w-14 translate-y-px" />
+                                    <span className="text-xl font-medium">New Interview</span>
+                                </Button>
+                            </Link>
+                            <LogoutButton />
+
+                        </div>
                     </div>
 
                     {/* Stats Cards */}

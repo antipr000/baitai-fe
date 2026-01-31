@@ -5,6 +5,9 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
+// Root domain for subdomain routing (e.g., "baitai.club")
+export const rootDomain = process.env.NEXT_PUBLIC_ROOT_DOMAIN || "localhost:3000";
+
 export function formatDuration(minutes: number | string | null | undefined): string {
   if (!minutes) return "0m"
   const val = typeof minutes === "string" ? parseFloat(minutes) : minutes
