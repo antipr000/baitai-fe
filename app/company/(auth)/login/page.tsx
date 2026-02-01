@@ -34,17 +34,15 @@ export default function LoginPage() {
         try {
             await auth.setPersistence(rememberMe ? browserLocalPersistence : browserSessionPersistence);
             const credentials = await signInWithEmailAndPassword(auth, email, password);
-           
-                const idToken = await credentials.user.getIdToken();
-                await fetch("/api/v1/company/login/", {
-                    headers: {
-                        Authorization: `Bearer ${idToken}`,
-                    },
-                });
-                // window.location.href forces a full page reload to ensure server components (Header) update
-                window.location.href = "/company/dashboard";
-        }   
-         catch (err) {
+
+            const idToken = await credentials.user.getIdToken();
+            await api.post('api/v1/company/login/', {
+                token: idToken,
+            });
+            // window.location.href forces a full page reload to ensure server components (Header) update
+            window.location.href = "/company/dashboard";
+        }
+        catch (err) {
             console.log(err);
             setError("Something went wrong");
             toast.error("Something went wrong");
@@ -65,14 +63,8 @@ export default function LoginPage() {
             const idToken = await userCredential.user.getIdToken();
             console.log(idToken)
             // Send token to backend
-            await api.post('api/v1/company/hiring-managers/signup/token/', {
+            await api.post('api/v1/company/login/', {
                 token: idToken,
-            });
-
-            await fetch("/api/login", {
-                headers: {
-                    Authorization: `Bearer ${idToken}`,
-                },
             });
             toast.success("Successfully logged in! Redirecting...");
 
@@ -221,7 +213,7 @@ export default function LoginPage() {
                             </Button>
                         </div>
 
-                      
+
                     </CardContent>
                 </Card>
             </div>
