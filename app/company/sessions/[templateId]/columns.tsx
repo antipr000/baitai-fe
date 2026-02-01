@@ -149,6 +149,15 @@ export const columns: ColumnDef<Candidate>[] = [
         },
         cell: ({ row }) => {
             const candidate = row.original
+
+            if (candidate.status !== 'Completed') {
+                return (
+                    <Button variant="ghost" disabled className="text-[rgba(148,163,184,1)] px-0 bg-transparent opacity-50 cursor-not-allowed" >
+                        <Eye className="h-4 w-4 mr-2" /> <span className="font-semibold">View</span>
+                    </Button>
+                )
+            }
+
             return (
                 <Link href={`/results/${candidate.sessionId}`}>
                     <Button variant="ghost" className="text-[rgba(148,163,184,1)] hover:text-[rgba(62,84,251,1)] px-0 hover:bg-transparent" >
