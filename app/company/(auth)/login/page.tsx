@@ -72,10 +72,16 @@ export default function LoginPage() {
             await api.post('api/v1/company/login/', {
                 token: idToken,
             });
+
+            await fetch("/api/login", {
+                headers: {
+                    Authorization: `Bearer ${idToken}`,
+                },
+            });
             toast.success("Successfully logged in! Redirecting...");
 
             // window.location.href forces a full page reload to ensure server components (Header) update
-            router.push("/company/dashboard");
+            window.location.href = "/company/dashboard";
         } catch (err) {
             console.log(err);
             setError("Google Sign-in failed");
