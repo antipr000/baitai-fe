@@ -14,7 +14,7 @@ export type Candidate = {
     appliedDate: string
 }
 
-export const columns: ColumnDef<Candidate>[] = [
+export const getColumns = (templateId: string): ColumnDef<Candidate>[] => [
     {
         accessorKey: "name",
         header: "Candidate",
@@ -139,7 +139,7 @@ export const columns: ColumnDef<Candidate>[] = [
         cell: ({ row }) => {
             const candidate = row.original
             return (
-                <Link href={`/company/candidates/${candidate.id}`}>
+                <Link href={`/results/${templateId}`}>
                     <Button variant="ghost" className="text-[rgba(148,163,184,1)] hover:text-[rgba(62,84,251,1)] px-0 hover:bg-transparent" >
                         <Eye className="h-4 w-4 mr-2" /> <span className="font-semibold">View</span>
                     </Button>

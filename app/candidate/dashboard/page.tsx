@@ -46,7 +46,7 @@ export default async function DashboardPage() {
                             </Link>
                             <h1 className="text-2xl tracking-wide font-bold bg-[linear-gradient(91.24deg,#3E54FB_-35.23%,#C3CEFF_202.55%)] bg-clip-text text-transparent">My Dashboard</h1>
                         </div>
-                        <Link href="/candidate/results" className="flex items-center gap-2 px-4 py-2 rounded-md text-white bg-[linear-gradient(91.24deg,#3E54FB_-35.23%,#C3CEFF_202.55%)] hover:opacity-90 transition-opacity">
+                        <Link href="/results" className="flex items-center gap-2 px-4 py-2 rounded-md text-white bg-[linear-gradient(91.24deg,#3E54FB_-35.23%,#C3CEFF_202.55%)] hover:opacity-90 transition-opacity">
                             <Image src="/candidate/dashboard/note.svg" alt="Results" width={20} height={20} /> <span className='font-semibold'>View all Results</span>
                         </Link>
                     </div>
@@ -113,7 +113,7 @@ export default async function DashboardPage() {
                     </div>
 
                     {/* Recent Results Section */}
-                    <RecentResultsSection viewMoreHref="/candidate/results" />
+                    <RecentResultsSection viewMoreHref="/results" />
                 </div>
             </div>
         </div>

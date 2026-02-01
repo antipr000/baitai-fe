@@ -6,18 +6,20 @@ import { serverFetch } from '@/lib/api/server'
 
 interface ApiInterview {
     id: string
+    status: string
+    end_date: string
+    created_at: string
+    template_id: string
+    title: string
     company_name: string
-    position: string
-    due_date: string
 }
 
 interface ApiResponse {
-    data: ApiInterview[]
-    metadata: {
-        pending: number
-        companies: number
-        roles: number
-    }
+    items: ApiInterview[]
+    total: number
+    page: number
+    page_size: number
+    total_pages: number
 }
 
 interface Interview {
@@ -25,6 +27,7 @@ interface Interview {
     company: string
     position: string
     dueIn: string
+    status: string
 }
 
 function formatDueDate(dueDate: string): string {
@@ -39,22 +42,26 @@ function formatDueDate(dueDate: string): string {
     return `Due in ${diffDays} days`
 }
 
-async function getInterviewInvites(): Promise<{ interviews: Interview[], metadata: ApiResponse['metadata'] }> {
-    const response = await serverFetch<ApiResponse>('/api/v1/user/interview/invites/')
+async function getInterviewInvites(): Promise<{ interviews: Interview[] }> {
+    const response = await serverFetch<ApiResponse>('/api/v1/user/interview/invites/', {
+        method: 'POST',
+        body: {}
+    })
 
     if (!response) {
         console.warn('Failed to fetch interview invites')
-        return { interviews: [], metadata: { pending: 0, companies: 0, roles: 0 } }
+        return { interviews: [] }
     }
 
-    const interviews = response.data.map((item) => ({
+    const interviews = response.items.map((item) => ({
         id: item.id,
         company: item.company_name,
-        position: item.position,
-        dueIn: formatDueDate(item.due_date),
+        position: item.title,
+        dueIn: formatDueDate(item.end_date),
+        status: item.status,
     }))
 
-    return { interviews, metadata: response.metadata }
+    return { interviews }
 }
 
 interface InterviewInvitesSectionProps {
@@ -64,7 +71,7 @@ interface InterviewInvitesSectionProps {
 export async function InterviewInvitesSection({
     viewMoreHref = '/candidate/company-interviews'
 }: InterviewInvitesSectionProps) {
-    const { interviews, metadata } = await getInterviewInvites()
+    const { interviews } = await getInterviewInvites()
 
     return (
         <div>
@@ -103,6 +110,7 @@ export async function InterviewInvitesSection({
                             position={interview.position}
                             dueIn={interview.dueIn}
                             interviewId={interview.id}
+                            status={interview.status}
                         />
                     ))}
                 </div>

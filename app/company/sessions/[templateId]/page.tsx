@@ -3,8 +3,8 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { BackButton2 } from '@/components/ui/back-button2'
 import Image from 'next/image'
-import { DataTable } from './data-table'
-import { columns, Candidate } from './columns'
+import { SessionTable } from './session-table'
+import { Candidate } from './columns'
 import { BackButton } from '@/components/ui/back-button'
 import { InviteForm } from '@/components/invite-form'
 import { serverFetch } from '@/lib/api/server'
@@ -154,7 +154,7 @@ export default async function SessionPage({ params }: { params: Promise<{ templa
                     {/* Table Section */}
                     <div>
                         <div className="flex flex-col gap-4 mb-6">
-                            <DataTable columns={columns} data={candidates} />
+                            <SessionTable data={candidates} templateId={templateId} />
                         </div>
                     </div>
 

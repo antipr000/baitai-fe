@@ -47,7 +47,7 @@ interface RecentResultsSectionProps {
 }
 
 export async function RecentResultsSection({
-  viewMoreHref = '/candidate/results'
+  viewMoreHref = '/results'
 }: RecentResultsSectionProps) {
   const response = await serverFetch<ApiResultResponse>('/api/v1/user/interview/results/filter/', {
     method: 'POST',
@@ -99,7 +99,7 @@ export async function RecentResultsSection({
                 title={item.template_title || item.role}
                 timeAgo={formatTimeAgo(item.date)}
                 score={item.score}
-                href={`/candidate/results/${item.session_id}`}
+                href={`/results/${item.session_id}`}
                 isScored={item.is_scored}
               />
             ))}
