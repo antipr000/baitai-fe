@@ -36,7 +36,7 @@ export default function LoginPage() {
             const credentials = await signInWithEmailAndPassword(auth, email, password);
            
                 const idToken = await credentials.user.getIdToken();
-                await fetch("/api/v1/company/hiring-managers/signup/", {
+                await fetch("/api/v1/company/login/", {
                     headers: {
                         Authorization: `Bearer ${idToken}`,
                     },
