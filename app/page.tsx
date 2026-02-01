@@ -111,14 +111,14 @@ export default async function Home() {
                   </motion.div>
                 </span>
               </h2>
-              <WaitlistForm>
+              <Link href="/candidate/dashboard">
                 <Button
                   size="lg"
                   className="bg-[rgba(58,63,187,1)] hover:bg-[rgba(58,63,187,1)] hover:opacity-80 text-[rgba(233,244,255,1)] font-medium md:px-8 md:py-3 px-5 py-2 rounded-lg lg:text-lg md:text-base text-sm hover:shadow-lg"
                 >
                   Take interviews
                 </Button>
-              </WaitlistForm>
+              </Link>
 
             </div>
 

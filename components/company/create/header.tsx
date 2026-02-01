@@ -11,14 +11,13 @@ import { useState } from 'react'
 
 interface HeaderProps {
     authToken?: string
+    companyId?: string
 }
 
-export const Header = ({ authToken }: HeaderProps) => {
+export const Header = ({ authToken, companyId }: HeaderProps) => {
     const store = useInterviewStore()
     const router = useRouter()
     const [isSubmitting, setIsSubmitting] = useState(false)
-
-    const companyId = store.companyId
 
     const handleSave = async (isDraft: boolean = false) => {
         // Basic validation first

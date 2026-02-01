@@ -1,12 +1,12 @@
 "use client"
 
-import React, { useEffect } from 'react'
+import React from 'react'
 import { Header } from './header'
 import { InterviewDetails } from './interview-details'
 import { IntroductionSection } from './introduction-section'
 import { SectionList } from './section-list'
 import { ConclusionSection } from './conclusion-section'
-import { useInterviewStore } from '@/stores/interview-store'
+
 
 interface CreateInterviewFormProps {
     companyId?: string
@@ -14,17 +14,9 @@ interface CreateInterviewFormProps {
 }
 
 export function CreateInterviewForm({ companyId, authToken }: CreateInterviewFormProps) {
-    const { setCompanyId } = useInterviewStore()
-
-    useEffect(() => {
-        if (companyId) {
-            setCompanyId(companyId)
-        }
-    }, [companyId, setCompanyId])
-
     return (
         <div className="container mx-auto max-w-6xl py-8 space-y-8 pb-20">
-            <Header authToken={authToken} />
+            <Header authToken={authToken} companyId={companyId} />
 
             <div className='max-w-5xl mx-auto'>
                 <InterviewDetails />
