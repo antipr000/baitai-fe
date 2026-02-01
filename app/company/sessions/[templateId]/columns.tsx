@@ -12,9 +12,10 @@ export type Candidate = {
     status: "Completed" | "In Progress" | "Pending"
     score: number
     appliedDate: string
+    sessionId: string
 }
 
-export const getColumns = (templateId: string): ColumnDef<Candidate>[] => [
+export const columns: ColumnDef<Candidate>[] = [
     {
         accessorKey: "name",
         header: "Candidate",
@@ -93,6 +94,16 @@ export const getColumns = (templateId: string): ColumnDef<Candidate>[] => [
         },
         cell: ({ row }) => {
             const score = row.getValue("score") as number
+            const status = row.original.status
+
+            if (status !== 'Completed') {
+                return (
+                    <div className="font-medium text-[rgba(10,13,26,0.6)] pl-2">
+                        N/A
+                    </div>
+                )
+            }
+
             return (
                 <div className="font-medium text-[rgba(10,13,26,0.6)] pl-2">
                     {score}%
@@ -139,7 +150,7 @@ export const getColumns = (templateId: string): ColumnDef<Candidate>[] => [
         cell: ({ row }) => {
             const candidate = row.original
             return (
-                <Link href={`/results/${templateId}`}>
+                <Link href={`/results/${candidate.sessionId}`}>
                     <Button variant="ghost" className="text-[rgba(148,163,184,1)] hover:text-[rgba(62,84,251,1)] px-0 hover:bg-transparent" >
                         <Eye className="h-4 w-4 mr-2" /> <span className="font-semibold">View</span>
                     </Button>

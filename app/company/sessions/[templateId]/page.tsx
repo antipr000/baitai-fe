@@ -54,7 +54,8 @@ async function getSessions(templateId: string): Promise<Candidate[]> {
         email: item.email,
         status: (item.status.charAt(0).toUpperCase() + item.status.slice(1)) as "Completed" | "In Progress" | "Pending",
         score: item.score,
-        appliedDate: formatDate(item.applied_date)
+        appliedDate: formatDate(item.applied_date),
+        sessionId: item.session_id
     }))
 }
 
@@ -154,7 +155,7 @@ export default async function SessionPage({ params }: { params: Promise<{ templa
                     {/* Table Section */}
                     <div>
                         <div className="flex flex-col gap-4 mb-6">
-                            <SessionTable data={candidates} templateId={templateId} />
+                            <SessionTable data={candidates} />
                         </div>
                     </div>
 

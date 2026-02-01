@@ -1,14 +1,12 @@
 "use client"
 
 import { DataTable } from './data-table'
-import { getColumns, Candidate } from './columns'
+import { columns, Candidate } from './columns'
 
 interface SessionTableProps {
     data: Candidate[]
-    templateId: string
 }
 
-export function SessionTable({ data, templateId }: SessionTableProps) {
-    const columns = getColumns(templateId)
+export function SessionTable({ data }: SessionTableProps) {
     return <DataTable columns={columns} data={data} />
 }
