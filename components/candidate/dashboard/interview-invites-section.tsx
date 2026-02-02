@@ -45,7 +45,7 @@ function formatDueDate(dueDate: string): string {
 async function getInterviewInvites(): Promise<{ interviews: Interview[] }> {
     const response = await serverFetch<ApiResponse>('/api/v1/user/interview/invites/', {
         method: 'POST',
-        body: {}
+        body: { page: 1, page_size: 2 }
     })
 
     if (!response) {
