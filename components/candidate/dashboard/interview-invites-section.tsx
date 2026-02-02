@@ -9,9 +9,10 @@ interface ApiInterview {
     status: string
     end_date: string
     created_at: string
-    template_id: string
     title: string
     company_name: string
+    message: string,
+    template_id: string
 }
 
 interface ApiResponse {
@@ -28,6 +29,7 @@ interface Interview {
     position: string
     dueIn: string
     status: string
+    template_id: string
 }
 
 function formatDueDate(dueDate: string): string {
@@ -59,6 +61,7 @@ async function getInterviewInvites(): Promise<{ interviews: Interview[] }> {
         position: item.title,
         dueIn: formatDueDate(item.end_date),
         status: item.status,
+        template_id: item.template_id
     }))
 
     return { interviews }
@@ -109,7 +112,7 @@ export async function InterviewInvitesSection({
                             company={interview.company}
                             position={interview.position}
                             dueIn={interview.dueIn}
-                            interviewId={interview.id}
+                            interviewId={interview.template_id}
                             status={interview.status}
                         />
                     ))}
