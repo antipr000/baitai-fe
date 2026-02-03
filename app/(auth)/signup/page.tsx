@@ -57,7 +57,7 @@ export default function SignupPage() {
                 full_name: fullName.trim()
             });
             const idToken = await auth.currentUser?.getIdToken();
-            const credential =await signInWithEmailAndPassword(auth, email.trim(), password);
+            const credential = await signInWithEmailAndPassword(auth, email.trim(), password);
 
             await sendEmailVerification(credential.user);
             toast.success("Verification email sent! Check your email")
@@ -66,7 +66,7 @@ export default function SignupPage() {
             //         Authorization: `Bearer ${idToken}`,
             //     },
             // });
-            
+
 
             // toast.success("Account created successfully!");
             // router.push("/candidate/dashboard");
@@ -99,7 +99,7 @@ export default function SignupPage() {
             const idToken = await userCredential.user.getIdToken();
 
             // Send token to backend
-            await api.post('api/v1/company/hiring-managers/signup/token/', {
+            await api.post('api/v1/user/signup/token/', {
                 token: idToken,
             });
 
