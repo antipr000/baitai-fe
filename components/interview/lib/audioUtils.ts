@@ -120,6 +120,9 @@ export async function convertWebMToRawPCM(
     await audioContext.close()
   }
 
+
+
+  //DEBUG
   // Calculate RMS of the decoded buffer to check for silence
   let totalSumSq = 0
   let totalSamples = 0
@@ -139,6 +142,8 @@ export async function convertWebMToRawPCM(
   if (rms === 0) {
     console.warn('[Audio Conversion] WARNING: Decoded audio is absolute silence (RMS=0)')
   }
+
+  // DEBUG ENDS
 
   // Convert AudioBuffer to raw PCM
   const pcmBuffer = await audioBufferToRawPCM(audioBuffer, targetSampleRate)
