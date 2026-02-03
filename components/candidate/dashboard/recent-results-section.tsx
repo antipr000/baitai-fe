@@ -61,7 +61,7 @@ export async function RecentResultsSection({
   const results = response.items
 
 
-  const hasPending = results.some(r => !r.is_scored)
+  // const hasPending = results.some(r => !r.is_scored)
 
   return (
     <div>
@@ -70,7 +70,7 @@ export async function RecentResultsSection({
       </div>
 
       {/* Poll for updates if any results are pending */}
-      {hasPending && <ScorePoller />}
+      <ScorePoller />
 
       {results.length === 0 ? (
         <div className="flex items-center justify-between p-6 bg-white rounded-lg shadow-sm">
