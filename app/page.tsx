@@ -40,7 +40,7 @@ export default async function Home() {
           />
 
           {/* AI Badge */}
-          <Badge className="bg-[linear-gradient(91deg,rgba(15,2,53,1)_-107.69%,rgba(43,5,155,1)_80.08%)] text-white px-6 py-2 mb-8 mt-5 text-sm">
+          <Badge className="bg-[linear-gradient(91deg,rgba(15,2,53,1)_-107.69%,rgba(43,5,155,1)_80.08%)] text-white px-6 py-2 mb-5 mt-2 text-sm">
             <Image
               src="/main/lightning.svg"
               alt="AI Badge"
@@ -54,19 +54,19 @@ export default async function Home() {
           </Badge>
 
           {/* Main Heading */}
-          <h1 className="lg:text-4xl md:text-3xl text-2xl font-semibold lg:mb-6 md:mb-4 -tracking-tightest">
+          <h1 className="lg:text-4xl md:text-3xl text-2xl font-semibold lg:mb-2 md:mb-1 -tracking-tightest">
             <span className="text-[rgba(58,63,187,1)]">
               Train Talent, Transform Hiring
             </span>
           </h1>
 
           {/* Subtitle */}
-          <p className="lg:text-2xl md:text-xl text-[rgba(53,77,194,0.5)] text-sm mb-16 max-w-3xl mx-auto">
+          <p className="lg:text-2xl md:text-xl text-[rgba(53,77,194,0.5)] text-sm mb-8 max-w-3xl mx-auto">
             Streamline recruitment and ace interviews with our AI-powered platform
           </p>
 
           {/* Feature Cards */}
-          <div className="grid grid-cols-2 gap-12 justify-start lg:max-w-6xl md:max-w-4xl mx-auto">
+          <div className="grid grid-cols-2 gap-12 justify-start lg:max-w-6xl md:max-w-4xl mx-auto pb-5">
 
             {/* Interview Section */}
             <div className="text-center relative">
@@ -183,7 +183,7 @@ export default async function Home() {
 
 
       {/* Bottom Section */}
-      <section className="mt-2 bg-[linear-gradient(68.04deg,rgba(58,63,187,0.9)_-8.15%,rgba(107,124,255,0.9)_66.87%)] text-white lg:py-20 md:py-10 lg:px-6 md:px-20  px-10 py-8">
+      <section className=" bg-[linear-gradient(68.04deg,rgba(58,63,187,0.9)_-8.15%,rgba(107,124,255,0.9)_66.87%)] text-white lg:py-20 md:py-10 lg:px-6 md:px-20  px-10 py-8">
         <div className="max-w-6xl mx-auto whitespace-nowrap">
           <div className="grid grid-cols-2 md:gap-12 gap-6 items-center">
             <div>
