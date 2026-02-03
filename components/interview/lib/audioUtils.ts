@@ -120,6 +120,26 @@ export async function convertWebMToRawPCM(
     await audioContext.close()
   }
 
+  // Calculate RMS of the decoded buffer to check for silence
+  let totalSumSq = 0
+  let totalSamples = 0
+  
+  // Check first channel only for efficiency
+  const channelData = audioBuffer.getChannelData(0)
+  for (let i = 0; i < channelData.length; i++) {
+    totalSumSq += channelData[i] * channelData[i]
+  }
+  totalSamples = channelData.length
+  
+  const rms = Math.sqrt(totalSumSq / totalSamples)
+  console.log(
+    `[Audio Conversion] Decoded WebM stats: Duration=${audioBuffer.duration}s, Channels=${audioBuffer.numberOfChannels}, Rate=${audioBuffer.sampleRate}, RMS=${rms.toFixed(6)}`
+  )
+  
+  if (rms === 0) {
+    console.warn('[Audio Conversion] WARNING: Decoded audio is absolute silence (RMS=0)')
+  }
+
   // Convert AudioBuffer to raw PCM
   const pcmBuffer = await audioBufferToRawPCM(audioBuffer, targetSampleRate)
   console.log(
@@ -192,6 +212,17 @@ export class MixedAudioContext {
     micStream: MediaStream,
     sampleRate: number = 16000
   ): Promise<MediaStream> {
+    // Check if current mic source is dead
+    if (this.initialized && this.micSource) {
+      const storedStream = (this.micSource as any).mediaStream as MediaStream | undefined
+      const isAlive = storedStream?.getAudioTracks().some(t => t.readyState === 'live')
+      
+      if (!isAlive) {
+        console.log('[MixedAudioContext] Stored mic stream is dead, reinitializing...')
+        this.destroy()
+      }
+    }
+
     if (this.initialized && this.mixedStream) {
       console.log('[MixedAudioContext] Already initialized, returning existing stream')
       return this.mixedStream
