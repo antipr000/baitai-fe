@@ -137,7 +137,7 @@ export default function SignupPage() {
 
             {/* Left Panel - Form */}
             <div className="flex-1 relative flex items-center justify-center p-8 bg-[rgba(248,250,255,1)] order-1">
-                <Link href="/" className="flex absolute top-8 left-8 items-center gap-2 text-[rgba(96,117,232,1)] hover:opacity-80 transition-opacity mb-4">
+                <Link href="/" className="flex absolute top-8 left-8 items-center gap-2 text-[rgba(96,117,232,1)] hover:opacity-80 transition-opacity mb-4 z-20">
                     <div className="bg-[rgba(98,117,252,0.82)] p-2 rounded-md border border-gray-200">
                         <Image src="/auth/arrow2.svg" alt="Back" width={20} height={20} className="w-4 h-2.5" />
                     </div>

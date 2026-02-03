@@ -51,7 +51,7 @@ export async function RecentResultsSection({
 }: RecentResultsSectionProps) {
   const response = await serverFetch<ApiResultResponse>('/api/v1/user/interview/results/filter/', {
     method: 'POST',
-    body: { page: 1, page_size: 5 }
+    body: { page: 1, page_size: 5,status:"completed",is_scored:true }
   })
 
   if (!response || !response.items) {

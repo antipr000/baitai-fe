@@ -97,7 +97,7 @@ export default function LoginPage() {
                 {/* Radial gradient glow effect */}
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(10,0,0,0.5)_0%,transparent_70%)]"></div>
 
-                <Link href="/" className="absolute top-8 left-8  flex items-center gap-2 text-white hover:opacity-80 transition-opacity z-10">
+                <Link href="/" className="absolute top-8 left-8   flex items-center gap-2 text-white hover:opacity-80 transition-opacity z-20">
                     <div className="bg-white p-2 rounded-md">
                         <Image src="/auth/arrow.svg" alt="Back" width={20} height={20} className="w-4 h-2.5" />
                     </div>
