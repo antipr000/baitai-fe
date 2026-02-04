@@ -153,8 +153,11 @@ export default function ActiveInterview({
     sessionId,
     templateId,
     onInterviewEnd: () => {
-      toast.message('Interview Completed')
-      setTimeout(() => router.push('/candidate/dashboard'), 2000)
+      toast.success('Interview Completed')
+      setTimeout(() => {
+        toast.info('Processing results. Please wait for it to finish', { duration: 2000 })
+        router.push('/candidate/dashboard')
+      }, 2000)
     },
   })
 
