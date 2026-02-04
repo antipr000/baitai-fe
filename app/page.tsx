@@ -40,7 +40,7 @@ export default async function Home() {
           />
 
           {/* AI Badge */}
-          <Badge className="bg-[linear-gradient(91deg,rgba(15,2,53,1)_-107.69%,rgba(43,5,155,1)_80.08%)] text-white px-6 py-2 mb-5 mt-2 text-sm">
+          <Badge className="bg-[linear-gradient(91deg,rgba(15,2,53,1)_-107.69%,rgba(43,5,155,1)_80.08%)] text-white px-6 py-2 mb-3 mt-2 text-sm">
             <Image
               src="/main/lightning.svg"
               alt="AI Badge"
@@ -54,14 +54,14 @@ export default async function Home() {
           </Badge>
 
           {/* Main Heading */}
-          <h1 className="lg:text-4xl md:text-3xl text-2xl font-semibold lg:mb-2 md:mb-1 -tracking-tightest">
+          <h1 className="lg:text-4xl md:text-3xl text-2xl font-semibold lg:mb-1.5  -tracking-tightest">
             <span className="text-[rgba(58,63,187,1)]">
-              Train Talent, Transform Hiring
+              Redefining How Hiring Works
             </span>
           </h1>
 
           {/* Subtitle */}
-          <p className="lg:text-2xl md:text-xl text-[rgba(53,77,194,0.5)] text-sm mb-8 max-w-3xl mx-auto">
+          <p className="lg:text-2xl md:text-xl text-[rgba(53,77,194,0.5)] text-sm mb-8 max-w-5xl mx-auto">
             Streamline recruitment and ace interviews with our AI-powered platform
           </p>
 
