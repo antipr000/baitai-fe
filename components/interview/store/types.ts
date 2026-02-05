@@ -115,22 +115,10 @@ export interface AudioChunkInfo {
 export interface SilenceDetectionConfig {
   /** ms of silence after user speech before sending end_of_turn */
   silenceDuration: number
-  /** EMA smoothing for ambient noise floor */
-  noiseFloorAlpha: number
-  /** minimum RMS (normalized 0..1) treated as baseline noise */
-  minNoiseFloor: number
-  /** how much above noise floor counts as speech */
-  speechMargin: number
-  /** how much above noise floor still counts as silence (hysteresis) */
-  silenceMargin: number
 }
 
 export const DEFAULT_SILENCE_CONFIG: SilenceDetectionConfig = {
-  silenceDuration: 2000,
-  noiseFloorAlpha: 0.05,
-  minNoiseFloor: 0.008,
-  speechMargin: 0.025,
-  silenceMargin: 0.012,
+  silenceDuration: 500, 
 }
 
 // ============================================

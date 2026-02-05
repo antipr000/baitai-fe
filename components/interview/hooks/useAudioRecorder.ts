@@ -1,11 +1,11 @@
 /**
  * useAudioRecorder Hook
  *
- * Manages microphone audio recording with silence detection.
+ * Manages microphone audio recording with silence detection using @ricky0123/vad-web.
  * Registers controls with centralized actions for cross-module calls.
  */
 
-import { useEffect, useRef, useCallback } from 'react'
+import { useEffect, useRef, useCallback, useMemo } from 'react'
 import { useInterviewStore } from '../store'
 import { convertWebMToRawPCM, MixedAudioContext } from '../lib/audioUtils'
 import {
@@ -17,6 +17,7 @@ import {
 } from '../store/interviewActions'
 import { DEFAULT_SILENCE_CONFIG } from '../store/types'
 import type { SilenceDetectionConfig } from '../store/types'
+import { MicVAD } from '@ricky0123/vad-web'
 
 // ============================================
 // Types
@@ -43,151 +44,109 @@ export function useAudioRecorder(
 ): UseAudioRecorderReturn {
   const { micStream, silenceConfig, onSpeechDetected, onError } = options
 
-  const config: SilenceDetectionConfig = {
+  const config = useMemo<SilenceDetectionConfig>(() => ({
     ...DEFAULT_SILENCE_CONFIG,
     ...silenceConfig,
-  }
+  }), [silenceConfig])
 
   const store = useInterviewStore
 
   // Refs for browser APIs (not serializable)
   const mediaRecorderRef = useRef<MediaRecorder | null>(null)
-  const audioContextRef = useRef<AudioContext | null>(null)
-  const analyserRef = useRef<AnalyserNode | null>(null)
+  const vadRef = useRef<MicVAD | null>(null)
+  const vadStreamRef = useRef<MediaStream | null>(null)  // Track which stream VAD was created with
   const audioChunksRef = useRef<Blob[]>([])
 
-  // Timers
-  const silenceRAFRef = useRef<number | null>(null)
-  const silenceTimerRef = useRef<NodeJS.Timeout | null>(null)
+  // Timers and guards
   const periodicFlushTimerRef = useRef<NodeJS.Timeout | null>(null)
-
-  // Noise floor (updates at 60fps)
-  const noiseFloorRmsRef = useRef<number>(config.minNoiseFloor)
+  const isFlushingRef = useRef(false)  // Guard against concurrent flushes
 
   // ============================================
   // Silence Detection
   // ============================================
 
   const stopSilenceDetection = useCallback(() => {
-    if (silenceRAFRef.current !== null) {
-      cancelAnimationFrame(silenceRAFRef.current)
-      silenceRAFRef.current = null
-    }
-    if (silenceTimerRef.current) {
-      clearTimeout(silenceTimerRef.current)
-      silenceTimerRef.current = null
-    }
-    if (analyserRef.current) {
-      analyserRef.current = null
-    }
-    if (audioContextRef.current) {
-      if (audioContextRef.current.state !== 'closed') {
-        audioContextRef.current.close().catch(console.error)
-      }
-      audioContextRef.current = null
+    if (vadRef.current) {
+      vadRef.current.pause()
+      // Don't nullify - keep VAD instance for reuse across turns
     }
   }, [])
 
-  const setupSilenceDetection = useCallback(() => {
+  const setupSilenceDetection = useCallback(async () => {
     const state = store.getState()
     if (state.conversationState !== 'listening') return
 
     state.setHasHeardSpeech(false)
-    noiseFloorRmsRef.current = config.minNoiseFloor
 
     const stream = micStream
     const hasLiveTrack = stream?.getAudioTracks().some((t) => t.readyState === 'live')
 
-    if (!stream || !hasLiveTrack || !state.isMicOn) {
-      console.log('[AudioRecorder] Skipping silence detection - no valid stream')
+    if (!stream || !state.isMicOn || !hasLiveTrack) {
+      console.log('[AudioRecorder] Skipping silence detection - mic is off or stream is not live')
       return
     }
 
     try {
-      if (!audioContextRef.current || audioContextRef.current.state === 'closed') {
-        audioContextRef.current = new AudioContext()
+      // Check if we can reuse existing VAD or need to recreate (stream changed)
+      const streamChanged = vadStreamRef.current !== stream
+
+      if (vadRef.current && !streamChanged) {
+        console.log('[AudioRecorder] Resuming existing VAD')
+        vadRef.current.start()
+        return
       }
-      if (audioContextRef.current.state === 'suspended') {
-        audioContextRef.current.resume().catch(console.error)
+
+      // Stream changed or no VAD exists - destroy old and create new
+      if (vadRef.current) {
+        console.log('[AudioRecorder] Stream changed, recreating VAD')
+        vadRef.current.destroy()
+        vadRef.current = null
       }
 
-      const source = audioContextRef.current.createMediaStreamSource(stream)
-      const analyser = audioContextRef.current.createAnalyser()
-      analyser.fftSize = 2048
-      source.connect(analyser)
-      analyserRef.current = analyser
+      console.log('[AudioRecorder] Initializing new VAD...')
 
-      const timeDomain = new Uint8Array(analyser.fftSize)
-      let silenceStartTime: number | null = null
-
-      const checkSilence = () => {
-        const currentState = store.getState()
-
-        if (!analyserRef.current || !currentState.isMicOn || currentState.conversationState !== 'listening') {
-          return
-        }
-
-        const isRecording = mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive'
-        const hasAudioChunks = audioChunksRef.current.length > 0
-        const hasSentSegments = currentState.hasSentAudioSegments
-
-        if (!isRecording && !hasAudioChunks && !hasSentSegments) {
-          silenceRAFRef.current = requestAnimationFrame(checkSilence)
-          return
-        }
-
-        analyserRef.current.getByteTimeDomainData(timeDomain)
-        let sumSq = 0
-        for (let i = 0; i < timeDomain.length; i++) {
-          const centered = (timeDomain[i] - 128) / 128
-          sumSq += centered * centered
-        }
-        const rms = Math.sqrt(sumSq / timeDomain.length)
-
-        const prevFloor = noiseFloorRmsRef.current
-        const speechThreshold = Math.max(
-          config.minNoiseFloor + config.speechMargin,
-          prevFloor + config.speechMargin
-        )
-        const isSpeech = rms > speechThreshold
-
-        if (!currentState.hasHeardSpeech && !isSpeech) {
-          noiseFloorRmsRef.current = Math.max(
-            config.minNoiseFloor,
-            prevFloor * (1 - config.noiseFloorAlpha) + rms * config.noiseFloorAlpha
-          )
-        }
-
-        if (isSpeech) {
-          if (!currentState.hasHeardSpeech) {
-            store.getState().setHasHeardSpeech(true)
-            console.log('[AudioRecorder] Speech detected')
+      vadRef.current = await MicVAD.new({
+        model: 'v5',
+        baseAssetPath: '/vad/',
+        onnxWASMBasePath: '/vad/',
+        getStream: async () => stream!,
+        pauseStream: async () => {
+          // No-op to preserve stream for MediaRecorder
+        },
+        resumeStream: async (s) => s,
+        onSpeechStart: () => {
+          console.log('[AudioRecorder] Speech detected (VAD)')
+          const currentState = store.getState()
+          if (currentState.conversationState === 'listening' && !currentState.hasHeardSpeech) {
+            currentState.setHasHeardSpeech(true)
             onSpeechDetected?.()
           }
-          silenceStartTime = null
-        } else {
-          if ((hasAudioChunks || hasSentSegments) && currentState.hasHeardSpeech) {
-            if (silenceStartTime === null) {
-              silenceStartTime = Date.now()
-            } else if (Date.now() - silenceStartTime > config.silenceDuration) {
-              console.log('[AudioRecorder] Silence duration exceeded')
-              // Call sendEndOfTurn which is registered via actions
-              sendEndOfTurnInternal()
-              silenceStartTime = null
-              return
-            }
-          } else {
-            silenceStartTime = null
+        },
+        onSpeechEnd: () => {
+          console.log('[AudioRecorder] Speech ended (VAD)')
+          const currentState = store.getState()
+          if (currentState.conversationState === 'listening' && currentState.hasHeardSpeech) {
+            console.log('[AudioRecorder] Triggering end of turn from VAD')
+            sendEndOfTurnInternal()
           }
-        }
+        },
+        onVADMisfire: () => {
+          console.log('[AudioRecorder] VAD misfire (noise)')
+        },
+        positiveSpeechThreshold: 0.6,
+        // minSpeechMs: 150, // ~150ms of speech required to trigger start
+        redemptionMs: config.silenceDuration,
+      })
 
-        silenceRAFRef.current = requestAnimationFrame(checkSilence)
-      }
+      vadRef.current.start()
+      vadStreamRef.current = stream  // Remember which stream VAD was created with
+      console.log('[AudioRecorder] Silence detection active (VAD)')
 
-      checkSilence()
-      console.log('[AudioRecorder] Silence detection active')
     } catch (error) {
       console.error('[AudioRecorder] Error setting up silence detection:', error)
+      if (error instanceof Error) {
+        console.error('[AudioRecorder] Error details:', error.message, error.stack);
+      }
       onError?.(error instanceof Error ? error : new Error(String(error)))
     }
   }, [config, micStream, onSpeechDetected, onError])
@@ -197,18 +156,25 @@ export function useAudioRecorder(
   // ============================================
 
   const flushAudio = useCallback(async (): Promise<void> => {
-    const state = store.getState()
+    // Guard against concurrent flushes
+    if (isFlushingRef.current) {
+      console.log('[AudioRecorder] Flush already in progress, skipping')
+      return
+    }
+
     const isRecording = mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive'
 
     if (!isRecording || audioChunksRef.current.length === 0) {
       return
     }
 
+    isFlushingRef.current = true
     console.log('[AudioRecorder] Flushing audio segments...')
     const recorder = mediaRecorderRef.current
 
     if (!recorder) {
       console.error('[AudioRecorder] No media recorder found')
+      isFlushingRef.current = false
       return
     }
 
@@ -218,14 +184,15 @@ export function useAudioRecorder(
         setTimeout(resolve, 150)
       }
       recorder.addEventListener('stop', onStop)
-    })
 
-    try {
-      recorder.stop() // happens async in background
-    } catch {
-      console.error('[AudioRecorder] Error stopping media recorder')
-      return
-    }
+      try {
+        recorder.stop()
+      } catch {
+        console.error('[AudioRecorder] Error stopping media recorder')
+        recorder.removeEventListener('stop', onStop)  // Clean up listener on error
+        resolve()
+      }
+    })
 
     await stoppedPromise
 
@@ -257,6 +224,8 @@ export function useAudioRecorder(
       stateAfterSend.conversationState === 'listening') {
       await startRecordingInternal(true)  // With silence detection for user turn
     }
+
+    isFlushingRef.current = false
   }, [onError])  // Note: startRecordingInternal intentionally omitted to avoid circular dependency
 
   // ============================================
@@ -449,7 +418,7 @@ export function useAudioRecorder(
           return
         }
       }
-    } 
+    }
     //Rare case: No audio chunks and no segments sent
     else if (!hasSentSegments) {
       transitionToListening()
@@ -498,6 +467,11 @@ export function useAudioRecorder(
   useEffect(() => {
     return () => {
       stopRecording()
+      // Properly destroy VAD on unmount to release ONNX resources
+      if (vadRef.current) {
+        vadRef.current.destroy()
+        vadRef.current = null
+      }
     }
   }, [stopRecording])
 

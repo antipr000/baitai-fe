@@ -30,6 +30,7 @@
     "@radix-ui/react-switch": "^1.2.6",
     "@radix-ui/react-tabs": "^1.1.13",
     "@radix-ui/react-tooltip": "^1.2.8",
+    "@ricky0123/vad-web": "^0.0.30",
     "@tanstack/react-table": "^8.21.3",
     "@uiw/react-codemirror": "^4.25.4",
     "axios": "^1.13.2",
