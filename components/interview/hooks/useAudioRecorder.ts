@@ -133,8 +133,9 @@ export function useAudioRecorder(
         onVADMisfire: () => {
           console.log('[AudioRecorder] VAD misfire (noise)')
         },
-        positiveSpeechThreshold: 0.6,
-        // minSpeechMs: 150, // ~150ms of speech required to trigger start
+        positiveSpeechThreshold: 0.5,
+        negativeSpeechThreshold: 0.6,
+        minSpeechMs: 150,
         redemptionMs: config.silenceDuration,
       })
 
