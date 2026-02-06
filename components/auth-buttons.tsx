@@ -16,12 +16,19 @@ export function AuthButtons({ isAuthenticated }: AuthButtonsProps) {
     async function handleLogout() {
         try {
             await signOut(auth);
-            await fetch("/api/logout", { method: "POST" });
-            router.push("/login");
+            // Call logout API and wait for it to complete
+            const response = await fetch("/api/logout");
+            if (response.ok) {
+                // Hard reload to clear all cached pages
+                window.location.href = "/login";
+            }
+            else {
+                toast.error("Logout failed");
+            }
         } catch (error) {
             console.error("Logout failed:", error);
-            router.push("/login");
             toast.error("Logout failed");
+            window.location.href = "/login";
         }
     }
 

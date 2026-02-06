@@ -136,7 +136,7 @@ export const columns: ColumnDef<Result>[] = [
             }
 
             return (
-                <Link href={`/candidate/results/${result.id}`}>
+                <Link href={`/results/${result.id}`}>
                     <Button variant="ghost" className="text-muted-foreground hover:text-foreground px-4 py-2 rounded-md" >
                         <Eye className="h-4 w-4 " /> <span className="font-medium">View</span>
                     </Button>

@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import { ScorePoller } from './score-poller'
 
-interface ApiResultItem { 
+interface ApiResultItem {
   session_id: string
   template_id: string
   template_title: string
@@ -17,6 +17,14 @@ interface ApiResultItem {
   is_scored: boolean
   started_at: string
   ended_at: string
+}
+
+interface ApiResultResponse {
+  items: ApiResultItem[]
+  total: number
+  page: number
+  page_size: number
+  total_pages: number
 }
 
 function formatTimeAgo(dateString: string): string {
@@ -39,15 +47,21 @@ interface RecentResultsSectionProps {
 }
 
 export async function RecentResultsSection({
-  viewMoreHref = '/candidate/results'
+  viewMoreHref = '/results'
 }: RecentResultsSectionProps) {
-  const results = await serverFetch<ApiResultItem[]>('/api/v1/user/interview/results/recent/')
+  const response = await serverFetch<ApiResultResponse>('/api/v1/user/interview/results/filter/', {
+    method: 'POST',
+    body: { page: 1, page_size: 5,status:"completed",is_scored:true }
+  })
 
-  if (!results || !Array.isArray(results)) {
+  if (!response || !response.items) {
     return null
   }
 
-  const hasPending = results.some(r => !r.is_scored)
+  const results = response.items
+
+
+  // const hasPending = results.some(r => !r.is_scored)
 
   return (
     <div>
@@ -56,7 +70,7 @@ export async function RecentResultsSection({
       </div>
 
       {/* Poll for updates if any results are pending */}
-      {hasPending && <ScorePoller />}
+      <ScorePoller />
 
       {results.length === 0 ? (
         <div className="flex items-center justify-between p-6 bg-white rounded-lg shadow-sm">
@@ -85,7 +99,7 @@ export async function RecentResultsSection({
                 title={item.template_title || item.role}
                 timeAgo={formatTimeAgo(item.date)}
                 score={item.score}
-                href={`/candidate/results/${item.session_id}`}
+                href={`/results/${item.session_id}`}
                 isScored={item.is_scored}
               />
             ))}

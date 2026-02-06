@@ -142,6 +142,10 @@ export default function ActiveInterview({ cameraStream, micStream, templateId, s
   const messagesEndRef = useRef<HTMLDivElement | null>(null)
   const conversationPanelRef = useRef<HTMLDivElement | null>(null)
 
+  // 40s Periodic Flush refs
+  const periodicFlushTimerRef = useRef<NodeJS.Timeout | null>(null)
+  const hasSentAudioSegmentsRef = useRef(false)
+
   // Silence detection constants
   // Prefer time-domain RMS over frequency averages; more robust with background noise.
   const SILENCE_DURATION = 2000 // ms of silence after user speech before sending end_of_turn
@@ -650,11 +654,16 @@ export default function ActiveInterview({ cameraStream, micStream, templateId, s
           timestamp: new Date(),
         }
         setMessages((prev) => [...prev, completionMessage])
-        toast.message("Interview Completed")
-        // Redirect to dashboard after a short delay to show the completion message
+
+        // Show processing feedback
+        toast.dismiss()
+        toast.info("Interview Completed. Redirecting to dashboard.")
+
+        // Redirect to dashboard after 6 seconds
         setTimeout(() => {
+          toast.dismiss()
           router.push('/candidate/dashboard')
-        }, 2000)
+        }, 6000)
       } else {
         // No-op for state: we already transition speaking -> listening when playback ends.
       }
@@ -891,6 +900,69 @@ export default function ActiveInterview({ cameraStream, micStream, templateId, s
     return pcmBuffer
   }, [audioBufferToRawPCM])
 
+  const flushAudioSegments = useCallback(async () => {
+    // Check if we are actually recording and have chunks
+    const isRecording = mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive'
+
+    if (!isRecording || audioChunksRef.current.length === 0) {
+      console.log('[Audio Flush] Skipping flush - recording:', isRecording, 'chunks:', audioChunksRef.current.length)
+      return
+    }
+
+    console.log('[Audio Flush] Periodic flush triggered - stopping recorder to process segments...')
+
+    const recorder = mediaRecorderRef.current!
+
+    // Stop the recorder to ensure we get a complete WebM segment with header
+    // Create a promise to wait for the recorder to fully stop and all chunks to arrive
+    const stoppedPromise = new Promise<void>((resolve) => {
+      const onStop = () => {
+        recorder.removeEventListener('stop', onStop)
+        // Wait a bit to ensure all 'dataavailable' events have fired
+        setTimeout(resolve, 150)
+      }
+      recorder.addEventListener('stop', onStop)
+    })
+
+    try {
+      recorder.stop()
+    } catch (e) {
+      console.error('[Audio Flush] Error stopping recorder:', e)
+      return
+    }
+
+    // Wait for recorder to fully stop
+    await stoppedPromise
+
+    // Snapshot the chunks (now includes the complete WebM file with header)
+    const chunksToProcess = [...audioChunksRef.current]
+    audioChunksRef.current = []
+
+    console.log(`[Audio Flush] Captured ${chunksToProcess.length} chunks, restarting recorder for next segment...`)
+
+    // Restart the recorder immediately to avoid missing audio
+    // Keep the same silence detection state as before
+    if (isConnectedRef.current && !hasNavigatedAwayRef.current && startRecordingRef.current) {
+      const shouldEnableSilence = conversationStateRef.current === 'listening'
+      startRecordingRef.current(shouldEnableSilence)
+    }
+
+    // Process and send the captured segment
+    try {
+      if (chunksToProcess.length > 0) {
+        const pcmBuffer = await convertWebMToRawPCM(chunksToProcess)
+        if (isConnectedRef.current && send) {
+          console.log(`[Audio Flush] Sending ${pcmBuffer.byteLength} bytes of audio data`)
+          send(pcmBuffer)
+          hasSentAudioSegmentsRef.current = true
+        }
+      }
+    } catch (error) {
+      console.error('[Audio Flush] Error converting and sending audio segment:', error)
+      // Note: The segment is lost, but the recorder has already restarted for the next one
+    }
+  }, [convertWebMToRawPCM, send])
+
   const sendEndOfTurn = useCallback(async (): Promise<void> => {
     if (!isConnected || isProcessing || hasSentEndOfTurnRef.current) {
       console.log('[End of Turn] Skipping - isConnected:', isConnected, 'isProcessing:', isProcessing, 'hasSent:', hasSentEndOfTurnRef.current)
@@ -900,22 +972,26 @@ export default function ActiveInterview({ cameraStream, micStream, templateId, s
     // Check if we're actually recording and have audio chunks
     const isRecording = mediaRecorderRef.current !== null && mediaRecorderRef.current.state !== 'inactive'
     const hasAudioChunks = audioChunksRef.current.length > 0
+    const hasSentSegments = hasSentAudioSegmentsRef.current
 
-    // Don't send end_of_turn if there's no audio to process
-    if (!isRecording && !hasAudioChunks) {
-      console.log('[End of Turn] Skipping - no audio recorded and not currently recording')
+    // Don't send end_of_turn if there's no audio to process AND we haven't sent any segments yet
+    if (!isRecording && !hasAudioChunks && !hasSentSegments) {
+      console.log('[End of Turn] Skipping - no audio recorded/flushed and not currently recording')
       return
     }
 
-    console.log('[End of Turn] Sending end_of_turn signal to backend')
+    console.log('[End of Turn] Detected silence - processing end of turn...')
     setIsProcessing(true)
     hasSentEndOfTurnRef.current = true
     hasHeardSpeechThisListeningTurnRef.current = false
 
+    // Pause silence detection to avoid repeated triggers while processing
+    stopSilenceDetection()
+
     // Stop recording when sending end of turn
     let recordingStoppedPromise: Promise<void> | null = null
     if (isRecording && mediaRecorderRef.current) {
-      console.log('[End of Turn] Stopping recording')
+      console.log('[End of Turn] Stopping recording to capture final audio...')
       try {
         // Create a promise that resolves when recording fully stops
         recordingStoppedPromise = new Promise<void>((resolve) => {
@@ -943,9 +1019,6 @@ export default function ActiveInterview({ cameraStream, micStream, templateId, s
       recordingStoppedPromise = Promise.resolve()
     }
 
-    // Pause silence detection to avoid repeated triggers while processing
-    stopSilenceDetection()
-
     // Wait for recording to fully stop and all chunks to arrive
     if (recordingStoppedPromise) {
       await recordingStoppedPromise
@@ -954,17 +1027,17 @@ export default function ActiveInterview({ cameraStream, micStream, templateId, s
     // Make a copy of chunks to avoid race conditions during processing
     const chunksToProcess = [...audioChunksRef.current]
 
-    // Convert accumulated WebM chunks to raw PCM and send
+    // Send any new audio captured since last periodic flush
     if (chunksToProcess.length > 0) {
       try {
-        console.log(`[End of Turn] Converting ${chunksToProcess.length} WebM chunks to raw PCM...`)
+        console.log(`[End of Turn] Converting ${chunksToProcess.length} new WebM chunks to raw PCM...`)
         const pcmBuffer = await convertWebMToRawPCM(chunksToProcess)
 
         // Clear the audio buffer immediately after conversion
         audioChunksRef.current = []
 
         // Send the raw PCM audio to backend
-        console.log('[End of Turn] Sending raw PCM audio to backend:', pcmBuffer.byteLength, 'bytes')
+        console.log('[End of Turn] Sending final audio segment to backend:', pcmBuffer.byteLength, 'bytes')
         if (!isConnectedRef.current || !send) {
           throw new Error('WebSocket not connected; cannot send audio')
         }
@@ -973,37 +1046,62 @@ export default function ActiveInterview({ cameraStream, micStream, templateId, s
         await new Promise(resolve => setTimeout(resolve, 50))
       } catch (error) {
         console.error('[End of Turn] Error converting audio to PCM:', error)
-        console.error('[End of Turn] Not sending audio/end_of_turn because conversion failed')
-        // Clear buffer on error to prevent stale data
-        audioChunksRef.current = []
-        // Don't send end_of_turn if audio conversion failed
-        hasSentEndOfTurnRef.current = false
-        setIsProcessing(false)
-        setConversationState('listening')
-        return
+
+        // If we've sent segments before via periodic flush, we can still proceed
+        if (hasSentSegments) {
+          console.log('[End of Turn] Conversion failed but segments were already sent, proceeding with end_of_turn')
+          audioChunksRef.current = []
+        } else {
+          // No prior segments and conversion failed - abort
+          console.error('[End of Turn] Not sending end_of_turn because conversion failed and no prior segments')
+          audioChunksRef.current = []
+          hasSentEndOfTurnRef.current = false
+          setIsProcessing(false)
+          setConversationState('listening')
+
+          // Restart recording
+          if (isConnectedRef.current && micStreamRef.current && isMicOnRef.current && startRecordingRef.current) {
+            startRecordingRef.current(true)
+          }
+          return
+        }
       }
+    } else if (hasSentSegments) {
+      console.log('[End of Turn] No new audio since last flush, but segments were already sent. Proceeding to end turn.')
+      audioChunksRef.current = []
     } else {
-      // No audio chunks - don't send end_of_turn
-      console.log('[End of Turn] No audio chunks available, skipping end_of_turn')
+      // No audio chunks and no prior segments - don't send end_of_turn
+      console.log('[End of Turn] No audio chunks available and no prior segments, skipping end_of_turn')
       hasSentEndOfTurnRef.current = false
       setIsProcessing(false)
       setConversationState('listening')
+
+      // Restart recording
+      if (isConnectedRef.current && micStreamRef.current && isMicOnRef.current && startRecordingRef.current) {
+        startRecordingRef.current(true)
+      }
       return
     }
 
-    // Send end_of_turn message only if we have audio
+    // Send end_of_turn message
     try {
       if (!isConnectedRef.current || !send) {
         throw new Error('WebSocket not connected; cannot send end_of_turn')
       }
       const endOfTurnMessage = JSON.stringify({ type: 'end_of_turn' })
       send(endOfTurnMessage)
+      console.log('[End of Turn] Sent end_of_turn signal to backend')
     } catch (error) {
       console.error('[End of Turn] Error sending end_of_turn message:', error)
       // Treat as failure: unlock and return to listening
       hasSentEndOfTurnRef.current = false
       setIsProcessing(false)
       setConversationState('listening')
+
+      // Restart recording
+      if (isConnectedRef.current && micStreamRef.current && isMicOnRef.current && startRecordingRef.current) {
+        startRecordingRef.current(true)
+      }
       return
     }
 
@@ -1053,11 +1151,12 @@ export default function ActiveInterview({ cameraStream, micStream, templateId, s
       const checkSilence = () => {
         if (!analyserRef.current || !isMicOnRef.current || conversationStateRef.current !== 'listening') return
 
-        // Only check for silence if we're actually recording and have some audio chunks
+        // Only check for silence if we're actually recording and have some audio chunks OR have sent segments
         const isRecording = mediaRecorderRef.current !== null && mediaRecorderRef.current.state !== 'inactive'
         const hasAudioChunks = audioChunksRef.current.length > 0
+        const hasSentSegments = hasSentAudioSegmentsRef.current
 
-        if (!isRecording && !hasAudioChunks) {
+        if (!isRecording && !hasAudioChunks && !hasSentSegments) {
           // Not recording and no audio chunks - don't trigger silence detection
           silenceRAFRef.current = requestAnimationFrame(checkSilence)
           return
@@ -1093,7 +1192,9 @@ export default function ActiveInterview({ cameraStream, micStream, templateId, s
         } else {
           // Once speech has been detected for this turn, treat "not speech" as silence
           // (handles steady background noise that never falls below a strict silence threshold).
-          if (hasAudioChunks && hasHeardSpeechThisListeningTurnRef.current) {
+          // Once speech has been detected for this turn, treat "not speech" as silence
+          // (handles steady background noise that never falls below a strict silence threshold).
+          if ((hasAudioChunks || hasSentSegments) && hasHeardSpeechThisListeningTurnRef.current) {
             if (silenceStartTime === null) {
               silenceStartTime = Date.now()
               console.log('[Silence Detection] Silence started')
@@ -1207,6 +1308,16 @@ export default function ActiveInterview({ cameraStream, micStream, templateId, s
       mediaRecorderRef.current = mediaRecorder
       audioChunksRef.current = []
       hasSentEndOfTurnRef.current = false // Reset flag for new recording session
+      hasSentAudioSegmentsRef.current = false // Reset segment tracking
+
+      // Clear any existing flush timer
+      if (periodicFlushTimerRef.current) {
+        clearInterval(periodicFlushTimerRef.current)
+      }
+
+      // Start periodic flush timer (10 seconds)
+      periodicFlushTimerRef.current = setInterval(flushAudioSegments, 10000)
+      console.log('[Recording] Started 40s periodic flush timer')
 
       mediaRecorder.ondataavailable = (event) => {
         if (event.data && event.data.size > 0) {
@@ -1246,7 +1357,7 @@ export default function ActiveInterview({ cameraStream, micStream, templateId, s
       console.error('[Recording] Error starting recording:', error)
       setError('Failed to start recording')
     }
-  }, [setupSilenceDetection, stopSilenceDetection, initializeMixedAudioContext])
+  }, [setupSilenceDetection, stopSilenceDetection, initializeMixedAudioContext, flushAudioSegments])
 
   // Store startRecording in ref
   useEffect(() => {
@@ -1258,6 +1369,12 @@ export default function ActiveInterview({ cameraStream, micStream, templateId, s
     if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
       mediaRecorderRef.current.stop()
       console.log('[Recording] MediaRecorder stopped')
+    }
+
+    if (periodicFlushTimerRef.current) {
+      clearInterval(periodicFlushTimerRef.current)
+      periodicFlushTimerRef.current = null
+      console.log('[Recording] Stopped periodic flush timer')
     }
 
     if (silenceTimerRef.current) {
@@ -1291,6 +1408,9 @@ export default function ActiveInterview({ cameraStream, micStream, templateId, s
       return
     }
 
+    toast.dismiss()
+    toast.loading("Ending interview and processing results...")
+
     // Stop all recordings
     stopRecording()
     stopVideoRecording()
@@ -1302,8 +1422,8 @@ export default function ActiveInterview({ cameraStream, micStream, templateId, s
     // Finalize all media uploads before closing
     finalizeAllMedia()
 
-    // Wait a bit for finalization to complete
-    await new Promise(resolve => setTimeout(resolve, 1000))
+    // Wait a bit for finalization and to show processing state (5 seconds)
+    await new Promise(resolve => setTimeout(resolve, 5000))
 
     // Close WebSocket
     closeWebSocket()
@@ -1359,7 +1479,8 @@ export default function ActiveInterview({ cameraStream, micStream, templateId, s
       }
     }
 
-    // Navigate away (you can customize this)
+    // Navigate away
+    toast.dismiss()
     router.push('/candidate/dashboard')
   }
 

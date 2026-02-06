@@ -45,7 +45,10 @@ async function getData(): Promise<Result[]> {
     const response = await serverFetch<ApiResponse>('/api/v1/user/interview/results/filter/', {
         method: 'POST',
         body: {
-            status: 'completed'
+            status: 'completed',
+            is_scored: true,
+            page: 1,
+            page_size: 100
         }
     })
 

@@ -13,42 +13,14 @@ import { clientConfig, serverConfig } from "@/lib/auth/config";
 import { AuthButtons } from "@/components/auth-buttons";
 import { hiringFeatures, jobSeekerSteps, jobSeekerFeatures, hiringTeamSteps } from "@/lib/home-data";
 import { WaitlistForm } from "@/components/waitlist-form";
+import Header from "@/components/header";
 
 export default async function Home() {
-  const tokens = await getTokens(await cookies(), {
-    apiKey: clientConfig.apiKey,
-    cookieName: serverConfig.cookieName,
-    cookieSignatureKeys: serverConfig.cookieSignatureKeys,
-    serviceAccount: serverConfig.serviceAccount,
-  });
-
 
   return (
     <div className="min-h-screen  flex flex-col">
       {/* Header */}
-      <header className="fixed top-0 left-0 right-0 z-50 sm:px-6 px-2 md:py-4 py-4 bg-white/80 backdrop-blur-md border-b border-gray-200/20 shadow-sm w-screen max-w-full overflow-x-hidden box-border">
-        <nav className="flex items-center justify-between w-full max-w-full md:max-w-7xl md:mx-auto overflow-x-hidden box-border m-0">
-          <div className="flex items-center space-x-2">
-            <Image className="md:size-[34px] lg:[size-40px] size-6" src="/main/logo.png" alt="Bait AI Logo" width={40} height={40} />
-            <span className="lg:text-3xl md:text-2xl text-base font-bold bg-clip-text text-transparent bg-[linear-gradient(106.63deg,rgba(16,81,171,1)_0%,rgba(28,15,111,1)_144.25%)]">bAIt</span>
-          </div>
-          <div className="hidden md:flex items-center lg:space-x-8 space-x-4">
-            <Link href="/about" className="text-[rgba(69,94,255,0.8)] hover:opacity-70 font-medium">About us</Link>
-            <Link href="#hiring-teams" className="text-[rgba(69,94,255,0.8)] hover:opacity-70 font-medium">For Hiring Teams</Link>
-            <Link href="#job-seekers" className="text-[rgba(69,94,255,0.8)] hover:opacity-70 font-medium">For Job Seekers</Link>
-            <Link href="/pricing" className="text-[rgba(69,94,255,0.8)] hover:opacity-70 font-medium">Pricing</Link >
-          </div>
-
-          <div className="hidden md:flex items-center space-x-4">
-            <AuthButtons isAuthenticated={!!tokens} />
-          </div>
-          <div className="md:hidden justify-around items-center">
-            <MobileNavBar isAuthenticated={!!tokens} />
-          </div>
-
-        </nav>
-
-      </header>
+      <Header />
 
       {/* Hero Section */}
       <main className="relative w-full px-6 py-6 md:pt-28 pt-20 bg-[linear-gradient(95.57deg,#E7F5FF_7.28%,#F5F7FF_100.24%)]">
@@ -68,7 +40,7 @@ export default async function Home() {
           />
 
           {/* AI Badge */}
-          <Badge className="bg-[linear-gradient(91deg,rgba(15,2,53,1)_-107.69%,rgba(43,5,155,1)_80.08%)] text-white px-6 py-2 mb-8 mt-5 text-sm">
+          <Badge className="bg-[linear-gradient(91deg,rgba(15,2,53,1)_-107.69%,rgba(43,5,155,1)_80.08%)] text-white px-6 py-2 mb-3 mt-2 text-sm">
             <Image
               src="/main/lightning.svg"
               alt="AI Badge"
@@ -82,19 +54,19 @@ export default async function Home() {
           </Badge>
 
           {/* Main Heading */}
-          <h1 className="lg:text-4xl md:text-3xl text-2xl font-semibold lg:mb-6 md:mb-4 -tracking-tightest">
+          <h1 className="lg:text-4xl md:text-3xl text-2xl font-semibold lg:mb-1.5  -tracking-tightest">
             <span className="text-[rgba(58,63,187,1)]">
-              Train Talent, Transform Hiring
+              Redefining How Hiring Works
             </span>
           </h1>
 
           {/* Subtitle */}
-          <p className="lg:text-2xl md:text-xl text-[rgba(53,77,194,0.5)] text-sm mb-16 max-w-3xl mx-auto">
+          <p className="lg:text-2xl md:text-xl text-[rgba(53,77,194,0.5)] text-sm mb-8 max-w-5xl mx-auto">
             Streamline recruitment and ace interviews with our AI-powered platform
           </p>
 
           {/* Feature Cards */}
-          <div className="grid grid-cols-2 gap-12 justify-start lg:max-w-6xl md:max-w-4xl mx-auto">
+          <div className="grid grid-cols-2 gap-12 justify-start lg:max-w-6xl md:max-w-4xl mx-auto pb-5">
 
             {/* Interview Section */}
             <div className="text-center relative">
@@ -139,14 +111,14 @@ export default async function Home() {
                   </motion.div>
                 </span>
               </h2>
-              <WaitlistForm>
+              <Link href="/candidate/dashboard">
                 <Button
                   size="lg"
                   className="bg-[rgba(58,63,187,1)] hover:bg-[rgba(58,63,187,1)] hover:opacity-80 text-[rgba(233,244,255,1)] font-medium md:px-8 md:py-3 px-5 py-2 rounded-lg lg:text-lg md:text-base text-sm hover:shadow-lg"
                 >
                   Take interviews
                 </Button>
-              </WaitlistForm>
+              </Link>
 
             </div>
 
@@ -211,7 +183,7 @@ export default async function Home() {
 
 
       {/* Bottom Section */}
-      <section className="mt-2 bg-[linear-gradient(68.04deg,rgba(58,63,187,0.9)_-8.15%,rgba(107,124,255,0.9)_66.87%)] text-white lg:py-20 md:py-10 lg:px-6 md:px-20  px-10 py-8">
+      <section className=" bg-[linear-gradient(68.04deg,rgba(58,63,187,0.9)_-8.15%,rgba(107,124,255,0.9)_66.87%)] text-white lg:py-20 md:py-10 lg:px-6 md:px-20  px-10 py-8">
         <div className="max-w-6xl mx-auto whitespace-nowrap">
           <div className="grid grid-cols-2 md:gap-12 gap-6 items-center">
             <div>

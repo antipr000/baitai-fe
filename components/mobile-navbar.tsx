@@ -33,7 +33,7 @@ export const MobileNavBar = ({ isAuthenticated }: MobileNavBarProps) => {
         }
     }
 
-    return (<Sheet open={open} onOpenChange={setOpen}>
+    return (<Sheet modal={false} open={open} onOpenChange={setOpen}>
         <><SheetTrigger asChild className="">
             <Button variant="ghost" size="icon" className="text-[rgba(69,94,255,0.8)] ml-auto">
                 <Menu className="h-6 w-6" />

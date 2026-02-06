@@ -20,6 +20,7 @@ interface PerformanceTrendItem {
 interface CategoryScore {
     category: string
     score: number
+    reason: string
 }
 
 interface AggregatesResponse {
@@ -69,11 +70,9 @@ interface PageProps {
 export default async function ResultPage({ params }: PageProps) {
     const { id } = await params
     const data = await getAggregates(id)
-
     if (!data) {
         notFound()
     }
-
     const maxScore = 100
     const performanceLevel = getPerformanceLevel(data.current_score)
 
@@ -93,6 +92,7 @@ export default async function ResultPage({ params }: PageProps) {
     const skillCards = data.category_scores.map(cat => ({
         title: formatCategoryName(cat.category),
         score: cat.score,
+        reason: cat.reason
     }))
 
     return (
@@ -204,7 +204,7 @@ export default async function ResultPage({ params }: PageProps) {
                 </div>
 
                 {/* Charts Row */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-12">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-24 mt-12">
                     {/* Performance Trend */}
                     <Card className="bg-[rgba(196,240,0,0.1)] border border-[rgba(196,240,0,0.05)]">
                         <CardHeader className="pb-2">
@@ -236,7 +236,7 @@ export default async function ResultPage({ params }: PageProps) {
                 <div className="mt-12 grid grid-cols-1 md:grid-cols-2 gap-6 p-8 px-10 rounded-3xl bg-[linear-gradient(94.46deg,rgba(119,198,255,0.3)_-27.34%,#F5F7FF_202.83%)]">
                     {skillCards.map((skill, index) => (
                         <Card key={index} className="bg-white border border-[rgba(75,179,255,0.1)]">
-                            <CardContent className="p-6">
+                            <CardContent className="p-6 px-12">
                                 <div className="flex justify-between items-center mb-3">
                                     <h3 className="font-semibold text-[rgba(10,13,26,0.9)]">{skill.title}</h3>
                                     <span className="text-lg ">
@@ -244,14 +244,19 @@ export default async function ResultPage({ params }: PageProps) {
                                         <span className="text-[rgba(10,13,26,0.9)] font-semibold">/100</span>
                                     </span>
                                 </div>
-                                <Progress value={skill.score} indicatorColor="linear-gradient(90.14deg,rgba(45,166,255,0.9) -4.79%,#B9E1FF 161.26%)" className="h-2" />
+                                <Progress value={skill.score} indicatorColor="linear-gradient(90.14deg,rgba(45,166,255,0.9) -4.79%,#B9E1FF 161.26%)" className="h-[6px]" />
+                                {skill.reason && (
+                                    <p className="mt-4 text-sm text-[rgba(10,13,26,0.5)]">
+                                        {skill.reason}
+                                    </p>
+                                )}
                             </CardContent>
                         </Card>
                     ))}
                 </div>
 
                 {/* Key Strengths & Scope of Improvement */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-15 mx-5 mt-12">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-18 mx-10 mt-12">
                     {/* Key Strengths */}
                     <Card className="bg-[rgba(5,187,54,0.05)] border-[rgba(25,192,71,0.5)]">
                         <CardContent className="p-8 px-10">
@@ -290,7 +295,7 @@ export default async function ResultPage({ params }: PageProps) {
                 </div>
 
                 {/* Action Buttons */}
-                <div className="flex items-center my-12  gap-6 pb-8 mx-18">
+                <div className="flex items-center my-12  gap-16 pb-8 mx-18">
                     <Link href={`/interview/${data.template_id}`} className="flex-1">
                         <Button className="p-6 w-full h-14 rounded-xl bg-[linear-gradient(92.27deg,rgba(62,84,251,0.82)_18.18%,rgba(143,164,255,0.738)_110.61%)] hover:opacity-80 text-[rgba(248,250,255,1)] font-semibold text-xl">
                             Retake Interview
