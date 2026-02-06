@@ -17,7 +17,7 @@ type InterviewSectionProps = {
     setSelectedMic: (id: string | null) => void
     setSelectedSpeaker: (id: string | null) => void
     saveSelection: (key: string, value: string) => void
-    startInterview: () => void
+    startInterview: () => void | Promise<void>
     onCameraStream?: (stream: MediaStream) => void
     onMicStream?: (stream: MediaStream) => void
     keepCameraStreamOnUnmount?: boolean
@@ -79,12 +79,23 @@ export default function InterviewSection({
     const [isMicTesting, setIsMicTesting] = useState(false)
     const [audioLevel, setAudioLevel] = useState(0)
     const [isSpeakerTesting, setIsSpeakerTesting] = useState(false)
+    const [isStarting, setIsStarting] = useState(false)
     const audioContextRef = useRef<AudioContext | null>(null)
     const analyserRef = useRef<AnalyserNode | null>(null)
     const micStreamRef = useRef<MediaStream | null>(null)
     const animationFrameRef = useRef<number | null>(null)
     const videoElementRef = useRef<HTMLVideoElement | null>(null)
     const cameraStreamRef = useRef<MediaStream | null>(null)
+
+    const handleStart = async () => {
+        if (permission !== 'granted' || isStarting) return
+        setIsStarting(true)
+        try {
+            await startInterview()
+        } finally {
+            setIsStarting(false)
+        }
+    }
 
     const startMicTest = async () => {
         try {
@@ -416,11 +427,11 @@ export default function InterviewSection({
                         {/* Start Now Button */}
                         <div className="text-center mb-4">
                             <Button
-                                disabled={permission !== 'granted'}
-                                onClick={startInterview}
-                                className={`w-full hover:bg-transparent border-2 border-[rgba(104,100,247,1)] hover:text-[rgba(104,100,247,1)] bg-[rgba(104,100,247,1)] text-white py-3 rounded-lg font-semibold text-lg ${permission !== 'granted' ? 'bg-gray-300 text-gray-500 border-gray-300 cursor-not-allowed' : ''}`}
+                                disabled={permission !== 'granted' || isStarting}
+                                onClick={handleStart}
+                                className={`w-full hover:bg-transparent border-2 border-[rgba(104,100,247,1)] hover:text-[rgba(104,100,247,1)] bg-[rgba(104,100,247,1)] text-white py-3 rounded-lg font-semibold text-lg ${permission !== 'granted' || isStarting ? 'bg-gray-300 text-gray-500 border-gray-300 cursor-not-allowed' : ''}`}
                             >
-                                Start Now
+                                {isStarting ? 'Starting...' : 'Start Now'}
                             </Button>
                         </div>
                     </div>
