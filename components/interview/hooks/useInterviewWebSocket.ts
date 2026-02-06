@@ -56,31 +56,76 @@ export function useInterviewWebSocket(
   // ============================================
   // WebSocket Connection Effect
   // ============================================
+
+  // Ref for timeout cleanup only (not state)
+  const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const MAX_RECONNECT_ATTEMPTS = 5
+
   useEffect(() => {
     if (!sessionId) return
 
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
     console.log('[WebSocket] Connecting to session:', sessionId)
 
+    // Reset reconnection state on new session
+    store.getState().resetReconnectionState()
+
     const manager = new WebSocketManager(
       { sessionId, apiUrl },
       {
         onConnect: () => {
           console.log('[WebSocket] Connected')
+          // Reset reconnection attempts on successful connection
+          store.getState().setReconnectAttempts(0)
           // Status update handled by onStatusChange
         },
         onDisconnect: () => {
           console.log('[WebSocket] Disconnected')
-          // Status update handled by onStatusChange
-          // Stop recording when disconnected (matches original)
+          const state = store.getState()
+
+          // Check if we should attempt to reconnect
+          if (!state.isIntentionalDisconnect && state.reconnectAttempts < MAX_RECONNECT_ATTEMPTS) {
+            const attempt = state.incrementReconnectAttempts()
+            const delay = Math.min(1000 * Math.pow(2, attempt - 1), 5000) // Exponential backoff: 1s, 2s, 4s, 5s...
+
+            console.log(`[WebSocket] Connection lost unexpectedly. Attempting reconnect ${attempt}/${MAX_RECONNECT_ATTEMPTS} in ${delay}ms...`)
+
+            state.setConnectionStatus('connecting')
+
+            reconnectTimeoutRef.current = setTimeout(() => {
+              console.log('[WebSocket] Reconnecting now...')
+              manager.connect()
+            }, delay)
+
+            // NOTE: We do NOT stop recording here to allow seamless resumption if possible,
+            // or at least wait until max retries fail.
+            return
+          }
+
+          if (!state.isIntentionalDisconnect) {
+            console.error('[WebSocket] Max reconnection attempts reached')
+            state.setError('Connection lost. Please refresh the page.')
+            onError?.(new Error('WebSocket connection lost'))
+          }
+
+          // Legacy behavior: Stop recording when finally disconnected
           stopRecording()
         },
         onStatusChange: (status) => {
-          store.getState().setConnectionStatus(status)
+          const state = store.getState()
+          // Don't overwrite 'connecting' status during reconnection delay
+          if (status === 'disconnected' && !state.isIntentionalDisconnect && state.reconnectAttempts < MAX_RECONNECT_ATTEMPTS) {
+            return
+          }
+          state.setConnectionStatus(status)
         },
         onError: (error) => {
           console.error('[WebSocket] Error:', error)
-          store.getState().setError('Connection error. Please try again.')
+          const state = store.getState()
+          // Only set user-facing error if we're not going to retry or if it's a critical error
+          if (state.reconnectAttempts >= MAX_RECONNECT_ATTEMPTS) {
+            state.setError('Connection error. Please try again.')
+          }
           onError?.(error instanceof Error ? error : new Error('WebSocket connection error'))
         },
         onTextMessage: handleTextMessage,
@@ -132,6 +177,13 @@ export function useInterviewWebSocket(
 
     return () => {
       console.log('[WebSocket] Cleanup - disconnecting')
+      // Mark as intentional to prevent reconnection attempts (navigating away, unmounting, etc.)
+      store.getState().setIsIntentionalDisconnect(true)
+
+      if (reconnectTimeoutRef.current) {
+        clearTimeout(reconnectTimeoutRef.current)
+      }
+
       manager.disconnect()
       wsManagerRef.current = null
       registerWebSocketManager(null)
@@ -325,6 +377,9 @@ export function useInterviewWebSocket(
       stopVideoRecording()
       stopScreenRecording()
 
+      // Mark as intentional to prevent reconnection attempts during cleanup
+      store.getState().setIsIntentionalDisconnect(true)
+
       // Finalize all media uploads before closing
       finalizeAllMedia()
 
@@ -353,6 +408,7 @@ export function useInterviewWebSocket(
     transitionToListeningOnError(message.message || 'An error occurred')
 
     if (message.error_type === 'session') {
+      store.getState().setIsIntentionalDisconnect(true)
       wsManagerRef.current?.disconnect()
     }
 
