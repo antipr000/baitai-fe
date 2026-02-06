@@ -406,8 +406,8 @@ export async function handleEndInterview(
   // Finalize media
   await finalizeAllMedia()
 
-  // Disconnect WebSocket
-  disconnectWebSocket()
+  // Disconnect WebSocket handled by component unmount cleanup
+  // disconnectWebSocket()
 
   // Stop all streams
   cameraStream?.getTracks().forEach(t => t.stop())

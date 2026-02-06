@@ -85,6 +85,10 @@ const createInitialState = (): InterviewState => ({
 
   // UI
   showEndConfirm: false,
+
+  // Reconnection
+  reconnectAttempts: 0,
+  isIntentionalDisconnect: false,
 })
 
 // ============================================
@@ -339,6 +343,27 @@ export const useInterviewStore = create<InterviewStore>()(
     // UI
     // ----------------------------------------
     setShowEndConfirm: (showEndConfirm: boolean) => set({ showEndConfirm }),
+
+    // ----------------------------------------
+    // Reconnection
+    // ----------------------------------------
+    setReconnectAttempts: (reconnectAttempts: number) =>
+      set({ reconnectAttempts }),
+
+    incrementReconnectAttempts: () => {
+      let newCount = 0
+      set((state) => {
+        newCount = state.reconnectAttempts + 1
+        return { reconnectAttempts: newCount }
+      })
+      return newCount
+    },
+
+    setIsIntentionalDisconnect: (isIntentionalDisconnect: boolean) =>
+      set({ isIntentionalDisconnect }),
+
+    resetReconnectionState: () =>
+      set({ reconnectAttempts: 0, isIntentionalDisconnect: false }),
 
     // ----------------------------------------
     // Reset

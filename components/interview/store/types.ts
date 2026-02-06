@@ -214,6 +214,10 @@ export interface InterviewState {
 
   // UI
   showEndConfirm: boolean
+
+  // Reconnection
+  reconnectAttempts: number
+  isIntentionalDisconnect: boolean
 }
 
 // ============================================
@@ -277,6 +281,12 @@ export interface InterviewActions {
 
   // UI
   setShowEndConfirm: (show: boolean) => void
+
+  // Reconnection
+  setReconnectAttempts: (attempts: number) => void
+  incrementReconnectAttempts: () => number // returns new count
+  setIsIntentionalDisconnect: (intentional: boolean) => void
+  resetReconnectionState: () => void
 
   // Reset
   reset: () => void
