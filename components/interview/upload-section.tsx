@@ -7,7 +7,7 @@ import Image from 'next/image'
 import { motion } from "motion/react"
 import { Progress } from '../ui/progress'
 import { Loader2, CheckCircle2, XCircle } from 'lucide-react'
-import api from '@/lib/api/client'
+import { uploadResume } from '@/lib/api/resume'
 
 type UploadSectionProps = {
     onUploadComplete?: () => void
@@ -51,35 +51,24 @@ export default function UploadSection({ onUploadComplete }: UploadSectionProps) 
         setUploadError(null)
 
         try {
-            const formData = new FormData()
-            formData.append('file', selectedFile)
-            formData.append('type', 'resume')
-            
-
-            // needs to be changed to actual backend URL
-            await api.post(
-                '/api/v1/upload/resume/', 
-                formData,
-                {
-                    onUploadProgress: (progressEvent) => {
-                        if (progressEvent.lengthComputable && progressEvent.total !== undefined) {
-                            const percentComplete = (progressEvent.loaded / progressEvent.total) * 100
-                            setUploadProgress(percentComplete)
-                        }
-                    },
+            await uploadResume(selectedFile, (progressEvent) => {
+                if (progressEvent.lengthComputable && progressEvent.total !== undefined) {
+                    const percentComplete = (progressEvent.loaded / progressEvent.total) * 100
+                    setUploadProgress(percentComplete)
                 }
-            )
+            })
 
             setUploadSuccess(true)
             setUploadProgress(100)
-                onUploadComplete?.()
+            onUploadComplete?.()
         } catch (error) {
             if (axios.isAxiosError(error)) {
-                setUploadError(error.message ||'Upload failed. Please try again.')
+                const serverMessage = error.response?.data?.error
+                setUploadError(serverMessage || error.message || 'Upload failed. Please try again.')
             } else {
                 setUploadError('An error occurred during upload. Please try again.')
             }
-            console.log('Upload error:', error)   
+            console.error('Upload error:', error)
         } finally {
             setIsUploading(false)
         }
