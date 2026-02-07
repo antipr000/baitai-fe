@@ -77,6 +77,10 @@ export function disconnectWebSocket() {
   wsManager?.disconnect()
 }
 
+export function sendEndInterviewMessage(): boolean {
+  return wsManager?.sendEndInterview() ?? false
+}
+
 export function isWebSocketConnected(): boolean {
   return wsManager?.isConnected() ?? false
 }
@@ -396,6 +400,10 @@ export async function handleEndInterview(
   }
 
   store.setHasNavigatedAway(true)
+
+  // Send end_interview message to backend via WebSocket
+  // This triggers the backend to mark the session as COMPLETED and run scoring
+  sendEndInterviewMessage()
 
   // Stop all recordings
   stopRecording()

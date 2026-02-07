@@ -336,6 +336,14 @@ export class WebSocketManager {
   }
 
   /**
+   * Send end_interview signal (user-initiated interview termination)
+   */
+  sendEndInterview(): boolean {
+    console.log('[WebSocketManager] Sending end_interview')
+    return this.send({ type: 'end_interview' })
+  }
+
+  /**
    * Start a media upload session
    */
   sendStartMediaUpload(recordingType: 'video' | 'screen' | 'audio'): boolean {
