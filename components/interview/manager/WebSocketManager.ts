@@ -267,33 +267,9 @@ export class WebSocketManager {
 
           this.pingTimeoutTimer = setTimeout(() => {
             console.warn(`[WebSocketManager] Ping timed out after ${this.config.pongTimeout}ms - forcing disconnect`)
-
-            // Force close immediately without waiting for graceful handshake
-            // This is critical if internet is down, as standard close() waits for server ACK
-            const ws = this.ws
-            if (ws) {
-              // Remove listeners to prevent duplicate events if/when the socket actually closes later
-              ws.onclose = null
-              ws.onerror = null
-              ws.onmessage = null
-              ws.onopen = null
-
-              try {
-                ws.close(4999, 'Ping timeout')
-              } catch (e) {
-                // Ignore errors closing an already broken socket
-              }
-            }
-
-            // Manually trigger close handler to update UI and start reconnection immediately
-            this.handleClose({
-              code: 4999,
-              reason: 'Ping timeout',
-              wasClean: false,
-            } as CloseEvent)
-
-            // Clear ws reference to prevent stale state
-            this.ws = null
+            // Force close with a custom code to indicate timeout
+            // This will trigger onclose -> handleClose -> scheduleReconnect
+            this.ws?.close(4999, 'Ping timeout')
           }, this.config.pongTimeout)
 
         } catch (error) {
