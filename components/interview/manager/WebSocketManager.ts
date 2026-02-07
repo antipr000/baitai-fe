@@ -35,8 +35,6 @@ export interface WebSocketManagerConfig {
   maxReconnectAttempts?: number
   /** Reconnection delay in ms (default: 2000) */
   reconnectDelay?: number
-  /** Timeout for waiting for pong response in ms (default: 10000) */
-  pongTimeout?: number
 }
 
 export interface WebSocketManagerCallbacks {
@@ -63,7 +61,6 @@ export class WebSocketManager {
   private config: Required<WebSocketManagerConfig>
   private callbacks: WebSocketManagerCallbacks
   private keepaliveTimer: NodeJS.Timeout | null = null
-  private pingTimeoutTimer: NodeJS.Timeout | null = null
   private reconnectTimer: NodeJS.Timeout | null = null
   private reconnectAttempts = 0
   private isDestroyed = false
@@ -81,7 +78,6 @@ export class WebSocketManager {
       autoReconnect: config.autoReconnect ?? false,
       maxReconnectAttempts: config.maxReconnectAttempts ?? 3,
       reconnectDelay: config.reconnectDelay ?? 2000,
-      pongTimeout: config.pongTimeout ?? 5000,
     }
     this.callbacks = callbacks
   }
@@ -196,18 +192,6 @@ export class WebSocketManager {
       // JSON text message
       try {
         const message = JSON.parse(data) as WebSocketTextMessage
-
-        // Intercept pong messages for keepalive
-        if (message.type === 'pong') {
-          // console.log('[WebSocketManager] Received pong - connection healthy')
-          if (this.pingTimeoutTimer) {
-            clearTimeout(this.pingTimeoutTimer)
-            this.pingTimeoutTimer = null
-          }
-          // Don't propagate pong to listeners, it's internal
-          return
-        }
-
         this.callbacks.onTextMessage?.(message)
       } catch (e) {
         console.error('[WebSocketManager] Failed to parse message:', e)
@@ -260,18 +244,6 @@ export class WebSocketManager {
         try {
           this.ws.send(JSON.stringify({ type: 'ping' }))
           console.log('[WebSocketManager] Sent keepalive ping')
-
-          // Start ping timeout timer
-          // If we don't get a pong back within pongTimeout, we consider the connection dead
-          if (this.pingTimeoutTimer) clearTimeout(this.pingTimeoutTimer)
-
-          this.pingTimeoutTimer = setTimeout(() => {
-            console.warn(`[WebSocketManager] Ping timed out after ${this.config.pongTimeout}ms - forcing disconnect`)
-            // Force close with a custom code to indicate timeout
-            // This will trigger onclose -> handleClose -> scheduleReconnect
-            this.ws?.close(4999, 'Ping timeout')
-          }, this.config.pongTimeout)
-
         } catch (error) {
           console.error('[WebSocketManager] Failed to send keepalive:', error)
         }
@@ -285,10 +257,6 @@ export class WebSocketManager {
     if (this.keepaliveTimer) {
       clearInterval(this.keepaliveTimer)
       this.keepaliveTimer = null
-    }
-    if (this.pingTimeoutTimer) {
-      clearTimeout(this.pingTimeoutTimer)
-      this.pingTimeoutTimer = null
     }
   }
 
