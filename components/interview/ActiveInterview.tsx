@@ -64,6 +64,7 @@ import {
   stopSilenceDetection,
   cleanupAll,
   transitionToListening,
+  sendEndInterviewMessage,
 } from './store/interviewActions'
 
 import { MixedAudioContext } from './lib/audioUtils'
@@ -330,12 +331,17 @@ export default function ActiveInterview({
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9000'
       if (sessionId) {
         try {
+          // 1. Finalize media
           navigator.sendBeacon(
             `${apiUrl}/api/v1/interview-session/${sessionId}/media/finalize/`,
             JSON.stringify({ type: 'finalize_all_media' })
           )
+
+          // 2. End interview via WebSocket
+          sendEndInterviewMessage()
+
         } catch (error) {
-          console.error('[Media Upload] Error sending beacon:', error)
+          console.error('[Unload] Error sending end interview:', error)
         }
       }
     }
