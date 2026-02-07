@@ -74,6 +74,17 @@ export function useInterviewWebSocket(
       { sessionId, apiUrl },
       {
         onConnect: () => {
+
+          const state = store.getState()
+
+          // If this was a reconnection (attempts > 0), ensure we're in listening state
+          if (state.reconnectAttempts > 0) {
+            console.log('[WebSocket] Reconnection successful - resetting to listening state')
+            state.setConversationState('listening')
+            // Also reset processing flags to be safe
+            state.setIsProcessing(false)
+          }
+
           console.log('[WebSocket] Connected')
           // Reset reconnection attempts on successful connection
           store.getState().setReconnectAttempts(0)
