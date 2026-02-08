@@ -1,4 +1,5 @@
 'use client'
+import axios from "axios";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { auth } from "@/lib/firebase";
@@ -70,10 +71,16 @@ export default function SignupPage() {
 
             // toast.success("Account created successfully!");
             // router.push("/candidate/dashboard");
-        } catch (err) {
+        } catch (err: any) {
             console.log(err);
-            setError("Something went wrong");
-            toast.error("Something went wrong");
+            if (axios.isAxiosError(err)) {
+                const message = err.response?.data?.detail || "Something went wrong";
+                setError(message);
+                toast.error(message);
+            } else {
+                setError("Something went wrong");
+                toast.error("Something went wrong");
+            }
         } finally {
             setLoading(false);
         }
@@ -103,8 +110,6 @@ export default function SignupPage() {
                 token: idToken,
             });
 
-            console.log("token", idToken)
-
             await fetch("/api/login", {
                 headers: {
                     Authorization: `Bearer ${idToken}`,
@@ -112,10 +117,16 @@ export default function SignupPage() {
             });
             toast.success("Successfully signed up! Redirecting...");
             router.push("/company/dashboard");
-        } catch (err) {
+        } catch (err: any) {
             console.log(err);
-            setError("Google Sign-up failed");
-            toast.error("Google Sign-up failed");
+            if (axios.isAxiosError(err)) {
+                const message = err.response?.data?.detail || "Google Sign-up failed";
+                setError(message);
+                toast.error(message);
+            } else {
+                setError("Google Sign-up failed");
+                toast.error("Google Sign-up failed");
+            }
         } finally {
             setLoading(false);
         }

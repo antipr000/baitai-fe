@@ -3,6 +3,7 @@
 
 
 "use client";
+import axios from "axios";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { auth } from "@/lib/firebase";
@@ -46,10 +47,16 @@ export default function LoginPage() {
             } else {
                 toast.error("Please verify your email");
             }
-        } catch (err) {
+        } catch (err: any) {
             console.log(err);
-            setError("Something went wrong");
-            toast.error("Something went wrong");
+            if (axios.isAxiosError(err)) {
+                const message = err.response?.data?.detail || "Something went wrong";
+                setError(message);
+                toast.error(message);
+            } else {
+                setError("Something went wrong");
+                toast.error("Something went wrong");
+            }
         } finally {
             setLoading(false);
         }
@@ -81,10 +88,16 @@ export default function LoginPage() {
 
             // window.location.href forces a full page reload to ensure server components (Header) update
             window.location.href = "/candidate/dashboard";
-        } catch (err) {
+        } catch (err: any) {
             console.log(err);
-            setError("Google Sign-in failed");
-            toast.error("Google Sign-in failed");
+            if (axios.isAxiosError(err)) {
+                const message = err.response?.data?.detail || "Google Sign-in failed";
+                setError(message);
+                toast.error(message);
+            } else {
+                setError("Google Sign-in failed");
+                toast.error("Google Sign-in failed");
+            }
         } finally {
             setLoading(false);
         }
@@ -253,9 +266,15 @@ function ForgotPasswordModal() {
             await sendPasswordResetEmail(auth, email);
             toast.success("Password reset email sent. Check your inbox!");
             setEmail("");
-        } catch (error) {
-            console.log(error);
-            toast.error("Failed to send reset email.");
+        } catch (err: any) {
+            console.log(err);
+            if (axios.isAxiosError(err)) {
+                const message = err.response?.data?.detail || "Failed to send reset email.";
+                toast.error(message);
+            } else {
+                const message = err.message || "Failed to send reset email.";
+                toast.error(message.replace("Firebase: ", ""));
+            }
         } finally {
             setLoading(false);
         }
