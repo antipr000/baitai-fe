@@ -61,8 +61,14 @@ export function useInterviewWebSocket(
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const MAX_RECONNECT_ATTEMPTS = 5
 
+  // Subscribe to isInitialized to trigger effect when store is ready
+  const isInitialized = useInterviewStore((s) => s.isInitialized)
+
   useEffect(() => {
-    if (!sessionId) return
+    if (!sessionId || !isInitialized) {
+      console.log('[WebSocket] Skipping connection - sessionId:', sessionId, 'isInitialized:', isInitialized)
+      return
+    }
 
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
     console.log('[WebSocket] Connecting to session:', sessionId)
@@ -199,7 +205,7 @@ export function useInterviewWebSocket(
       wsManagerRef.current = null
       registerWebSocketManager(null)
     }
-  }, [sessionId]) // Only reconnect when sessionId changes
+  }, [sessionId, isInitialized]) // Reconnect when sessionId or isInitialized changes
 
   // ============================================
   // Message Handler (uses store.getState() for fresh state)

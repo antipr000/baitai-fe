@@ -218,6 +218,9 @@ export interface InterviewState {
   // Reconnection
   reconnectAttempts: number
   isIntentionalDisconnect: boolean
+
+  // Initialization flag
+  isInitialized: boolean
 }
 
 // ============================================

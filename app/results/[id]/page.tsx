@@ -129,7 +129,7 @@ export default async function ResultPage({ params }: PageProps) {
 
                                 <p className="text-sm text-muted-foreground">{data.interview_title}</p>
 
-                                {data.total_attempts > 1 && (
+                                {data.total_attempts > 1 && data.improvement_points !== null && (
                                     <div className="flex items-center  text-sm ">
                                         {data.improvement_points >= 0 ? (
                                             <Image src="/candidate/results/up.svg" alt="Up" width={20} height={20} className="mr-1 mt-2 h-8 w-8" />
@@ -157,7 +157,11 @@ export default async function ResultPage({ params }: PageProps) {
                                 <Image src="/candidate/results/up2.svg" alt="Up" width={20} height={20} className="mr-1 mt-2 h-8 w-8" />
                                 <div>
                                     <p className="text-sm text-muted-foreground">Improvement</p>
-                                    <p className="text-xl font-bold">{data.total_attempts > 1 ? `${data.improvement_percent >= 0 ? '+' : ''}${data.improvement_percent}%` : 'N/A'}</p>
+                                    <p className="text-xl font-bold">
+                                        {data.total_attempts > 1 && data.improvement_percent !== null
+                                            ? `${data.improvement_percent >= 0 ? '+' : ''}${data.improvement_percent}%`
+                                            : 'N/A'}
+                                    </p>
                                 </div>
                             </div>
                         </CardContent>

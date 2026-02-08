@@ -89,6 +89,9 @@ const createInitialState = (): InterviewState => ({
   // Reconnection
   reconnectAttempts: 0,
   isIntentionalDisconnect: false,
+
+  // Initialization flag
+  isInitialized: false,
 })
 
 // ============================================
@@ -108,6 +111,7 @@ export const useInterviewStore = create<InterviewStore>()(
         templateId,
         conversationState: 'thinking',
         connectionStatus: 'disconnected',
+        isInitialized: true,
       }),
 
     // ----------------------------------------

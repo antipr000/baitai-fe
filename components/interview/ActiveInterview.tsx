@@ -339,8 +339,23 @@ export default function ActiveInterview({
             JSON.stringify({ type: 'finalize_all_media' })
           )
 
-          // 2. End interview via WebSocket
-          sendEndInterviewMessage()
+          // 2. End interview via reliable fetch with keepalive (replaces WebSocket)
+          // keepalive: true ensures the request completes even if the page unloads
+          console.log('[Unload] Ending interview via fetch, authToken present:', !!authToken)
+          if (authToken) {
+            fetch(`${apiUrl}/api/v1/interview-session/${sessionId}/end/`, {
+              method: 'POST',
+              headers: {
+                'Authorization': `Bearer ${authToken}`,
+                'Content-Type': 'application/json',
+              },
+              keepalive: true,
+            }).catch((error) => {
+              console.error('[Unload] Error sending end interview via fetch:', error)
+            })
+          } else {
+            console.warn('[Unload] No authToken available, cannot send end interview request')
+          }
 
         } catch (error) {
           console.error('[Unload] Error sending end interview:', error)
@@ -358,6 +373,20 @@ export default function ActiveInterview({
       MixedAudioContext.destroyInstance()
       screenStreamRef.current?.getTracks().forEach((t) => t.stop())
       disconnectWebSocket()
+
+      // Also ensure we end the session on server-side
+      // This is safe to call multiple times (idempotent on server)
+      console.log('[PageHide/Unmount] Ending interview session via fetch')
+      if (authToken && sessionId) {
+        fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9000'}/api/v1/interview-session/${sessionId}/end/`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${authToken}`,
+            'Content-Type': 'application/json',
+          },
+          keepalive: true,
+        }).catch((err) => console.error('Error ending session on cleanup:', err))
+      }
     }
 
     window.addEventListener('beforeunload', handleBeforeUnload)
@@ -365,8 +394,11 @@ export default function ActiveInterview({
     return () => {
       window.removeEventListener('beforeunload', handleBeforeUnload)
       window.removeEventListener('pagehide', handlePageHide)
+
+      // Also trigger end session on component unmount (covers client-side navigation)
+      handlePageHide()
     }
-  }, [sessionId])
+  }, [sessionId, authToken])
 
   // -------------------------------------------------------------------------
   // Handlers
