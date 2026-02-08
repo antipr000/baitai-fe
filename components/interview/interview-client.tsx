@@ -2,7 +2,7 @@
 "use client"
 
 import api from '@/lib/api/client';
-import { checkResume } from '@/lib/api/resume';
+import { ResumeCheckResponse } from '@/lib/api/resume';
 import { useAuth } from '@/lib/auth/authContext';
 
 import LeftSection from "@/components/interview/left-section"
@@ -30,11 +30,13 @@ interface InterviewClientProps {
     templateId: string
     templateData: InterviewTemplateData | null
     authToken?: string
+    initialResumeCheck: ResumeCheckResponse | null
 }
 
-export default function InterviewClient({ templateId, templateData, authToken }: InterviewClientProps) {
+export default function InterviewClient({ templateId, templateData, authToken, initialResumeCheck }: InterviewClientProps) {
     const { loading: authLoading } = useAuth();
-    const [activeSection, setActiveSection] = useState<'upload' | 'interview'>('upload')
+    const hasResume = initialResumeCheck?.has_resume ?? false;
+    const [activeSection, setActiveSection] = useState<'upload' | 'interview'>(hasResume ? 'interview' : 'upload')
     const [isInterviewActive, setIsInterviewActive] = useState(false)
     const [cameras, setCameras] = useState<MediaDevice[]>([]);
     const [microphones, setMicrophones] = useState<MediaDevice[]>([]);
@@ -46,8 +48,7 @@ export default function InterviewClient({ templateId, templateData, authToken }:
     const [selectedSpeaker, setSelectedSpeaker] = useState<string | null>(null);
     const [cameraStream, setCameraStream] = useState<MediaStream | null>(null);
     const [micStream, setMicStream] = useState<MediaStream | null>(null);
-    const [resumeUploaded, setResumeUploaded] = useState(false);
-    const [isCheckingResume, setIsCheckingResume] = useState(true);
+    const [resumeUploaded, setResumeUploaded] = useState(hasResume);
 
     const [sessionId, setSessionId] = useState<string | null>(null);
 
@@ -220,29 +221,7 @@ export default function InterviewClient({ templateId, templateData, authToken }:
 
 
 
-    // Check if user already has a resume uploaded
-    // Wait for Firebase Auth to restore the session before making the API call,
-    // otherwise auth.currentUser is null on page reload and no token gets attached.
-    useEffect(() => {
-        if (authLoading) return;
 
-        async function checkExistingResume() {
-            try {
-                setIsCheckingResume(true);
-                const result = await checkResume();
-                if (result.has_resume) {
-                    setResumeUploaded(true);
-                    setActiveSection('interview');
-                }
-            } catch (error) {
-                console.error('[Interview Client] Error checking resume:', error);
-                // If check fails, default to showing upload section
-            } finally {
-                setIsCheckingResume(false);
-            }
-        }
-        checkExistingResume();
-    }, [authLoading]);
 
     const handleStartInterview = async () => {
         if (!templateId) {
@@ -276,7 +255,7 @@ export default function InterviewClient({ templateId, templateData, authToken }:
     };
 
     if (isInterviewActive && permission === 'granted' && templateId && sessionId) {  // could check for resume uploaded also if want to make it mandatory
-        return <ActiveInterview cameraStream={cameraStream} micStream={micStream} templateId={templateId} sessionId={sessionId} />
+        return <ActiveInterview cameraStream={cameraStream} micStream={micStream} templateId={templateId} sessionId={sessionId} authToken={authToken} />
     }
 
     return (
@@ -288,7 +267,6 @@ export default function InterviewClient({ templateId, templateData, authToken }:
                     title={templateData?.title}
                     duration={templateData?.duration}
                     resumeUploaded={resumeUploaded}
-                    isCheckingResume={isCheckingResume}
                 />
             </div>
             <div className="bg-[rgba(245,247,255,1)] flex-1 min-w-0">
@@ -296,7 +274,7 @@ export default function InterviewClient({ templateId, templateData, authToken }:
                     <UploadSection onUploadComplete={() => {
                         setResumeUploaded(true);
                         setActiveSection('interview');
-                    }} />
+                    }} authToken={authToken} />
                 ) : (
                     <InterviewSection
                         cameras={cameras}

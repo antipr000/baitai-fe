@@ -11,9 +11,10 @@ import { uploadResume } from '@/lib/api/resume'
 
 type UploadSectionProps = {
     onUploadComplete?: () => void
+    authToken?: string
 }
 
-export default function UploadSection({ onUploadComplete }: UploadSectionProps) {
+export default function UploadSection({ onUploadComplete, authToken }: UploadSectionProps) {
     const fileInputRef = useRef<HTMLInputElement>(null)
     const [selectedFile, setSelectedFile] = useState<File | null>(null)
     const [uploadProgress, setUploadProgress] = useState(0)
@@ -51,7 +52,7 @@ export default function UploadSection({ onUploadComplete }: UploadSectionProps) 
         setUploadError(null)
 
         try {
-            await uploadResume(selectedFile, (progressEvent) => {
+            await uploadResume(selectedFile, authToken, (progressEvent) => {
                 if (progressEvent.lengthComputable && progressEvent.total !== undefined) {
                     const percentComplete = (progressEvent.loaded / progressEvent.total) * 100
                     setUploadProgress(percentComplete)

@@ -38,15 +38,22 @@ export async function checkResume(): Promise<ResumeCheckResponse> {
  */
 export async function uploadResume(
   file: File,
+  token?: string,
   onUploadProgress?: (progressEvent: { loaded: number; total?: number; lengthComputable?: boolean }) => void
 ): Promise<UserResumeDTO> {
   const formData = new FormData()
   formData.append('file', file)
 
+  const headers: Record<string, string> = {
+    'Content-Type': 'multipart/form-data',
+  }
+
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`
+  }
+
   const response = await api.post('/api/v1/resume/upload/', formData, {
-    headers: {
-      'Content-Type': 'multipart/form-data',
-    },
+    headers,
     onUploadProgress,
   })
 

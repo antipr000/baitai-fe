@@ -2,7 +2,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { Progress } from '../ui/progress'
 import { Button } from '../ui/button'
-import { ArrowLeft, Loader2 } from 'lucide-react'
+import { ArrowLeft } from 'lucide-react'
 
 interface LeftSectionProps {
     activeSection: 'upload' | 'interview'
@@ -10,10 +10,9 @@ interface LeftSectionProps {
     title?: string
     duration?: number
     resumeUploaded?: boolean
-    isCheckingResume?: boolean
 }
 
-export default function LeftSection({ activeSection, setActiveSection, title, duration, resumeUploaded, isCheckingResume }: LeftSectionProps) {
+export default function LeftSection({ activeSection, setActiveSection, title, duration, resumeUploaded }: LeftSectionProps) {
     return (
         <div className='bg-white flex-1 '>
             <div className="flex items-center justify-between px-6 py-4 ">
@@ -48,13 +47,11 @@ export default function LeftSection({ activeSection, setActiveSection, title, du
                                         Upload Resume
                                     </h3>
                                     {resumeUploaded && (
-                                        <p className="text-xs text-green-500">Completed</p>
+                                        <p className="text-sm text-left text-green-500">Completed</p>
                                     )}
                                 </div>
                             </div>
-                            {isCheckingResume ? (
-                                <Loader2 className="w-5 h-5 animate-spin text-[rgba(98,117,252,0.9)]" />
-                            ) : resumeUploaded ? (
+                            {resumeUploaded ? (
                                 <div className="bg-green-500 p-1 rounded-full">
                                     <Image src="/interview/tick.svg" alt="check" width={16} height={16} />
                                 </div>

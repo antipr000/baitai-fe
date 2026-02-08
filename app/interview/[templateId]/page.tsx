@@ -1,4 +1,5 @@
 import { serverFetch } from "@/lib/api/server"
+import { ResumeCheckResponse } from "@/lib/api/resume"
 import InterviewClient, { InterviewTemplateData } from "@/components/interview/interview-client"
 
 interface PageProps {
@@ -24,5 +25,13 @@ export default async function InterviewPage({ params }: PageProps) {
         `/api/v1/user/interview/${templateId}/`
     )
 
-    return <InterviewClient templateId={templateId} templateData={templateData} authToken={tokens?.token} />
+    // Check for existing resume
+    const resumeCheckResult = await serverFetch<ResumeCheckResponse>('/api/v1/resume/check/')
+
+    return <InterviewClient
+        templateId={templateId}
+        templateData={templateData}
+        authToken={tokens?.token}
+        initialResumeCheck={resumeCheckResult}
+    />
 }

@@ -77,7 +77,8 @@ type ActiveInterviewProps = {
   cameraStream?: MediaStream | null
   micStream?: MediaStream | null
   templateId: string
-  sessionId: string
+  sessionId: string,
+  authToken?: string,
 }
 
 // ============================================================================
@@ -89,6 +90,7 @@ export default function ActiveInterview({
   micStream,
   templateId,
   sessionId,
+  authToken,
 }: ActiveInterviewProps) {
   const router = useRouter()
 
