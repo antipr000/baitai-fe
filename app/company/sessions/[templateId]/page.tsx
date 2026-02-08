@@ -33,11 +33,12 @@ interface SessionStats {
     appeared: number
     pending: number
     avg_score: number
+    template_name: string
 }
 
 async function getStats(templateId: string): Promise<SessionStats> {
     const response = await serverFetch<SessionStats>(`/api/v1/company/sessions/${templateId}/stats`)
-    return response || { invites_sent: 0, appeared: 0, pending: 0, avg_score: 0 }
+    return response || { invites_sent: 0, appeared: 0, pending: 0, avg_score: 0, template_name: "Interview Dashboard" }
 }
 
 async function getSessions(templateId: string): Promise<Candidate[]> {
@@ -76,7 +77,7 @@ export default async function SessionPage({ params }: { params: Promise<{ templa
                         <div className='flex items-center gap-4'>
                             <BackButton className="self-start" />
                             <div>
-                                <h1 className="text-2xl font-bold tracking-tight text-transparent bg-clip-text bg-[linear-gradient(91.24deg,#3E54FB_-35.23%,#C3CEFF_202.55%)]">Software Engineer Interview</h1>
+                                <h1 className="text-2xl font-bold tracking-tight text-transparent bg-clip-text bg-[linear-gradient(91.24deg,#3E54FB_-35.23%,#C3CEFF_202.55%)]">{stats.template_name}</h1>
                                 <p className="text-[rgba(84,86,95,0.5)]  font-medium">Interview Dashboard</p>
                             </div>
                         </div>
