@@ -1,15 +1,20 @@
 /**
  * Interview Actions - Centralized action handlers
- * 
- * This module provides action functions that can be called from anywhere
- * (hooks, components, WebSocket handlers) without stale closure issues.
- * 
+ *
+ * KEY CHANGE: The frontend no longer decides state transitions.
+ * State is set ONLY by the backend via STATE_CHANGED / STATE_SYNC events.
+ *
+ * This module provides:
+ * 1. Side-effect appliers (apply*State) that run when state changes arrive from the backend
+ * 2. WebSocket action wrappers (send events to the backend)
+ * 3. Audio/recording control wrappers
+ *
  * All actions use store.getState() to get fresh state.
  */
 
 import { useInterviewStore } from './interviewStore'
 import type { WebSocketManager } from '../manager/WebSocketManager'
-import type { ChatMessage } from './types'
+import type { ConversationState } from './types'
 
 // ============================================
 // Singleton References
@@ -30,6 +35,8 @@ let audioPlayerControls: {
   enqueue: (data: ArrayBuffer) => void
   stop: () => void
   getAnalyser: () => AnalyserNode | null
+  /** Check if all audio has been received AND played; if so, send SPEECH_COMPLETED */
+  checkIfFullyDone: () => void
 } | null = null
 let mediaRecorderControls: {
   startVideo: (stream: MediaStream) => void
@@ -62,7 +69,7 @@ export function registerMediaRecorderControls(controls: typeof mediaRecorderCont
 }
 
 // ============================================
-// WebSocket Actions
+// WebSocket Actions (send events to backend)
 // ============================================
 
 export function sendAudio(data: ArrayBuffer): boolean {
@@ -73,12 +80,28 @@ export function sendEndOfTurnMessage(): boolean {
   return wsManager?.sendEndOfTurn() ?? false
 }
 
-export function disconnectWebSocket() {
-  wsManager?.disconnect()
+export function sendSpeechCompletedMessage(): boolean {
+  return wsManager?.sendSpeechCompleted() ?? false
 }
 
 export function sendEndInterviewMessage(): boolean {
   return wsManager?.sendEndInterview() ?? false
+}
+
+export function sendArtifactOpenedMessage(artifactType: 'code' | 'whiteboard'): boolean {
+  return wsManager?.sendArtifactOpened(artifactType) ?? false
+}
+
+export function sendArtifactInteractionMessage(): boolean {
+  return wsManager?.sendArtifactInteraction() ?? false
+}
+
+export function sendArtifactSubmittedMessage(content: string, language?: string): boolean {
+  return wsManager?.sendArtifactSubmitted(content, language) ?? false
+}
+
+export function disconnectWebSocket() {
+  wsManager?.disconnect()
 }
 
 export function isWebSocketConnected(): boolean {
@@ -133,6 +156,18 @@ export function getAudioAnalyser(): AnalyserNode | null {
   return audioPlayerControls?.getAnalyser() ?? null
 }
 
+/**
+ * Ask the audio player to check if all audio has been received AND played.
+ * If so, it sends SPEECH_COMPLETED to the backend.
+ *
+ * Called by the WebSocket handler after setting responseAudioDone = true,
+ * so that if playback already finished while waiting for the flag, we
+ * send SPEECH_COMPLETED immediately.
+ */
+export function checkAudioPlaybackComplete() {
+  audioPlayerControls?.checkIfFullyDone()
+}
+
 // ============================================
 // Media Recorder Actions
 // ============================================
@@ -172,120 +207,153 @@ export function retryMediaUploadSession(type: 'video' | 'screen') {
 }
 
 // ============================================
-// State Transition Helpers
+// State Side-Effect Appliers
 // ============================================
-// These functions handle all state changes for a given transition,
-// reducing the chance of forgetting to set a required flag.
+//
+// These functions apply the side-effects needed when the backend transitions
+// to a given state. They do NOT decide the state -- that's the backend's job.
+// They are called from the STATE_CHANGED handler in useInterviewWebSocket.
+//
+// Each function:
+// 1. Resets the relevant flags for the new state
+// 2. Starts/stops recording and silence detection as needed
 
 /**
- * Transition to LISTENING state (user's turn to speak)
- * Called when: AI finishes speaking, response.wait received
- * 
- * Sets:
- * - conversationState: 'listening'
- * - isProcessing: false
- * - hasSentEndOfTurn: false
- * - hasHeardSpeech: false
- * 
- * NOTE: Caller is responsible for starting recording if needed
+ * Apply side effects for LISTENING state (user's turn to speak)
+ * Called when: backend sends STATE_CHANGED with state = 'listening'
+ *
+ * Resets: hasHeardSpeech, hasSentAudioSegments
+ * Starts: recording with silence detection (if mic is on and connected)
  */
-export function transitionToListening() {
+export async function applyListeningState() {
   const store = useInterviewStore.getState()
-  console.log('[State] → listening')
+  console.log('[State] Backend → listening')
 
-  store.setConversationState('listening')
-  store.setIsProcessing(false)
-  store.setHasSentEndOfTurn(false)
   store.setHasHeardSpeech(false)
-}
+  store.setHasSentAudioSegments(false)
+  store.clearTranscript()
 
+  // Start recording with silence detection
+  if (store.connectionStatus === 'connected' && store.isMicOn && !store.hasNavigatedAway) {
+    // Stop current recording first to get fresh WebM headers
+    stopRecording()
+    await new Promise(resolve => setTimeout(resolve, 100))
 
-
-/**
- * Transition to THINKING state (processing user input)
- * Called when: end_of_turn sent, waiting for AI response
- * 
- * Sets:
- * - conversationState: 'thinking'
- * - isProcessing: true (show "Processing..." UI)
- * - hasSentEndOfTurn: true (guard against re-sending)
- * - hasHeardSpeech: false (reset for next turn)
- * 
- * Actions:
- * - Stops silence detection
- */
-export function transitionToThinking() {
-  const store = useInterviewStore.getState()
-  console.log('[State] → thinking')
-
-  store.setConversationState('thinking')
-  store.setIsProcessing(true)
-  store.setHasSentEndOfTurn(true)
-  store.setHasHeardSpeech(false)
-
-  stopSilenceDetection()
-}
-
-/**
- * Transition to SPEAKING state (AI is responding with audio)
- * Called when: first sentence audio plays (handleSentenceComplete chunk 0)
- * 
- * Sets:
- * - conversationState: 'speaking'
- * 
- * Does NOT set:
- * - isProcessing (already false from onResponseStart)
- * 
- * Actions:
- * - Stops silence detection
- */
-export function transitionToSpeaking() {
-  const store = useInterviewStore.getState()
-  console.log('[State] → speaking')
-
-  store.setConversationState('speaking')
-  // Safety: Stop silence detection in case audio was queued directly 
-  // without a preceding response.start (which normally stops it)
-  stopSilenceDetection()
-}
-
-/**
- * Transition to response received state (AI started responding but no audio yet)
- * Called when: response.start received
- * 
- * Sets:
- * - isProcessing: false (got response, no longer waiting)
- * - conversationState: 'thinking' (if not already speaking)
- * 
- * Note: We stay in 'thinking' until audio plays, which triggers transitionToSpeaking
- */
-export function onResponseStart() {
-  const store = useInterviewStore.getState()
-  console.log('[State] Response start received')
-
-  store.setIsProcessing(false)
-  // Only change to thinking if not already speaking (prevents going backward)
-  if (store.conversationState !== 'speaking') {
-    store.setConversationState('thinking')
+    const currentState = useInterviewStore.getState()
+    if (currentState.connectionStatus === 'connected' &&
+      currentState.isMicOn &&
+      !currentState.hasNavigatedAway) {
+      await startRecording(true)
+    }
   }
 }
 
 /**
- * Transition to LISTENING state on error
- * Called when: WebSocket error, audio processing error
- * 
- * Same as transitionToListening but also sets error message
- * and doesn't auto-start recording (let caller decide)
+ * Apply side effects for THINKING state (backend processing)
+ * Called when: backend sends STATE_CHANGED with state = 'thinking'
+ *
+ * Stops: silence detection
  */
-export function transitionToListeningOnError(errorMessage: string) {
-  const store = useInterviewStore.getState()
-  console.log('[State] Error → listening:', errorMessage)
+export function applyThinkingState() {
+  console.log('[State] Backend → thinking')
+  stopSilenceDetection()
+}
 
-  store.setConversationState('listening')
-  store.setIsProcessing(false)
-  store.setHasSentEndOfTurn(false)
-  store.setHasHeardSpeech(false)
-  store.setError(errorMessage)
+/**
+ * Apply side effects for SPEAKING state (AI streaming response)
+ * Called when: backend sends STATE_CHANGED with state = 'speaking'
+ *
+ * Stops: recording and silence detection
+ * Resets: responseAudioDone, streaming state for new response
+ */
+export function applySpeakingState() {
+  const store = useInterviewStore.getState()
+  console.log('[State] Backend → speaking')
+
+  stopAndClearRecordingBuffer()
+  stopSilenceDetection()
+
+  // Reset for new response
+  store.setResponseAudioDone(false)
+  store.clearStreamingState()
+  store.setExpectedAudioChunk(null)
+  store.clearCompletedSentences()
+  store.startStreamingMessage()
+}
+
+/**
+ * Apply side effects for ARTIFACT state (user working on code/whiteboard)
+ * Called when: backend sends STATE_CHANGED with state = 'artifact'
+ *
+ * Stops: silence detection (activity timer runs on backend instead)
+ * Keeps: recording running (user might speak while in artifact mode)
+ */
+export function applyArtifactState() {
+  console.log('[State] Backend → artifact')
+  stopSilenceDetection()
+}
+
+/**
+ * Apply side effects for COMPLETED state (interview over)
+ * Called when: backend sends STATE_CHANGED with state = 'completed'
+ *
+ * Stops: all recording, playback
+ */
+export function applyCompletedState() {
+  const store = useInterviewStore.getState()
+  console.log('[State] Backend → completed')
+
+  store.setHasNavigatedAway(true)
+  stopRecording()
+  stopPlayback()
+  stopVideoRecording()
+  stopScreenRecording()
+}
+
+/**
+ * Apply side effects for IDLE state
+ * Called when: backend sends STATE_CHANGED with state = 'idle'
+ */
+export function applyIdleState() {
+  console.log('[State] Backend → idle')
+}
+
+/**
+ * Central handler for STATE_CHANGED events from the backend.
+ * Dispatches to the appropriate apply*State() function based on the new state.
+ *
+ * Called from the useInterviewWebSocket handler for STATE_CHANGED events.
+ */
+export async function onStateChanged(
+  newState: ConversationState,
+  _previousState: ConversationState,
+  _metadata: Record<string, unknown>
+) {
+  // Update the store first
+  const store = useInterviewStore.getState()
+  store.setConversationState(newState)
+
+  // Apply side effects for the new state
+  switch (newState) {
+    case 'idle':
+      applyIdleState()
+      break
+    case 'listening':
+      await applyListeningState()
+      break
+    case 'thinking':
+      applyThinkingState()
+      break
+    case 'speaking':
+      applySpeakingState()
+      break
+    case 'artifact':
+      applyArtifactState()
+      break
+    case 'completed':
+      applyCompletedState()
+      break
+  }
 }
 
 // ============================================
@@ -293,64 +361,13 @@ export function transitionToListeningOnError(errorMessage: string) {
 // ============================================
 
 /**
- * Called when AI starts responding - stops recording and clears buffer
- * This matches the original behavior where we:
- * 1. Stop the MediaRecorder
- * 2. Clear audioChunksRef.current = []
- * 3. Reset hasSentEndOfTurnRef.current = false
+ * Called when AI finishes speaking (all audio played, response_audio_done received).
+ * Sends SPEECH_COMPLETED to the backend. Does NOT transition state locally.
+ * The backend will respond with STATE_CHANGED(listening).
  */
-export function onAIResponseStart() {
-  stopAndClearRecordingBuffer()
-}
-
-/**
- * Called when AI finishes speaking - restarts recording with silence detection
- */
-export async function onAIPlaybackComplete() {
-  const store = useInterviewStore.getState()
-  console.log('[State] AI playback complete → listening')
-
-  // Use helper to set state
-  transitionToListening()
-
-  if (store.connectionStatus !== 'connected' || !store.isMicOn || store.hasNavigatedAway) {
-    return
-  }
-
-  // Stop current recording first to get fresh WebM headers
-  stopRecording()
-
-  // Small delay then restart with silence detection
-  await new Promise(resolve => setTimeout(resolve, 100))
-
-  const currentState = useInterviewStore.getState()
-  if (currentState.connectionStatus === 'connected' &&
-    currentState.isMicOn &&
-    !currentState.hasNavigatedAway) {
-    await startRecording(true)
-  }
-}
-
-/**
- * Called when interview ends
- */
-export async function onInterviewEnd() {
-  const store = useInterviewStore.getState()
-  store.setHasNavigatedAway(true)
-
-  // Stop all recordings
-  stopRecording()
-  stopPlayback()
-  stopVideoRecording()
-  stopScreenRecording()
-
-  // Finalize media uploads
-  await finalizeAllMedia()
-
-  // Disconnect after short delay
-  setTimeout(() => {
-    disconnectWebSocket()
-  }, 1000)
+export function onAIPlaybackComplete() {
+  console.log('[State] AI playback complete → sending speech_completed')
+  sendSpeechCompletedMessage()
 }
 
 /**
@@ -413,9 +430,6 @@ export async function handleEndInterview(
 
   // Finalize media
   await finalizeAllMedia()
-
-  // Disconnect WebSocket handled by component unmount cleanup
-  // disconnectWebSocket()
 
   // Stop all streams
   cameraStream?.getTracks().forEach(t => t.stop())

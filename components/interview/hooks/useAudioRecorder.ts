@@ -3,6 +3,10 @@
  *
  * Manages microphone audio recording with silence detection.
  * Registers controls with centralized actions for cross-module calls.
+ *
+ * KEY CHANGE: sendEndOfTurn no longer transitions state locally.
+ * It sends the end_of_turn event to the backend. The backend responds with
+ * STATE_CHANGED(thinking) which triggers applyThinkingState via onStateChanged.
  */
 
 import { useEffect, useRef, useCallback } from 'react'
@@ -12,8 +16,7 @@ import {
   registerAudioRecorderControls,
   sendAudio,
   sendEndOfTurnMessage,
-  transitionToListening,
-  transitionToThinking,
+  stopSilenceDetection as stopSilenceDetectionAction,
 } from '../store/interviewActions'
 import { DEFAULT_SILENCE_CONFIG } from '../store/types'
 import type { SilenceDetectionConfig } from '../store/types'
@@ -77,22 +80,18 @@ export function useAudioRecorder(
       clearTimeout(silenceTimerRef.current)
       silenceTimerRef.current = null
     }
-    if (analyserRef.current) {
-      analyserRef.current = null
-    }
-    if (audioContextRef.current) {
-      if (audioContextRef.current.state !== 'closed') {
-        audioContextRef.current.close().catch(console.error)
-      }
-      audioContextRef.current = null
-    }
+    analyserRef.current = null
+    // NOTE: AudioContext is NOT closed here -- it is reused by setupSilenceDetection
+    // to avoid expensive recreation. Cleanup on unmount handles closing it.
   }, [])
 
   const setupSilenceDetection = useCallback(() => {
     const state = store.getState()
     if (state.conversationState !== 'listening') return
 
-    state.setHasHeardSpeech(false)
+    // NOTE: hasHeardSpeech is NOT reset here. It is reset in applyListeningState()
+    // at the start of each new turn. This prevents periodic flushAudio restarts
+    // from clearing the speech flag mid-turn.
     noiseFloorRmsRef.current = config.minNoiseFloor
 
     const stream = micStream
@@ -123,18 +122,24 @@ export function useAudioRecorder(
       const checkSilence = () => {
         const currentState = store.getState()
 
-        if (!analyserRef.current || !currentState.isMicOn || currentState.conversationState !== 'listening') {
+        // Only truly stop when analyser is nulled (via stopSilenceDetection)
+        if (!analyserRef.current) {
           return
         }
 
-        const isRecording = mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive'
-        const hasAudioChunks = audioChunksRef.current.length > 0
-        const hasSentSegments = currentState.hasSentAudioSegments
-
-        if (!isRecording && !hasAudioChunks && !hasSentSegments) {
+        // If mic is off or state is temporarily not 'listening', keep the loop
+        // alive but skip analysis. This prevents the loop from dying permanently
+        // on transient state changes (e.g., brief state sync flickers).
+        if (!currentState.isMicOn || currentState.conversationState !== 'listening') {
           silenceRAFRef.current = requestAnimationFrame(checkSilence)
           return
         }
+
+        // NOTE: The audio-data gate (!isRecording && !hasAudioChunks && !hasSentSegments)
+        // has been removed. The silence timer now runs purely based on RMS analysis
+        // regardless of recorder state. This prevents the timer from stalling during
+        // brief recorder restart gaps (e.g., periodic flushAudio). The sendEndOfTurnInternal
+        // function already guards against sending when there is no audio to send.
 
         analyserRef.current.getByteTimeDomainData(timeDomain)
         let sumSq = 0
@@ -166,7 +171,7 @@ export function useAudioRecorder(
           }
           silenceStartTime = null
         } else {
-          if ((hasAudioChunks || hasSentSegments) && currentState.hasHeardSpeech) {
+          if (currentState.hasHeardSpeech) {
             if (silenceStartTime === null) {
               silenceStartTime = Date.now()
             } else if (Date.now() - silenceStartTime > config.silenceDuration) {
@@ -197,7 +202,6 @@ export function useAudioRecorder(
   // ============================================
 
   const flushAudio = useCallback(async (): Promise<void> => {
-    const state = store.getState()
     const isRecording = mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive'
 
     if (!isRecording || audioChunksRef.current.length === 0) {
@@ -257,7 +261,7 @@ export function useAudioRecorder(
       stateAfterSend.conversationState === 'listening') {
       await startRecordingInternal(true)  // With silence detection for user turn
     }
-  }, [onError])  // Note: startRecordingInternal intentionally omitted to avoid circular dependency
+  }, [onError])
 
   // ============================================
   // Recording Control
@@ -306,8 +310,9 @@ export function useAudioRecorder(
 
       mediaRecorderRef.current = mediaRecorder
       audioChunksRef.current = []
-      state.setHasSentEndOfTurn(false)
-      state.setHasSentAudioSegments(false)
+      // NOTE: hasSentAudioSegments is NOT reset here. It is reset in applyListeningState()
+      // at the start of each new turn. This prevents periodic flushAudio restarts
+      // from clearing the sent-segments flag mid-turn (backend already has previous audio).
 
       if (periodicFlushTimerRef.current) {
         clearInterval(periodicFlushTimerRef.current)
@@ -319,7 +324,6 @@ export function useAudioRecorder(
           audioChunksRef.current.push(event.data)
           const totalSize = audioChunksRef.current.reduce((sum, chunk) => sum + chunk.size, 0)
           console.log(`[Recording] Audio chunk available: ${event.data.size} bytes (accumulated: ${audioChunksRef.current.length} chunks, total: ${totalSize} bytes)`)
-
         }
       }
 
@@ -374,18 +378,23 @@ export function useAudioRecorder(
     }
     stopSilenceDetection()
     audioChunksRef.current = []
-    store.getState().setHasSentEndOfTurn(false)
   }, [stopSilenceDetection])
 
   // ============================================
   // End of Turn
   // ============================================
 
-  // Only invoked for user's  end of turn
+  /**
+   * Process end of turn: flush remaining audio, send it, then send end_of_turn event.
+   * Does NOT transition state locally -- the backend will respond with
+   * STATE_CHANGED(thinking) via the WebSocket.
+   */
   const sendEndOfTurnInternal = useCallback(async (): Promise<void> => {
     const state = store.getState()
 
-    if (state.connectionStatus !== 'connected' || state.isProcessing || state.hasSentEndOfTurn) {
+    // Guard: only send when connected, listening, and haven't already sent
+    if (state.connectionStatus !== 'connected' ||
+      state.conversationState !== 'listening') {
       return
     }
 
@@ -398,10 +407,6 @@ export function useAudioRecorder(
     }
 
     console.log('[AudioRecorder] Processing end of turn...')
-    // Set processing flag early to prevent duplicate calls (guard at line 388)
-    state.setIsProcessing(true)
-    // Other flags will be set by transitionToThinking() after successful send
-    // Early failures call transitionToListening() which resets isProcessing
     stopSilenceDetection()
 
     // Clear periodic flush timer - we're stopping recording
@@ -444,33 +449,32 @@ export function useAudioRecorder(
       } catch (error) {
         audioChunksRef.current = []
         if (!hasSentSegments) {
-          transitionToListening()
+          // No audio was ever sent; don't send end_of_turn
+          // Backend will stay in listening state; restart recording
           await startRecordingInternal(true)
           return
         }
       }
-    } 
-    //Rare case: No audio chunks and no segments sent
-    else if (!hasSentSegments) {
-      transitionToListening()
+    } else if (!hasSentSegments) {
+      // No audio chunks and no segments sent; restart recording
       await startRecordingInternal(true)
       return
     }
 
     // Send end_of_turn via WebSocket
+    // Backend will handle the LISTENING -> THINKING transition
     const sendSuccess = sendEndOfTurnMessage()
 
     if (!sendSuccess) {
-      transitionToListening()
+      // Failed to send; restart recording so user can try again
       await startRecordingInternal(true)
       return
     }
 
-    // Successfully sent end_of_turn - transition to thinking
-    transitionToThinking()
-
-    // Do NOT restart recording here - AI is about to speak
-    // Recording will be restarted by onAIPlaybackComplete when AI finishes speaking
+    // Successfully sent end_of_turn. The backend will respond with
+    // STATE_CHANGED(thinking). Do NOT transition state locally.
+    // Do NOT restart recording here -- AI is about to speak.
+    console.log('[AudioRecorder] end_of_turn sent, waiting for backend state change')
   }, [stopSilenceDetection, startRecordingInternal])
 
   // ============================================
@@ -498,6 +502,12 @@ export function useAudioRecorder(
   useEffect(() => {
     return () => {
       stopRecording()
+      // Close the AudioContext on unmount (not closed in stopSilenceDetection
+      // to allow fast restart during the session)
+      if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
+        audioContextRef.current.close().catch(console.error)
+        audioContextRef.current = null
+      }
     }
   }, [stopRecording])
 
