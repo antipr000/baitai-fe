@@ -40,6 +40,7 @@ import {
   stopScreenRecording,
   finalizeAllMedia,
   applyListeningState,
+  checkAudioPlaybackComplete,
 } from '../store/interviewActions'
 
 // ============================================
@@ -308,8 +309,11 @@ export function useInterviewWebSocket(
   function handleResponseAudioDone(message: ResponseAudioDonePayload) {
     console.log(`[WebSocket] Response audio done (total_chunks: ${message.total_chunks})`)
     // Mark that all audio has been sent for this response.
-    // The audio player will send SPEECH_COMPLETED when playback finishes.
     store.getState().setResponseAudioDone(true)
+    // Ask the audio player to check if playback is already finished.
+    // If so, it sends SPEECH_COMPLETED immediately. If not, it will
+    // re-check when the last chunk finishes playing.
+    checkAudioPlaybackComplete()
   }
 
   function handleInterviewEnded(message: InterviewEndedPayload) {

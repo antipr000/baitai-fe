@@ -35,6 +35,8 @@ let audioPlayerControls: {
   enqueue: (data: ArrayBuffer) => void
   stop: () => void
   getAnalyser: () => AnalyserNode | null
+  /** Check if all audio has been received AND played; if so, send SPEECH_COMPLETED */
+  checkIfFullyDone: () => void
 } | null = null
 let mediaRecorderControls: {
   startVideo: (stream: MediaStream) => void
@@ -152,6 +154,18 @@ export function stopPlayback() {
 
 export function getAudioAnalyser(): AnalyserNode | null {
   return audioPlayerControls?.getAnalyser() ?? null
+}
+
+/**
+ * Ask the audio player to check if all audio has been received AND played.
+ * If so, it sends SPEECH_COMPLETED to the backend.
+ *
+ * Called by the WebSocket handler after setting responseAudioDone = true,
+ * so that if playback already finished while waiting for the flag, we
+ * send SPEECH_COMPLETED immediately.
+ */
+export function checkAudioPlaybackComplete() {
+  audioPlayerControls?.checkIfFullyDone()
 }
 
 // ============================================
