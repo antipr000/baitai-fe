@@ -80,22 +80,18 @@ export function useAudioRecorder(
       clearTimeout(silenceTimerRef.current)
       silenceTimerRef.current = null
     }
-    if (analyserRef.current) {
-      analyserRef.current = null
-    }
-    if (audioContextRef.current) {
-      if (audioContextRef.current.state !== 'closed') {
-        audioContextRef.current.close().catch(console.error)
-      }
-      audioContextRef.current = null
-    }
+    analyserRef.current = null
+    // NOTE: AudioContext is NOT closed here -- it is reused by setupSilenceDetection
+    // to avoid expensive recreation. Cleanup on unmount handles closing it.
   }, [])
 
   const setupSilenceDetection = useCallback(() => {
     const state = store.getState()
     if (state.conversationState !== 'listening') return
 
-    state.setHasHeardSpeech(false)
+    // NOTE: hasHeardSpeech is NOT reset here. It is reset in applyListeningState()
+    // at the start of each new turn. This prevents periodic flushAudio restarts
+    // from clearing the speech flag mid-turn.
     noiseFloorRmsRef.current = config.minNoiseFloor
 
     const stream = micStream
@@ -126,18 +122,24 @@ export function useAudioRecorder(
       const checkSilence = () => {
         const currentState = store.getState()
 
-        if (!analyserRef.current || !currentState.isMicOn || currentState.conversationState !== 'listening') {
+        // Only truly stop when analyser is nulled (via stopSilenceDetection)
+        if (!analyserRef.current) {
           return
         }
 
-        const isRecording = mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive'
-        const hasAudioChunks = audioChunksRef.current.length > 0
-        const hasSentSegments = currentState.hasSentAudioSegments
-
-        if (!isRecording && !hasAudioChunks && !hasSentSegments) {
+        // If mic is off or state is temporarily not 'listening', keep the loop
+        // alive but skip analysis. This prevents the loop from dying permanently
+        // on transient state changes (e.g., brief state sync flickers).
+        if (!currentState.isMicOn || currentState.conversationState !== 'listening') {
           silenceRAFRef.current = requestAnimationFrame(checkSilence)
           return
         }
+
+        // NOTE: The audio-data gate (!isRecording && !hasAudioChunks && !hasSentSegments)
+        // has been removed. The silence timer now runs purely based on RMS analysis
+        // regardless of recorder state. This prevents the timer from stalling during
+        // brief recorder restart gaps (e.g., periodic flushAudio). The sendEndOfTurnInternal
+        // function already guards against sending when there is no audio to send.
 
         analyserRef.current.getByteTimeDomainData(timeDomain)
         let sumSq = 0
@@ -169,7 +171,7 @@ export function useAudioRecorder(
           }
           silenceStartTime = null
         } else {
-          if ((hasAudioChunks || hasSentSegments) && currentState.hasHeardSpeech) {
+          if (currentState.hasHeardSpeech) {
             if (silenceStartTime === null) {
               silenceStartTime = Date.now()
             } else if (Date.now() - silenceStartTime > config.silenceDuration) {
@@ -308,7 +310,9 @@ export function useAudioRecorder(
 
       mediaRecorderRef.current = mediaRecorder
       audioChunksRef.current = []
-      state.setHasSentAudioSegments(false)
+      // NOTE: hasSentAudioSegments is NOT reset here. It is reset in applyListeningState()
+      // at the start of each new turn. This prevents periodic flushAudio restarts
+      // from clearing the sent-segments flag mid-turn (backend already has previous audio).
 
       if (periodicFlushTimerRef.current) {
         clearInterval(periodicFlushTimerRef.current)
@@ -498,6 +502,12 @@ export function useAudioRecorder(
   useEffect(() => {
     return () => {
       stopRecording()
+      // Close the AudioContext on unmount (not closed in stopSilenceDetection
+      // to allow fast restart during the session)
+      if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
+        audioContextRef.current.close().catch(console.error)
+        audioContextRef.current = null
+      }
     }
   }, [stopRecording])
 
