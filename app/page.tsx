@@ -505,27 +505,25 @@ export default async function Home() {
         </section>
 
 
-        {/* CTA Section */}
-        <section className="w-full bg-[linear-gradient(92.04deg,rgba(230,255,128,0.7)_-5.1%,rgba(229,255,123,0.7)_106.14%)]  px-0 md:py-10 py-6">
-          <div className="w-full">
-            <div className="flex flex-col items-center text-center gap-6">
-              <div>
-                <h2 className="md:text-2xl t mb-2 lg:text-[32px] text-transparent bg-clip-text bg-[linear-gradient(271.56deg,#86A5FF_-14.72%,#4569D1_128.95%)] font-semibold tracking-tight">
-                  Start Your Free Practice Today
+        <section className="bg-[rgba(245,255,199,1)] px-6 md:px-8 lg:px-12 py-20 md:py-24 lg:py-30 rounded-3xl mx-4 md:mx-6 lg:mx-10 my-8">
+          <div className="w-full max-w-4xl mx-auto">
+            <div className="flex flex-col items-center text-center gap-8 md:gap-10">
+              <div className="space-y-4">
+                <h2 className="text-2xl md:text-3xl lg:text-5xl text-[rgba(83,118,219,1)] font-semibold tracking-tight">
+                  Start your free practice today
                 </h2>
-                <p className="bg-clip-text text-transparent font-semibold bg-[linear-gradient(271.56deg,rgba(134,165,255,0.5)_-14.72%,rgba(69,105,209,0.5)_128.95%)] max-w-2xl lg:text-2xl md:text-xl text-sm">
+                <p className="text-base md:text-lg lg:text-xl text-[rgba(11,31,59,0.6)] font-medium max-w-2xl mx-auto">
                   No payment required. Start practicing in under 2 minutes.
                 </p>
-
               </div>
-              <div className="flex flex-row gap-4 mt-2">
+              <div className="flex flex-col sm:flex-row gap-4 mt-4">
                 <Link href="/signup">
-                  <Button className="rounded-xl px-8 lg:py-6 md:py-4   lg:text-2xl  md:text-xl font-semibold bg-[rgba(83,118,219,1)] hover:bg-[rgba(83,118,219,1)] hover:opacity-90 border-[rgba(99,112,227,1)]  text-[rgba(234,253,161,1)]">
-                    Create a free account
+                  <Button className="rounded-xl px-10 py-4 md:px-12 md:py-5 lg:px-14 lg:py-6 border-2 border-[rgba(58,63,187,0.9)] text-lg md:text-xl lg:text-2xl font-semibold bg-[rgba(58,63,187,1)] hover:bg-transparent hover:opacity-90 text-white hover:text-[rgba(58,63,187,1)]">
+                    Sign up
                   </Button>
                 </Link>
                 <Link href="/#how-it-works">
-                  <Button className="rounded-xl px-8 lg:py-6 md:py-4  lg:text-2xl  md:text-xl font-semibold hover:opacity-90 hover:bg-[rgba(234,253,161,1)]   bg-[rgba(234,253,161,1)]  border-2 border-[rgba(83,118,219,1)] text-[rgba(83,118,219,1)] ">
+                  <Button className="rounded-xl px-10 py-4 md:px-12 md:py-5 lg:px-14 lg:py-6 text-lg md:text-xl lg:text-2xl   border-[rgba(58,63,187,0.9)]font-semibold bg-transparent hover:bg-[rgba(58,63,187,1)] hover:opacity-90 border-2 border-[rgba(58,63,187,1)] text-[rgba(83,118,219,1)] hover:text-white">
                     How it works
                   </Button>
                 </Link>
