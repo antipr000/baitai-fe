@@ -34,33 +34,33 @@ export const hiringFeatures = [
 export const jobSeekerSteps = [
     {
         number: "1",
-        title: "Mock Interview",
-        description: "Our AI coach helps you get comfortable with conversational, unlimited mock interviews.",
-        image: "/main/mock_interview.png",
-        imageAlt: "Mock Interview",
-        hasImageContainer: true,
+        title: "Choose Your Focus",
+        description: "Select your target role, industry, and interview type. Practice for specific companies or general preparation.",
+        image: "/main/img1.png",
+        imageAlt: "Choose Your Focus",
         bgColor: "bg-[rgba(107,124,255,1)]",
-        borderColor: "border-[rgba(107,124,255,1)]"
+        borderColor: "border-[rgba(107,124,255,1)]",
+        icon: "/main/eye2.gif"
     },
     {
         number: "2",
-        title: "Instant Feedback",
-        description: "Receive your interview performance score, strengths, weaknesses, and improvement tips instantly.",
-        image: "/main/feedback.png",
-        imageAlt: "Feedback",
-        hasImageContainer: false,
+        title: "Practice with AI",
+        description: "Engage in realistic mock interviews with our AI. Get adaptive questions that challenge you appropriately.",
+        image: "/main/img2.png",
+        imageAlt: "Practice with AI",
         bgColor: "bg-[rgba(107,124,255,1)]",
-        borderColor: "border-[rgba(107,124,255,1)]"
+        borderColor: "border-[rgba(107,124,255,1)]",
+        icon: "/main/robot.gif"
     },
     {
         number: "3",
-        title: "Actual Interview",
-        description: "When you're ready, start your official interview — just like a real hiring round.",
-        image: "/main/interview2.png",
-        imageAlt: "Interview",
-        hasImageContainer: false,
+        title: "Get Instant Feedback",
+        description: "Receive detailed analysis on your answers, communication style, and areas for improvement after each session.",
+        image: "/main/img3.png",
+        imageAlt: "Get Instant Feedback",
         bgColor: "bg-[rgba(107,124,255,1)]",
-        borderColor: "border-[rgba(107,124,255,1)]"
+        borderColor: "border-[rgba(107,124,255,1)]",
+        icon: "/main/note.gif"
     }
 ];
 

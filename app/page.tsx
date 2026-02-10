@@ -11,7 +11,7 @@ import { getTokens } from "next-firebase-auth-edge";
 import { cookies } from "next/headers";
 import { clientConfig, serverConfig } from "@/lib/auth/config";
 import { AuthButtons } from "@/components/auth-buttons";
-import { hiringFeatures, jobSeekerSteps, jobSeekerFeatures, hiringTeamSteps } from "@/lib/home-data";
+import { hiringFeatures, jobSeekerSteps, jobSeekerFeatures, hiringTeamSteps } from "@/app/home-data";
 import { WaitlistForm } from "@/components/waitlist-form";
 import Header from "@/components/header";
 
@@ -418,89 +418,84 @@ export default async function Home() {
 
 
         {/* How it Works */}
-        <section id="how-it-works" className=" scroll-mt-[120px] bg-[rgba(243,255,190,0.15)]]">
-          <div className="lg:max-w-6xl md:max-w-3xl mx-auto px-3 p-2">
+        <section id="how-it-works" className="scroll-mt-[120px] bg-[rgba(253,255,245,1)] py-8 md:py-12 lg:py-16">
+          <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8">
 
-            <div className="lg:text-4xl md:text-2xl text-base md:mb-4 mb-0 text-center text-[rgba(58,63,187,1)]">How it works</div>
-
-            <div className="md:w-xl w-[200px] mx-auto p-4 mb-2">
-              <Separator className="bg-[rgba(201,231,81,0.7)]" />
+            {/* Section Header */}
+            <div className="text-center mb-6 md:mb-10">
+              <p className="text-base md:text-lg font-medium text-[rgba(58,63,187,1)] uppercase tracking-tight mb-3">
+                How It Works
+              </p>
+              <h2 className="text-3xl md:text-4xl lg:text-5xl font-semibold mb-2 mt-5">
+                <span className="text-[rgba(10,13,26,1)]">How It Works for </span>
+                <span className="text-[rgba(107,124,255,1)]">Job Seekers</span>
+              </h2>
+              <p className="text-base md:text-lg text-[rgba(10,13,26,0.7)] mt-3 max-w-4xl mx-auto leading-relaxed">
+                Prepare like never before. Practice with AI, get data-backed insights, and walk into interviews with confidence.
+              </p>
             </div>
 
-            <div className="max-w-6xl mx-auto mb-12 px-4">
-              <div className="flex flex-col md:flex-row lg:items-start items-center justify-between gap-12">
-                {jobSeekerSteps.map((step, index) => (
-                  <div
-                    key={index}
-                    className="flex-1 flex flex-col items-center relative"
-                  >
-                    {/* Header + Connector Wrapper */}
-                    <div className="relative flex items-center justify-center w-full">
+            {/* Steps */}
+            <div className="space-y-8 md:space-y-10 lg:space-y-12">
+              {jobSeekerSteps.map((step, index) => {
 
-                      {/* Step Card */}
-                      <Card
-                        className={`${step.bgColor} ${step.borderColor} border rounded-3xl 
-            w-[280px] h-[72px] `}
-                      >
-                        <CardContent className="flex items-center justify-center h-full px-6">
-                          <div className="flex items-center gap-4">
-                            <div className="w-10 h-10 rounded-full bg-[rgba(224,245,255,1)] border-2 border-[rgba(108,132,255,1)] flex items-center justify-center">
-                              <span className="text-sm font-bold text-[rgba(107,124,255,1)]">
-                                {step.number}
+                return (
+                  <Card
+                    key={index}
+                    className="border-2 border-[rgba(58,63,187,1)] rounded-xl overflow-hidden bg-white"
+                  >
+                    <CardContent className="p-0">
+                      <div className="flex flex-col md:flex-row">
+
+                        {/* Left Side - Content */}
+                        <div className="flex-1 px-15 flex items-center">
+                          <div className="text-center max-w-xs">
+                            {/* Step Number + Icon */}
+                            <div className="flex items-center justify-center gap-3 mb-2">
+                              <span className="text-base md:text-xl font-semibold text-[rgba(107,124,255,1)]">
+                                0{step.number}
                               </span>
+                              <Image
+                                src={step.icon}
+                                alt=""
+                                width={40}
+                                height={40}
+                                className="w-8 h-8 md:w-10 md:h-10 object-contain"
+                              />
                             </div>
-                            <h3 className="text-sm md:text-base font-semibold text-[rgba(224,245,255,1)] whitespace-nowrap">
+
+                            {/* Title */}
+                            <h3 className="text-lg md:text-xl font-semibold text-[rgba(10,13,26,1)] mb-2">
                               {step.title}
                             </h3>
-                          </div>
-                        </CardContent>
-                      </Card>
 
-                      {/* Connector Line */}
-                      {index < jobSeekerSteps.length - 1 && (
-                        <div className="hidden xl:block absolute right-[-57px] top-1/2 -translate-y-1/2 xl:w-20 w-[65px]">
-                          <div className="h-2 rounded-full bg-gray-200 overflow-hidden">
-                            <motion.div
-                              className="h-full bg-[linear-gradient(90deg,#00D7FF,#3A3FBB)] origin-left"
-                              initial={{ scaleX: 0.2 }}
-                              animate={{ scaleX: [0.2, 0.5, 1, 0.2] }}
-                              transition={{
-                                duration: 2.5,
-                                repeat: Infinity,
-                                ease: "easeInOut",
-                              }}
+                            {/* Description */}
+                            <p className="text-sm md:text-base text-[rgba(10,13,26,0.6)] tracking-tight">
+                              {step.description}
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* Right Side - Image */}
+                        <div className="flex-1 p-0 md:p-4 flex items-center justify-center">
+                          <div className="w-full max-w-xl">
+                            <Image
+                              src={step.image}
+                              alt={step.imageAlt}
+                              width={420}
+                              height={220}
+                              className="rounded-2xl w-full h-auto object-contain"
                             />
                           </div>
                         </div>
-                      )}
-                    </div>
 
-                    {/* Description */}
-                    <p className="text-center text-[rgba(6,15,100,0.5)] text-sm font-semibold mt-4">
-                      {step.description}
-                    </p>
-
-                    {/* Image */}
-                    <div className="mt-10 w-full flex justify-center">
-                      <div className="rounded-2xl shadow-md bg-white p-4">
-                        {step.hasImageContainer ? (
-                          <div className=" rounded-2xl md:py-12 lg:py-12 py-10 lg:w-[300px]      shadow-md px-5 bg-[rgba(249,255,255,1)]">
-                            <Image className="rounded-lg" src={step.image} alt={step.imageAlt} width={330} height={150} />
-                          </div>
-                        ) : (
-                          <Image
-                            src={step.image}
-                            alt={step.imageAlt}
-                            width={350}
-                            height={230}
-                            className="rounded-xl object-contain"
-                          />)}
                       </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
+                    </CardContent>
+                  </Card>
+                )
+              })}
             </div>
+
           </div>
         </section>
 
@@ -523,7 +518,7 @@ export default async function Home() {
                   </Button>
                 </Link>
                 <Link href="/#how-it-works">
-                  <Button className="rounded-xl px-10 py-4 md:px-12 md:py-5 lg:px-14 lg:py-6 text-lg md:text-xl lg:text-2xl   border-[rgba(58,63,187,0.9)]font-semibold bg-transparent hover:bg-[rgba(58,63,187,1)] hover:opacity-90 border-2 border-[rgba(58,63,187,1)] text-[rgba(83,118,219,1)] hover:text-white">
+                  <Button className="rounded-xl px-10 py-4 md:px-12 md:py-5 lg:px-14 lg:py-6 text-lg md:text-xl lg:text-2xl   border-[rgba(58,63,187,0.9)] font-semibold bg-transparent hover:bg-[rgba(58,63,187,1)] hover:opacity-90 border-2  text-[rgba(83,118,219,1)] hover:text-white">
                     How it works
                   </Button>
                 </Link>
