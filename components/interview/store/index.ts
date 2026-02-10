@@ -2,13 +2,36 @@
  * Interview Store - Public API
  */
 
+// Event Protocol Types (mirrors backend events.py)
+export {
+  BackendInterviewState,
+  InboundEvent,
+  OutboundEvent,
+} from './events'
+
+export type {
+  StateChangedPayload,
+  StateSyncPayload,
+  ErrorPayload,
+  TranscriptChunkPayload,
+  TranscriptFinalPayload,
+  ResponseTextChunkPayload,
+  ResponseTextDonePayload,
+  ResponseAudioChunkPayload,
+  ResponseAudioDonePayload,
+  InterviewEndedPayload,
+  PongPayload,
+  OutboundMessage,
+  ArtifactOpenedPayload,
+  ArtifactSubmittedPayload,
+} from './events'
+
 // Types
 export type {
   ConversationState,
   UploadStatus,
   ConnectionStatus,
   ChatMessage,
-  WebSocketMessageType,
   WebSocketTextMessage,
   MediaType,
   MediaRecordingState,
@@ -35,6 +58,7 @@ export {
   useIsProcessing,
   useIsAISpeaking,
   useIsAudioPlaying,
+  useTranscript,
   useStreamingText,
   useCurrentStreamingMessageId,
   useAudioRecording,
@@ -54,7 +78,6 @@ export {
   useIsMicOn,
   useIsVideoOn,
   useIsScreenSharing,
-  useHasSentEndOfTurn,
   useHasHeardSpeech,
   useHasNavigatedAway,
   useHasSentAudioSegments,
@@ -74,4 +97,3 @@ export {
   useCodeEditorContent,
   useCodeEditorLanguage,
 } from './codeEditorStore'
-
