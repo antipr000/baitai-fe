@@ -3,17 +3,18 @@
  *
  * Manages AI audio playback with queue management.
  * Registers controls with centralized actions for cross-module calls.
+ *
+ * KEY CHANGE: When playback finishes, sends SPEECH_COMPLETED to the backend
+ * instead of self-transitioning to listening. The backend will respond with
+ * STATE_CHANGED(listening) which triggers recording restart via applyListeningState.
  */
 
 import { useEffect, useRef, useCallback } from 'react'
 import { useInterviewStore } from '../store'
-import { MixedAudioContext } from '../lib/audioUtils'
 import {
   registerAudioPlayerControls,
   onAIPlaybackComplete,
   stopRecording,
-  transitionToSpeaking,
-  transitionToListening,
 } from '../store/interviewActions'
 
 // ============================================
@@ -84,17 +85,14 @@ export function useAudioPlayer(
         analyser.fftSize = 256
         analyserRef.current = analyser
       }
-      console.log('[AudioPlayer] analyserRef.current:', analyserRef.current)
 
-      // Only on first chunk: transition state, stop recording, notify
+      // Only on first chunk: stop recording, notify
       // Done AFTER analyser is created so visualization has access to it
       if (isFirstChunk) {
-        transitionToSpeaking()
         stopRecording()
-        console.log('[AudioPlayer] Starting playback, transitioned to speaking')
+        console.log('[AudioPlayer] Starting playback (backend already set state to speaking)')
         onPlaybackStart?.()
       }
-
 
       if (playbackContext.state === 'suspended') {
         await playbackContext.resume()
@@ -119,17 +117,17 @@ export function useAudioPlayer(
         if (audioQueueRef.current.length > 0 && playNextRef.current) {
           playNextRef.current()
         } else {
-          // Queue is empty - check if response is truly complete before transitioning
+          // Queue is empty - check if all audio has been received from backend
           const currentState = store.getState()
-          if (currentState.isResponseComplete) {
-            // All audio finished - trigger recording restart via centralized action
-            // onAIPlaybackComplete handles: conversationState, hasSentEndOfTurn, hasHeardSpeech, recording restart
-            console.log('[AudioPlayer] Playback complete')
+          if (currentState.responseAudioDone) {
+            // All audio finished - send SPEECH_COMPLETED to backend.
+            // Backend will respond with STATE_CHANGED(listening).
+            console.log('[AudioPlayer] Playback complete → sending speech_completed')
             onAIPlaybackComplete()
           } else {
-            // Response not complete yet - more audio chunks may arrive
-            // Poll until either more audio arrives or response completes
-            console.log('[AudioPlayer] Queue empty but response not complete, waiting...')
+            // Backend hasn't sent response_audio_done yet - more chunks may arrive.
+            // Poll until either more audio arrives or response_audio_done is set.
+            console.log('[AudioPlayer] Queue empty but response_audio_done not received, waiting...')
             let pollCount = 0
             const maxPolls = 50 // Max 5 seconds (50 * 100ms)
 
@@ -139,18 +137,18 @@ export function useAudioPlayer(
 
               // Safety: stop polling if disconnected, navigated away, or timeout
               if (state.hasNavigatedAway || state.connectionStatus !== 'connected' || pollCount > maxPolls) {
-                console.log('[AudioPlayer] Stopping poll - disconnected/navigated/timeout, transitioning to listening')
+                console.log('[AudioPlayer] Stopping poll - disconnected/navigated/timeout, sending speech_completed')
                 onAIPlaybackComplete()
-                return // implicit cleanup
+                return
               }
 
               if (audioQueueRef.current.length > 0 && playNextRef.current) {
                 // More audio arrived, continue playing
                 console.log('[AudioPlayer] More audio arrived, resuming playback')
                 playNextRef.current()
-              } else if (state.isResponseComplete) {
-                // Response completed while waiting
-                console.log('[AudioPlayer] Response now complete, transitioning to listening')
+              } else if (state.responseAudioDone) {
+                // response_audio_done received while waiting
+                console.log('[AudioPlayer] response_audio_done received, sending speech_completed')
                 onAIPlaybackComplete()
               } else {
                 // Keep waiting
@@ -179,8 +177,7 @@ export function useAudioPlayer(
       if (audioQueueRef.current.length > 0 && playNextRef.current) {
         playNextRef.current()
       } else {
-        // Error and no more audio - treat as done speaking
-        // onAIPlaybackComplete handles: conversationState, hasSentEndOfTurn, hasHeardSpeech, recording restart
+        // Error and no more audio - send speech_completed so backend can advance
         onAIPlaybackComplete()
       }
     }
@@ -221,9 +218,7 @@ export function useAudioPlayer(
     }
     audioQueueRef.current = []
     isPlayingRef.current = false
-    // Emergency stop - just set listening state, don't restart recording
-    // transitionToListening() handles the state reset safely without side-effects
-    transitionToListening()
+    // Emergency stop - don't transition state, backend controls that
   }, [])
 
   // ============================================
@@ -262,11 +257,8 @@ export function useAudioPlayer(
   // ============================================
   // Return
   // ============================================
-  // isPlaying now uses the derived selector (conversationState === speaking || thinking with streaming)
   const isPlaying = useInterviewStore(
-    (s) =>
-      s.conversationState === 'speaking'
-    // || (s.conversationState === 'thinking' && s.streamingText.currentMessageId !== null)
+    (s) => s.conversationState === 'speaking'
   )
 
   return {

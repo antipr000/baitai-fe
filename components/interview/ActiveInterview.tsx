@@ -1,12 +1,13 @@
 'use client'
 
 /**
- * ActiveInterview Component (with Zustand Actions)
+ * ActiveInterview Component
  *
- * This is a highly simplified version that uses:
- * - Zustand store for all state
- * - Centralized actions for cross-module communication
- * - Minimal refs (only UI refs and timers)
+ * Simplified for backend-driven state management:
+ * - conversationState is set ONLY by backend STATE_CHANGED / STATE_SYNC events
+ * - Side effects (recording, silence detection) are handled by apply*State() in actions
+ * - This component only handles UI rendering and user interactions
+ * - Artifact events are managed by the useArtifactEvents hook
  */
 
 import React, { useEffect, useRef } from 'react'
@@ -43,6 +44,7 @@ import {
   useRecordingState,
   useIsAISpeaking,
   useIsAudioPlaying,
+  useTranscript,
 } from './store'
 
 // Hooks
@@ -50,6 +52,7 @@ import { useInterviewWebSocket } from './hooks/useInterviewWebSocket'
 import { useAudioRecorder } from './hooks/useAudioRecorder'
 import { useAudioPlayer } from './hooks/useAudioPlayer'
 import { useMediaRecording } from './hooks'
+import { useArtifactEvents } from './hooks/useArtifactEvents'
 
 // Centralized actions
 import {
@@ -60,11 +63,7 @@ import {
   stopRecording,
   stopPlayback,
   disconnectWebSocket,
-  enableSilenceDetection,
-  stopSilenceDetection,
   cleanupAll,
-  transitionToListening,
-  sendEndInterviewMessage,
 } from './store/interviewActions'
 
 import { MixedAudioContext } from './lib/audioUtils'
@@ -101,12 +100,11 @@ export default function ActiveInterview({
     connectionStatus,
     conversationState,
     isProcessing,
-    // NOTE: isAISpeaking removed from this selector - use useIsAISpeaking() directly
     error,
     showEndConfirm,
   } = useConversationUIState()
 
-  // isAISpeaking is now derived from conversationState + streamingText
+  // isAISpeaking is derived from conversationState + streamingText
   const isAISpeaking = useIsAISpeaking()
   // isAudioPlaying is true only when actual audio is playing (for visualization)
   const isAudioPlaying = useIsAudioPlaying()
@@ -122,6 +120,7 @@ export default function ActiveInterview({
   } = useRecordingState()
 
   const messages = useMessages()
+  const transcript = useTranscript()
   const isConnected = connectionStatus === 'connected'
 
   // Code editor state
@@ -135,7 +134,6 @@ export default function ActiveInterview({
   const videoRef = useRef<HTMLVideoElement | null>(null)
   const messagesEndRef = useRef<HTMLDivElement | null>(null)
   const screenStreamRef = useRef<MediaStream | null>(null)
-  const thinkingTimerRef = useRef<NodeJS.Timeout | null>(null)
 
   // -------------------------------------------------------------------------
   // Initialize store
@@ -151,7 +149,7 @@ export default function ActiveInterview({
   // Setup hooks (they register their controls internally)
   // -------------------------------------------------------------------------
 
-  // WebSocket - handles all message routing
+  // WebSocket - handles all message routing and state changes
   const { isConnected: wsConnected } = useInterviewWebSocket({
     sessionId,
     templateId,
@@ -185,6 +183,12 @@ export default function ActiveInterview({
     sendBinary: () => { },
     sendText: () => { },
     isConnected: wsConnected,
+  })
+
+  // Artifact events - handles code editor WebSocket events
+  const { reportInteraction, submitArtifact } = useArtifactEvents({
+    isOpen: isCodeEditorOpen,
+    artifactType: 'code',
   })
 
   // -------------------------------------------------------------------------
@@ -236,7 +240,9 @@ export default function ActiveInterview({
   }, [])
 
   // -------------------------------------------------------------------------
-  // Start recording when connected
+  // Start recording when connected and listening
+  // This is a safety net -- applyListeningState() in the actions layer
+  // handles this reactively, but this covers edge cases (e.g., mic toggled on)
   // -------------------------------------------------------------------------
   useEffect(() => {
     if (wsConnected && micStream && isMicOn && conversationState === 'listening') {
@@ -274,8 +280,8 @@ export default function ActiveInterview({
         }
       }, 1000)
     } else {
-      store.setRecordingDuration(0)  //check
-      store.setRecordingStartTime(null) //check
+      store.setRecordingDuration(0)
+      store.setRecordingStartTime(null)
     }
 
     return () => {
@@ -283,46 +289,10 @@ export default function ActiveInterview({
     }
   }, [isVideoRecording, isScreenRecording])
 
-  // -------------------------------------------------------------------------
-  // Conversation state management - silence detection and thinking timeout
-  // -------------------------------------------------------------------------
-  useEffect(() => {
-    if (conversationState === 'thinking') {
-      if (thinkingTimerRef.current)
-        clearTimeout(thinkingTimerRef.current)
-      stopSilenceDetection()
-
-      // TODO: Re-enable with proper backend cancellation support
-      // Force state transition after 10 seconds - DISABLED to avoid conflicts with late server responses
-      // thinkingTimerRef.current = setTimeout(() => {
-      //   console.log('[ActiveInterview] 10s thinking timeout - forcing transition to listening')
-      //   transitionToListening()
-      //   startRecording(true).catch(console.error)
-      // }, 10000)
-    } else if (conversationState === 'speaking') {
-      // Never run silence detection while AI audio is playing
-      if (thinkingTimerRef.current) {
-        clearTimeout(thinkingTimerRef.current)
-        thinkingTimerRef.current = null
-      }
-      stopSilenceDetection()
-    } else {
-      // listening state
-      if (thinkingTimerRef.current) {
-        clearTimeout(thinkingTimerRef.current)
-        thinkingTimerRef.current = null
-      }
-      // Setup silence detection if we're recording
-      const store = useInterviewStore.getState()
-      if (store.audio.isRecording) {
-        enableSilenceDetection()
-      }
-    }
-
-    return () => {
-      if (thinkingTimerRef.current) clearTimeout(thinkingTimerRef.current)
-    }
-  }, [conversationState])
+  // NOTE: The old conversationState management effect (silence detection,
+  // thinking timeout) has been REMOVED. Side effects are now handled
+  // reactively by apply*State() functions in interviewActions.ts,
+  // triggered by STATE_CHANGED events from the backend.
 
   // -------------------------------------------------------------------------
   // Browser close/unload handlers
@@ -340,7 +310,6 @@ export default function ActiveInterview({
           )
 
           // 2. End interview via reliable fetch with keepalive (replaces WebSocket)
-          // keepalive: true ensures the request completes even if the page unloads
           console.log('[Unload] Ending interview via fetch, authToken present:', !!authToken)
           if (authToken) {
             fetch(`${apiUrl}/api/v1/interview-session/${sessionId}/end/`, {
@@ -375,7 +344,6 @@ export default function ActiveInterview({
       disconnectWebSocket()
 
       // Also ensure we end the session on server-side
-      // This is safe to call multiple times (idempotent on server)
       console.log('[PageHide/Unmount] Ending interview session via fetch')
       if (authToken && sessionId) {
         fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9000'}/api/v1/interview-session/${sessionId}/end/`, {
@@ -447,6 +415,22 @@ export default function ActiveInterview({
     )
   }
 
+  const onCodeEditorToggle = () => {
+    useCodeEditorStore.getState().toggleEditor()
+    // Artifact events (open/close) are handled by useArtifactEvents hook
+  }
+
+  const onArtifactSubmit = () => {
+    submitArtifact(codeEditorContent, codeEditorLanguage)
+    // Optionally close the editor after submission
+    useCodeEditorStore.getState().setIsOpen(false)
+  }
+
+  const onCodeEditorChange = (val: string) => {
+    useCodeEditorStore.getState().setContent(val)
+    reportInteraction()
+  }
+
   // -------------------------------------------------------------------------
   // Render
   // -------------------------------------------------------------------------
@@ -504,23 +488,51 @@ export default function ActiveInterview({
                   </div>
                 ))
               )}
+
+              {/* Live transcript (what the user is currently saying) */}
+              {transcript && conversationState === 'listening' && (
+                <div className="p-3 rounded-lg bg-gray-700/50 text-gray-300 text-sm italic">
+                  {transcript}
+                </div>
+              )}
+
+              {/* Processing indicator */}
               {isProcessing && (
                 <div className="p-3 rounded-lg bg-gray-700/50 text-gray-400 text-sm flex items-center gap-2">
                   <Loader2 className="w-4 h-4 animate-spin" />
                   <span>Processing your response...</span>
                 </div>
               )}
+
+              {/* AI speaking indicator */}
               {isAISpeaking && (
                 <div className="p-3 rounded-lg bg-blue-600/20 text-blue-100 text-sm flex items-center gap-2">
                   <Loader2 className="w-4 h-4 animate-spin" />
                   <span>AI is speaking...</span>
                 </div>
               )}
+
+              {/* Artifact mode indicator */}
+              {conversationState === 'artifact' && (
+                <div className="p-3 rounded-lg bg-purple-600/20 text-purple-100 text-sm flex items-center gap-2">
+                  <Code2 className="w-4 h-4" />
+                  <span>Working on code... Submit when ready.</span>
+                </div>
+              )}
+
+              {/* Completed state indicator */}
+              {conversationState === 'completed' && (
+                <div className="p-3 rounded-lg bg-green-600/20 text-green-100 text-sm flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4" />
+                  <span>Interview completed. Thank you!</span>
+                </div>
+              )}
+
               <div ref={messagesEndRef} />
             </div>
           </div>
 
-          {/* Code Editor Panel - resizable with CSS */}
+          {/* Code Editor Panel */}
           {isCodeEditorOpen && (
             <div
               className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[45vw] h-[75vh] bg-gray-800 rounded-lg border border-gray-700 shadow-xl flex flex-col overflow-hidden z-50"
@@ -529,11 +541,13 @@ export default function ActiveInterview({
                 language={codeEditorLanguage}
                 onLanguageChange={(lang) => useCodeEditorStore.getState().setLanguage(lang)}
                 onCopy={() => navigator.clipboard.writeText(codeEditorContent)}
+                onSubmit={onArtifactSubmit}
+                submitDisabled={!isConnected}
               />
               <div className="flex-1 overflow-hidden">
                 <CodeEditor
                   value={codeEditorContent}
-                  onChange={(val) => useCodeEditorStore.getState().setContent(val)}
+                  onChange={onCodeEditorChange}
                   language={codeEditorLanguage}
                 />
               </div>
@@ -591,7 +605,7 @@ export default function ActiveInterview({
 
         {/* Code Editor Toggle */}
         <Button
-          onClick={() => useCodeEditorStore.getState().toggleEditor()}
+          onClick={onCodeEditorToggle}
           className={cn(
             'rounded-full w-14 h-14 flex items-center justify-center transition-all',
             isCodeEditorOpen ? 'bg-purple-600 hover:bg-purple-700' : 'bg-gray-700 hover:bg-gray-600'

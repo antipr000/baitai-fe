@@ -3,18 +3,31 @@
  * Centralized types for state management and components
  */
 
+import type { BackendInterviewState, OutboundMessage } from './events'
+
 // ============================================
 // Core State Types
 // ============================================
 
 /**
- * Conversation state machine:
- * - idle: Initial state before connection
- * - listening: User is expected to speak (silence detection active)
- * - thinking: end_of_turn sent; waiting for backend response
- * - speaking: AI audio is actively playing
+ * Conversation state -- set ONLY by the backend via STATE_CHANGED / STATE_SYNC events.
+ * The frontend never decides the next state itself.
+ *
+ * Values mirror BackendInterviewState:
+ * - 'idle': WebSocket connected, waiting for interview to begin
+ * - 'listening': User's turn to speak (silence detection active)
+ * - 'thinking': Backend processing (LLM decision, TTS, etc.)
+ * - 'speaking': AI audio is streaming / playing
+ * - 'artifact': User is interacting with code editor / whiteboard
+ * - 'completed': Interview is over (terminal)
  */
-export type ConversationState = 'idle' | 'listening' | 'thinking' | 'speaking'
+export type ConversationState =
+  | 'idle'
+  | 'listening'
+  | 'thinking'
+  | 'speaking'
+  | 'artifact'
+  | 'completed'
 
 /**
  * Upload status for media
@@ -41,40 +54,11 @@ export interface ChatMessage {
 // WebSocket Message Types
 // ============================================
 
-export type WebSocketMessageType =
-  // NOTE: response.text not used by current backend (always streams)
-  // | 'response.text'
-  | 'response.start'
-  | 'response.text.chunk'
-  | 'response.text.complete'
-  // NOTE: response.audio not used by current backend (uses response.audio.chunk instead)
-  // | 'response.audio'
-  | 'response.audio.chunk'
-  | 'response.sentence.complete'
-  | 'response.wait'
-  | 'response.completed'
-  | 'error'
-  | 'transcript.chunk'  // TODO: Handle real-time transcription display
-  | 'pong'
-  | 'media_upload.started'
-  | 'media_upload.error'
-  | 'media_chunk.ack'
-  | 'media_chunk.error'
-  | 'media_finalized'
-  | 'all_media_finalized'
-
-export interface WebSocketTextMessage {
-  type: WebSocketMessageType
-  text?: string
-  message?: string
-  status?: string
-  user_transcript?: string
-  next_action?: string
-  error_type?: string
-  chunk_index?: number
-  recording_type?: MediaType
-  bytes_uploaded?: number
-}
+/**
+ * The type for incoming WebSocket JSON messages.
+ * This is the discriminated union from events.ts.
+ */
+export type WebSocketTextMessage = OutboundMessage
 
 // ============================================
 // Recording Types
@@ -163,21 +147,14 @@ export interface InterviewState {
 
   // Conversation
   /**
-   * Turn-taking state machine (source of truth for whose turn it is):
-   * - 'idle': Initial state before connection
-   * - 'listening': User's turn to speak (silence detection active)
-   * - 'thinking': Processing user input, waiting for AI response
-   * - 'speaking': AI audio is actively playing
+   * Real-time interaction state, set ONLY by the backend via STATE_CHANGED / STATE_SYNC.
+   * The frontend NEVER decides the next state -- it reacts to these events.
    */
   conversationState: ConversationState
   messages: ChatMessage[]
-  /**
-   * Backend is processing user's audio (waiting for response).
-   * True during 'thinking' state when no streaming has started yet.
-   */
-  isProcessing: boolean
-  // NOTE: isAISpeaking is now derived from conversationState + streamingText.
-  // Use useIsAISpeakingDerived() selector instead.
+
+  // Live transcript (from TRANSCRIPT_CHUNK / TRANSCRIPT_FINAL events)
+  transcript: string
 
   // Streaming text (replaces aiStreamBufferRef, currentAiMessageIdRef, tokenQueueRef, isProcessingTokensRef)
   streamingText: StreamingTextState
@@ -185,6 +162,12 @@ export interface InterviewState {
   // Audio chunk tracking (replaces expectedAudioChunkRef, sentenceCompleteRef)
   expectedAudioChunk: AudioChunkInfo | null
   completedSentences: Map<number, string>
+
+  /**
+   * True when backend has sent RESPONSE_AUDIO_DONE for the current response.
+   * When audio playback finishes and this is true, frontend sends SPEECH_COMPLETED.
+   */
+  responseAudioDone: boolean
 
   // Recording states
   audio: MediaRecordingState
@@ -202,15 +185,9 @@ export interface InterviewState {
   isScreenSharing: boolean
 
   // Flags (replaces various refs)
-  hasSentEndOfTurn: boolean
   hasHeardSpeech: boolean
   hasNavigatedAway: boolean
   hasSentAudioSegments: boolean
-  /**
-   * True when AI response is complete (all audio chunks received).
-   * Used to prevent premature transition to listening when audio queue is temporarily empty.
-   */
-  isResponseComplete: boolean
 
   // UI
   showEndConfirm: boolean
@@ -235,15 +212,18 @@ export interface InterviewActions {
   setConnectionStatus: (status: ConnectionStatus) => void
   setError: (error: string | null) => void
 
-  // Conversation state
+  // Conversation state (set ONLY from state_changed / state_sync handlers)
   setConversationState: (state: ConversationState) => void
-  setIsProcessing: (processing: boolean) => void
-  // NOTE: setIsAISpeaking removed - isAISpeaking is now derived
 
   // Messages
   addMessage: (message: Omit<ChatMessage, 'id' | 'timestamp'>) => void
   updateMessage: (id: string, text: string) => void
   clearMessages: () => void
+
+  // Transcript
+  setTranscript: (text: string) => void
+  appendTranscript: (text: string) => void
+  clearTranscript: () => void
 
   // Streaming text
   startStreamingMessage: () => string // returns new messageId
@@ -261,6 +241,9 @@ export interface InterviewActions {
   removeCompletedSentence: (chunkIndex: number) => void
   clearCompletedSentences: () => void
 
+  // Response audio tracking
+  setResponseAudioDone: (done: boolean) => void
+
   // Recording states
   setAudioRecording: (update: Partial<MediaRecordingState>) => void
   setVideoRecording: (update: Partial<MediaRecordingState>) => void
@@ -276,11 +259,9 @@ export interface InterviewActions {
   setIsScreenSharing: (sharing: boolean) => void
 
   // Flags
-  setHasSentEndOfTurn: (sent: boolean) => void
   setHasHeardSpeech: (heard: boolean) => void
   setHasNavigatedAway: (navigated: boolean) => void
   setHasSentAudioSegments: (sent: boolean) => void
-  setIsResponseComplete: (complete: boolean) => void
 
   // UI
   setShowEndConfirm: (show: boolean) => void

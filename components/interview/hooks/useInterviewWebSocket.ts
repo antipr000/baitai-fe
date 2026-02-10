@@ -2,30 +2,45 @@
  * useInterviewWebSocket Hook
  *
  * Manages WebSocket connection for real-time interview communication.
- * Uses Zustand store for state and centralized actions for cross-module calls.
+ * Uses the new backend-driven state machine protocol:
+ * - STATE_CHANGED / STATE_SYNC events drive conversationState
+ * - Frontend emits user-action events (speech_completed, end_of_turn, etc.)
+ * - Frontend NEVER decides the next state
+ *
+ * Message handlers are organized as a dispatch map (Record<OutboundEvent, handler>)
+ * for easy extensibility -- adding a new event requires adding the enum value,
+ * a handler function, and registering it in the map.
  */
 
 import { useEffect, useRef } from 'react'
 import { useInterviewStore } from '../store'
 import { WebSocketManager } from '../manager/WebSocketManager'
+import { OutboundEvent, BackendInterviewState } from '../store/events'
+import type {
+  OutboundMessage,
+  StateChangedPayload,
+  StateSyncPayload,
+  ErrorPayload,
+  TranscriptChunkPayload,
+  TranscriptFinalPayload,
+  ResponseTextChunkPayload,
+  ResponseTextDonePayload,
+  ResponseAudioChunkPayload,
+  ResponseAudioDonePayload,
+  InterviewEndedPayload,
+} from '../store/events'
+import type { ConversationState } from '../store/types'
 import {
   registerWebSocketManager,
   enqueueAudio,
-  onAIResponseStart,
-  stopSilenceDetection,
+  onStateChanged,
   stopRecording,
   stopPlayback,
-  startRecording,
   stopVideoRecording,
   stopScreenRecording,
   finalizeAllMedia,
-  retryMediaUploadSession,
-  transitionToListening,
-  transitionToSpeaking,
-  onResponseStart,
-  transitionToListeningOnError,
+  applyListeningState,
 } from '../store/interviewActions'
-import type { WebSocketTextMessage } from '../store/types'
 
 // ============================================
 // Types
@@ -40,6 +55,26 @@ export interface UseInterviewWebSocketOptions {
 
 export interface UseInterviewWebSocketReturn {
   isConnected: boolean
+}
+
+// ============================================
+// Helpers
+// ============================================
+
+/**
+ * Convert BackendInterviewState enum value to ConversationState type.
+ * Filters out 'disconnected' which is not a UI-renderable state.
+ */
+function toConversationState(backendState: BackendInterviewState): ConversationState | null {
+  const mapping: Record<string, ConversationState> = {
+    [BackendInterviewState.IDLE]: 'idle',
+    [BackendInterviewState.SPEAKING]: 'speaking',
+    [BackendInterviewState.LISTENING]: 'listening',
+    [BackendInterviewState.THINKING]: 'thinking',
+    [BackendInterviewState.ARTIFACT]: 'artifact',
+    [BackendInterviewState.COMPLETED]: 'completed',
+  }
+  return mapping[backendState] ?? null
 }
 
 // ============================================
@@ -80,21 +115,13 @@ export function useInterviewWebSocket(
       { sessionId, apiUrl },
       {
         onConnect: () => {
-
-          const state = store.getState()
-
-          // If this was a reconnection (attempts > 0), ensure we're in listening state
-          if (state.reconnectAttempts > 0) {
-            console.log('[WebSocket] Reconnection successful - resetting to listening state')
-            state.setConversationState('listening')
-            // Also reset processing flags to be safe
-            state.setIsProcessing(false)
-          }
-
           console.log('[WebSocket] Connected')
           // Reset reconnection attempts on successful connection
           store.getState().setReconnectAttempts(0)
-          // Status update handled by onStatusChange
+
+          // Do NOT set conversationState here.
+          // Wait for STATE_SYNC (reconnection) or STATE_CHANGED (fresh connection)
+          // from the backend to set the authoritative state.
         },
         onDisconnect: () => {
           console.log('[WebSocket] Disconnected')
@@ -114,8 +141,6 @@ export function useInterviewWebSocket(
               manager.connect()
             }, delay)
 
-            // NOTE: We do NOT stop recording here to allow seamless resumption if possible,
-            // or at least wait until max retries fail.
             return
           }
 
@@ -156,32 +181,6 @@ export function useInterviewWebSocket(
             return
           }
 
-          /* May be not needed */
-
-          // // Check if this is a streaming audio chunk (matches original handleAudioData)
-          // const expectedChunk = state.expectedAudioChunk
-          // if (expectedChunk) {
-          //   const chunkIndex = expectedChunk.chunkIndex
-
-          //   // Verify this matches a completed sentence for better sync
-          //   const sentenceText = state.getCompletedSentence(chunkIndex)
-          //   if (sentenceText && sentenceText === expectedChunk.text) {
-          //     console.log(
-          //       `[Audio] Received synchronized audio chunk ${chunkIndex} (${data.byteLength} bytes) for sentence: "${expectedChunk.text.substring(0, 30)}..."`
-          //     )
-          //     // Remove from tracking since we've received the audio
-          //     state.removeCompletedSentence(chunkIndex)
-          //   } else {
-          //     console.log(
-          //       `[Audio] Received audio chunk (out of sync) ${chunkIndex} (${data.byteLength} bytes) for: "${expectedChunk.text.substring(0, 30)}..."`
-          //     )
-          //   }
-          //   state.setExpectedAudioChunk(null)
-          // } else {
-          //   // Legacy complete audio (for backward compatibility)
-          //   console.log(`[Audio] Received complete audio (${data.byteLength} bytes)`)
-          // }
-
           // Queue audio for playback
           enqueueAudio(data)
         },
@@ -208,139 +207,76 @@ export function useInterviewWebSocket(
   }, [sessionId, isInitialized]) // Reconnect when sessionId or isInitialized changes
 
   // ============================================
-  // Message Handler (uses store.getState() for fresh state)
+  // Message Handlers
   // ============================================
-  function handleTextMessage(message: WebSocketTextMessage) {
-    const state = store.getState()
-    if (state.hasNavigatedAway) return
 
-    console.log('[WebSocket] Text message:', message.type)
+  function handleStateChanged(message: StateChangedPayload) {
+    const newState = toConversationState(message.state)
+    const previousState = toConversationState(message.previous_state)
 
-    switch (message.type) {
-      case 'response.start':
-        handleResponseStart(message)
-        break
-      // NOTE: response.text is not used by current backend (always streams)
-      // case 'response.text':
-      //   handleResponseText(message)
-      //   break
-      case 'response.text.chunk':
-        handleTextChunk(message)
-        break
-      case 'response.sentence.complete':
-        handleSentenceComplete(message)
-        break
-      case 'response.audio.chunk':
-        handleAudioChunk(message)
-        break
-      case 'response.text.complete':
-        handleTextComplete(message)
-        break
-      case 'response.wait':
-        handleResponseWait(message)
-        break
-      case 'response.completed':
-        handleResponseCompleted(message)
-        break
-      case 'error':
-        handleError(message)
-        break
-      case 'media_upload.started':
-      case 'media_upload.error':
-      case 'media_chunk.ack':
-      case 'media_chunk.error':
-        handleMediaUpload(message)
-        break
-      // TODO: Handle real-time transcription display
-      case 'transcript.chunk':
-        console.log('[WebSocket] Real-time transcript:', message.text)
-        // Could update UI to show what user is saying in real-time
-        break
-      // Keep-alive response (no action needed)
-      case 'pong': // check
-        break
-      // Media finalization (could update UI if needed)
-      case 'media_finalized':
-      case 'all_media_finalized':
-        console.log('[WebSocket] Media finalized:', message)
-        break
+    if (!newState) {
+      console.warn('[WebSocket] Ignoring state_changed with unrenderable state:', message.state)
+      return
+    }
+
+    console.log(`[WebSocket] State changed: ${previousState ?? '?'} → ${newState}`)
+    onStateChanged(newState, previousState ?? 'idle', message.metadata ?? {})
+  }
+
+  function handleStateSync(message: StateSyncPayload) {
+    const newState = toConversationState(message.state)
+    if (!newState) {
+      console.warn('[WebSocket] Ignoring state_sync with unrenderable state:', message.state)
+      return
+    }
+
+    console.log(`[WebSocket] State sync: ${newState} (session_status: ${message.session_status})`)
+    const currentStore = store.getState()
+    currentStore.setConversationState(newState)
+
+    // Apply side effects based on synced state
+    if (newState === 'listening') {
+      applyListeningState()
     }
   }
 
-  function handleResponseStart(message: WebSocketTextMessage) {
+  function handleError(message: ErrorPayload) {
+    console.error('[WebSocket] Error:', message.message, '(type:', message.error_type, ', fatal:', message.fatal, ')')
+
     const state = store.getState()
+    state.setError(message.message)
 
-    // Use transition helper for state changes
-    onResponseStart()
-
-    // Mark response as incomplete - audio chunks are expected
-    state.setIsResponseComplete(false)
-    // response.start is for streaming - recording continues until AI starts speaking audio
-
-    if (message.user_transcript && message.user_transcript !== '[Silence/Unintelligible]') {
-      state.addMessage({ speaker: 'candidate', text: message.user_transcript })
+    if (message.error_type === 'session' || message.fatal) {
+      state.setIsIntentionalDisconnect(true)
+      wsManagerRef.current?.disconnect()
     }
 
-    // Clear previous streaming state and start new message
-    state.clearStreamingState()
-    state.setExpectedAudioChunk(null)
-    state.clearCompletedSentences()
-    state.startStreamingMessage()
+    onError?.(new Error(message.message || 'WebSocket error'))
   }
 
+  function handleTranscriptChunk(message: TranscriptChunkPayload) {
+    const text = message.text || ''
+    if (text) {
+      store.getState().setTranscript(text)
+    }
+  }
 
-  // NOTE: handleResponseText is not used by current backend (always streams)
-  // Kept for potential future backward compatibility
-  // function handleResponseText(message: WebSocketTextMessage) {
-  //   const state = store.getState()
-  //   state.setIsProcessing(false)
-  //   if (state.conversationState !== 'speaking') {
-  //     state.setConversationState('thinking')
-  //   }
-  //   onAIResponseStart()
-  //   state.setHasSentEndOfTurn(false)
-  //   if (message.user_transcript && message.user_transcript !== '[Silence/Unintelligible]') {
-  //     state.addMessage({ speaker: 'candidate', text: message.user_transcript })
-  //   }
-  //   if (message.text) {
-  //     state.addMessage({ speaker: 'ai', text: message.text })
-  //   }
-  //   state.clearStreamingState()
-  // }
+  function handleTranscriptFinal(message: TranscriptFinalPayload) {
+    const text = message.text || ''
+    if (text && text !== '[Silence/Unintelligible]') {
+      store.getState().addMessage({ speaker: 'candidate', text })
+    }
+    store.getState().clearTranscript()
+  }
 
-  function handleTextChunk(message: WebSocketTextMessage) {
+  function handleResponseTextChunk(message: ResponseTextChunkPayload) {
     const chunk = message.text || ''
     if (chunk) {
       store.getState().addTokenToQueue(chunk)
     }
   }
 
-  function handleSentenceComplete(message: WebSocketTextMessage) {
-    const state = store.getState()
-    const chunkIndex = message.chunk_index ?? 0
-    const sentenceText = message.text || ''
-    state.addCompletedSentence(chunkIndex, sentenceText)
-    console.log(`[WebSocket] Sentence ${chunkIndex} complete: "${sentenceText.substring(0, 50)}..." - expecting audio chunk`)
-
-    // NOTE: Don't transition to speaking here - the audio player handles this 
-    // when audio actually starts playing, ensuring the analyser exists first
-  }
-
-  function handleAudioChunk(message: WebSocketTextMessage) {
-    const state = store.getState()
-    const chunkIndex = message.chunk_index ?? 0
-    const chunkText = message.text || ''
-    state.setExpectedAudioChunk({ chunkIndex, text: chunkText })
-    console.log(`[WebSocket] Audio chunk ${chunkIndex} metadata received`)
-
-    // Check if this sentence was already marked as complete (Sanity check)
-    const sentenceText = state.getCompletedSentence(chunkIndex)
-    if (sentenceText && sentenceText === chunkText) {
-      console.log(`[WebSocket] Audio chunk ${chunkIndex} matches completed sentence - ready for synchronized playback`)
-    }
-  }
-
-  function handleTextComplete(message: WebSocketTextMessage) {
+  function handleResponseTextDone(message: ResponseTextDonePayload) {
     console.log('[WebSocket] Text complete, waiting for token queue...')
 
     const waitForQueueAndFinalize = () => {
@@ -352,114 +288,106 @@ export function useInterviewWebSocket(
         return
       }
 
-      // Use message.text if provided, otherwise the accumulated buffer (matches original)
+      // Use message.text if provided, otherwise the accumulated buffer
       currentState.finalizeStreamingMessage(message.text)
-
-      // NOTE: isAISpeaking is now derived, no need to set it manually
-
       console.log('[WebSocket] Text finalized after queue drain')
     }
 
     waitForQueueAndFinalize()
   }
 
-  function handleResponseWait(message: WebSocketTextMessage) {
-    // Backend sends response.wait when candidate is "still thinking"
-    // This means: let user continue speaking, don't generate AI response yet
-    // NOTE: Don't add partial transcript here - only add final transcript from response.start
-    console.log('[WebSocket] response.wait received')
-    transitionToListening()
-    startRecording(true).catch(console.error)
-  }
-
-  function handleResponseCompleted(message: WebSocketTextMessage) {
+  function handleResponseAudioChunk(message: ResponseAudioChunkPayload) {
     const state = store.getState()
-    console.log('[WebSocket] Response completed - status:', message.status, 'next_action:', message.next_action)
-    state.setIsProcessing(false)
-
-    // Mark response as complete - audio player can now transition to listening when queue empties
-    state.setIsResponseComplete(true)
-
-    // Check if interview has completed
-    const isCompleted = message.status === 'completed' || message.next_action === 'END_INTERVIEW'
-
-    if (isCompleted) {
-      console.log('[WebSocket] Interview completed - ending session')
-
-
-
-      // Stop all recordings and playback (consistent with handleEndInterview)
-      stopRecording()
-      stopPlayback()
-      stopVideoRecording()
-      stopScreenRecording()
-
-      // Mark as intentional to prevent reconnection attempts during cleanup
-      store.getState().setIsIntentionalDisconnect(true)
-
-      // Finalize all media uploads before closing
-      finalizeAllMedia()
-
-      // Wait a bit for finalization to complete, then close WebSocket
-      setTimeout(() => {
-        wsManagerRef.current?.disconnect()
-      }, 1000)
-
-      // Add completion message to conversation
-      state.addMessage({
-        speaker: 'ai',
-        text: 'Thank you, the interview is now concluded.',
-      })
-      // maybe we can have an audio from the backend to play when the interview is completed
-
-      // Mark as navigated away to prevent further processing
-      state.setHasNavigatedAway(true)
-      // Callback will show toast and redirect
-      onInterviewEnd?.()
-    }
-    // No-op for non-completed: we already transition speaking -> listening when playback ends
+    const chunkIndex = message.chunk_index ?? 0
+    const chunkText = message.text || ''
+    state.setExpectedAudioChunk({ chunkIndex, text: chunkText })
+    state.addCompletedSentence(chunkIndex, chunkText)
+    console.log(`[WebSocket] Audio chunk ${chunkIndex} metadata received`)
   }
 
-  function handleError(message: WebSocketTextMessage) {
-    console.error('[WebSocket] Error:', message.message)
-    transitionToListeningOnError(message.message || 'An error occurred')
+  function handleResponseAudioDone(message: ResponseAudioDonePayload) {
+    console.log(`[WebSocket] Response audio done (total_chunks: ${message.total_chunks})`)
+    // Mark that all audio has been sent for this response.
+    // The audio player will send SPEECH_COMPLETED when playback finishes.
+    store.getState().setResponseAudioDone(true)
+  }
 
-    if (message.error_type === 'session') {
-      store.getState().setIsIntentionalDisconnect(true)
+  function handleInterviewEnded(message: InterviewEndedPayload) {
+    console.log('[WebSocket] Interview ended - reason:', message.reason)
+    const state = store.getState()
+
+    // Add completion message to conversation
+    state.addMessage({
+      speaker: 'ai',
+      text: message.message || 'Thank you, the interview is now concluded.',
+    })
+
+    // Stop all recordings and playback
+    stopRecording()
+    stopPlayback()
+    stopVideoRecording()
+    stopScreenRecording()
+
+    // Mark as intentional to prevent reconnection attempts during cleanup
+    state.setIsIntentionalDisconnect(true)
+
+    // Finalize all media uploads before closing
+    finalizeAllMedia()
+
+    // Wait a bit for finalization to complete, then close WebSocket
+    setTimeout(() => {
       wsManagerRef.current?.disconnect()
-    }
+    }, 1000)
 
-    onError?.(new Error(message.message || 'WebSocket error'))
+    // Mark as navigated away to prevent further processing
+    state.setHasNavigatedAway(true)
+
+    // Callback will show toast and redirect
+    onInterviewEnd?.()
   }
 
-  function handleMediaUpload(message: WebSocketTextMessage) {
-    const state = store.getState()
-    const recordingType = message.recording_type
+  function handlePong() {
+    // No-op: keep-alive response
+  }
 
-    if (message.type === 'media_upload.started' || message.type === 'media_chunk.ack') {
-      if (recordingType === 'video') {
-        state.setVideoRecording({ uploadStatus: 'uploading' })
-      } else if (recordingType === 'screen') {
-        state.setScreenRecording({ uploadStatus: 'uploading' })
-      }
-    } else if (message.type === 'media_upload.error') {
-      // Session-level error - reset and retry after delay (matches original)
-      console.error(`[WebSocket] Media upload session error for ${recordingType}:`, message.message)
-      if (recordingType === 'video') {
-        state.setVideoRecording({ uploadStatus: 'error' })
-        retryMediaUploadSession('video')
-      } else if (recordingType === 'screen') {
-        state.setScreenRecording({ uploadStatus: 'error' })
-        retryMediaUploadSession('screen')
-      }
-    } else if (message.type === 'media_chunk.error') {
-      // Chunk-level error - just mark error, no retry (original behavior)
-      console.error(`[WebSocket] Media chunk error for ${recordingType}:`, message.message)
-      if (recordingType === 'video') {
-        state.setVideoRecording({ uploadStatus: 'error' })
-      } else if (recordingType === 'screen') {
-        state.setScreenRecording({ uploadStatus: 'error' })
-      }
+  // ============================================
+  // Handler Dispatch Map
+  // ============================================
+  // Adding a new event type requires:
+  // 1. Add enum value to OutboundEvent in events.ts
+  // 2. Create a handler function above
+  // 3. Register it in this map
+
+  const handlerMap: Partial<Record<OutboundEvent, (message: OutboundMessage) => void>> = {
+    [OutboundEvent.STATE_CHANGED]: (m) => handleStateChanged(m as StateChangedPayload),
+    [OutboundEvent.STATE_SYNC]: (m) => handleStateSync(m as StateSyncPayload),
+    [OutboundEvent.ERROR]: (m) => handleError(m as ErrorPayload),
+    [OutboundEvent.TRANSCRIPT_CHUNK]: (m) => handleTranscriptChunk(m as TranscriptChunkPayload),
+    [OutboundEvent.TRANSCRIPT_FINAL]: (m) => handleTranscriptFinal(m as TranscriptFinalPayload),
+    [OutboundEvent.RESPONSE_TEXT_CHUNK]: (m) => handleResponseTextChunk(m as ResponseTextChunkPayload),
+    [OutboundEvent.RESPONSE_TEXT_DONE]: (m) => handleResponseTextDone(m as ResponseTextDonePayload),
+    [OutboundEvent.RESPONSE_AUDIO_CHUNK]: (m) => handleResponseAudioChunk(m as ResponseAudioChunkPayload),
+    [OutboundEvent.RESPONSE_AUDIO_DONE]: (m) => handleResponseAudioDone(m as ResponseAudioDonePayload),
+    [OutboundEvent.INTERVIEW_ENDED]: (m) => handleInterviewEnded(m as InterviewEndedPayload),
+    [OutboundEvent.PONG]: () => handlePong(),
+  }
+
+  // ============================================
+  // Message Router
+  // ============================================
+
+  function handleTextMessage(message: OutboundMessage) {
+    const state = store.getState()
+    if (state.hasNavigatedAway) return
+
+    const eventType = message.type as OutboundEvent
+    console.log('[WebSocket] Text message:', eventType)
+
+    const handler = handlerMap[eventType]
+    if (handler) {
+      handler(message)
+    } else {
+      console.warn('[WebSocket] Unknown event type:', eventType)
     }
   }
 
