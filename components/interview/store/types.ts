@@ -110,7 +110,7 @@ export interface SilenceDetectionConfig {
 }
 
 export const DEFAULT_SILENCE_CONFIG: SilenceDetectionConfig = {
-  silenceDuration: 700,
+  silenceDuration: 1000,
   noiseFloorAlpha: 0.05,
   minNoiseFloor: 0.008,
   speechMargin: 0.025,
