@@ -11,7 +11,8 @@ import { getTokens } from "next-firebase-auth-edge";
 import { cookies } from "next/headers";
 import { clientConfig, serverConfig } from "@/lib/auth/config";
 import { AuthButtons } from "@/components/auth-buttons";
-import { hiringFeatures, jobSeekerSteps, hiringTeamSteps } from "@/app/home-data";
+import { HiringTeamsSection } from "@/components/main/hiring-teams-section";
+import { hiringFeatures, jobSeekerSteps } from "@/app/home-data";
 import { WaitlistForm } from "@/components/waitlist-form";
 import Header from "@/components/header";
 import { JobSeekersSection } from "@/components/main/job-seekers-section";
@@ -237,124 +238,39 @@ export default async function Home() {
       </section>
 
       {/* Workflow and CTA Section */}
-      <section className="  bg-[rgba(255, 255, 255, 1)] ">
-        <div className="lg:max-w-6xl md:max-w-3xl mx-auto  px-3 p-2">
-          <div className="flex items-center mx-5   my-8 w-fit border-b border-[rgba(120,130,237,0.6)]  lg:pb-2">
-            <p className="lg:text-4xl md:text-2xl text-lg font-semibold my-4 md:tracking-[6px] tracking-[2px] text-semibold text-transparent bg-clip-text bg-[linear-gradient(94.46deg,#6772E6_-13.88%,#8791F4_113.71%)]">
-              Journey made easy
-            </p>
-          </div>
-          {/* Steps Container */}
-          <div className="max-w-6xl mx-auto mb-12 px-4">
-            <div className="flex flex-col md:flex-row lg:items-start items-center justify-between gap-12">
 
-              {hiringTeamSteps.map((step, index) => (
-                <div
-                  key={index}
-                  className="flex-1 flex flex-col items-center relative"
-                >
-                  {/* Header + Connector Wrapper */}
-                  <div className="relative flex items-center justify-center w-full">
-
-                    {/* Step Card */}
-                    <Card
-                      className={`${step.bgColor} ${step.borderColor} border rounded-3xl 
-            w-[280px] h-[72px] `}
-                    >
-                      <CardContent className="flex items-center justify-center h-full px-6">
-                        <div className="flex items-center gap-4">
-                          <div className="w-10 h-10 rounded-full bg-[rgba(224,245,255,1)] border-2 border-[rgba(108,132,255,1)] flex items-center justify-center">
-                            <span className="text-sm font-bold text-[rgba(58,63,187,1)]">
-                              {step.number}
-                            </span>
-                          </div>
-                          <h3 className="text-sm md:text-base font-semibold text-[rgba(224,245,255,1)] whitespace-nowrap">
-                            {step.title}
-                          </h3>
-                        </div>
-                      </CardContent>
-                    </Card>
-
-                    {/* Connector Line */}
-                    {index < hiringTeamSteps.length - 1 && (
-                      <div className="hidden xl:block absolute right-[-57px] top-1/2 -translate-y-1/2 xl:w-20 w-[65px]">
-                        <div className="h-2 rounded-full bg-gray-200 overflow-hidden">
-                          <motion.div
-                            className="h-full bg-[linear-gradient(90deg,#00D7FF,#3A3FBB)] origin-left"
-                            initial={{ scaleX: 0.2 }}
-                            animate={{ scaleX: [0.2, 0.5, 1, 0.2] }}
-                            transition={{
-                              duration: 2.5,
-                              repeat: Infinity,
-                              ease: "easeInOut",
-                            }}
-                          />
-                        </div>
-                      </div>
-                    )}
-                  </div>
+      <HiringTeamsSection />
+      {/*  */}
 
 
-                  {/* Description */}
-                  <p className="text-center text-[rgba(6,15,100,0.5)] text-sm font-semibold mt-4">
-                    {step.description}
-                  </p>
-
-                  {/* Image */}
-                  <div className="mt-10 w-full flex justify-center">
-                    <div className="rounded-2xl shadow-md bg-white p-4">
-                      {step.hasImageContainer ? (
-                        <div className=" rounded-2xl md:py-12 lg:py-12 py-10 lg:w-[300px]      shadow-md px-5 bg-[rgba(249,255,255,1)]">
-                          <Image className="rounded-lg" src={step.image} alt={step.imageAlt} width={330} height={150} />
-                        </div>
-                      ) : (
-                        <Image
-                          src={step.image}
-                          alt={step.imageAlt}
-                          width={350}
-                          height={230}
-                          className="rounded-xl object-contain"
-                        />)}
-                    </div>
-                  </div>
-                </div>
-              ))}
+      {/* CTA Section */}
+      <section className="bg-[rgba(107,124,255,1)] px-6 md:px-8 lg:px-42 py-20 md:py-24 lg:py-31 rounded-3xl mx-4 md:mx-6 lg:mx-10 my-15">
+        <div className="w-full max-w-6xl mx-auto">
+          <div className="flex flex-col items-center text-center gap-8 md:gap-10">
+            <div className="space-y-6">
+              <h2 className="text-2xl md:text-3xl lg:text-5xl text-[rgba(245,247,255,1)] font-semibold tracking-tight">
+                Excited to revolutionize your hiring process?
+              </h2>
+              <p className="text-base md:text-lg lg:text-xl text-[rgba(245,247,255,0.9)] font-medium max-w-2xl mx-auto">
+                Join leading companies who are already hiring smarter with AI
+              </p>
+            </div>
+            <div className="flex flex-col sm:flex-row gap-9 mt-9">
+              <Link href="https://cal.com/soham-mukherjee-8yzald/30min" target="_blank" rel="noopener noreferrer">
+                <Button className="rounded-xl px-10 py-4 md:px-12 md:py-5 lg:px-6 lg:py-6 border-2 border-[rgba(107,124,255,1)] hover:border-[rgba(245,247,255,1)] text-base md:text-lg lg:text-xl font-medium bg-[rgba(245,247,255,1)] hover:bg-transparent hover:opacity-90 text-[rgba(107,124,255,1)] hover:text-[rgba(245,247,255,1)]">
+                  Schedule a Demo
+                </Button>
+              </Link>
+              <Link href="/pricing">
+                <Button className="rounded-xl px-10 py-4 md:px-12 md:py-5 lg:px-6 lg:py-6 text-base md:text-lg lg:text-xl   border-[rgba(245,247,255,1)] font-medium bg-transparent hover:bg-[rgba(245,247,255,1)] hover:opacity-90 border-2  text-[rgba(245,247,255,1)] hover:text-[rgba(107,124,255,1)]">
+                  View Pricing
+                </Button>
+              </Link>
             </div>
           </div>
-
         </div>
-
-        {/*  */}
-
-
-        {/* CTA Section */}
-        <section className="bg-[rgba(107,124,255,1)] px-6 md:px-8 lg:px-42 py-20 md:py-24 lg:py-31 rounded-3xl mx-4 md:mx-6 lg:mx-10 my-8">
-          <div className="w-full max-w-6xl mx-auto">
-            <div className="flex flex-col items-center text-center gap-8 md:gap-10">
-              <div className="space-y-6">
-                <h2 className="text-2xl md:text-3xl lg:text-5xl text-[rgba(245,247,255,1)] font-semibold tracking-tight">
-                  Excited to revolutionize your hiring process?
-                </h2>
-                <p className="text-base md:text-lg lg:text-xl text-[rgba(245,247,255,0.9)] font-medium max-w-2xl mx-auto">
-                  Join leading companies who are already hiring smarter with AI
-                </p>
-              </div>
-              <div className="flex flex-col sm:flex-row gap-9 mt-9">
-                <Link href="https://cal.com/soham-mukherjee-8yzald/30min" target="_blank" rel="noopener noreferrer">
-                  <Button className="rounded-xl px-10 py-4 md:px-12 md:py-5 lg:px-6 lg:py-6 border-2 border-[rgba(107,124,255,1)] hover:border-[rgba(245,247,255,1)] text-base md:text-lg lg:text-xl font-medium bg-[rgba(245,247,255,1)] hover:bg-transparent hover:opacity-90 text-[rgba(107,124,255,1)] hover:text-[rgba(245,247,255,1)]">
-                    Schedule a Demo
-                  </Button>
-                </Link>
-                <Link href="/pricing">
-                  <Button className="rounded-xl px-10 py-4 md:px-12 md:py-5 lg:px-6 lg:py-6 text-base md:text-lg lg:text-xl   border-[rgba(245,247,255,1)] font-medium bg-transparent hover:bg-[rgba(245,247,255,1)] hover:opacity-90 border-2  text-[rgba(245,247,255,1)] hover:text-[rgba(107,124,255,1)]">
-                    View Pricing
-                  </Button>
-                </Link>
-              </div>
-            </div>
-          </div>
-        </section>
       </section>
+
       <section>
         {/* Job Seekers Section */}
         <JobSeekersSection />

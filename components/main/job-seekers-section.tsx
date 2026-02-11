@@ -5,12 +5,12 @@ import { jobSeekerFeatures } from "@/app/home-data";
 
 export function JobSeekersSection() {
     return (
-        <section id="job-seekers" className="scroll-mt-[120px] py-14 px-6">
+        <section id="job-seekers" className="scroll-mt-[120px] py-14 px-20">
             <div className="max-w-7xl mx-auto">
                 {/* Header */}
                 <div className="text-center mb-10">
                     {/* Badge */}
-                    <div className="inline-flex items-center justify-center mb-6">
+                    <div className="inline-flex items-center justify-center mb-3">
                         <Badge className="text-lg bg-transparent border-2 border-[rgba(107,124,255,1)] text-[rgba(58,63,187,1)] font-semibold tracking-tight rounded-full uppercase hover:bg-transparent p-3 px-20">
                             FOR JOB SEEKERS
                         </Badge>
@@ -32,7 +32,7 @@ export function JobSeekersSection() {
                 <div className="flex  justify-center gap-10">
                     {jobSeekerFeatures.map((feature, index) => (
                         <Card key={index} className="bg-white border border-[rgba(58,63,187,0.5)] shadow-none rounded-2xl w-full ">
-                            <CardContent className="flex flex-col items-center justify-start  py-10 text-center">
+                            <CardContent className="flex flex-col items-center justify-start  py-5 text-center">
                                 <div className="mb-4 h-12 flex items-center justify-center">
                                     <Image
                                         src={feature.icon}

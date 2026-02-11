@@ -89,33 +89,27 @@ export const jobSeekerFeatures = [
 
 export const hiringTeamSteps = [
     {
-        number: "1",
-        bgColor: "bg-[rgba(58,63,187,1)]",
-        borderColor: "border-[rgba(58,63,187,1)]",
-        title: "Design Your Flow",
-        description: "Create interview sections with custom configurations and AI guidelines",
-        image: "/main/getting-started.png",
-        imageAlt: "Getting Started Illustration",
-        hasImageContainer: true
+        number: "01",
+        title: "Design Your Interview",
+        description: "Create custom questions, set evaluation criteria, and define the ideal candidate profile for your role.",
+        icon: "/main/screen2.gif"
     },
     {
-        number: "2",
-        bgColor: "bg-[rgba(58,63,187,1)]",
-        borderColor: "border-[rgba(58,63,187,1)]",
-        title: "Conduct AI Interviews",
-        description: "AI-powered interviews with real-time adaptation and candidate interaction",
-        image: "/main/candidate.png",
-        imageAlt: "Candidate Illustration",
-        hasImageContainer: false
+        number: "02",
+        title: "Share & Scale",
+        description: "Publish your interview with a single link. Unlimited candidates can take it simultaneously, 24/7.",
+        icon: "/main/search.gif"
     },
     {
-        number: "3",
-        bgColor: "bg-[rgba(58,63,187,1)]",
-        borderColor: "border-[rgba(58,63,187,1)]",
-        title: "Get Insights",
-        description: "Review interview scores, transcripts, and performance analytics for better decisions",
-        image: "/main/meet.png",
-        imageAlt: "Insights Illustration",
-        hasImageContainer: false
+        number: "03",
+        title: "AI Conducts Interviews",
+        description: "Our AI adapts questions based on responses, ensuring consistent and thorough evaluation for every candidate.",
+        icon: "/main/robot2.gif"
+    },
+    {
+        number: "04",
+        title: "Review & Decide",
+        description: "Get ranked candidates with detailed analytics, skill assessments, and AI-powered recommendations.",
+        icon: "/main/people2.gif"
     }
 ];
