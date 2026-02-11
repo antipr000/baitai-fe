@@ -328,26 +328,25 @@ export default async function Home() {
 
 
         {/* CTA Section */}
-        <section className="w-full px-5 bg-[linear-gradient(95.83deg,rgba(0,13,137,0.9)_-2.79%,rgba(0,50,216,0.9)_104.99%)] rounded-t-3xl md:px-0 py-10">
-          <div className="w-full">
-            <div className="flex flex-col items-center text-center gap-6">
-              <div>
-                <h2 className="lg:text-[32px] md:mb-2 mb-3 md:text-2xl text-transparent bg-clip-text bg-[linear-gradient(90deg,#EFF3FF_0%,#C8C7FF_100%)] font-semibold tracking-tight">
+        <section className="bg-[rgba(107,124,255,1)] px-6 md:px-8 lg:px-42 py-20 md:py-24 lg:py-31 rounded-3xl mx-4 md:mx-6 lg:mx-10 my-8">
+          <div className="w-full max-w-6xl mx-auto">
+            <div className="flex flex-col items-center text-center gap-8 md:gap-10">
+              <div className="space-y-6">
+                <h2 className="text-2xl md:text-3xl lg:text-5xl text-[rgba(245,247,255,1)] font-semibold tracking-tight">
                   Excited to revolutionize your hiring process?
                 </h2>
-                <p className="text-[rgba(206,241,248,0.3)] max-w-2xl lg:text-2xl md:text-xl">
+                <p className="text-base md:text-lg lg:text-xl text-[rgba(245,247,255,0.9)] font-medium max-w-2xl mx-auto">
                   Join leading companies who are already hiring smarter with AI
                 </p>
-
               </div>
-              <div className="flex  gap-4 mt-2 md:max-w-3xl lg:max-w-6xl">
+              <div className="flex flex-col sm:flex-row gap-9 mt-9">
                 <Link href="https://cal.com/soham-mukherjee-8yzald/30min" target="_blank" rel="noopener noreferrer">
-                  <Button className="rounded-xl px-8 lg:py-6 md:py-4  lg:text-2xl  md:text-xl font-semibold bg-[rgba(0,12,134,0.9)] hover:bg-[rgba(0,12,134,0.9)] hover:opacity-90 border-2 border-[rgba(99,112,227,1)] hover:text-white shadow-[0px_4px_4px_0px_rgba(0,0,0,0.08)] text-[rgba(224,244,255,0.9)]">
+                  <Button className="rounded-xl px-10 py-4 md:px-12 md:py-5 lg:px-6 lg:py-6 border-2 border-[rgba(107,124,255,1)] hover:border-[rgba(245,247,255,1)] text-base md:text-lg lg:text-xl font-medium bg-[rgba(245,247,255,1)] hover:bg-transparent hover:opacity-90 text-[rgba(107,124,255,1)] hover:text-[rgba(245,247,255,1)]">
                     Schedule a Demo
                   </Button>
                 </Link>
                 <Link href="/pricing">
-                  <Button className="rounded-xl px-8 lg:py-6 md:py-4 lg:text-2xl md:text-xl  font-semibold hover:opacity-90 hover:text-white bg-[rgba(68,102,198,1)] border-2 border-[rgba(224,244,255,1)] text-[rgba(224,244,255,0.9)] hover:bg-[rgba(255,255,255,0.1)]">
+                  <Button className="rounded-xl px-10 py-4 md:px-12 md:py-5 lg:px-6 lg:py-6 text-base md:text-lg lg:text-xl   border-[rgba(245,247,255,1)] font-medium bg-transparent hover:bg-[rgba(245,247,255,1)] hover:opacity-90 border-2  text-[rgba(245,247,255,1)] hover:text-[rgba(107,124,255,1)]">
                     View Pricing
                   </Button>
                 </Link>
