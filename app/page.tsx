@@ -12,6 +12,7 @@ import { cookies } from "next/headers";
 import { clientConfig, serverConfig } from "@/lib/auth/config";
 import { AuthButtons } from "@/components/auth-buttons";
 import { HiringTeamsSection } from "@/components/main/hiring-teams-section";
+import { HiringFeaturesSection } from "@/components/main/hiring-features-section";
 import { hiringFeatures, jobSeekerSteps } from "@/app/home-data";
 import { WaitlistForm } from "@/components/waitlist-form";
 import Header from "@/components/header";
@@ -25,11 +26,9 @@ export default async function Home() {
       <Header />
 
       {/* Hero Section */}
-      <main className="relative w-full px-6 py-6 md:pt-28 pt-20 bg-[linear-gradient(95.57deg,#E7F5FF_7.28%,#F5F7FF_100.24%)]">
-
-
+      <main className="relative w-full px-17  md:py-28 py-6 ">
         {/* Content */}
-        <div className="relative z-10 lg:max-w-7xl md:max-w-4xl w-full mx-auto text-center">
+        <div className="relative z-10 lg:max-w-7xl  md:max-w-4xl w-full mx-auto py-2">
           {/* Grid Overlay */}
           <div
             className="
@@ -41,201 +40,106 @@ export default async function Home() {
       "
           />
 
-          {/* AI Badge */}
-          <Badge className="bg-[linear-gradient(91deg,rgba(15,2,53,1)_-107.69%,rgba(43,5,155,1)_80.08%)] text-white px-6 py-2 mb-3 mt-2 text-sm">
-            <Image
-              src="/main/lightning.svg"
-              alt="AI Badge"
-              width={14}
-              height={14}
-              className="inline-block mr-2"
-            />
-            <span className="text-[rgba(213,220,255,0.9)]">
-              AI-powered interview
-            </span>
-          </Badge>
+          <div className="grid mt-29 lg:grid-cols-2 gap-41 items-center">
+            {/* Left Column */}
+            <div className="text-left flex flex-col items-start">
+              {/* AI Badge */}
+              <Badge className="bg-[rgba(196,240,0,1)] text-[rgba(58,63,187,1)] px-7 py-3 mb-5 text-sm font-medium hover:bg-[#a5ce21] border-none rounded-full">
+                <Image
+                  src="/main/lightning2.svg"
+                  alt="AI Badge"
+                  width={13}
+                  height={18}
+                  className="inline-block mr-2"
+                />
+                AI-Powered Interviews
+              </Badge>
 
-          {/* Main Heading */}
-          <h1 className="lg:text-4xl md:text-3xl text-2xl font-semibold lg:mb-1.5  -tracking-tightest">
-            <span className="text-[rgba(58,63,187,1)]">
-              Redefining How Hiring Works
-            </span>
-          </h1>
+              {/* Main Heading */}
+              <h1 className="lg:text-6xl md:text-5xl text-4xl font-semibold leading-tight mb-5 tracking-tight">
+                <span className="text-[rgba(107,124,255,1)]">Redefining</span>{" "}
+                <span className="text-black">How</span>
+                <br />
+                <span className="text-[rgba(107,124,255,1)]">Hiring</span>{" "}
+                <span className="text-black">Works</span>
+              </h1>
 
-          {/* Subtitle */}
-          <p className="lg:text-2xl md:text-xl text-[rgba(53,77,194,0.5)] text-sm mb-8 max-w-5xl mx-auto">
-            Streamline recruitment and ace interviews with our AI-powered platform
-          </p>
+              {/* Subtitle */}
+              <p className="text-xl text-[rgba(10,13,26,0.7)] mb-10 max-w-lg leading-tight">
+                Design once, interview thousands. Give candidates the practice they need and hiring teams the insights they deserve.
+              </p>
 
-          {/* Feature Cards */}
-          <div className="grid grid-cols-2 gap-12 justify-start lg:max-w-6xl md:max-w-4xl mx-auto pb-5">
-
-            {/* Interview Section */}
-            <div className="text-center relative">
-              <Image
-                src="/main/ellipse.svg"
-                alt="Interview Illustration"
-                width={300}
-                height={200}
-                className="absolute inset-0 mx-auto lg:w-[300px] md:w-[200px] w-[200px] z-[-1]"
-              />
-              <Image
-                src="/main/interview.png"
-                alt="Interview Illustration"
-                width={300}
-                height={200}
-                className="mx-auto mb-6 lg:w-[300px] md:w-[200px] w-[200px] relative"
-              />
-              <h2 className="lg:text-3xl md:text-2xl text-base whitespace-nowrap font-semibold text-gray-800 mb-4">
-                <span className="text-[rgb(69,94,255)] flex items-center justify-center gap-1">
-                  <span>Interview</span>
-
-                  <motion.div className="overflow-hidden lg:h-[37px] md:h-[31px]  h-[25px]">
-                    <motion.div
-                      animate={{ y: ["0%", "-100%", "-200%", "0%"] }}
-                      transition={{
-                        duration: 3,
-                        repeat: Infinity,
-                        ease: "easeInOut",
-                      }}
-                      className="flex flex-col lg:h-[37px] md:h-[31px]  h-[25px]"
+              {/* Buttons */}
+              <div className="flex flex-col sm:flex-row gap-4">
+                <Link href="/candidate/dashboard">
+                  <Button
+                    size="lg"
+                    className="bg-[rgba(58,63,187,1)] border border-[rgba(58,63,187,0.9)] hover:bg-white hover:text-[rgba(58,63,187,1)] text-white font-medium px-8 py-6 rounded-lg text-lg flex items-center gap-2"
+                  >
+                    Take Interviews
+                    <svg
+                      width="20"
+                      height="20"
+                      viewBox="0 0 20 20"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="fill-current"
                     >
-                      <span className="text-transparent bg-[linear-gradient(55.21deg,#173D7E_34.16%,#C3E1FC_93.59%)] bg-clip-text">
-                        anytime
-                      </span>
-                      <span className="text-transparent bg-[linear-gradient(55.21deg,#173D7E_34.16%,#C3E1FC_93.59%)] bg-clip-text">
-                        anywhere
-                      </span>
-                      <span className="text-transparent bg-[linear-gradient(55.21deg,#173D7E_34.16%,#C3E1FC_93.59%)] bg-clip-text">
-                        effortlessly
-                      </span>
-                    </motion.div>
-                  </motion.div>
-                </span>
-              </h2>
-              <Link href="/candidate/dashboard">
-                <Button
-                  size="lg"
-                  className="bg-[rgba(58,63,187,1)] hover:bg-[rgba(58,63,187,1)] hover:opacity-80 text-[rgba(233,244,255,1)] font-medium md:px-8 md:py-3 px-5 py-2 rounded-lg lg:text-lg md:text-base text-sm hover:shadow-lg"
-                >
-                  Take interviews
-                </Button>
-              </Link>
+                      <path
+                        fillRule="evenodd"
+                        clipRule="evenodd"
+                        d="M14.7077 9.37508L10.6587 5.44877L11.5288 4.55139L17.1478 10.0001L11.5288 15.4487L10.6587 14.5514L14.7077 10.6251H2.5V9.37508H14.7077Z"
+                        fill="currentColor"
+                      />
+                    </svg>
+                  </Button>
+                </Link>
 
+                <Link href="https://cal.com/soham-mukherjee-8yzald/30min" target="_blank" rel="noopener noreferrer">
+                  <Button
+                    size="lg"
+                    className="bg-white hover:bg-[rgba(58,63,187,1)] text-[rgba(58,63,187,1)] hover:text-white border border-[rgba(58,63,187,1)] font-medium px-8 py-6 rounded-lg text-lg flex items-center gap-2 transition-colors duration-200"
+                  >
+                    Request Demo
+                    <svg
+                      width="16"
+                      height="16"
+                      viewBox="0 0 20 20"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="fill-current w-4 h-4 ml-1"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        clipRule="evenodd"
+                        d="M17.439 8.96715L3.86972 0.22212C3.06472 -0.211451 2.14258 -0.166444 2.14258 1.38998V18.61C2.14258 20.0329 3.13186 20.2572 3.86972 19.7779L17.439 11.0328C17.9976 10.4621 17.9976 9.53786 17.439 8.96715Z"
+                        fill="currentColor"
+                      />
+                    </svg>
+                  </Button>
+                </Link>
+              </div>
             </div>
 
-            {/* Hire Section */}
-            <div className="text-center relative">
+            {/* Right Column - Hero Image */}
+            <div className="relative">
               <Image
-                src="/main/ellipse2.svg"
-                alt="Hire Illustration"
-                width={300}
-                height={200}
-                className="absolute inset-0 mx-auto lg:w-[300px] md:w-[200px] w-[200px] z-[-1]"
+                src="/main/hero.png"
+                alt="Platform Dashboard"
+                width={800}
+                height={500}
+                priority
+                className="w-full h-auto object-cover"
               />
-              <Image
-                src="/main/hire.png"
-                alt="Hire Illustration"
-                width={300}
-                height={200}
-                className="mx-auto mb-6 lg:w-[300px] md:w-[200px] w-[200px] relative"
-              />
-
-              <h2 className="lg:text-3xl md:text-2xl text-base whitespace-nowrap font-semibold text-gray-800 mb-4">
-                <span className="text-[rgba(69,94,255,1)] flex items-center justify-center gap-1">
-                  <span>Hire</span>
-                  <motion.div className="overflow-hidden lg:h-[37px] md:h-[31px]  h-[25px]">
-                    <motion.div
-                      animate={{ y: ["0%", "-100%", "-200%", "0%"] }}
-                      transition={{
-                        duration: 3,
-                        repeat: Infinity,
-                        ease: "easeInOut",
-                      }}
-                      className="flex flex-col lg:h-[37px] md:h-[31px]  h-[25px]"
-                    >
-                      <span className="text-transparent bg-[linear-gradient(55.21deg,#173D7E_34.16%,#C3E1FC_93.59%)] bg-clip-text">
-                        faster
-                      </span>
-                      <span className="text-transparent bg-[linear-gradient(55.21deg,#173D7E_34.16%,#C3E1FC_93.59%)] bg-clip-text">
-                        fairer
-                      </span>
-                      <span className="text-transparent bg-[linear-gradient(55.21deg,#173D7E_34.16%,#C3E1FC_93.59%)] bg-clip-text">
-                        smarter
-                      </span>
-                    </motion.div>
-                  </motion.div>
-                </span>
-              </h2>
-
-              <Link href="https://cal.com/soham-mukherjee-8yzald/30min" target="_blank" rel="noopener noreferrer">
-                <Button
-                  size="lg"
-                  className="bg-[rgba(58,63,187,1)] hover:bg-[rgba(58,63,187,1)] hover:opacity-80 text-[rgba(233,244,255,1)] font-medium md:px-8 md:py-3 px-5 py-2 rounded-lg lg:text-lg md:text-base text-sm hover:shadow-lg"
-                >
-                  Schedule a demo
-                </Button>
-              </Link>
-
             </div>
-
           </div>
         </div>
       </main>
 
 
-      {/* Bottom Section */}
-      <section className=" bg-[linear-gradient(68.04deg,rgba(58,63,187,0.9)_-8.15%,rgba(107,124,255,0.9)_66.87%)] text-white lg:py-20 md:py-10 lg:px-6 md:px-20  px-10 py-8">
-        <div className="max-w-6xl mx-auto whitespace-nowrap">
-          <div className="grid grid-cols-2 md:gap-12 gap-6 items-center">
-            <div>
-              <h2 className="lg:text-4xl md:text-2xl mb-4">
-                For <span className=""><span className="font-bold">Hiring Teams</span></span>
-              </h2>
-            </div>
-            <div>
-              <h3 className="lg:text-4xl md:text-2xl  text-[rgba(255,255,255,0.3)] leading-tight">
-                What if your next hire
-              </h3>
-
-              <h3 className="lg:text-4xl md:text-2xl md:ml-20 ml-10 text-[rgba(255,255,255,0.3)] leading-tight">came twice as fast?</h3>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* For Hiring Teams Section */}
-      <section id="hiring-teams" className="scroll-mt-[120px] py-10 lg:px-6 md:px-10 px-5 bg-[linear-gradient(106.66deg,#DCF4FF_3.3%,#E6F5FF_98.34%)]">
-        <div className="lg:max-w-6xl md:max-w-3xl mx-auto">
-          <div className="flex flex-col items-center  md:flex-row gap-8">
-            {/* Left Content */}
-            <div className="flex-1  space-y-6">
-              <h2 className="lg:text-4xl md:text-xl md:w-full w-4/5  bg-[linear-gradient(103.06deg,rgba(58,63,187,0.9)_8.76%,rgba(93,107,238,0.9)_59.41%)] text-transparent bg-clip-text font-semibold">
-                Our AI interview platform integrates seamlessly into your existing workflow, helping you identify top talent faster and more accurately.
-              </h2>
-            </div>
-
-            {/* Right Content - Feature Cards */}
-            <div className="flex-1 flex flex-col gap-6 min-h-36">
-              {hiringFeatures.map((feature, index) => (
-                <Card key={index} className={`${feature.bgColor} p-0 rounded-4xl border ${feature.borderColor}`}>
-                  <CardContent className="lg:p-6 md:p-5">
-                    <div className="flex items-start p-2 space-x-4">
-                      <Image src={feature.icon} alt={feature.title} className="rounded-full" width={40} height={40} />
-                      <div>
-                        <h3 className="lg:text-lg md:text-base text-sm font-semibold text-[rgba(58,63,187,1)]  mb-2">{feature.title}</h3>
-                        <p className="lg:text-base md:text-sm text-xs text-[rgba(58,63,187,0.7)] font-medium ">{feature.description}</p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </div>
-
-        </div>
-
-      </section>
+      {/* For Hiring Teams Section */}
+      <HiringFeaturesSection />
 
       {/* Workflow and CTA Section */}
 
@@ -244,7 +148,7 @@ export default async function Home() {
 
 
       {/* CTA Section */}
-      <section className="bg-[rgba(107,124,255,1)] px-6 md:px-8 lg:px-42 py-20 md:py-24 lg:py-31 rounded-3xl mx-4 md:mx-6 lg:mx-10 my-15">
+      <section className="bg-[rgba(107,124,255,1)] px-6 md:px-8 lg:px-42 py-20 md:py-24 lg:py-31 rounded-3xl mx-4 md:mx-6 lg:mx-15 my-15">
         <div className="w-full max-w-6xl mx-auto">
           <div className="flex flex-col items-center text-center gap-8 md:gap-10">
             <div className="space-y-6">
@@ -255,7 +159,7 @@ export default async function Home() {
                 Join leading companies who are already hiring smarter with AI
               </p>
             </div>
-            <div className="flex flex-col sm:flex-row gap-9 mt-9">
+            <div className="flex flex-col sm:flex-row gap-7 mt-7">
               <Link href="https://cal.com/soham-mukherjee-8yzald/30min" target="_blank" rel="noopener noreferrer">
                 <Button className="rounded-xl px-10 py-4 md:px-12 md:py-5 lg:px-6 lg:py-6 border-2 border-[rgba(107,124,255,1)] hover:border-[rgba(245,247,255,1)] text-base md:text-lg lg:text-xl font-medium bg-[rgba(245,247,255,1)] hover:bg-transparent hover:opacity-90 text-[rgba(107,124,255,1)] hover:text-[rgba(245,247,255,1)]">
                   Schedule a Demo
@@ -360,7 +264,7 @@ export default async function Home() {
         </section>
 
 
-        <section className="bg-[rgba(245,255,199,1)] px-6 md:px-8 lg:px-12 py-20 md:py-24 lg:py-30 rounded-3xl mx-4 md:mx-6 lg:mx-10 my-8">
+        <section className="bg-[rgba(245,255,199,1)] px-6 md:px-8 lg:px-12 py-20 md:py-24 lg:py-35 rounded-3xl mx-4 md:mx-6 lg:mx-15 my-8">
           <div className="w-full max-w-4xl mx-auto">
             <div className="flex flex-col items-center text-center gap-8 md:gap-10">
               <div className="space-y-4">
@@ -371,7 +275,7 @@ export default async function Home() {
                   No payment required. Start practicing in under 2 minutes.
                 </p>
               </div>
-              <div className="flex flex-col sm:flex-row gap-4 mt-4">
+              <div className="flex flex-col sm:flex-row gap-6 mt-4">
                 <Link href="/signup">
                   <Button className="rounded-xl px-10 py-4 md:px-12 md:py-5 lg:px-14 lg:py-6 border-2 border-[rgba(58,63,187,0.9)] text-lg md:text-xl lg:text-2xl font-semibold bg-[rgba(58,63,187,1)] hover:bg-transparent hover:opacity-90 text-white hover:text-[rgba(58,63,187,1)]">
                     Sign up

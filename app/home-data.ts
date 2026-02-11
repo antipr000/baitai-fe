@@ -4,30 +4,30 @@ export const hiringFeatures = [
     {
         bgColor: "bg-[rgba(253,203,80,0.3)]",
         borderColor: "border-[rgba(192,237,245,0.3)]",
-        icon: "/main/book.gif",
-        title: "Better Quality",
-        description: "Go beyond resumes to assess real skills and fit"
-    },
-    {
-        bgColor: "bg-[rgba(51,204,204,0.2)]",
-        borderColor: "border-[rgba(192,237,245,0.3)]",
-        icon: "/main/balance.gif",
-        title: "Reduce Bias",
-        description: "Fair, consistent evaluation criteria for every candidate"
-    },
-    {
-        bgColor: "bg-[rgba(177,217,82,0.3)]",
-        borderColor: "border-[rgba(183,228,79,0.31)]",
-        icon: "/main/time.gif",
-        title: "Save Time",
-        description: "Automate initial screening and focus on the best candidates"
+        icon: "/main/brain2.gif",
+        title: "AI-Powered Evaluation",
+        description: "Intelligent scoring that adapts to each role's requirements, eliminating subjective bias."
     },
     {
         bgColor: "bg-[rgba(39,162,204,0.2)]",
         borderColor: "border-[rgba(192,237,245,0.3)]",
-        icon: "/main/people.gif",
-        title: "Scale Easily",
-        description: "Interview hundreds of candidates without adding resources"
+        icon: "/main/people3.gif",
+        title: "Scale Effortlessly",
+        description: "Interview thousands of candidates simultaneously with a single published link."
+    },
+    {
+        bgColor: "bg-[rgba(177,217,82,0.3)]",
+        borderColor: "border-[rgba(183,228,79,0.31)]",
+        icon: "/main/time2.gif",
+        title: "Save Time",
+        description: "Reduce weeks of manual screening to just hours"
+    },
+    {
+        bgColor: "bg-[rgba(51,204,204,0.2)]",
+        borderColor: "border-[rgba(192,237,245,0.3)]",
+        icon: "/main/shield.gif",
+        title: "Fair & Consistent",
+        description: "Every candidate gets the same structured experience, ensuring unbiased evaluation."
     }
 ];
 

@@ -17,7 +17,7 @@ export function JobSeekersSection() {
                     </div>
 
                     {/* Main Heading */}
-                    <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4 tracking-tight">
+                    <h2 className="text-3xl md:text-4xl lg:text-5xl font-semibold mb-4 tracking-tight">
                         <span className="text-[rgba(10,13,26,1)]">Ace Every </span>
                         <span className="text-[rgba(170,208,2,1)]">Interview</span>
                     </h2>
@@ -32,7 +32,7 @@ export function JobSeekersSection() {
                 <div className="flex  justify-center gap-10">
                     {jobSeekerFeatures.map((feature, index) => (
                         <Card key={index} className="bg-white border border-[rgba(58,63,187,0.5)] shadow-none rounded-2xl w-full ">
-                            <CardContent className="flex flex-col items-center justify-start  py-5 text-center">
+                            <CardContent className="flex flex-col items-center justify-start  py-7 text-center">
                                 <div className="mb-4 h-12 flex items-center justify-center">
                                     <Image
                                         src={feature.icon}
