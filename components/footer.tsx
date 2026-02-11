@@ -107,7 +107,7 @@ export const Footer = () => {
           </div>
 
           {/* Right Columns: Links */}
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-10 lg:gap-24">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-10 lg:gap-15">
 
             {/* Product */}
             <div className="flex flex-col gap-4">
