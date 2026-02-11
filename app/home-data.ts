@@ -66,32 +66,24 @@ export const jobSeekerSteps = [
 
 export const jobSeekerFeatures = [
     {
-        bgColor: "bg-[rgba(51,204,204,0.1)]",
-        borderColor: "border-[rgba(192,237,245,0.3)]",
-        icon: "/main/24.gif",
-        title: "Practice Anytime",
-        description: "24/7 access to mock interviews—no scheduling hassles"
+        icon: "/main/brain.gif",
+        title: "Realistic Mock Interviews",
+        description: "Practice with an AI Interviewer that adapts questions like a real interviewer would."
     },
     {
-        bgColor: "bg-[rgba(253,96,80,0.1)]",
-        borderColor: "border-[rgba(246,225,220,1)]",
-        icon: "/main/score.gif",
-        title: "Instant Scores",
-        description: "Get your interview score based on your performance within a few minutes"
+        icon: "/main/graph.gif",
+        title: "Performance Insights",
+        description: "Track your progress through data-backed analysis on communication, technical skills, and cultural fit."
     },
     {
-        bgColor: "bg-[rgba(51,204,204,0.1)]",
-        borderColor: "border-[rgba(192,237,245,0.3)]",
-        icon: "/main/eye.gif",
-        title: "Realistic Scenarios",
-        description: "Practice with interview questions from your industry"
+        icon: "/main/target.gif",
+        title: "Role-Specific Prep",
+        description: "Tailored questions for your target role, company, and industry."
     },
     {
-        bgColor: "bg-[rgba(177,217,82,0.1)]",
-        borderColor: "border-[rgba(238,245,229,1)]",
-        icon: "/main/progress.gif",
-        title: "Track your Progress",
-        description: "Get detailed insights on your performance"
+        icon: "/main/note2.gif",
+        title: "Instant Feedback",
+        description: "No waiting — get detailed scores and suggestions the moment you finish."
     }
 ];
 

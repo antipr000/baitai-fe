@@ -11,14 +11,15 @@ import { getTokens } from "next-firebase-auth-edge";
 import { cookies } from "next/headers";
 import { clientConfig, serverConfig } from "@/lib/auth/config";
 import { AuthButtons } from "@/components/auth-buttons";
-import { hiringFeatures, jobSeekerSteps, jobSeekerFeatures, hiringTeamSteps } from "@/app/home-data";
+import { hiringFeatures, jobSeekerSteps, hiringTeamSteps } from "@/app/home-data";
 import { WaitlistForm } from "@/components/waitlist-form";
 import Header from "@/components/header";
+import { JobSeekersSection } from "@/components/main/job-seekers-section";
 
 export default async function Home() {
 
   return (
-    <div className="min-h-screen  flex flex-col">
+    <div className="min-h-screen bg-[rgba(245,247,255,1)]  flex flex-col">
       {/* Header */}
       <Header />
 
@@ -354,66 +355,10 @@ export default async function Home() {
             </div>
           </div>
         </section>
-
       </section>
-      <section className="bg-[rgba(243,255,190,0.15)]">
+      <section>
         {/* Job Seekers Section */}
-        <section id="job-seekers" className="scroll-mt-[120px] mt-15 bg-[linear-gradient(91.27deg,rgba(231,255,125,0.6)_2.28%,rgba(243,255,191,0.6)_108.31%)] text-white md:py-12 py-8 px-6">
-          <div className="lg:max-w-5xl md:max-w-3xl mx-auto">
-            <div className="flex justify-between items-center">
-              <div className="">
-                <h2 className="text-5xl md:mb-4 mb-0">
-                  <span className="block  lg:text-4xl md:text-3xl text-base text-[rgba(166,203,29,0.5)]">Getting a job</span>
-                  <span className="block text-[rgba(166,203,29,0.5)] lg:text-4xl md:text-3xl text-sm font-semibold md:mt-2 mt-0 md:ml-10 ml-5">Just got easier</span>
-                </h2>
-              </div>
-              <div>
-                <h3 className="lg:text-4xl md:text-3xl text-sm bg-[linear-gradient(271.56deg,#86A5FF_-14.72%,#4569D1_128.95%)] text-transparent bg-clip-text leading-tight">
-                  <span className="">For</span> <span className="font-bold">Job Seekers</span>
-                </h3>
-              </div>
-            </div>
-          </div>
-        </section>
-
-
-        {/* Features Grid */}
-        <section className="py-10 px-6 bg-[rgba(243,255,190,0.15)]">
-
-
-          <div className="max-w-7xl mx-auto   min-h-36">
-            <div className="flex flex-col-reverse  md:items-center  md:flex-row  gap-4">
-              {/* Left Content - Feature Cards */}
-              <div className="flex-1 flex flex-col gap-6">
-                {jobSeekerFeatures.map((feature, index) => (
-                  <Card key={index} className={`${feature.bgColor} p-0 rounded-4xl border ${feature.borderColor}`}>
-                    <CardContent className="lg:p-6 md:p-5">
-                      <div className="flex items-start p-2 space-x-4">
-                        <Image src={feature.icon} alt={feature.title} className="rounded-full" width={40} height={40} />
-                        <div>
-                          <h3 className="lg:text-lg md:text-base text-sm font-semibold text-[rgba(58,63,187,1)]  mb-2">{feature.title}</h3>
-                          <p className="lg:text-base md:text-sm text-xs text-[rgba(58,63,187,0.7)] font-medium ">{feature.description}</p>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-              <div className="space-y-4 my-4">
-                <div className="max-w-xl md:max-w-2xl w-full mt-2 mx-0 md:ml-0 text-left md:text-right">
-                  <p className="text-base font-semibold leading-tight text-[rgba(116,130,248,0.85)] lg:text-[32px] md:text-2xl">
-                    <span className="block">Prepare for</span>
-                    <span className="block">any interview—</span>
-                    <span className="block">AI-powered or traditional</span>
-                    <span className="block">with unlimited, adaptive practice</span>
-                    <span className="block">sessions tailored to your needs and skills.</span>
-                  </p>
-                </div>
-              </div>
-
-            </div>
-          </div>
-        </section>
+        <JobSeekersSection />
 
 
 
