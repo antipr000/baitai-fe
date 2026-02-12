@@ -26,7 +26,7 @@ export default async function Home() {
       <Header />
 
       {/* Hero Section */}
-      <main className="relative w-full px-17  md:py-27 py-6 ">
+      <main className="relative w-full px-17  lg:py-32 md:py-15 py-6 ">
         {/* Content */}
         <div className="relative z-10 lg:max-w-7xl  md:max-w-4xl w-full mx-auto py-2">
           {/* Grid Overlay */}
@@ -40,11 +40,11 @@ export default async function Home() {
       "
           />
 
-          <div className="grid mt-29 lg:grid-cols-2 gap-41 items-center">
+          <div className="flex flex-col lg:flex-row lg:gap-0 gap-9 mt-18 lg:mt-20  lg:items-center">
             {/* Left Column */}
-            <div className="text-left flex flex-col items-start">
+            <div className="text-center lg:text-left flex flex-col items-center lg:items-start w-full">
               {/* AI Badge */}
-              <Badge className="bg-[rgba(196,240,0,1)] text-[rgba(58,63,187,1)] px-7 py-3 mb-5 text-sm font-medium hover:bg-[#a5ce21] border-none rounded-full">
+              <Badge className="bg-[rgba(196,240,0,1)] text-[rgba(58,63,187,1)] px-7 py-3 mb-5 text-sm font-medium border-none rounded-full">
                 <Image
                   src="/main/lightning2.svg"
                   alt="AI Badge"
@@ -56,7 +56,7 @@ export default async function Home() {
               </Badge>
 
               {/* Main Heading */}
-              <h1 className="lg:text-6xl md:text-5xl text-4xl font-semibold leading-tight mb-5 tracking-tight">
+              <h1 className="xl:text-5xl md:text-4xl text-3xl font-semibold leading-tight mb-5 tracking-tight">
                 <span className="text-[rgba(107,124,255,1)]">Redefining</span>{" "}
                 <span className="text-black">How</span>
                 <br />
@@ -65,16 +65,16 @@ export default async function Home() {
               </h1>
 
               {/* Subtitle */}
-              <p className="text-xl text-[rgba(10,13,26,0.7)] mb-10 max-w-lg leading-tight">
+              <p className="xl:text-xl text-base  text-[rgba(10,13,26,0.7)] mb-10 lg:max-w-lg md:max-w-120 lg:leading-tight mx-auto lg:mx-0">
                 Design once, interview thousands. Give candidates the practice they need and hiring teams the insights they deserve.
               </p>
 
               {/* Buttons */}
-              <div className="flex flex-col sm:flex-row gap-4">
+              <div className="flex  gap-4 justify-center lg:justify-start w-full">
                 <Link href="/candidate/dashboard">
                   <Button
                     size="lg"
-                    className="bg-[rgba(58,63,187,1)] border border-[rgba(58,63,187,0.9)] hover:bg-white hover:text-[rgba(58,63,187,1)] text-white font-medium px-8 py-6 rounded-lg text-lg flex items-center gap-2"
+                    className="bg-[rgba(58,63,187,1)] border border-[rgba(58,63,187,0.9)] hover:bg-white hover:text-[rgba(58,63,187,1)] text-white font-medium px-8  py-6  rounded-md xl:text-lg text-base  flex items-center gap-2 w-full sm:w-auto justify-center"
                   >
                     Take Interviews
                     <svg
@@ -98,7 +98,7 @@ export default async function Home() {
                 <Link href="https://cal.com/soham-mukherjee-8yzald/30min" target="_blank" rel="noopener noreferrer">
                   <Button
                     size="lg"
-                    className="bg-white hover:bg-[rgba(58,63,187,1)] text-[rgba(58,63,187,1)] hover:text-white border border-[rgba(58,63,187,1)] font-medium px-8 py-6 rounded-lg text-lg flex items-center gap-2 transition-colors duration-200"
+                    className="bg-white hover:bg-[rgba(58,63,187,1)] text-[rgba(58,63,187,1)] hover:text-white border border-[rgba(58,63,187,1)] font-medium px-8  py-6 rounded-md xl:text-lg text-base  flex items-center gap-2 transition-colors duration-200 w-full sm:w-auto justify-center"
                   >
                     Request Demo
                     <svg
@@ -119,13 +119,16 @@ export default async function Home() {
                   </Button>
                 </Link>
               </div>
+              <p className="mt-4 text-[rgba(10,13,26,0.6)] tracking-tighter text-center lg:text-left lg:text-base text-sm w-full">
+                Includes 6 Free Trial Credits <span className="mx-1 text-[rgba(10,13,26,0.7)]">|</span> Worth 2 Interviews
+              </p>
             </div>
 
             {/* Right Column - Hero Image */}
-            <div className="relative">
+            <div className="w-full flex justify-center lg:block">
               <Image
                 src="/main/hero.png"
-                alt="Platform Dashboard"
+                alt="hero"
                 width={800}
                 height={500}
                 priority

@@ -5,7 +5,7 @@ import { hiringFeatures } from "@/app/home-data";
 
 export function HiringFeaturesSection() {
     return (
-        <section id="hiring-teams" className="scroll-mt-[100px] py-13 px-6 md:px-12 lg:px-13 bg-[rgba(247,249,255,1)]">
+        <section id="hiring-teams" className="scroll-mt-[100px] lg:py-13 px-6 md:px-12 lg:px-13 bg-[rgba(247,249,255,1)]">
             <div className="max-w-7xl mx-auto">
                 {/* Header */}
                 <div className="text-center mb-13">

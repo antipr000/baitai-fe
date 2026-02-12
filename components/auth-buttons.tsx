@@ -37,24 +37,24 @@ export function AuthButtons({ isAuthenticated }: AuthButtonsProps) {
             {isAuthenticated ? (
                 <>
 
- <Link href="/candidate/dashboard">
+                    <Link href="/candidate/dashboard">
                         <Button variant="ghost" className="rounded-full lg:text-base text-sm border border-[rgba(58,63,187,1)] text-[rgba(58,63,187,1)] hover:bg-[rgba(58,63,187,1)] hover:text-white font-medium px-7 py-2  transition-colors">
-                           Go to Dashboard
+                            Dashboard
                         </Button>
                     </Link>
-                        <Button onClick={handleLogout} className="flex rounded-full items-center overflow-hidden border border-[rgba(58,63,187,1)] px-8 py-2 lg:text-base text-sm bg-[rgba(58,63,187,1)] hover:bg-white hover:text-[rgba(58,63,187,1)] font-medium transition-colors sm:px-13 sm:py-2">
-                           Logout
+                    <Button onClick={handleLogout} className="flex rounded-full items-center overflow-hidden border border-[rgba(58,63,187,1)] px-8 py-2 lg:text-base text-sm bg-[rgba(58,63,187,1)] hover:bg-white hover:text-[rgba(58,63,187,1)] font-medium transition-colors sm:px-13 sm:py-2">
+                        Logout
                     </Button>
                 </>
             ) : (
                 <>
                     <Link href="/login">
-                        <Button variant="ghost" className="rounded-full lg:text-base text-sm border border-[rgba(58,63,187,1)] text-[rgba(58,63,187,1)] hover:bg-[rgba(58,63,187,1)] hover:text-white font-medium px-13 py-2  transition-colors">
+                        <Button variant="ghost" className="rounded-full lg:text-base text-sm border border-[rgba(58,63,187,1)] text-[rgba(58,63,187,1)] hover:bg-[rgba(58,63,187,1)] hover:text-white font-medium lg:px-10 md:px-6 px-6 py-2  transition-colors">
                             Login
                         </Button>
                     </Link>
                     <Link href="/signup">
-                        <Button className="flex rounded-full items-center overflow-hidden border border-[rgba(58,63,187,1)] px-8 py-2 lg:text-base text-sm bg-[rgba(58,63,187,1)] hover:bg-white hover:text-[rgba(58,63,187,1)] font-medium transition-colors sm:px-13 sm:py-2">
+                        <Button className="flex rounded-full items-center overflow-hidden border border-[rgba(58,63,187,1)] lg:px-10 md:px-6 px-6 py-2 lg:text-base text-sm bg-[rgba(58,63,187,1)] hover:bg-white hover:text-[rgba(58,63,187,1)] font-medium transition-colors">
                             Sign up
                         </Button>
                     </Link>
