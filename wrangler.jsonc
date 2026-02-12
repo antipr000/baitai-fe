@@ -10,6 +10,9 @@
     "directory": ".open-next/assets",
     "binding": "ASSETS"
   },
+  "placement": {
+    "mode": "smart"
+  },
   // Add your routes here when you have the domain configured
   // Uncomment and update with your actual domain
   // "routes": [
@@ -25,9 +28,9 @@
       "persist": true
     },
     "traces": {
-      "enabled": false,
-      "persist": true,
-      "head_sampling_rate": 1
+      "enabled": true,
+      "head_sampling_rate": 1,
+      "persist": true
     }
   }
 }
