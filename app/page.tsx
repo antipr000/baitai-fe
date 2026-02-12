@@ -146,25 +146,25 @@ export default async function Home() {
       <HiringTeamsSection />
 
       {/* CTA Section */}
-      <section className="bg-[rgba(107,124,255,1)] px-6 md:px-8 lg:px-42 py-20 md:py-24 lg:py-31 rounded-3xl mx-4 md:mx-6 lg:mx-15 my-15">
+      <section className="bg-[rgba(107,124,255,1)] px-6 md:px-15 lg:px-42 py-7 md:py-20 lg:py-16 xl:py-20 md:rounded-2xl rounded-sm mx-4 md:mx-15 lg:mx-15   my-15">
         <div className="w-full max-w-6xl mx-auto">
           <div className="flex flex-col items-center text-center gap-8 md:gap-10">
             <div className="space-y-6">
-              <h2 className="text-2xl md:text-3xl lg:text-5xl text-[rgba(245,247,255,1)] font-semibold tracking-tight">
+              <h2 className="text-lg md:text-3xl lg:text-4xl xl:text-5xl text-[rgba(245,247,255,1)] font-semibold tracking-tight md:w-full w-3/4 mx-auto">
                 Excited to revolutionize your hiring process?
               </h2>
-              <p className="text-base md:text-lg lg:text-xl text-[rgba(245,247,255,0.9)] font-medium max-w-2xl mx-auto">
+              <p className="md:w-full w-4/5 mx-auto text-xs md:text-base lg:text-xl xl:text-2xl text-[rgba(245,247,255,0.9)] font-medium max-w-2xl ">
                 Join leading companies who are already hiring smarter with AI
               </p>
             </div>
-            <div className="flex flex-col sm:flex-row gap-7 mt-7">
+            <div className="flex gap-7 lg:mt-7 md:mt-4 ">
               <Link href="https://cal.com/soham-mukherjee-8yzald/30min" target="_blank" rel="noopener noreferrer">
-                <Button className="rounded-xl px-10 py-4 md:px-12 md:py-5 lg:px-6 lg:py-6 border-2 border-[rgba(107,124,255,1)] hover:border-[rgba(245,247,255,1)] text-base md:text-lg lg:text-xl font-medium bg-[rgba(245,247,255,1)] hover:bg-transparent hover:opacity-90 text-[rgba(107,124,255,1)] hover:text-[rgba(245,247,255,1)]">
+                <Button className="md:rounded-xl rounded-sm px-3 py-2 md:px-6 md:py-5 lg:px-6 lg:py-6 border-2 border-[rgba(107,124,255,1)] hover:border-[rgba(245,247,255,1)] text-sm md:text-base lg:text-lg xl:text-xl font-medium bg-[rgba(245,247,255,1)] hover:bg-transparent hover:opacity-90 text-[rgba(107,124,255,1)] hover:text-[rgba(245,247,255,1)]">
                   Schedule a Demo
                 </Button>
               </Link>
               <Link href="/pricing">
-                <Button className="rounded-xl px-10 py-4 md:px-12 md:py-5 lg:px-6 lg:py-6 text-base md:text-lg lg:text-xl   border-[rgba(245,247,255,1)] font-medium bg-transparent hover:bg-[rgba(245,247,255,1)] hover:opacity-90 border-2  text-[rgba(245,247,255,1)] hover:text-[rgba(107,124,255,1)]">
+                <Button className="md:rounded-xl rounded-sm px-3 py-2 md:px-6 md:py-5 lg:px-6 lg:py-6 text-sm md:text-base lg:text-lg xl:text-xl   border-[rgba(245,247,255,1)] font-medium bg-transparent hover:bg-[rgba(245,247,255,1)] hover:opacity-90 border-2  text-[rgba(245,247,255,1)] hover:text-[rgba(107,124,255,1)]">
                   View Pricing
                 </Button>
               </Link>
