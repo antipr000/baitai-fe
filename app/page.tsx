@@ -44,7 +44,7 @@ export default async function Home() {
             {/* Left Column */}
             <div className="text-center lg:text-left flex flex-col items-center lg:items-start w-full">
               {/* AI Badge */}
-              <Badge className="bg-[rgba(196,240,0,1)] text-[rgba(58,63,187,1)] px-7 py-3 mb-5 text-sm font-medium border-none rounded-full">
+              <Badge className="bg-[rgba(196,240,0,1)] text-[rgba(58,63,187,1)] px-7 py-3 mb-5 md:text-sm text-xs lg:text-base font-medium border-none rounded-full">
                 <Image
                   src="/main/lightning2.svg"
                   alt="AI Badge"
@@ -56,7 +56,7 @@ export default async function Home() {
               </Badge>
 
               {/* Main Heading */}
-              <h1 className="xl:text-5xl md:text-4xl text-3xl font-semibold leading-tight mb-5 tracking-tight">
+              <h1 className="xl:text-5xl md:text-4xl text-2xl font-semibold leading-tight mb-5 tracking-tight">
                 <span className="text-[rgba(107,124,255,1)]">Redefining</span>{" "}
                 <span className="text-black">How</span>
                 <br />
@@ -65,16 +65,16 @@ export default async function Home() {
               </h1>
 
               {/* Subtitle */}
-              <p className="xl:text-xl text-base  text-[rgba(10,13,26,0.7)] mb-10 lg:max-w-lg md:max-w-120 lg:leading-tight mx-auto lg:mx-0">
+              <p className="xl:text-xl md:text-base text-sm  text-[rgba(10,13,26,0.7)] mb-10 lg:max-w-lg md:max-w-120 lg:leading-tight leading-relaxed mx-auto lg:mx-0">
                 Design once, interview thousands. Give candidates the practice they need and hiring teams the insights they deserve.
               </p>
 
               {/* Buttons */}
-              <div className="flex  gap-4 justify-center lg:justify-start w-full">
+              <div className="flex  md:gap-4 gap-2 justify-center lg:justify-start w-full">
                 <Link href="/candidate/dashboard">
                   <Button
                     size="lg"
-                    className="bg-[rgba(58,63,187,1)] border border-[rgba(58,63,187,0.9)] hover:bg-white hover:text-[rgba(58,63,187,1)] text-white font-medium px-8  py-6  rounded-md xl:text-lg text-base  flex items-center gap-2 w-full sm:w-auto justify-center"
+                    className="bg-[rgba(58,63,187,1)] border border-[rgba(58,63,187,0.9)] hover:bg-white hover:text-[rgba(58,63,187,1)] text-white font-medium px-8  md:py-6 py-4 rounded-md xl:text-xl md:text-base text-sm  flex items-center gap-2 w-full sm:w-auto justify-center"
                   >
                     Take Interviews
                     <svg
@@ -98,7 +98,7 @@ export default async function Home() {
                 <Link href="https://cal.com/soham-mukherjee-8yzald/30min" target="_blank" rel="noopener noreferrer">
                   <Button
                     size="lg"
-                    className="bg-white hover:bg-[rgba(58,63,187,1)] text-[rgba(58,63,187,1)] hover:text-white border border-[rgba(58,63,187,1)] font-medium px-8  py-6 rounded-md xl:text-lg text-base  flex items-center gap-2 transition-colors duration-200 w-full sm:w-auto justify-center"
+                    className="bg-white hover:bg-[rgba(58,63,187,1)] text-[rgba(58,63,187,1)] hover:text-white border border-[rgba(58,63,187,1)] font-medium px-8  md:py-6 py-4 rounded-md xl:text-xl md:text-base text-sm  flex items-center gap-2 transition-colors duration-200 w-full sm:w-auto justify-center"
                   >
                     Request Demo
                     <svg
@@ -119,7 +119,7 @@ export default async function Home() {
                   </Button>
                 </Link>
               </div>
-              <p className="mt-4 text-[rgba(10,13,26,0.6)] tracking-tighter text-center lg:text-left lg:text-base text-sm w-full">
+              <p className="mt-4 text-[rgba(10,13,26,0.6)] tracking-tighter text-center lg:text-left lg:text-base md:text-sm text-xs w-full">
                 Includes 6 Free Trial Credits <span className="mx-1 text-[rgba(10,13,26,0.7)]">|</span> Worth 2 Interviews
               </p>
             </div>
@@ -140,15 +140,10 @@ export default async function Home() {
       </main>
 
 
-      {/* For Hiring Teams Section */}
-      {/* For Hiring Teams Section */}
+
       <HiringFeaturesSection />
 
-      {/* Workflow and CTA Section */}
-
       <HiringTeamsSection />
-      {/*  */}
-
 
       {/* CTA Section */}
       <section className="bg-[rgba(107,124,255,1)] px-6 md:px-8 lg:px-42 py-20 md:py-24 lg:py-31 rounded-3xl mx-4 md:mx-6 lg:mx-15 my-15">
