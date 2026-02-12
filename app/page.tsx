@@ -26,7 +26,7 @@ export default async function Home() {
       <Header />
 
       {/* Hero Section */}
-      <main className="relative w-full px-17  md:py-28 py-6 ">
+      <main className="relative w-full px-17  md:py-27 py-6 ">
         {/* Content */}
         <div className="relative z-10 lg:max-w-7xl  md:max-w-4xl w-full mx-auto py-2">
           {/* Grid Overlay */}
@@ -182,7 +182,7 @@ export default async function Home() {
 
 
         {/* How it Works */}
-        <section id="how-it-works" className="scroll-mt-[120px] bg-[rgba(253,255,245,1)] py-8 md:py-12 lg:py-16">
+        <section id="how-it-works" className="scroll-mt-[120px] bg-[rgba(253,255,245,1)] py-8 md:py-12 lg:py-16 mb-[20px]">
           <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8">
 
             {/* Section Header */}
@@ -264,10 +264,10 @@ export default async function Home() {
         </section>
 
 
-        <section className="bg-[rgba(245,255,199,1)] px-6 md:px-8 lg:px-12 py-20 md:py-24 lg:py-35 rounded-3xl mx-4 md:mx-6 lg:mx-15 my-8">
+        <section className="bg-[rgba(245,255,199,1)] px-6 md:px-10 lg:px-12 py-20 md:py-24 lg:py-36 rounded-3xl mx-4 md:mx-6 lg:mx-15 my-8">
           <div className="w-full max-w-4xl mx-auto">
             <div className="flex flex-col items-center text-center gap-8 md:gap-10">
-              <div className="space-y-4">
+              <div className="space-y-2.5">
                 <h2 className="text-2xl md:text-3xl lg:text-5xl text-[rgba(83,118,219,1)] font-semibold tracking-tight">
                   Start your free practice today
                 </h2>
@@ -275,14 +275,30 @@ export default async function Home() {
                   No payment required. Start practicing in under 2 minutes.
                 </p>
               </div>
-              <div className="flex flex-col sm:flex-row gap-6 mt-4">
+              <div className="flex flex-col sm:flex-row gap-8 mt-7.5">
                 <Link href="/signup">
-                  <Button className="rounded-xl px-10 py-4 md:px-12 md:py-5 lg:px-14 lg:py-6 border-2 border-[rgba(58,63,187,0.9)] text-lg md:text-xl lg:text-2xl font-semibold bg-[rgba(58,63,187,1)] hover:bg-transparent hover:opacity-90 text-white hover:text-[rgba(58,63,187,1)]">
+                  <Button
+                    className="flex items-center justify-center min-w-[200px] gap-2 rounded-xl px-10 py-4 md:px-12 md:py-5 lg:px-16 lg:py-6 border-2 border-[rgba(58,63,187,0.9)] text-base md:text-base lg:text-xl font-medium bg-[rgba(58,63,187,1)] hover:bg-transparent hover:opacity-90 text-white hover:text-[rgba(58,63,187,1)]">
                     Sign up
+                    <svg
+                      width="20"
+                      height="20"
+                      viewBox="0 0 20 20"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="fill-current"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        clipRule="evenodd"
+                        d="M14.7077 9.37508L10.6587 5.44877L11.5288 4.55139L17.1478 10.0001L11.5288 15.4487L10.6587 14.5514L14.7077 10.6251H2.5V9.37508H14.7077Z"
+                        fill="currentColor"
+                      />
+                    </svg>
                   </Button>
                 </Link>
                 <Link href="/#how-it-works">
-                  <Button className="rounded-xl px-10 py-4 md:px-12 md:py-5 lg:px-14 lg:py-6 text-lg md:text-xl lg:text-2xl   border-[rgba(58,63,187,0.9)] font-semibold bg-transparent hover:bg-[rgba(58,63,187,1)] hover:opacity-90 border-2  text-[rgba(83,118,219,1)] hover:text-white">
+                  <Button className="flex items-center justify-center min-w-[200px] rounded-xl px-10 py-4 md:px-12 md:py-5 lg:px-16 lg:py-6 text-base md:text-base lg:text-xl   border-[rgba(58,63,187,0.9)] font-medium bg-transparent hover:bg-[rgba(58,63,187,1)] hover:opacity-90 border-2  text-[rgba(83,118,219,1)] hover:text-white">
                     How it works
                   </Button>
                 </Link>

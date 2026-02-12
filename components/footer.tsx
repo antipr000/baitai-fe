@@ -5,7 +5,7 @@ import React from "react";
 export const Footer = () => {
   // TODO: Add links
   return (
-    <footer className="w-full  lg:max-w-7xl md:max-w-4xl mx-auto  py-10 lg:py-12 mb-30 mt-4">
+    <footer className="w-full  lg:max-w-7xl md:max-w-4xl mx-auto  py-10 lg:py-20 mb-62 mt-20">
       <div className=" px-5 md:px-7">
         <div className="flex flex-col lg:flex-row justify-around">
 
@@ -28,7 +28,7 @@ export const Footer = () => {
               Streamline recruitment and ace interviews with our AI-powered platform
             </p>
 
-            <div className="flex items-center gap-6 my-2">
+            <div className="flex items-center gap-7 my-2">
               <Link
                 href="https://www.linkedin.com/company/bait-ai"
                 target="_blank"
@@ -38,8 +38,8 @@ export const Footer = () => {
                 <Image
                   src="/main/linkedin.svg"
                   alt="LinkedIn"
-                  width={22}
-                  height={22}
+                  width={30}
+                  height={30}
                   className="size-6"
                 />
               </Link>
@@ -52,8 +52,8 @@ export const Footer = () => {
                 <Image
                   src="/main/gmail.svg"
                   alt="Gmail"
-                  width={22}
-                  height={22}
+                  width={30}
+                  height={30}
                   className="size-6"
                 />
               </Link>
@@ -66,8 +66,8 @@ export const Footer = () => {
                 <Image
                   src="/main/x.svg"
                   alt="X (Twitter)"
-                  width={22}
-                  height={22}
+                  width={30}
+                  height={30}
                   className="size-6 bg-black p-1 rounded-sm"
                 />
               </Link>
@@ -80,8 +80,8 @@ export const Footer = () => {
                 <Image
                   src="/main/instagram.svg"
                   alt="Instagram"
-                  width={22}
-                  height={22}
+                  width={30}
+                  height={30}
                   className="size-6"
                 />
               </Link>
@@ -94,8 +94,8 @@ export const Footer = () => {
                 <Image
                   src="/main/facebook.svg"
                   alt="Facebook"
-                  width={22}
-                  height={22}
+                  width={30}
+                  height={30}
                   className="size-6"
                 />
               </Link>
