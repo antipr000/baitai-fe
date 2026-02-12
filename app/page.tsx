@@ -26,7 +26,7 @@ export default async function Home() {
       <Header />
 
       {/* Hero Section */}
-      <main className="relative w-full px-17  lg:py-32 md:py-15 py-6 ">
+      <main className="relative w-full px-17 lg:pt-32 lg:pb-10 md:py-15 py-6 ">
         {/* Content */}
         <div className="relative z-10 lg:max-w-7xl  md:max-w-4xl w-full mx-auto py-2">
           {/* Grid Overlay */}
@@ -40,7 +40,7 @@ export default async function Home() {
       "
           />
 
-          <div className="flex flex-col lg:flex-row lg:gap-0 gap-9 mt-18 lg:mt-20  lg:items-center">
+          <div className="flex flex-col lg:flex-row lg:gap-0 gap-9 mt-18 lg:mt-10 lg:items-center">
             {/* Left Column */}
             <div className="text-center lg:text-left flex flex-col items-center lg:items-start w-full">
               {/* AI Badge */}
@@ -119,7 +119,7 @@ export default async function Home() {
                   </Button>
                 </Link>
               </div>
-              <p className="mt-4 text-[rgba(10,13,26,0.6)] tracking-tighter text-center lg:text-left lg:text-base md:text-sm text-xs w-full">
+              <p className="mt-4 ml-4 text-[rgba(10,13,26,0.6)] tracking-tighter text-center lg:text-left lg:text-base md:text-sm text-xs w-full">
                 Includes 6 Free Trial Credits <span className="mx-1 text-[rgba(10,13,26,0.7)]">|</span> Worth 2 Interviews
               </p>
             </div>
