@@ -5,26 +5,26 @@ import React from "react";
 export const Footer = () => {
   // TODO: Add links
   return (
-    <footer className="w-full  lg:max-w-7xl md:max-w-4xl mx-auto  py-10 lg:py-20 mb-62 mt-20">
-      <div className=" px-5 md:px-7">
-        <div className="flex flex-col lg:flex-row justify-around">
+    <footer className="w-full mx-auto py-3 md:py-10 lg:py-20 md:mb-20 lg:mb-62 mt-20">
+      <div className="px-5 md:px-16 lg:px-24">
+        <div className="flex flex-col md:flex-row gap-10 justify-between">
 
           {/* Left Column: Brand & Social */}
-          <div className="flex flex-col gap-3 lg:gap-4 max-w-sm">
+          <div className="flex flex-col gap-2 lg:gap-4 items-center md:items-start md:justify-start justify-center md:mx-0 mx-auto md:w-auto w-3/4 md:text-left text-center max-w-sm">
             <div className="flex items-center gap-2">
               <Image
                 src="/main/logo.png"
                 alt="Bait AI Logo"
                 width={46}
                 height={46}
-                className="w-11 h-11"
+                className="lg:size-11 md:size-6 size-5"
               />
-              <span className="text-3xl tracking-tight font-bold bg-clip-text text-transparent bg-[linear-gradient(106.63deg,rgba(16,81,171,1)_0%,rgba(28,15,111,1)_144.25%)]">
+              <span className="lg:text-3xl md:text-2xl text-xl tracking-tight font-bold bg-clip-text text-transparent bg-[linear-gradient(106.63deg,rgba(16,81,171,1)_0%,rgba(28,15,111,1)_144.25%)]">
                 bAIt
               </span>
             </div>
 
-            <p className="text-[rgba(53,77,194,0.6)] leading-relaxed">
+            <p className="lg:text-base md:text-sm text-xs text-[rgba(53,77,194,0.6)] leading-relaxed">
               Streamline recruitment and ace interviews with our AI-powered platform
             </p>
 
@@ -40,7 +40,7 @@ export const Footer = () => {
                   alt="LinkedIn"
                   width={30}
                   height={30}
-                  className="size-6"
+                  className="lg:size-6 md:size-5 size-4"
                 />
               </Link>
               <Link
@@ -54,7 +54,7 @@ export const Footer = () => {
                   alt="Gmail"
                   width={30}
                   height={30}
-                  className="size-6"
+                  className="lg:size-6  md:size-5 size-4"
                 />
               </Link>
               <Link
@@ -68,7 +68,7 @@ export const Footer = () => {
                   alt="X (Twitter)"
                   width={30}
                   height={30}
-                  className="size-6 bg-black p-1 rounded-sm"
+                  className="lg:size-6 size-4 md:size-5 bg-black p-1 rounded-sm"
                 />
               </Link>
               <Link
@@ -82,7 +82,7 @@ export const Footer = () => {
                   alt="Instagram"
                   width={30}
                   height={30}
-                  className="size-6"
+                  className="lg:size-6 md:size-5 size-4"
                 />
               </Link>
               <Link
@@ -96,21 +96,21 @@ export const Footer = () => {
                   alt="Facebook"
                   width={30}
                   height={30}
-                  className="size-6"
+                  className="lg:size-6 md:size-5 size-4"
                 />
               </Link>
             </div>
 
-            <div className=" text-black mt-2">
+            <div className="lg:text-base md:text-sm text-xs text-black mt-2">
               Copyright © 2026 Bait AI | All Rights Reserved
             </div>
           </div>
 
           {/* Right Columns: Links */}
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-10 lg:gap-15">
+          <div className="grid md:text-base text-xs grid-cols-3 gap-2 md:gap-10 lg:gap-15 justify-center px-10">
 
             {/* Product */}
-            <div className="flex flex-col gap-4">
+            <div className=" flex flex-col gap-4 ">
               <h3 className="font-semibold text-[rgba(17,24,39,0.9)]">Product</h3>
               <div className="flex flex-col gap-3">
                 <Link href="#" className=" text-[rgba(17,24,39,0.6)] hover:text-primary transition-colors">

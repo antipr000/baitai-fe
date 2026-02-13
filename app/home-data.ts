@@ -97,7 +97,7 @@ export const hiringTeamSteps = [
     {
         number: "02",
         title: "Share & Scale",
-        description: "Publish your interview with a single link. Unlimited candidates can take it simultaneously, 24/7.",
+        description: "Publish your interview with a single link. Candidates can take it simultaneously, 24/7.",
         icon: "/main/search.gif"
     },
     {

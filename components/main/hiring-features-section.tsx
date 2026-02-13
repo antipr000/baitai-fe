@@ -32,7 +32,7 @@ export function HiringFeaturesSection() {
                     {hiringFeatures.map((feature, index) => (
                         <Card key={index} className="bg-white border border-[rgba(58,63,187,0.5)] p-2 shadow-none rounded-2xl w-full h-full ">
                             <CardContent className="flex flex-col items-center justify-center p-0  md:p-5 lg:p-7 text-center h-full">
-                                <div className="mb-4 md:mb-6 h-14 flex items-center justify-center">
+                                <div className="mb-2 md:mb-6 h-14 flex items-center justify-center">
                                     <Image
                                         src={feature.icon}
                                         alt={feature.title}

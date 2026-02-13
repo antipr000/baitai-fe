@@ -63,10 +63,10 @@ export const MobileNavBar = ({ isAuthenticated }: MobileNavBarProps) => {
                             key={item.name}
                             href={item.href}
                             onClick={() => setOpen(false)}
-                            className="flex items-center gap-4 bg-[#F5F7FF] p-4 rounded-lg group transition-colors hover:bg-white border border-transparent hover:border-[#E0E7FF]"
+                            className="flex items-center gap-3 bg-[#F5F7FF] p-3 rounded-lg group transition-colors hover:bg-white border border-transparent hover:border-[#E0E7FF]"
                         >
-                            <Image src={item.icon} alt={item.name} width={20} height={20} className="w-5 h-5 text-[rgba(88,63,187,1)]" />
-                            <span className="text-[rgba(10,13,26,1)] font-medium text-base">
+                            <Image src={item.icon} alt={item.name} width={18} height={18} className="w-[18px] h-[18px] text-[rgba(88,63,187,1)]" />
+                            <span className="text-[rgba(10,13,26,1)] font-medium text-sm">
                                 {item.name}
                             </span>
                         </Link>
@@ -77,14 +77,14 @@ export const MobileNavBar = ({ isAuthenticated }: MobileNavBarProps) => {
                     {isAuthenticated ? (
                         <>
                             <Link href="/candidate/dashboard" onClick={() => setOpen(false)}>
-                                <Button className="w-full bg-[rgba(58,63,187,1)] hover:bg-[rgba(58,63,187,0.9)] text-white font-medium h-12 rounded-lg text-base">
+                                <Button className="w-full bg-[rgba(58,63,187,1)] hover:bg-[rgba(58,63,187,0.9)] text-white font-medium h-11 rounded-lg text-sm">
                                     Dashboard
                                 </Button>
                             </Link>
                             <Button
                                 onClick={handleLogout}
                                 variant="outline"
-                                className="w-full bg-white border-[rgba(58,63,187,1)] text-[rgba(58,63,187,1)] hover:bg-[rgba(58,63,187,0.05)] hover:text-[rgba(58,63,187,1)] font-medium h-12 rounded-lg text-base"
+                                className="w-full bg-white border-[rgba(58,63,187,1)] text-[rgba(58,63,187,1)] hover:bg-[rgba(58,63,187,0.05)] hover:text-[rgba(58,63,187,1)] font-medium h-11 rounded-lg text-sm"
                             >
                                 Logout
                             </Button>
@@ -94,14 +94,14 @@ export const MobileNavBar = ({ isAuthenticated }: MobileNavBarProps) => {
                             <Link href="/login" onClick={() => setOpen(false)}>
                                 <Button
                                     variant="outline"
-                                    className="w-full bg-white border-2 border-[rgba(58,63,187,1)] text-[rgba(58,63,187,1)] hover:bg-[rgba(58,63,187,0.05)] hover:text-[rgba(58,63,187,1)] font-medium h-12 rounded-lg text-base"
+                                    className="w-full bg-white border-2 border-[rgba(58,63,187,1)] text-[rgba(58,63,187,1)] hover:bg-[rgba(58,63,187,0.05)] hover:text-[rgba(58,63,187,1)] font-medium h-11 rounded-lg text-sm"
                                 >
                                     Sign in
                                 </Button>
                             </Link>
 
                             <Link href="https://cal.com/soham-mukherjee-8yzald/30min" target="_blank" rel="noopener noreferrer" onClick={() => setOpen(false)}>
-                                <Button className="w-full bg-[rgba(58,63,187,1)] hover:bg-[rgba(58,63,187,0.9)] text-white font-medium h-12 rounded-lg text-base">
+                                <Button className="w-full bg-[rgba(58,63,187,1)] hover:bg-[rgba(58,63,187,0.9)] text-white font-medium h-11 rounded-lg text-sm">
                                     Request a demo
                                 </Button>
                             </Link>

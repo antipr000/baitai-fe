@@ -3,7 +3,7 @@ import { hiringFeatures, hiringTeamSteps } from "@/app/home-data";
 
 export function HiringTeamsSection() {
     return (
-        <section className="bg-[rgba(236,239,255,1)] py-15 lg:py-21 md:px-17 px-5 overflow-hidden">
+        <section className="bg-[rgba(236,239,255,1)] py-15 lg:py-18 md:px-17 px-5 overflow-hidden">
             <div className="max-w-7xl mx-auto relative">
 
                 <div className="text-center max-w-3xl mx-auto mb-4 md:mb-9 ">

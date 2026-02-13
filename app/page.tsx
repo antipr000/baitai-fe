@@ -26,7 +26,7 @@ export default async function Home() {
       <Header />
 
       {/* Hero Section */}
-      <main className="relative w-full px-17 lg:pt-32 lg:pb-10 md:py-15 py-6 ">
+      <main className="relative w-full px-17 lg:pt-32 lg:pb-25 md:py-15 py-6 ">
         {/* Content */}
         <div className="relative z-10 lg:max-w-7xl  md:max-w-4xl w-full mx-auto py-2">
           {/* Grid Overlay */}
@@ -146,7 +146,7 @@ export default async function Home() {
       <HiringTeamsSection />
 
       {/* CTA Section */}
-      <section className="bg-[rgba(107,124,255,1)] px-6 md:px-15 lg:px-42 py-7 md:py-20 lg:py-16 xl:py-20 md:rounded-2xl rounded-sm mx-4 md:mx-15 lg:mx-15   my-15">
+      <section className="bg-[rgba(107,124,255,1)] px-6 md:px-15 lg:px-42 py-7 md:py-20 lg:py-25 xl:py-30 md:rounded-2xl rounded-sm mx-4 md:mx-15 lg:mx-15   my-15">
         <div className="w-full max-w-6xl mx-auto">
           <div className="flex flex-col items-center text-center gap-8 md:gap-10">
             <div className="space-y-6">
@@ -185,14 +185,14 @@ export default async function Home() {
 
             {/* Section Header */}
             <div className="text-center mb-6 md:mb-10">
-              <p className="text-base md:text-lg font-medium text-[rgba(58,63,187,1)] uppercase tracking-tight mb-3">
+              <p className="text-sm md:text-base lg:text-lg font-medium text-[rgba(58,63,187,1)] uppercase tracking-tight mb-3">
                 How It Works
               </p>
-              <h2 className="text-3xl md:text-4xl lg:text-5xl font-semibold mb-2 mt-5">
+              <h2 className="text-xl md:text-2xl lg:text-3xl xl:text-5xl font-semibold mb-2 mt-5">
                 <span className="text-[rgba(10,13,26,1)]">How It Works for </span>
                 <span className="text-[rgba(107,124,255,1)]">Job Seekers</span>
               </h2>
-              <p className="text-base md:text-lg text-[rgba(10,13,26,0.7)] mt-3 max-w-4xl mx-auto leading-relaxed">
+              <p className="md:w-3/4 mx-auto text-sm md:text-base lg:text-xl text-[rgba(10,13,26,0.7)] mt-3 max-w-4xl leading-relaxed">
                 Prepare like never before. Practice with AI, get data-backed insights, and walk into interviews with confidence.
               </p>
             </div>
@@ -204,10 +204,10 @@ export default async function Home() {
                 return (
                   <Card
                     key={index}
-                    className="border-2 border-[rgba(58,63,187,1)] rounded-xl overflow-hidden bg-white"
+                    className="border-2 border-[rgba(58,63,187,1)] md:px-6 px-3 rounded-md overflow-hidden bg-white md:w-3/4 mx-auto lg:w-full"
                   >
                     <CardContent className="p-0">
-                      <div className="flex flex-col md:flex-row">
+                      <div className="flex flex-col lg:flex-row lg:items-left items-center gap-4">
 
                         {/* Left Side - Content */}
                         <div className="flex-1 px-15 flex items-center">
@@ -219,20 +219,20 @@ export default async function Home() {
                               </span>
                               <Image
                                 src={step.icon}
-                                alt=""
-                                width={40}
-                                height={40}
-                                className="w-8 h-8 md:w-10 md:h-10 object-contain"
+                                alt="step"
+                                width={50}
+                                height={50}
+                                className=" size-4 md:size-12 object-contain"
                               />
                             </div>
 
                             {/* Title */}
-                            <h3 className="text-lg md:text-xl font-semibold text-[rgba(10,13,26,1)] mb-2">
+                            <h3 className="text-lg md:text-xl font-semibold text-[rgba(10,13,26,1)] mt-7 mb-2 ">
                               {step.title}
                             </h3>
 
                             {/* Description */}
-                            <p className="text-sm md:text-base text-[rgba(10,13,26,0.6)] tracking-tight">
+                            <p className="text-xs md:text-sm lg:text-base text-[rgba(10,13,26,0.6)] tracking-tight">
                               {step.description}
                             </p>
                           </div>
@@ -246,7 +246,7 @@ export default async function Home() {
                               alt={step.imageAlt}
                               width={420}
                               height={220}
-                              className="rounded-2xl w-full h-auto object-contain"
+                              className="rounded-md w-full h-auto object-contain"
                             />
                           </div>
                         </div>
@@ -262,21 +262,21 @@ export default async function Home() {
         </section>
 
 
-        <section className="bg-[rgba(245,255,199,1)] px-6 md:px-10 lg:px-12 py-20 md:py-24 lg:py-36 rounded-3xl mx-4 md:mx-6 lg:mx-15 my-8">
-          <div className="w-full max-w-4xl mx-auto">
+        <section className="bg-[rgba(245,255,199,1)] px-6 md:px-12 lg:px-28 xl:px-42 py-7 md:py-20 lg:py-25 xl:py-30 md:rounded-2xl rounded-sm mx-4 md:mx-10 lg:mx-15 xl:mx-20 my-15">
+          <div className="w-full max-w-6xl mx-auto">
             <div className="flex flex-col items-center text-center gap-8 md:gap-10">
-              <div className="space-y-2.5">
-                <h2 className="text-2xl md:text-3xl lg:text-5xl text-[rgba(83,118,219,1)] font-semibold tracking-tight">
+              <div className="space-y-6">
+                <h2 className="text-lg md:text-3xl lg:text-4xl xl:text-5xl text-[rgba(83,118,219,1)] font-semibold tracking-tight md:w-full w-3/4 mx-auto">
                   Start your free practice today
                 </h2>
-                <p className="text-base md:text-lg lg:text-xl text-[rgba(11,31,59,0.6)] font-medium max-w-2xl mx-auto">
+                <p className="md:w-full w-4/5 mx-auto text-xs md:text-base lg:text-xl xl:text-2xl text-[rgba(11,31,59,0.6)] font-medium max-w-2xl">
                   No payment required. Start practicing in under 2 minutes.
                 </p>
               </div>
-              <div className="flex flex-col sm:flex-row gap-8 mt-7.5">
+              <div className="flex gap-5 md:gap-7 lg:mt-7 md:mt-4">
                 <Link href="/signup">
                   <Button
-                    className="flex items-center justify-center min-w-[200px] gap-2 rounded-xl px-10 py-4 md:px-12 md:py-5 lg:px-16 lg:py-6 border-2 border-[rgba(58,63,187,0.9)] text-base md:text-base lg:text-xl font-medium bg-[rgba(58,63,187,1)] hover:bg-transparent hover:opacity-90 text-white hover:text-[rgba(58,63,187,1)]">
+                    className="flex items-center justify-center gap-2 md:rounded-xl rounded-sm px-5 py-2.5 md:px-8 md:py-5 lg:px-10 lg:py-6 border-2 border-[rgba(58,63,187,0.9)] text-sm md:text-base lg:text-lg xl:text-xl font-medium bg-[rgba(58,63,187,1)] hover:bg-transparent hover:opacity-90 text-white hover:text-[rgba(58,63,187,1)]">
                     Sign up
                     <svg
                       width="20"
@@ -296,7 +296,7 @@ export default async function Home() {
                   </Button>
                 </Link>
                 <Link href="/#how-it-works">
-                  <Button className="flex items-center justify-center min-w-[200px] rounded-xl px-10 py-4 md:px-12 md:py-5 lg:px-16 lg:py-6 text-base md:text-base lg:text-xl   border-[rgba(58,63,187,0.9)] font-medium bg-transparent hover:bg-[rgba(58,63,187,1)] hover:opacity-90 border-2  text-[rgba(83,118,219,1)] hover:text-white">
+                  <Button className="flex items-center justify-center md:rounded-xl rounded-sm px-5 py-2.5 md:px-8 md:py-5 lg:px-10 lg:py-6 text-sm md:text-base lg:text-lg xl:text-xl border-[rgba(58,63,187,0.9)] font-medium bg-transparent hover:bg-[rgba(58,63,187,1)] border-2 text-[rgba(83,118,219,1)] hover:text-white">
                     How it works
                   </Button>
                 </Link>
