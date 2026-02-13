@@ -5,8 +5,8 @@ import React from "react";
 export const Footer = () => {
   // TODO: Add links
   return (
-    <footer className="w-full mx-auto py-3 md:py-10 lg:py-20 md:mb-20 lg:mb-62 mt-20">
-      <div className="px-5 md:px-16 lg:px-24">
+    <footer className="  mx-auto py-3 md:py-10 lg:py-20 md:mb-20 lg:mb-62 md:mt-20">
+      <div className="px-5 mx-auto md:px-16 lg:px-24">
         <div className="flex flex-col md:flex-row gap-10 justify-between">
 
           {/* Left Column: Brand & Social */}
