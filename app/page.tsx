@@ -17,6 +17,7 @@ import { hiringFeatures, jobSeekerSteps } from "@/app/home-data";
 import { WaitlistForm } from "@/components/waitlist-form";
 import Header from "@/components/header";
 import { JobSeekersSection } from "@/components/main/job-seekers-section";
+import { HeroVideo } from "@/components/main/hero-video";
 
 export default async function Home() {
 
@@ -124,16 +125,8 @@ export default async function Home() {
               </p>
             </div>
 
-            {/* Right Column - Hero Image */}
             <div className="w-full flex justify-center lg:block">
-              <Image
-                src="/main/hero.png"
-                alt="hero"
-                width={800}
-                height={500}
-                priority
-                className="w-full h-auto object-cover"
-              />
+              <HeroVideo />
             </div>
           </div>
         </div>
