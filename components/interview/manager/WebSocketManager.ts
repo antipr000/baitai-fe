@@ -8,15 +8,13 @@
  * - Send queue for messages during connection
  * - Connection state tracking
  *
- * Replaces the useWebSocket hook with a more controllable class-based approach
- * that integrates better with the Zustand store.
+ * All outbound messages use InboundEvent types from events.ts.
+ * All inbound messages are typed as OutboundMessage from events.ts.
  */
 
-import type {
-  ConnectionStatus,
-  WebSocketMessageType,
-  WebSocketTextMessage,
-} from '../store/types'
+import type { ConnectionStatus } from '../store/types'
+import type { OutboundMessage } from '../store/events'
+import { InboundEvent } from '../store/events'
 
 // ============================================
 // Types
@@ -45,7 +43,7 @@ export interface WebSocketManagerCallbacks {
   /** Called on connection error */
   onError?: (error: Event | Error) => void
   /** Called when a text message is received */
-  onTextMessage?: (message: WebSocketTextMessage) => void
+  onTextMessage?: (message: OutboundMessage) => void
   /** Called when binary audio data is received */
   onBinaryMessage?: (data: ArrayBuffer) => void
   /** Called when connection status changes */
@@ -191,7 +189,7 @@ export class WebSocketManager {
     } else if (typeof data === 'string') {
       // JSON text message
       try {
-        const message = JSON.parse(data) as WebSocketTextMessage
+        const message = JSON.parse(data) as OutboundMessage
         this.callbacks.onTextMessage?.(message)
       } catch (e) {
         console.error('[WebSocketManager] Failed to parse message:', e)
@@ -242,7 +240,7 @@ export class WebSocketManager {
     this.keepaliveTimer = setInterval(() => {
       if (this.ws?.readyState === WebSocket.OPEN) {
         try {
-          this.ws.send(JSON.stringify({ type: 'ping' }))
+          this.ws.send(JSON.stringify({ type: InboundEvent.PING }))
           console.log('[WebSocketManager] Sent keepalive ping')
         } catch (error) {
           console.error('[WebSocketManager] Failed to send keepalive:', error)
@@ -328,11 +326,20 @@ export class WebSocketManager {
   }
 
   /**
-   * Send end_of_turn signal
+   * Send end_of_turn signal (silence detected, user finished speaking)
    */
   sendEndOfTurn(): boolean {
     console.log('[WebSocketManager] Sending end_of_turn')
-    return this.send({ type: 'end_of_turn' })
+    return this.send({ type: InboundEvent.END_OF_TURN })
+  }
+
+  /**
+   * Send speech_completed signal (frontend finished playing all AI audio)
+   * This tells the backend to transition SPEAKING -> LISTENING
+   */
+  sendSpeechCompleted(): boolean {
+    console.log('[WebSocketManager] Sending speech_completed')
+    return this.send({ type: InboundEvent.SPEECH_COMPLETED })
   }
 
   /**
@@ -340,48 +347,49 @@ export class WebSocketManager {
    */
   sendEndInterview(): boolean {
     console.log('[WebSocketManager] Sending end_interview')
-    return this.send({ type: 'end_interview' })
+    return this.send({ type: InboundEvent.END_INTERVIEW })
   }
 
+  // ============================================
+  // Artifact Events
+  // ============================================
+
   /**
-   * Start a media upload session
+   * Send artifact_opened signal (user opened code editor / whiteboard)
+   * Backend transitions LISTENING -> ARTIFACT and starts inactivity timer
    */
-  sendStartMediaUpload(recordingType: 'video' | 'screen' | 'audio'): boolean {
-    console.log(`[WebSocketManager] Starting ${recordingType} upload session`)
+  sendArtifactOpened(artifactType: 'code' | 'whiteboard'): boolean {
+    console.log(`[WebSocketManager] Sending artifact_opened (${artifactType})`)
     return this.send({
-      type: 'media_upload.start',
-      recording_type: recordingType,
+      type: InboundEvent.ARTIFACT_OPENED,
+      artifact_type: artifactType,
     })
   }
 
   /**
-   * Send a media chunk
+   * Send artifact_interaction signal (user keystroke / draw / scroll)
+   * Resets the backend's inactivity timer. Should be debounced by the caller.
    */
-  sendMediaChunk(
-    recordingType: 'video' | 'screen' | 'audio',
-    chunkIndex: number,
-    data: string, // base64 encoded
-    isFinal: boolean = false
-  ): boolean {
-    return this.send({
-      type: 'media_chunk',
-      recording_type: recordingType,
-      chunk_index: chunkIndex,
-      data,
-      is_final: isFinal,
-    })
+  sendArtifactInteraction(): boolean {
+    return this.send({ type: InboundEvent.ARTIFACT_INTERACTION })
   }
 
   /**
-   * Send a finalize media message
+   * Send artifact_submitted signal (user finished with artifact, wants feedback)
+   * Backend transitions ARTIFACT -> THINKING and runs the decision pipeline
    */
-  sendFinalizeMedia(recordingType: 'video' | 'screen' | 'audio'): boolean {
-    console.log(`[WebSocketManager] Finalizing ${recordingType} upload`)
+  sendArtifactSubmitted(content: string, language?: string): boolean {
+    console.log('[WebSocketManager] Sending artifact_submitted')
     return this.send({
-      type: 'media_upload.finalize',
-      recording_type: recordingType,
+      type: InboundEvent.ARTIFACT_SUBMITTED,
+      content,
+      ...(language && { language }),
     })
   }
+
+  // ============================================
+  // Send Queue
+  // ============================================
 
   /**
    * Flush queued messages

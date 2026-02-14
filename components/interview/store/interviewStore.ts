@@ -1,13 +1,16 @@
 /**
  * Zustand Store for Interview State Management
- * 
+ *
+ * Key change: conversationState is now set ONLY by the backend via
+ * STATE_CHANGED / STATE_SYNC events. The frontend never decides state transitions.
+ *
  * This store replaces:
  * - 15 useState calls from ActiveInterview
  * - 9 state-mirror refs (isMicOnRef, isConnectedRef, conversationStateRef, etc.)
  * - 4 streaming text refs (aiStreamBufferRef, currentAiMessageIdRef, tokenQueueRef, isProcessingTokensRef)
  * - 5 flag refs (hasSentEndOfTurnRef, hasNavigatedAwayRef, hasHeardSpeechThisListeningTurnRef, etc.)
  * - 2 audio tracking refs (expectedAudioChunkRef, sentenceCompleteRef)
- * 
+ *
  * Use store.getState() in callbacks to avoid stale closure issues.
  */
 
@@ -50,17 +53,22 @@ const createInitialState = (): InterviewState => ({
   connectionStatus: 'disconnected',
   error: null,
 
-  // Conversation
+  // Conversation (set ONLY by backend STATE_CHANGED / STATE_SYNC)
   conversationState: 'idle',
   messages: [],
-  isProcessing: false,
+
+  // Live transcript
+  transcript: '',
 
   // Streaming text
   streamingText: createInitialStreamingTextState(),
 
   // Audio chunk tracking
   expectedAudioChunk: null,
-  completedSentences: new Map(),  // check why used map
+  completedSentences: new Map(),
+
+  // Response audio tracking
+  responseAudioDone: false,
 
   // Recording states
   audio: createInitialMediaState(),
@@ -77,11 +85,9 @@ const createInitialState = (): InterviewState => ({
   isScreenSharing: false,
 
   // Flags
-  hasSentEndOfTurn: false,
   hasHeardSpeech: false,
   hasNavigatedAway: false,
   hasSentAudioSegments: false,
-  isResponseComplete: true, // Start as true (no pending response)
 
   // UI
   showEndConfirm: false,
@@ -109,7 +115,7 @@ export const useInterviewStore = create<InterviewStore>()(
       set({
         sessionId,
         templateId,
-        conversationState: 'thinking',
+        conversationState: 'idle',
         connectionStatus: 'disconnected',
         isInitialized: true,
       }),
@@ -123,14 +129,10 @@ export const useInterviewStore = create<InterviewStore>()(
     setError: (error: string | null) => set({ error }),
 
     // ----------------------------------------
-    // Conversation State
+    // Conversation State (set ONLY by backend events)
     // ----------------------------------------
     setConversationState: (conversationState: ConversationState) =>
       set({ conversationState }),
-
-    setIsProcessing: (isProcessing: boolean) => set({ isProcessing }),
-
-    // NOTE: setIsAISpeaking removed - isAISpeaking is now derived
 
     // ----------------------------------------
     // Messages
@@ -155,6 +157,16 @@ export const useInterviewStore = create<InterviewStore>()(
       })),
 
     clearMessages: () => set({ messages: [] }),
+
+    // ----------------------------------------
+    // Transcript
+    // ----------------------------------------
+    setTranscript: (transcript: string) => set({ transcript }),
+
+    appendTranscript: (text: string) =>
+      set((state) => ({ transcript: state.transcript + text })),
+
+    clearTranscript: () => set({ transcript: '' }),
 
     // ----------------------------------------
     // Streaming Text
@@ -290,6 +302,12 @@ export const useInterviewStore = create<InterviewStore>()(
       set({ completedSentences: new Map() }),
 
     // ----------------------------------------
+    // Response Audio Tracking
+    // ----------------------------------------
+    setResponseAudioDone: (responseAudioDone: boolean) =>
+      set({ responseAudioDone }),
+
+    // ----------------------------------------
     // Recording States
     // ----------------------------------------
     setAudioRecording: (update: Partial<MediaRecordingState>) =>
@@ -329,9 +347,6 @@ export const useInterviewStore = create<InterviewStore>()(
     // ----------------------------------------
     // Flags
     // ----------------------------------------
-    setHasSentEndOfTurn: (hasSentEndOfTurn: boolean) =>
-      set({ hasSentEndOfTurn }),
-
     setHasHeardSpeech: (hasHeardSpeech: boolean) => set({ hasHeardSpeech }),
 
     setHasNavigatedAway: (hasNavigatedAway: boolean) =>
@@ -339,9 +354,6 @@ export const useInterviewStore = create<InterviewStore>()(
 
     setHasSentAudioSegments: (hasSentAudioSegments: boolean) =>
       set({ hasSentAudioSegments }),
-
-    setIsResponseComplete: (isResponseComplete: boolean) =>
-      set({ isResponseComplete }),
 
     // ----------------------------------------
     // UI
@@ -391,7 +403,8 @@ export const useError = () => useInterviewStore((s) => s.error)
 export const useConversationState = () =>
   useInterviewStore((s) => s.conversationState)
 export const useMessages = () => useInterviewStore((s) => s.messages)
-export const useIsProcessing = () => useInterviewStore((s) => s.isProcessing)
+export const useIsProcessing = () =>
+  useInterviewStore((s) => s.conversationState === 'thinking')
 export const useIsAISpeaking = () =>
   useInterviewStore(
     (s) =>
@@ -403,7 +416,8 @@ export const useIsAISpeaking = () =>
 export const useIsAudioPlaying = () =>
   useInterviewStore((s) => s.conversationState === 'speaking')
 
-
+// Transcript
+export const useTranscript = () => useInterviewStore((s) => s.transcript)
 
 // Streaming text
 export const useStreamingText = () =>
@@ -450,8 +464,7 @@ export const useConversationUIState = () =>
     useShallow((s) => ({
       connectionStatus: s.connectionStatus,
       conversationState: s.conversationState,
-      isProcessing: s.isProcessing,
-      // NOTE: isAISpeaking removed from this selector - use useIsAISpeaking() hook directly
+      isProcessing: s.conversationState === 'thinking',
       error: s.error,
       showEndConfirm: s.showEndConfirm,
     }))
@@ -464,8 +477,6 @@ export const useIsScreenSharing = () =>
   useInterviewStore((s) => s.isScreenSharing)
 
 // Flags
-export const useHasSentEndOfTurn = () =>
-  useInterviewStore((s) => s.hasSentEndOfTurn)
 export const useHasHeardSpeech = () =>
   useInterviewStore((s) => s.hasHeardSpeech)
 export const useHasNavigatedAway = () =>
@@ -486,7 +497,7 @@ export const useShowEndConfirm = () =>
  * This replaces all the ref-syncing patterns like:
  *   const isMicOnRef = useRef(isMicOn)
  *   useEffect(() => { isMicOnRef.current = isMicOn }, [isMicOn])
- * 
+ *
  * Instead, just use: useInterviewStore.getState().isMicOn
  */
 export const getInterviewState = () => useInterviewStore.getState()

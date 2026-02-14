@@ -8,13 +8,17 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { ChevronDown, Copy, Check } from 'lucide-react'
+import { ChevronDown, Copy, Check, Send } from 'lucide-react'
 import type { EditorLanguage } from './code-editor'
 
 interface EditorToolbarProps {
     language: EditorLanguage
     onLanguageChange: (lang: EditorLanguage) => void
     onCopy: () => void
+    /** Optional submit handler -- when provided, shows a "Submit" button */
+    onSubmit?: () => void
+    /** Whether the submit button should be disabled */
+    submitDisabled?: boolean
 }
 
 const languages: { value: EditorLanguage; label: string }[] = [
@@ -27,6 +31,8 @@ export function EditorToolbar({
     language,
     onLanguageChange,
     onCopy,
+    onSubmit,
+    submitDisabled,
 }: EditorToolbarProps) {
     const [copied, setCopied] = React.useState(false)
 
@@ -64,18 +70,32 @@ export function EditorToolbar({
                 </DropdownMenuContent>
             </DropdownMenu>
 
-            <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleCopy}
-                className="text-gray-300 hover:text-white hover:bg-gray-800"
-            >
-                {copied ? (
-                    <Check className="w-4 h-4 text-green-500" />
-                ) : (
-                    <Copy className="w-4 h-4" />
+            <div className="flex items-center gap-1">
+                <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleCopy}
+                    className="text-gray-300 hover:text-white hover:bg-gray-800"
+                >
+                    {copied ? (
+                        <Check className="w-4 h-4 text-green-500" />
+                    ) : (
+                        <Copy className="w-4 h-4" />
+                    )}
+                </Button>
+
+                {onSubmit && (
+                    <Button
+                        size="sm"
+                        onClick={onSubmit}
+                        disabled={submitDisabled}
+                        className="bg-green-600 hover:bg-green-700 text-white text-xs px-3"
+                    >
+                        <Send className="w-3.5 h-3.5 mr-1" />
+                        Submit
+                    </Button>
                 )}
-            </Button>
+            </div>
         </div>
     )
 }
