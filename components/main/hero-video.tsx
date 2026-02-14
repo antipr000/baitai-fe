@@ -25,7 +25,7 @@ export function HeroVideo() {
 
     return (
         <div className="relative w-full cursor-pointer" onClick={!isPlaying ? handlePlay : undefined}>
-            {/* Video Element */}
+            {/* Video Element - always rendered to maintain consistent height */}
             <video
                 ref={videoRef}
                 src="https://storage.googleapis.com/bait-asset/demo.mkv"
@@ -34,19 +34,18 @@ export function HeroVideo() {
                 onPause={handlePause}
                 onEnded={handleEnded}
                 onPlay={() => setIsPlaying(true)}
-                className={`w-full h-auto object-cover rounded-lg ${isPlaying ? "block" : "hidden"}`}
+                className="w-full h-auto object-cover rounded-lg"
             />
 
-            {/* Poster + Play Button Overlay (shown when not playing) */}
+            {/* Poster Overlay (shown when not playing) */}
             {!isPlaying && (
-                <div className="relative w-full">
+                <div className="absolute inset-0 w-full h-full">
                     <Image
                         src="/main/hero3.png"
                         alt="hero"
-                        width={800}
-                        height={500}
+                        fill
                         priority
-                        className="w-full h-auto object-cover rounded-lg"
+                        className="object-cover rounded-lg"
                     />
                 </div>
             )}
