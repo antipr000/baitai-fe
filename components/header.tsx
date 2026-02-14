@@ -14,20 +14,21 @@ export default async function Header() {
         serviceAccount: serverConfig.serviceAccount,
     });
     return (
-        <header className="fixed top-0 left-0 right-0 z-50 sm:px-6 px-2 md:py-4 py-4 bg-white/90 backdrop-blur-md border-b border-gray-200/20 shadow-sm w-screen max-w-full overflow-x-hidden box-border">
+        <header className="fixed top-0 left-0 right-0 z-50 sm:px-6 px-2 md:py-7 lg:py-9 py-4 bg-[rgba(245,247,255,1)] border-b border-gray-200/20 shadow-sm w-screen max-w-full overflow-x-hidden ">
             <nav className="flex items-center justify-between w-full max-w-full md:max-w-7xl md:mx-auto overflow-x-hidden box-border m-0">
                 <Link href="/" className="flex items-center space-x-2">
-                    <Image className="md:size-[34px] lg:[size-40px] size-6" src="/main/logo.png" alt="Bait AI Logo" width={40} height={40} />
-                    <span className="lg:text-3xl md:text-2xl text-base font-bold bg-clip-text text-transparent bg-[linear-gradient(106.63deg,rgba(16,81,171,1)_0%,rgba(28,15,111,1)_144.25%)]">bAIt</span>
+                    <Image className="md:size-[34px] lg:[size-40px] size-8" src="/main/logo.png" alt="Bait AI Logo" width={40} height={40} />
+                    <span className="lg:text-3xl md:text-2xl text-xl font-bold text-transparent bg-clip-text bg-[linear-gradient(106.63deg,#1051AB_0%,#1C0F6F_144.25%)]">bAIt</span>
                 </Link>
-                <div className="hidden md:flex items-center lg:space-x-8 space-x-4">
-                    <Link href="/about" className="text-[rgba(69,94,255,0.8)] hover:opacity-70 font-medium">About us</Link>
-                    <Link href="/#hiring-teams" className="text-[rgba(69,94,255,0.8)] hover:opacity-70 font-medium">For Hiring Teams</Link>
-                    <Link href="/#job-seekers" className="text-[rgba(69,94,255,0.8)] hover:opacity-70 font-medium">For Job Seekers</Link>
-                    <Link href="/pricing" className="text-[rgba(69,94,255,0.8)] hover:opacity-70 font-medium">Pricing</Link >
+                <div className="hidden md:flex items-center lg:space-x-10 md:space-x-4 space-x-2">
+                    <Link href="/about" className="text-[rgba(69,94,255,0.8)] hover:opacity-70 font-medium lg:text-base md:text-sm">About us</Link>
+                    <Link href="/#hiring-teams" className="text-[rgba(69,94,255,0.8)] hover:opacity-70 font-medium lg:text-base md:text-sm">For Hiring Teams</Link>
+                    {/* check why not working when at top */}
+                    <Link href="/#job-seekers" className="text-[rgba(69,94,255,0.8)] hover:opacity-70 font-medium lg:text-base md:text-sm">For Job Seekers</Link>
+                    <Link href="/pricing" className="text-[rgba(69,94,255,0.8)] hover:opacity-70 font-medium lg:text-base md:text-sm">Pricing</Link >
                 </div>
 
-                <div className="hidden md:flex items-center space-x-4">
+                <div className="hidden md:flex items-center lg:space-x-4 space-x-2">
                     <AuthButtons isAuthenticated={!!tokens} />
                 </div>
                 <div className="md:hidden justify-around items-center">

@@ -1,15 +1,15 @@
 "use client"
 
 import { Menu } from 'lucide-react'
+import Image from 'next/image'
 import React, { useState } from 'react'
-import { Sheet, SheetContent, SheetTrigger } from './ui/sheet';
+import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetDescription } from './ui/sheet';
 import { Button } from './ui/button';
-import Image from 'next/image';
 import Link from 'next/link';
-import { Separator } from './ui/separator';
 import { auth } from '@/lib/firebase';
 import { signOut } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
+import * as VisuallyHidden from '@radix-ui/react-visually-hidden';
 
 interface MobileNavBarProps {
     isAuthenticated: boolean;
@@ -18,8 +18,6 @@ interface MobileNavBarProps {
 export const MobileNavBar = ({ isAuthenticated }: MobileNavBarProps) => {
     const [open, setOpen] = useState(false);
     const router = useRouter();
-
-
 
     async function handleLogout() {
         try {
@@ -33,101 +31,84 @@ export const MobileNavBar = ({ isAuthenticated }: MobileNavBarProps) => {
         }
     }
 
-    return (<Sheet modal={false} open={open} onOpenChange={setOpen}>
-        <><SheetTrigger asChild className="">
-            <Button variant="ghost" size="icon" className="text-[rgba(69,94,255,0.8)] ml-auto">
-                <Menu className="h-6 w-6" />
-                <span className="sr-only">Toggle menu</span>
-            </Button>
-        </SheetTrigger><SheetContent
-            side="left"
-            className="w-full p-5 min-h-screen bg-[linear-gradient(172.97deg,#E8F5FA_-6.95%,#F5F7FF_91.64%)]"
-            onOpenAutoFocus={(e) => e.preventDefault()}
-            onCloseAutoFocus={(e) => e.preventDefault()}
-        >
-                <nav className="flex flex-col gap-6 px-5 mt-8">
-                    <div className="flex items-center gap-4 border-[rgba(121,153,253,0.05)] border p-1 px-2 ">
-                        <Image src="/main/nav/about.svg" alt="Bait AI Logo" width={15} height={15} />
+    const navItems = [
+        { name: 'About us', href: '/about', icon: '/main/doc.svg' },
+        { name: 'For Hiring Teams', href: '/#hiring-teams', icon: '/main/briefcase.svg' },
+        { name: 'For Job Seekers', href: '/#job-seekers', icon: '/main/group.svg' },
+        { name: 'Pricing', href: '/pricing', icon: '/main/money.svg' },
+    ];
+
+    return (
+        <Sheet modal={false} open={open} onOpenChange={setOpen}>
+            <SheetTrigger asChild>
+                <Button variant="ghost" size="icon" className="text-[rgba(69,94,255,0.8)] ml-auto">
+                    <Menu className="h-6 w-6" />
+                    <span className="sr-only">Toggle menu</span>
+                </Button>
+            </SheetTrigger>
+            <SheetContent
+                side="left"
+                className="w-full p-4 bg-[rgba(248,250,255,1)] flex flex-col h-full"
+                onOpenAutoFocus={(e) => e.preventDefault()}
+                onCloseAutoFocus={(e) => e.preventDefault()}
+            >
+                <VisuallyHidden.Root>
+                    <SheetTitle>Mobile Menu</SheetTitle>
+                    <SheetDescription>Navigation links and actions</SheetDescription>
+                </VisuallyHidden.Root>
+
+                <nav className="flex flex-col gap-3 mt-8">
+                    {navItems.map((item) => (
                         <Link
-                            href="/about"
-                            className=" text-[rgba(10,13,26,0.7)] hover:opacity-70 font-medium py-2"
+                            key={item.name}
+                            href={item.href}
                             onClick={() => setOpen(false)}
+                            className="flex items-center gap-3 bg-[#F5F7FF] p-3 rounded-lg group transition-colors hover:bg-white border border-transparent hover:border-[#E0E7FF]"
                         >
-                            About us
+                            <Image src={item.icon} alt={item.name} width={18} height={18} className="w-[18px] h-[18px] text-[rgba(88,63,187,1)]" />
+                            <span className="text-[rgba(10,13,26,1)] font-medium text-sm">
+                                {item.name}
+                            </span>
                         </Link>
-                    </div>
-
-                    <div className="flex items-center gap-4 border-[rgba(121,153,253,0.05)] border p-1 px-2 ">
-                        <Image src="/main/nav/briefcase.svg" alt="briefcase" width={15} height={15} />
-                        <Link
-                            href="/#hiring-teams"
-                            className=" text-[rgba(10,13,26,0.7)] hover:opacity-70 font-medium py-2"
-                            onClick={() => setOpen(false)}
-                        >
-                            For Hiring Teams
-                        </Link>
-                    </div>
-
-                    <div className="flex items-center gap-4 border-[rgba(121,153,253,0.05)] border p-1 px-2 ">
-                        <Image src="/main/nav/people.svg" alt="people" width={15} height={15} />
-
-                        <Link
-                            href="/#job-seekers"
-                            className=" text-[rgba(10,13,26,0.7)] hover:opacity-70 font-medium py-2"
-                            onClick={() => setOpen(false)}
-                        >
-                            For Job Seekers
-                        </Link>
-                    </div>
-
-                    <div className="flex items-center gap-4 border-[rgba(121,153,253,0.05)] border p-1 px-2 ">
-                        <Image src="/main/nav/money.svg" alt="money" width={15} height={15} />
-
-                        <Link
-                            href="/pricing"
-                            className=" text-[rgba(10,13,26,0.7)] hover:opacity-70 font-medium py-2"
-                            onClick={() => setOpen(false)}
-                        >
-                            Pricing
-                        </Link>
-                    </div>
-
-                    <Separator className="my-2" />
-
+                    ))}
                 </nav>
-                <div className="flex flex-col gap-4 border-[rgba(121,153,253,0.05)] border px-2 p-1">
+
+                <div className="mt-auto flex flex-col gap-3 mb-8">
                     {isAuthenticated ? (
                         <>
-                            <Link href="/candidate/dashboard">
-                                <Button className="w-full bg-[linear-gradient(106.03deg,#677CFF_0%,#A3D9F8_238.47%)] hover:opacity-70 text-[rgba(238,246,251,1)] font-medium">
-                                    Go to Dashboard
+                            <Link href="/candidate/dashboard" onClick={() => setOpen(false)}>
+                                <Button className="w-full bg-[rgba(58,63,187,1)] hover:bg-[rgba(58,63,187,0.9)] text-white font-medium h-11 rounded-lg text-sm">
+                                    Dashboard
                                 </Button>
                             </Link>
                             <Button
                                 onClick={handleLogout}
-                                variant="ghost"
-                                className="w-full bg-[linear-gradient(106.03deg,rgba(239,246,254,0.5)_0%,rgba(163,217,248,0.5)_238.47%)] text-[rgba(108,132,255,1)] hover:opacity-70 border font-medium border-[rgba(108,132,255,0.9)]"
+                                variant="outline"
+                                className="w-full bg-white border-[rgba(58,63,187,1)] text-[rgba(58,63,187,1)] hover:bg-[rgba(58,63,187,0.05)] hover:text-[rgba(58,63,187,1)] font-medium h-11 rounded-lg text-sm"
                             >
                                 Logout
                             </Button>
                         </>
                     ) : (
                         <>
-                            <Link href="/login">
-                                <Button className="w-full bg-[linear-gradient(106.03deg,#677CFF_0%,#A3D9F8_238.47%)] hover:opacity-70 text-[rgba(238,246,251,1)] font-medium">
-                                    Login
+                            <Link href="/login" onClick={() => setOpen(false)}>
+                                <Button
+                                    variant="outline"
+                                    className="w-full bg-white border-2 border-[rgba(58,63,187,1)] text-[rgba(58,63,187,1)] hover:bg-[rgba(58,63,187,0.05)] hover:text-[rgba(58,63,187,1)] font-medium h-11 rounded-lg text-sm"
+                                >
+                                    Sign in
                                 </Button>
                             </Link>
 
-                            <Link href="/signup">
-                                <Button variant="ghost" className="w-full bg-[linear-gradient(106.03deg,rgba(239,246,254,0.5)_0%,rgba(163,217,248,0.5)_238.47%)] text-[rgba(108,132,255,1)] hover:opacity-70 border font-medium border-[rgba(108,132,255,0.9)]">
-                                    Sign Up
+                            <Link href="https://cal.com/soham-mukherjee-8yzald/30min" target="_blank" rel="noopener noreferrer" onClick={() => setOpen(false)}>
+                                <Button className="w-full bg-[rgba(58,63,187,1)] hover:bg-[rgba(58,63,187,0.9)] text-white font-medium h-11 rounded-lg text-sm">
+                                    Request a demo
                                 </Button>
                             </Link>
                         </>
                     )}
                 </div>
-            </SheetContent></>
-    </Sheet>
+            </SheetContent>
+        </Sheet>
     )
 }
