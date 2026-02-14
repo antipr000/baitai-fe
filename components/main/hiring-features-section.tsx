@@ -39,10 +39,10 @@ export function HiringFeaturesSection() {
                                     height={56}
                                     className="w-8 h-8 md:w-9 md:h-9 object-contain"
                                 />
-                                <h3 className="lg:text-xl mt-2 md:text-base text-xs font-semibold text-[rgba(58,63,187,1)] mb-2 md:mb-3 leading-snug">
+                                <h3 className="lg:text-xl mt-2 md:text-base text-xs font-semibold text-[rgba(58,63,187,1)] mb-2 md:mb-3 ">
                                     {feature.title}
                                 </h3>
-                                <p className="md:text-sm mt-1 text-xs lg:text-base text-[rgba(11,31,59,0.6)] leading-tight tracking-tighter ">
+                                <p className="md:text-sm mt-1 text-xs lg:text-base text-[rgba(11,31,59,0.6)] leading-normal tracking-tighter ">
                                     {feature.description}
                                 </p>
                             </CardContent>
