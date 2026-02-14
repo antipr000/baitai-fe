@@ -1,55 +1,19 @@
 "use client";
 
-import Image from "next/image";
-import { useRef, useState } from "react";
+import LiteYouTubeEmbed from "react-lite-youtube-embed";
+import "react-lite-youtube-embed/dist/LiteYouTubeEmbed.css";
 
 export function HeroVideo() {
-    const videoRef = useRef<HTMLVideoElement>(null);
-    const [isPlaying, setIsPlaying] = useState(false);
-
-    const handlePlay = () => {
-        if (videoRef.current) {
-            videoRef.current.play();
-            setIsPlaying(true);
-        }
-    };
-
-    const handlePause = () => {
-        if (videoRef.current?.seeking) return;
-        setIsPlaying(false);
-    };
-
-    const handleEnded = () => {
-        setIsPlaying(false);
-    };
-
     return (
-        <div className="relative w-full cursor-pointer" onClick={!isPlaying ? handlePlay : undefined}>
-            {/* Video Element */}
-            <video
-                ref={videoRef}
-                src="https://storage.googleapis.com/bait-asset/demo.mkv"
-                playsInline
-                controls={isPlaying}
-                onPause={handlePause}
-                onEnded={handleEnded}
-                onPlay={() => setIsPlaying(true)}
-                className={`w-full h-auto object-cover rounded-lg ${isPlaying ? "block" : "hidden"}`}
+        <div className="w-full rounded-lg overflow-hidden [&_.lty-playbtn]:hidden">
+            <LiteYouTubeEmbed
+                id="WIzDkQ-oOFQ"
+                title="Bait AI Demo"
+                poster="maxresdefault"
+                webp
+                noCookie
+                params="rel=0&modestbranding=1"
             />
-
-            {/* Poster + Play Button Overlay (shown when not playing) */}
-            {!isPlaying && (
-                <div className="relative w-full">
-                    <Image
-                        src="/main/hero.webp"
-                        alt="hero"
-                        width={800}
-                        height={500}
-                        priority
-                        className="w-full h-auto object-cover rounded-lg"
-                    />
-                </div>
-            )}
         </div>
     );
 }
