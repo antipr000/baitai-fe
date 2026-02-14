@@ -34,18 +34,19 @@ export function HeroVideo() {
                 onPause={handlePause}
                 onEnded={handleEnded}
                 onPlay={() => setIsPlaying(true)}
+                style={{ backgroundColor: 'rgba(245,247,255,1)' }}
                 className="w-full h-auto object-cover rounded-lg"
             />
 
             {/* Poster Overlay (shown when not playing) */}
             {!isPlaying && (
-                <div className="absolute inset-0 w-full h-full">
+                <div className="absolute -inset-[5px]">
                     <Image
                         src="/main/hero3.png"
                         alt="hero"
                         fill
                         priority
-                        className="object-cover rounded-lg"
+                        className="object-cover rounded-xl"
                     />
                 </div>
             )}
