@@ -3,18 +3,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
-import { Separator } from "@/components/ui/separator";
-import { MobileNavBar } from "@/components/mobile-navbar";
 import { Footer } from "@/components/footer";
-import * as motion from "motion/react-client";
-import { getTokens } from "next-firebase-auth-edge";
-import { cookies } from "next/headers";
-import { clientConfig, serverConfig } from "@/lib/auth/config";
-import { AuthButtons } from "@/components/auth-buttons";
 import { HiringTeamsSection } from "@/components/main/hiring-teams-section";
 import { HiringFeaturesSection } from "@/components/main/hiring-features-section";
-import { hiringFeatures, jobSeekerSteps } from "@/app/home-data";
-import { WaitlistForm } from "@/components/waitlist-form";
+import { jobSeekerSteps } from "@/app/home-data";
 import Header from "@/components/header";
 import { JobSeekersSection } from "@/components/main/job-seekers-section";
 import { HeroVideo } from "@/components/main/hero-video";
@@ -27,7 +19,7 @@ export default async function Home() {
       <Header />
 
       {/* Hero Section */}
-      <main className="relative w-full px-17 lg:pt-32 lg:pb-25 md:py-15 py-6 ">
+      <main className="relative w-full px-7 md:px-17 lg:pt-32 lg:pb-25 md:py-15 py-6 ">
         {/* Content */}
         <div className="relative z-10 lg:max-w-7xl  md:max-w-4xl w-full mx-auto py-2">
           {/* Grid Overlay */}
@@ -35,6 +27,7 @@ export default async function Home() {
             className="
       pointer-events-none
       absolute inset-0
+      
       bg-[linear-gradient(to_right,rgba(0,0,0,0.05)_1px,transparent_1px),linear-gradient(to_bottom,rgba(0,0,0,0.05)_1px,transparent_1px)]
       bg-size-[80px_80px]
       mask-[radial-gradient(circle_at_center,black_60%,transparent_100%)]
@@ -45,7 +38,7 @@ export default async function Home() {
             {/* Left Column */}
             <div className="text-center lg:text-left flex flex-col items-center lg:items-start w-full">
               {/* AI Badge */}
-              <Badge className="bg-[rgba(196,240,0,1)] text-[rgba(58,63,187,1)] px-7 py-3 mb-5 md:text-sm text-xs lg:text-base font-medium border-none rounded-full">
+              <Badge className="bg-[rgba(196,240,0,1)] z-30 text-[rgba(58,63,187,1)] px-7 py-3 mb-5 md:text-sm text-xs lg:text-base font-medium border-none rounded-full">
                 <Image
                   src="/main/lightning2.svg"
                   alt="AI Badge"
@@ -125,9 +118,8 @@ export default async function Home() {
               </p>
             </div>
 
-            <div className="w-full flex justify-center lg:block">
+
               <HeroVideo />
-            </div>
           </div>
         </div>
       </main>

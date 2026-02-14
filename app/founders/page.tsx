@@ -10,8 +10,9 @@ const founders = [
         image: "/founders/pic1.png",
         bio: "A UI/UX designer, with 4+ years of experience across design, program management, and education. At Bait AI, she wears multiple hats— driving product, growth, partnerships, and strategy ensuring our platform redefines how hiring works.",
         socials: {
-            linkedin: "#",
-            twitter: "#"
+
+             linkedin: "https://www.linkedin.com/in/debarati-roy-75359b1b3/",
+            twitter: "https://x.com/DebaratiRo39396"
         }
     },
     {
@@ -20,8 +21,8 @@ const founders = [
         image: "/founders/pic2.jpg",
         bio: "Former tech lead at Mercor, Soham has spent over 5+ years building scalable platforms. After witnessing firsthand how inefficient traditional hiring can be, he set out to explore a fairer, AI-driven approach to recruitment.",
         socials: {
-            linkedin: "#",
-            twitter: "#"
+            linkedin: "https://www.linkedin.com/in/antipr000/",
+            twitter: "https://x.com/sohammu25344956"
         }
     }
 ]

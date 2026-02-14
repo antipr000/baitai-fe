@@ -29,23 +29,21 @@ export function JobSeekersSection() {
                 </div>
 
                 {/* Features Grid */}
-                <div className="xl:max-w-7xl lg:max-w-5xl md:max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-2 xl:grid-cols-4 gap-3 md:gap-10 lg:gap-13 ">
+                <div className="xl:max-w-7xl lg:max-w-5xl md:max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-2 xl:grid-cols-4 gap-2 md:gap-10 lg:gap-13 ">
                     {jobSeekerFeatures.map((feature, index) => (
-                        <Card key={index} className="bg-white border border-[rgba(58,63,187,0.5)] p-2  shadow-none rounded-2xl w-full h-full ">
-                            <CardContent className="flex flex-col items-center justify-center p-0 md:p-5 lg:p-7 text-center h-full">
-                                <div className="mb-2 md:mb-6 h-14 flex items-center justify-center">
-                                    <Image
-                                        src={feature.icon}
-                                        alt={feature.title}
-                                        width={56}
-                                        height={56}
-                                        className="w-8 h-8 md:w-9 md:h-9 object-contain"
-                                    />
-                                </div>
-                                <h3 className="lg:text-xl md:text-base text-sm font-semibold text-[rgba(58,63,187,1)] mb-2 md:mb-3 leading-snug">
+                        <Card key={index} className="bg-white border border-[rgba(58,63,187,0.5)] p-0 lg:py-17 md:py-9  py-3  px-[2px] lg:px-3  gap-0 shadow-none rounded-lg w-full h-full ">
+                            <CardContent className="flex flex-col items-center justify-center p-0 m-0 text-center h-full">
+                                <Image
+                                    src={feature.icon}
+                                    alt={feature.title}
+                                    width={56}
+                                    height={56}
+                                    className="w-8 h-8 md:w-9 md:h-9 object-contain"
+                                />
+                                <h3 className="lg:text-xl mt-2 md:text-base text-xs font-semibold text-[rgba(58,63,187,1)] mb-2 md:mb-3 leading-snug">
                                     {feature.title}
                                 </h3>
-                                <p className="md:text-sm text-xs lg:text-base text-[rgba(11,31,59,0.6)] leading-relaxed lg:tracking-tighter ">
+                                <p className="md:text-sm mt-1 text-xs lg:text-base text-[rgba(11,31,59,0.6)] leading-tight tracking-tighter ">
                                     {feature.description}
                                 </p>
                             </CardContent>

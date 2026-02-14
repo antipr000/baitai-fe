@@ -132,7 +132,7 @@ export const Footer = () => {
                 <Link href="/founders" className="text-[rgba(17,24,39,0.6)] hover:text-primary transition-colors">
                   Founders
                 </Link>
-                <Link href="#" className="text-[rgba(17,24,39,0.6)] hover:text-primary transition-colors">
+                {/* <Link href="#" className="text-[rgba(17,24,39,0.6)] hover:text-primary transition-colors">
                   Careers
                 </Link>
                 <Link href="mailto:soham@baitai.club"
@@ -140,7 +140,7 @@ export const Footer = () => {
                 rel="noopener noreferrer"
                 className="text-[rgba(17,24,39,0.6)] hover:text-primary transition-colors">
                   Contact
-                </Link>
+                </Link> */}
               </div>
             </div>
 

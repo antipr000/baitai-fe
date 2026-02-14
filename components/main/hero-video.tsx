@@ -15,6 +15,7 @@ export function HeroVideo() {
     };
 
     const handlePause = () => {
+        if (videoRef.current?.seeking) return;
         setIsPlaying(false);
     };
 
@@ -40,7 +41,7 @@ export function HeroVideo() {
             {!isPlaying && (
                 <div className="relative w-full">
                     <Image
-                        src="/main/hero2.png"
+                        src="/main/hero3.png"
                         alt="hero"
                         width={800}
                         height={500}
