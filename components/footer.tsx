@@ -85,7 +85,7 @@ export const Footer = () => {
                   className="lg:size-6 md:size-5 size-4"
                 />
               </Link>
-              <Link
+              {/* <Link
                 href="https://facebook.com"
                 target="_blank"
                 rel="noopener noreferrer"
@@ -98,7 +98,7 @@ export const Footer = () => {
                   height={30}
                   className="lg:size-6 md:size-5 size-4"
                 />
-              </Link>
+              </Link> */}
             </div>
 
             <div className="lg:text-base md:text-sm text-xs text-black mt-2">
@@ -129,13 +129,16 @@ export const Footer = () => {
                 <Link href="/about" className="text-[rgba(17,24,39,0.6)] hover:text-primary transition-colors">
                   About
                 </Link>
-                <Link href="#" className="text-[rgba(17,24,39,0.6)] hover:text-primary transition-colors">
+                <Link href="/founders" className="text-[rgba(17,24,39,0.6)] hover:text-primary transition-colors">
                   Founders
                 </Link>
                 <Link href="#" className="text-[rgba(17,24,39,0.6)] hover:text-primary transition-colors">
                   Careers
                 </Link>
-                <Link href="#" className="text-[rgba(17,24,39,0.6)] hover:text-primary transition-colors">
+                <Link href="mailto:soham@baitai.club"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[rgba(17,24,39,0.6)] hover:text-primary transition-colors">
                   Contact
                 </Link>
               </div>
