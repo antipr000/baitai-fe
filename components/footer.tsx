@@ -6,7 +6,7 @@ export const Footer = () => {
   // TODO: Add links
   return (
     <footer className="  mx-auto py-3 md:py-10 lg:py-20 md:mb-20 lg:mb-62 md:mt-20">
-      <div className="px-5 mx-auto md:px-16 lg:px-24">
+      <div className="px-4 mx-auto md:px-16 lg:px-24">
         <div className="flex flex-col md:flex-row gap-10 justify-between">
 
           {/* Left Column: Brand & Social */}
@@ -101,16 +101,16 @@ export const Footer = () => {
               </Link> */}
             </div>
 
-            <div className="lg:text-base md:text-sm text-xs text-black mt-2">
+            <div className="lg:text-base md:text-sm text-xs text-black w mt-2">
               Copyright © 2026 Bait AI | All Rights Reserved
             </div>
           </div>
 
           {/* Right Columns: Links */}
-          <div className="grid md:text-base text-xs grid-cols-3 gap-2 md:gap-10 lg:gap-15 justify-center px-10">
+          <div className="grid md:text-base text-xs mt-1 md:mt-0 grid-cols-3 gap-2 md:gap-10 lg:gap-15 justify-center px-10">
 
             {/* Product */}
-            <div className=" flex flex-col gap-4 ">
+            <div className=" flex flex-col items-center  gap-4 ">
               <h3 className="font-semibold text-[rgba(17,24,39,0.9)]">Product</h3>
               <div className="flex flex-col gap-3">
                 <Link href="#" className=" text-[rgba(17,24,39,0.6)] hover:text-primary transition-colors">
