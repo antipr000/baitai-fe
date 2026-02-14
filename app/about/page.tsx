@@ -69,7 +69,7 @@ export default async function AboutPage() {
 
                 <Card className="flex flex-col items-center p-6 bg-white pb-10">
                     < Image
-                        src="/about/hero.png"
+                        src="/about/hero.webp"
                         alt="AI Interview Illustration"
                         width={800}
                         height={800}

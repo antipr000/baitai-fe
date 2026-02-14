@@ -41,7 +41,7 @@ export function HeroVideo() {
             {!isPlaying && (
                 <div className="relative w-full">
                     <Image
-                        src="/main/hero3.png"
+                        src="/main/hero.webp"
                         alt="hero"
                         width={800}
                         height={500}
