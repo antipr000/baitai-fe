@@ -21,6 +21,12 @@ interface CodeEditorState {
     /** When true, the editor was opened by the backend via LOAD_ARTIFACT.
      *  User cannot close it with the toggle button -- only via "Submit". */
     isBackendControlled: boolean
+    /**
+     * When set, the frontend received LOAD_ARTIFACT during SPEAKING state
+     * and needs to send ARTIFACT_OPENED once the state transitions to LISTENING.
+     * Stores the artifact_type so the ack message can include it.
+     */
+    pendingArtifactOpen: 'code' | 'whiteboard' | null
 }
 
 interface CodeEditorActions {
@@ -34,6 +40,8 @@ interface CodeEditorActions {
     openFromBackend: (artifactId: string, artifactType: 'code' | 'whiteboard') => void
     /** Close the editor from backend (called from UNLOAD_ARTIFACT handler) */
     closeFromBackend: () => void
+    /** Clear the pending artifact open flag (called after ARTIFACT_OPENED is sent) */
+    clearPendingArtifactOpen: () => void
     reset: () => void
 }
 
@@ -45,6 +53,7 @@ const initialState: CodeEditorState = {
     language: 'javascript',
     artifactId: null,
     isBackendControlled: false,
+    pendingArtifactOpen: null,
 }
 
 export const useCodeEditorStore = create<CodeEditorStore>((set) => ({
@@ -57,12 +66,13 @@ export const useCodeEditorStore = create<CodeEditorStore>((set) => ({
     setArtifactId: (artifactId) => set({ artifactId }),
     setIsBackendControlled: (isBackendControlled) => set({ isBackendControlled }),
 
-    openFromBackend: (artifactId, _artifactType) =>
+    openFromBackend: (artifactId, artifactType) =>
         set({
             isOpen: true,
             artifactId,
             isBackendControlled: true,
             content: '', // Start fresh for the new artifact
+            pendingArtifactOpen: artifactType, // Will be sent as ARTIFACT_OPENED when state reaches LISTENING
         }),
 
     closeFromBackend: () =>
@@ -71,7 +81,10 @@ export const useCodeEditorStore = create<CodeEditorStore>((set) => ({
             artifactId: null,
             isBackendControlled: false,
             content: '',
+            pendingArtifactOpen: null,
         }),
+
+    clearPendingArtifactOpen: () => set({ pendingArtifactOpen: null }),
 
     reset: () => set(initialState),
 }))

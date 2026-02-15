@@ -43,7 +43,6 @@ import {
   finalizeAllMedia,
   applyListeningState,
   checkAudioPlaybackComplete,
-  sendArtifactOpenedMessage,
 } from '../store/interviewActions'
 import { useCodeEditorStore } from '../store/codeEditorStore'
 
@@ -360,10 +359,12 @@ export function useInterviewWebSocket(
 
   function handleLoadArtifact(message: LoadArtifactPayload) {
     console.log(`[WebSocket] Load artifact: ${message.artifact_type} (id: ${message.artifact_id})`)
-    // Open the code editor in backend-controlled mode
+    // Open the code editor in backend-controlled mode.
+    // Do NOT send ARTIFACT_OPENED yet -- the backend is likely still in SPEAKING state
+    // (LOAD_ARTIFACT arrives during the response stream). The ack will be sent
+    // from applyListeningState() once the state transitions to LISTENING
+    // (after speech_completed is sent and processed).
     useCodeEditorStore.getState().openFromBackend(message.artifact_id, message.artifact_type)
-    // Acknowledge to backend that the artifact panel is open
-    sendArtifactOpenedMessage(message.artifact_type)
   }
 
   function handleUnloadArtifact() {
