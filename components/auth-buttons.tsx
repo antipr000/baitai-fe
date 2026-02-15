@@ -53,9 +53,9 @@ export function AuthButtons({ isAuthenticated }: AuthButtonsProps) {
                             Login
                         </Button>
                     </Link>
-                    <Link href="/signup">
+                    <Link href="https://cal.com/soham-mukherjee-8yzald/30min" target="_blank" rel="noopener noreferrer">
                         <Button className="flex rounded-full items-center overflow-hidden border border-[rgba(58,63,187,1)] lg:px-10 md:px-6 px-6 py-2 lg:text-base text-sm bg-[rgba(58,63,187,1)] hover:bg-white hover:text-[rgba(58,63,187,1)] font-medium transition-colors">
-                            Sign up
+                            Request a Demo
                         </Button>
                     </Link>
                 </>
