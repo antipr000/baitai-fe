@@ -387,6 +387,18 @@ export class WebSocketManager {
     })
   }
 
+  /**
+   * Send periodic artifact content update (syncs editor content to backend)
+   * Backend persists the content and uses it in LLM decision context
+   */
+  sendArtifactContentUpdate(content: string, language?: string): boolean {
+    return this.send({
+      type: InboundEvent.ARTIFACT_CONTENT_UPDATE,
+      content,
+      ...(language && { language }),
+    })
+  }
+
   // ============================================
   // Send Queue
   // ============================================

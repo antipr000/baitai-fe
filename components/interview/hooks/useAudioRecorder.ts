@@ -127,10 +127,16 @@ export function useAudioRecorder(
           return
         }
 
-        // If mic is off or state is temporarily not 'listening', keep the loop
+        // If mic is off or state doesn't support audio capture, keep the loop
         // alive but skip analysis. This prevents the loop from dying permanently
         // on transient state changes (e.g., brief state sync flickers).
-        if (!currentState.isMicOn || currentState.conversationState !== 'listening') {
+        // Both 'listening' and 'artifact' states support audio capture with
+        // silence detection. In 'artifact' state, the user is coding but can
+        // speak to ask questions -- speech-then-silence triggers end_of_turn.
+        const supportsAudioCapture =
+          currentState.conversationState === 'listening' ||
+          currentState.conversationState === 'artifact'
+        if (!currentState.isMicOn || !supportsAudioCapture) {
           silenceRAFRef.current = requestAnimationFrame(checkSilence)
           return
         }
