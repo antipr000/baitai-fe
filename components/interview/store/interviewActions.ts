@@ -13,6 +13,7 @@
  */
 
 import { useInterviewStore } from './interviewStore'
+import { useCodeEditorStore } from './codeEditorStore'
 import type { WebSocketManager } from '../manager/WebSocketManager'
 import type { ConversationState } from './types'
 
@@ -236,6 +237,20 @@ export async function applyListeningState() {
   store.setHasHeardSpeech(false)
   store.setHasSentAudioSegments(false)
   store.clearTranscript()
+
+  // Check if there's a pending ARTIFACT_OPENED to send.
+  // This happens when LOAD_ARTIFACT arrived during SPEAKING state --
+  // the editor was opened but the ack was deferred until LISTENING.
+  const editorState = useCodeEditorStore.getState()
+  if (editorState.pendingArtifactOpen) {
+    const artifactType = editorState.pendingArtifactOpen
+    editorState.clearPendingArtifactOpen()
+    console.log(`[State] Sending deferred artifact_opened (${artifactType})`)
+    sendArtifactOpenedMessage(artifactType)
+    // Backend will transition LISTENING -> ARTIFACT and send STATE_CHANGED(artifact).
+    // applyArtifactState() will handle starting recording with silence detection.
+    return
+  }
 
   // Start recording with silence detection
   if (store.connectionStatus === 'connected' && store.isMicOn && !store.hasNavigatedAway) {
