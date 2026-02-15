@@ -21,6 +21,8 @@ export type {
   ResponseAudioDonePayload,
   InterviewEndedPayload,
   PongPayload,
+  LoadArtifactPayload,
+  UnloadArtifactPayload,
   OutboundMessage,
   ArtifactOpenedPayload,
   ArtifactSubmittedPayload,
@@ -96,4 +98,6 @@ export {
   useIsCodeEditorOpen,
   useCodeEditorContent,
   useCodeEditorLanguage,
+  useIsBackendControlled,
+  useArtifactId,
 } from './codeEditorStore'

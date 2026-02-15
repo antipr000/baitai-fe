@@ -44,7 +44,6 @@ import {
   useRecordingState,
   useIsAISpeaking,
   useIsAudioPlaying,
-  useTranscript,
 } from './store'
 
 // Hooks
@@ -120,13 +119,13 @@ export default function ActiveInterview({
   } = useRecordingState()
 
   const messages = useMessages()
-  const transcript = useTranscript()
   const isConnected = connectionStatus === 'connected'
 
   // Code editor state
   const isCodeEditorOpen = useCodeEditorStore((s) => s.isOpen)
   const codeEditorContent = useCodeEditorStore((s) => s.content)
   const codeEditorLanguage = useCodeEditorStore((s) => s.language)
+  const isBackendControlled = useCodeEditorStore((s) => s.isBackendControlled)
 
   // -------------------------------------------------------------------------
   // UI Refs only
@@ -416,14 +415,17 @@ export default function ActiveInterview({
   }
 
   const onCodeEditorToggle = () => {
+    // When backend-controlled, user cannot toggle the editor closed -- only via Submit.
+    // The backend sends UNLOAD_ARTIFACT when the artifact section is over.
+    if (isBackendControlled) return
     useCodeEditorStore.getState().toggleEditor()
-    // Artifact events (open/close) are handled by useArtifactEvents hook
   }
 
   const onArtifactSubmit = () => {
     submitArtifact(codeEditorContent, codeEditorLanguage)
-    // Optionally close the editor after submission
-    useCodeEditorStore.getState().setIsOpen(false)
+    // Do NOT close the editor here. The backend controls the lifecycle:
+    // - It may keep the editor open for the next question in the same artifact section
+    // - It will send UNLOAD_ARTIFACT when transitioning to a non-artifact section
   }
 
   const onCodeEditorChange = (val: string) => {
@@ -487,13 +489,6 @@ export default function ActiveInterview({
                     <div>{message.text}</div>
                   </div>
                 ))
-              )}
-
-              {/* Live transcript (what the user is currently saying) */}
-              {transcript && conversationState === 'listening' && (
-                <div className="p-3 rounded-lg bg-gray-700/50 text-gray-300 text-sm italic">
-                  {transcript}
-                </div>
               )}
 
               {/* Processing indicator */}
@@ -603,14 +598,16 @@ export default function ActiveInterview({
           <ScreenShare className="w-6 h-6 text-white" />
         </Button>
 
-        {/* Code Editor Toggle */}
+        {/* Code Editor Toggle -- disabled when backend controls the editor lifecycle */}
         <Button
           onClick={onCodeEditorToggle}
+          disabled={isBackendControlled}
           className={cn(
             'rounded-full w-14 h-14 flex items-center justify-center transition-all',
-            isCodeEditorOpen ? 'bg-purple-600 hover:bg-purple-700' : 'bg-gray-700 hover:bg-gray-600'
+            isCodeEditorOpen ? 'bg-purple-600 hover:bg-purple-700' : 'bg-gray-700 hover:bg-gray-600',
+            isBackendControlled && 'opacity-50 cursor-not-allowed'
           )}
-          title="Code Editor"
+          title={isBackendControlled ? 'Code Editor (controlled by interview)' : 'Code Editor'}
         >
           <Code2 className="w-6 h-6 text-white" />
         </Button>
