@@ -591,20 +591,7 @@ export function useAudioRecorder(
     // Successfully sent end_of_turn. The backend will respond with
     // STATE_CHANGED(thinking). Do NOT transition state locally.
     console.log('[AudioRecorder] end_of_turn sent, waiting for backend state change')
-
-    // In artifact mode, restart recording with the speech onset detector
-    // so the user can continue coding and speak again when needed.
-    // The backend will go ARTIFACT -> THINKING -> (SPEAKING -> ARTIFACT | wait -> ARTIFACT).
-    // Note: By now the backend may have already transitioned to THINKING via STATE_CHANGED,
-    // in which case applyThinkingState() already ran and we skip this.
-    const currentConvState = store.getState().conversationState
-    if (wasInArtifactState && currentConvState === 'artifact') {
-      store.getState().setHasHeardSpeech(false)
-      store.getState().setHasSentAudioSegments(false)
-      await startRecordingInternal(false) // recording only, no silence detection
-      setupSpeechOnsetDetector()          // lightweight speech watcher
-    }
-  }, [stopSilenceDetection, startRecordingInternal, setupSpeechOnsetDetector])
+  }, [stopSilenceDetection, startRecordingInternal])
 
   // ============================================
   // Register Controls with Actions Module
