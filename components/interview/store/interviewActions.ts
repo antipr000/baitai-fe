@@ -31,6 +31,9 @@ let audioRecorderControls: {
   sendEndOfTurn: () => Promise<void>
   enableSilenceDetection: () => void
   stopSilenceDetection: () => void
+  /** Lightweight speech onset detector for artifact mode.
+   *  Watches for speech, then activates full silence detection. */
+  enableSpeechOnsetDetector: () => void
 } | null = null
 let audioPlayerControls: {
   enqueue: (data: ArrayBuffer) => void
@@ -143,6 +146,15 @@ export function enableSilenceDetection() {
 
 export function stopSilenceDetection() {
   audioRecorderControls?.stopSilenceDetection()
+}
+
+/**
+ * Enable the speech onset detector (artifact mode only).
+ * Lightweight rAF loop that watches for speech onset, then
+ * activates full silence detection when the user starts speaking.
+ */
+export function enableSpeechOnsetDetector() {
+  audioRecorderControls?.enableSpeechOnsetDetector()
 }
 
 // ============================================
@@ -317,13 +329,17 @@ export async function applyArtifactState() {
   const store = useInterviewStore.getState()
   console.log('[State] Backend → artifact')
 
-  // Reset speech flag so the silence timer starts clean.
-  // User must speak first before silence can trigger end_of_turn.
+  // Reset speech/audio flags for a clean start.
   store.setHasHeardSpeech(false)
+  store.setHasSentAudioSegments(false)
 
-  // Start recording with silence detection
+  // Start recording WITHOUT silence detection.
+  // The speech onset detector will activate full silence detection
+  // only when the user starts speaking. This prevents typing noise
+  // from triggering false end_of_turn events while coding.
   if (store.connectionStatus === 'connected' && store.isMicOn && !store.hasNavigatedAway) {
-    await startRecording(true)
+    await startRecording(false)   // recording only, no silence detection
+    enableSpeechOnsetDetector()   // lightweight speech watcher
   }
 }
 

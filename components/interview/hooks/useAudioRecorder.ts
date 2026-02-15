@@ -87,7 +87,7 @@ export function useAudioRecorder(
 
   const setupSilenceDetection = useCallback(() => {
     const state = store.getState()
-    if (state.conversationState !== 'listening') return
+    if (state.conversationState !== 'listening' && state.conversationState !== 'artifact') return
 
     // NOTE: hasHeardSpeech is NOT reset here. It is reset in applyListeningState()
     // at the start of each new turn. This prevents periodic flushAudio restarts
@@ -204,6 +204,110 @@ export function useAudioRecorder(
   }, [config, micStream, onSpeechDetected, onError])
 
   // ============================================
+  // Speech Onset Detector (Artifact Mode Only)
+  // ============================================
+  //
+  // Lightweight rAF loop that ONLY watches for speech onset.
+  // No silence timer, no end_of_turn triggering.
+  // When speech is detected, it stops itself and activates
+  // full silence detection (setupSilenceDetection).
+  //
+  // Used in artifact state where silence is the default (user is typing)
+  // and we only want to engage silence detection when the user speaks.
+
+  const setupSpeechOnsetDetector = useCallback(() => {
+    const state = store.getState()
+    if (state.conversationState !== 'artifact') return
+
+    noiseFloorRmsRef.current = config.minNoiseFloor
+
+    const stream = micStream
+    const hasLiveTrack = stream?.getAudioTracks().some((t) => t.readyState === 'live')
+
+    if (!stream || !hasLiveTrack || !state.isMicOn) {
+      console.log('[AudioRecorder] Skipping speech onset detector - no valid stream')
+      return
+    }
+
+    try {
+      if (!audioContextRef.current || audioContextRef.current.state === 'closed') {
+        audioContextRef.current = new AudioContext()
+      }
+      if (audioContextRef.current.state === 'suspended') {
+        audioContextRef.current.resume().catch(console.error)
+      }
+
+      const source = audioContextRef.current.createMediaStreamSource(stream)
+      const analyser = audioContextRef.current.createAnalyser()
+      analyser.fftSize = 2048
+      source.connect(analyser)
+      analyserRef.current = analyser
+
+      const timeDomain = new Uint8Array(analyser.fftSize)
+
+      const checkOnset = () => {
+        const currentState = store.getState()
+
+        // Stop when analyser is nulled (via stopSilenceDetection)
+        if (!analyserRef.current) {
+          return
+        }
+
+        // Only run in artifact state with mic on
+        if (!currentState.isMicOn || currentState.conversationState !== 'artifact') {
+          silenceRAFRef.current = requestAnimationFrame(checkOnset)
+          return
+        }
+
+        analyserRef.current.getByteTimeDomainData(timeDomain)
+        let sumSq = 0
+        for (let i = 0; i < timeDomain.length; i++) {
+          const centered = (timeDomain[i] - 128) / 128
+          sumSq += centered * centered
+        }
+        const rms = Math.sqrt(sumSq / timeDomain.length)
+
+        const prevFloor = noiseFloorRmsRef.current
+        const speechThreshold = Math.max(
+          config.minNoiseFloor + config.speechMargin,
+          prevFloor + config.speechMargin
+        )
+        const isSpeech = rms > speechThreshold
+
+        if (!isSpeech) {
+          // Update noise floor while no speech
+          noiseFloorRmsRef.current = Math.max(
+            config.minNoiseFloor,
+            prevFloor * (1 - config.noiseFloorAlpha) + rms * config.noiseFloorAlpha
+          )
+          silenceRAFRef.current = requestAnimationFrame(checkOnset)
+        } else {
+          // Speech detected! Set the flag and switch to full silence detection.
+          store.getState().setHasHeardSpeech(true)
+          console.log('[AudioRecorder] Speech onset detected in artifact mode → activating silence detection')
+          onSpeechDetected?.()
+
+          // Stop this onset loop (null analyser to break it, then set up full detection)
+          analyserRef.current = null
+          if (silenceRAFRef.current !== null) {
+            cancelAnimationFrame(silenceRAFRef.current)
+            silenceRAFRef.current = null
+          }
+
+          // Activate full silence detection which will track silence-after-speech
+          setupSilenceDetection()
+        }
+      }
+
+      checkOnset()
+      console.log('[AudioRecorder] Speech onset detector active (artifact mode)')
+    } catch (error) {
+      console.error('[AudioRecorder] Error setting up speech onset detector:', error)
+      onError?.(error instanceof Error ? error : new Error(String(error)))
+    }
+  }, [config, micStream, setupSilenceDetection, onSpeechDetected, onError])
+
+  // ============================================
   // Audio Flushing
   // ============================================
 
@@ -244,10 +348,12 @@ export function useAudioRecorder(
 
     // Get fresh state to determine if we should send and restart
     const currentState = store.getState()
-    const isListening = currentState.conversationState === 'listening'
+    const canSendAudio =
+      currentState.conversationState === 'listening' ||
+      currentState.conversationState === 'artifact'
 
-    // Only send audio to backend in 'listening' state (user speech)
-    if (isListening && chunksToProcess.length > 0) {
+    // Send audio to backend in 'listening' or 'artifact' states
+    if (canSendAudio && chunksToProcess.length > 0) {
       try {
         const pcmBuffer = await convertWebMToRawPCM(chunksToProcess)
         store.getState().setHasSentAudioSegments(true)
@@ -256,16 +362,19 @@ export function useAudioRecorder(
         console.error('[AudioRecorder] Error converting audio:', error)
         onError?.(error instanceof Error ? error : new Error(String(error)))
       }
-    } else if (!isListening) {
+    } else if (!canSendAudio) {
       console.log('[AudioRecorder] Discarding audio chunks (AI is speaking/thinking)')
     }
 
-    // Restart recorder only if still in listening state
+    // Restart recorder if still in a state that captures audio
     const stateAfterSend = store.getState()
     if (stateAfterSend.connectionStatus === 'connected' &&
       !stateAfterSend.hasNavigatedAway &&
-      stateAfterSend.conversationState === 'listening') {
-      await startRecordingInternal(true)  // With silence detection for user turn
+      (stateAfterSend.conversationState === 'listening' || stateAfterSend.conversationState === 'artifact')) {
+      // In listening mode: restart with silence detection
+      // In artifact mode: restart without (speech onset detector handles it separately)
+      const enableSilence = stateAfterSend.conversationState === 'listening'
+      await startRecordingInternal(enableSilence)
     }
   }, [onError])
 
@@ -398,11 +507,13 @@ export function useAudioRecorder(
   const sendEndOfTurnInternal = useCallback(async (): Promise<void> => {
     const state = store.getState()
 
-    // Guard: only send when connected, listening, and haven't already sent
+    // Guard: only send when connected and in a state that accepts end_of_turn
     if (state.connectionStatus !== 'connected' ||
-      state.conversationState !== 'listening') {
+      (state.conversationState !== 'listening' && state.conversationState !== 'artifact')) {
       return
     }
+
+    const wasInArtifactState = state.conversationState === 'artifact'
 
     const isRecording = mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive'
     const hasAudioChunks = audioChunksRef.current.length > 0
@@ -479,9 +590,21 @@ export function useAudioRecorder(
 
     // Successfully sent end_of_turn. The backend will respond with
     // STATE_CHANGED(thinking). Do NOT transition state locally.
-    // Do NOT restart recording here -- AI is about to speak.
     console.log('[AudioRecorder] end_of_turn sent, waiting for backend state change')
-  }, [stopSilenceDetection, startRecordingInternal])
+
+    // In artifact mode, restart recording with the speech onset detector
+    // so the user can continue coding and speak again when needed.
+    // The backend will go ARTIFACT -> THINKING -> (SPEAKING -> ARTIFACT | wait -> ARTIFACT).
+    // Note: By now the backend may have already transitioned to THINKING via STATE_CHANGED,
+    // in which case applyThinkingState() already ran and we skip this.
+    const currentConvState = store.getState().conversationState
+    if (wasInArtifactState && currentConvState === 'artifact') {
+      store.getState().setHasHeardSpeech(false)
+      store.getState().setHasSentAudioSegments(false)
+      await startRecordingInternal(false) // recording only, no silence detection
+      setupSpeechOnsetDetector()          // lightweight speech watcher
+    }
+  }, [stopSilenceDetection, startRecordingInternal, setupSpeechOnsetDetector])
 
   // ============================================
   // Register Controls with Actions Module
@@ -495,12 +618,13 @@ export function useAudioRecorder(
       sendEndOfTurn: sendEndOfTurnInternal,
       enableSilenceDetection: setupSilenceDetection,
       stopSilenceDetection: stopSilenceDetection,
+      enableSpeechOnsetDetector: setupSpeechOnsetDetector,
     })
 
     return () => {
       registerAudioRecorderControls(null)
     }
-  }, [startRecording, stopRecording, stopAndClearBuffer, flushAudio, sendEndOfTurnInternal, setupSilenceDetection, stopSilenceDetection])
+  }, [startRecording, stopRecording, stopAndClearBuffer, flushAudio, sendEndOfTurnInternal, setupSilenceDetection, stopSilenceDetection, setupSpeechOnsetDetector])
 
   // ============================================
   // Cleanup
