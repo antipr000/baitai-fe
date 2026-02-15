@@ -101,6 +101,13 @@ export enum InboundEvent {
    * Triggers state transition: ARTIFACT -> THINKING.
    */
   ARTIFACT_SUBMITTED = 'artifact_submitted',
+
+  /**
+   * Periodic sync of the current artifact content to the backend.
+   * Sent every ~5 seconds while the editor is open and state is ARTIFACT.
+   * Backend persists the content and uses it in LLM decision context.
+   */
+  ARTIFACT_CONTENT_UPDATE = 'artifact_content_update',
 }
 
 // ============================================
@@ -166,6 +173,19 @@ export enum OutboundEvent {
    * The interview has concluded. Terminal event -- no further events will follow.
    */
   INTERVIEW_ENDED = 'interview_ended',
+
+  /**
+   * Backend tells frontend to open the artifact panel (code editor, whiteboard).
+   * Sent when entering an artifact section. Frontend should open the editor
+   * and acknowledge with ARTIFACT_OPENED.
+   */
+  LOAD_ARTIFACT = 'load_artifact',
+
+  /**
+   * Backend tells frontend to close the artifact panel.
+   * Sent when leaving an artifact section (moving to a non-artifact section).
+   */
+  UNLOAD_ARTIFACT = 'unload_artifact',
 }
 
 // ============================================
@@ -234,6 +254,16 @@ export interface PongPayload {
   type: OutboundEvent.PONG
 }
 
+export interface LoadArtifactPayload {
+  type: OutboundEvent.LOAD_ARTIFACT
+  artifact_type: 'code' | 'whiteboard'
+  artifact_id: string
+}
+
+export interface UnloadArtifactPayload {
+  type: OutboundEvent.UNLOAD_ARTIFACT
+}
+
 /**
  * Discriminated union of all possible outbound (backend -> frontend) messages.
  * Use this as the type for incoming WebSocket JSON messages.
@@ -250,6 +280,8 @@ export type OutboundMessage =
   | ResponseAudioDonePayload
   | InterviewEndedPayload
   | PongPayload
+  | LoadArtifactPayload
+  | UnloadArtifactPayload
 
 // ============================================
 // Inbound Event Payloads

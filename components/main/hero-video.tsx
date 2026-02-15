@@ -7,7 +7,7 @@ export function HeroVideo() {
     return (
         <div className="w-full rounded-lg overflow-hidden [&_.lty-playbtn]:hidden">
             <LiteYouTubeEmbed
-                id="WIzDkQ-oOFQ"
+                id="po7Kj0HBKrg"
                 title="Bait AI Demo"
                 poster="maxresdefault"
                 webp

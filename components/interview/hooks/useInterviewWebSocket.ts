@@ -28,6 +28,8 @@ import type {
   ResponseAudioChunkPayload,
   ResponseAudioDonePayload,
   InterviewEndedPayload,
+  LoadArtifactPayload,
+  UnloadArtifactPayload,
 } from '../store/events'
 import type { ConversationState } from '../store/types'
 import {
@@ -41,7 +43,9 @@ import {
   finalizeAllMedia,
   applyListeningState,
   checkAudioPlaybackComplete,
+  sendArtifactOpenedMessage,
 } from '../store/interviewActions'
+import { useCodeEditorStore } from '../store/codeEditorStore'
 
 // ============================================
 // Types
@@ -354,6 +358,20 @@ export function useInterviewWebSocket(
     // No-op: keep-alive response
   }
 
+  function handleLoadArtifact(message: LoadArtifactPayload) {
+    console.log(`[WebSocket] Load artifact: ${message.artifact_type} (id: ${message.artifact_id})`)
+    // Open the code editor in backend-controlled mode
+    useCodeEditorStore.getState().openFromBackend(message.artifact_id, message.artifact_type)
+    // Acknowledge to backend that the artifact panel is open
+    sendArtifactOpenedMessage(message.artifact_type)
+  }
+
+  function handleUnloadArtifact() {
+    console.log('[WebSocket] Unload artifact')
+    // Close the code editor and clear artifact state
+    useCodeEditorStore.getState().closeFromBackend()
+  }
+
   // ============================================
   // Handler Dispatch Map
   // ============================================
@@ -374,6 +392,8 @@ export function useInterviewWebSocket(
     [OutboundEvent.RESPONSE_AUDIO_DONE]: (m) => handleResponseAudioDone(m as ResponseAudioDonePayload),
     [OutboundEvent.INTERVIEW_ENDED]: (m) => handleInterviewEnded(m as InterviewEndedPayload),
     [OutboundEvent.PONG]: () => handlePong(),
+    [OutboundEvent.LOAD_ARTIFACT]: (m) => handleLoadArtifact(m as LoadArtifactPayload),
+    [OutboundEvent.UNLOAD_ARTIFACT]: () => handleUnloadArtifact(),
   }
 
   // ============================================

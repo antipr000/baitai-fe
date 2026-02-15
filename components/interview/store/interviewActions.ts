@@ -100,6 +100,10 @@ export function sendArtifactSubmittedMessage(content: string, language?: string)
   return wsManager?.sendArtifactSubmitted(content, language) ?? false
 }
 
+export function sendArtifactContentUpdateMessage(content: string, language?: string): boolean {
+  return wsManager?.sendArtifactContentUpdate(content, language) ?? false
+}
+
 export function disconnectWebSocket() {
   wsManager?.disconnect()
 }
@@ -285,12 +289,27 @@ export function applySpeakingState() {
  * Apply side effects for ARTIFACT state (user working on code/whiteboard)
  * Called when: backend sends STATE_CHANGED with state = 'artifact'
  *
- * Stops: silence detection (activity timer runs on backend instead)
- * Keeps: recording running (user might speak while in artifact mode)
+ * Keeps audio recording + silence detection running so the user can speak
+ * to ask questions or request help while coding. The backend accepts
+ * END_OF_TURN in ARTIFACT state and uses a hands-off decision prompt
+ * (defaults to WAIT unless the user explicitly asks for help).
+ *
+ * The silence detection uses the existing "speech-then-silence" pattern:
+ * silence is the default (user is typing), only speech followed by 1s
+ * of silence triggers end_of_turn.
  */
-export function applyArtifactState() {
+export async function applyArtifactState() {
+  const store = useInterviewStore.getState()
   console.log('[State] Backend → artifact')
-  stopSilenceDetection()
+
+  // Reset speech flag so the silence timer starts clean.
+  // User must speak first before silence can trigger end_of_turn.
+  store.setHasHeardSpeech(false)
+
+  // Start recording with silence detection
+  if (store.connectionStatus === 'connected' && store.isMicOn && !store.hasNavigatedAway) {
+    await startRecording(true)
+  }
 }
 
 /**
@@ -348,7 +367,7 @@ export async function onStateChanged(
       applySpeakingState()
       break
     case 'artifact':
-      applyArtifactState()
+      await applyArtifactState()
       break
     case 'completed':
       applyCompletedState()

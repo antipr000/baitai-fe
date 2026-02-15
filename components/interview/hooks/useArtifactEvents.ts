@@ -2,21 +2,24 @@
  * useArtifactEvents Hook
  *
  * Manages artifact (code editor / whiteboard) WebSocket events:
- * - Sends artifact_opened when editor opens
- * - Sends debounced artifact_interaction on keystrokes
+ * - Sends debounced artifact_interaction on keystrokes (resets backend inactivity timer)
+ * - Sends periodic ARTIFACT_CONTENT_UPDATE with editor content every 5s
  * - Sends artifact_submitted when user submits their work
  *
- * Isolated from the code editor store itself so that artifact
- * event logic can be extended to other artifact types (whiteboard, etc.)
- * without modifying the editor.
+ * NOTE: The editor is now opened/closed by the backend via LOAD_ARTIFACT / UNLOAD_ARTIFACT
+ * events handled in useInterviewWebSocket. This hook no longer sends artifact_opened.
+ *
+ * Isolated from the code editor store itself so that artifact event logic
+ * can be extended to other artifact types (whiteboard, etc.) without modifying the editor.
  */
 
 import { useEffect, useRef, useCallback } from 'react'
 import { useInterviewStore } from '../store'
+import { useCodeEditorStore } from '../store/codeEditorStore'
 import {
-  sendArtifactOpenedMessage,
   sendArtifactInteractionMessage,
   sendArtifactSubmittedMessage,
+  sendArtifactContentUpdateMessage,
 } from '../store/interviewActions'
 
 // ============================================
@@ -30,6 +33,8 @@ export interface UseArtifactEventsOptions {
   artifactType: 'code' | 'whiteboard'
   /** Debounce interval for interaction events in ms (default: 5000) */
   interactionDebounceMs?: number
+  /** Interval for periodic content sync in ms (default: 5000) */
+  contentSyncIntervalMs?: number
 }
 
 export interface UseArtifactEventsReturn {
@@ -46,42 +51,62 @@ export interface UseArtifactEventsReturn {
 export function useArtifactEvents(
   options: UseArtifactEventsOptions
 ): UseArtifactEventsReturn {
-  const { isOpen, artifactType, interactionDebounceMs = 5000 } = options
+  const {
+    isOpen,
+    artifactType,
+    interactionDebounceMs = 5000,
+    contentSyncIntervalMs = 5000,
+  } = options
+
   const store = useInterviewStore
-  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null)
-  const wasOpenRef = useRef(false)
+  const interactionDebounceRef = useRef<NodeJS.Timeout | null>(null)
+  const contentSyncTimerRef = useRef<NodeJS.Timeout | null>(null)
 
   // ============================================
-  // Open / Close Effect
+  // Periodic Content Sync
   // ============================================
+  // Sends ARTIFACT_CONTENT_UPDATE every contentSyncIntervalMs while
+  // the editor is open and conversationState is 'artifact'.
+
+  const conversationState = useInterviewStore((s) => s.conversationState)
 
   useEffect(() => {
-    const state = store.getState()
+    const shouldSync = isOpen && conversationState === 'artifact'
 
-    if (isOpen && !wasOpenRef.current) {
-      // Editor just opened -- send artifact_opened to backend
-      // Only send if we're in a state where the backend expects it (listening)
-      if (state.conversationState === 'listening' && state.connectionStatus === 'connected') {
-        console.log(`[ArtifactEvents] Sending artifact_opened (${artifactType})`)
-        sendArtifactOpenedMessage(artifactType)
+    if (shouldSync) {
+      // Start periodic sync
+      contentSyncTimerRef.current = setInterval(() => {
+        const editorState = useCodeEditorStore.getState()
+        const interviewState = store.getState()
+
+        if (interviewState.connectionStatus !== 'connected' || interviewState.hasNavigatedAway) {
+          return
+        }
+
+        sendArtifactContentUpdateMessage(editorState.content, editorState.language)
+      }, contentSyncIntervalMs)
+
+      console.log(`[ArtifactEvents] Started periodic content sync (${contentSyncIntervalMs}ms)`)
+    }
+
+    return () => {
+      if (contentSyncTimerRef.current) {
+        clearInterval(contentSyncTimerRef.current)
+        contentSyncTimerRef.current = null
       }
     }
-
-    wasOpenRef.current = isOpen
-
-    // Cleanup debounce timer when editor closes
-    if (!isOpen && debounceTimerRef.current) {
-      clearTimeout(debounceTimerRef.current)
-      debounceTimerRef.current = null
-    }
-  }, [isOpen, artifactType])
+  }, [isOpen, conversationState, contentSyncIntervalMs])
 
   // Cleanup on unmount
   useEffect(() => {
     return () => {
-      if (debounceTimerRef.current) {
-        clearTimeout(debounceTimerRef.current)
-        debounceTimerRef.current = null
+      if (interactionDebounceRef.current) {
+        clearTimeout(interactionDebounceRef.current)
+        interactionDebounceRef.current = null
+      }
+      if (contentSyncTimerRef.current) {
+        clearInterval(contentSyncTimerRef.current)
+        contentSyncTimerRef.current = null
       }
     }
   }, [])
@@ -97,14 +122,14 @@ export function useArtifactEvents(
     }
 
     // Debounce: only send at most once per interactionDebounceMs
-    if (debounceTimerRef.current) {
+    if (interactionDebounceRef.current) {
       return // Already have a pending send
     }
 
     sendArtifactInteractionMessage()
 
-    debounceTimerRef.current = setTimeout(() => {
-      debounceTimerRef.current = null
+    interactionDebounceRef.current = setTimeout(() => {
+      interactionDebounceRef.current = null
     }, interactionDebounceMs)
   }, [interactionDebounceMs])
 
@@ -121,10 +146,14 @@ export function useArtifactEvents(
 
     console.log('[ArtifactEvents] Submitting artifact')
 
-    // Clear debounce timer
-    if (debounceTimerRef.current) {
-      clearTimeout(debounceTimerRef.current)
-      debounceTimerRef.current = null
+    // Clear timers
+    if (interactionDebounceRef.current) {
+      clearTimeout(interactionDebounceRef.current)
+      interactionDebounceRef.current = null
+    }
+    if (contentSyncTimerRef.current) {
+      clearInterval(contentSyncTimerRef.current)
+      contentSyncTimerRef.current = null
     }
 
     sendArtifactSubmittedMessage(content, language)
