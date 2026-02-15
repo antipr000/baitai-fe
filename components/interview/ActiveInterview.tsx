@@ -165,7 +165,7 @@ export default function ActiveInterview({
   const { isRecording, getMixedAudioContext } = useAudioRecorder({
     micStream: micStream || null,
     silenceConfig: {
-      silenceDuration: 700,
+      silenceDuration: 1500,
       noiseFloorAlpha: 0.05,
       minNoiseFloor: 0.008,
       speechMargin: 0.025,
