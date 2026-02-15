@@ -241,7 +241,7 @@ export default function LoginPageV2() {
                                     {/* Google Button */}
                                     <Button
                                         variant="outline"
-                                        className="w-full md:h-14 h-12 bg-white border-gray-200 text-gray-700 hover:bg-gray-50 flex items-center justify-center gap-3 text-base font-normal shadow-sm"
+                                        className="w-full md:h-13 h-11 bg-white border-gray-200 text-gray-700 hover:bg-gray-50 flex items-center justify-center gap-3 text-base font-normal shadow-sm"
                                         onClick={handleGoogleSignIn}
                                         disabled={loading}
                                     >
