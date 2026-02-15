@@ -527,10 +527,10 @@ export default function ActiveInterview({
             </div>
           </div>
 
-          {/* Code Editor Panel */}
+          {/* Code Editor Panel -- fills the right side, next to conversation panel */}
           {isCodeEditorOpen && (
             <div
-              className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[45vw] h-[75vh] bg-gray-800 rounded-lg border border-gray-700 shadow-xl flex flex-col overflow-hidden z-50"
+              className="fixed top-4 bottom-20 left-[25.5rem] right-4 bg-gray-800 rounded-lg border border-gray-700 shadow-xl flex flex-col overflow-hidden z-50"
             >
               <EditorToolbar
                 language={codeEditorLanguage}
