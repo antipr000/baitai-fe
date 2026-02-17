@@ -359,8 +359,20 @@ export async function applyArtifactState() {
   // only when the user starts speaking. This prevents typing noise
   // from triggering false end_of_turn events while coding.
   if (store.connectionStatus === 'connected' && store.isMicOn && !store.hasNavigatedAway) {
-    await startRecording(false)   // recording only, no silence detection
-    enableSpeechOnsetDetector()   // lightweight speech watcher
+    // Stop current recording first to ensure the old MediaRecorder has
+    // fully transitioned to 'inactive'. Without this, startRecordingInternal
+    // silently bails out because the previous recorder (stopped async by
+    // applySpeakingState → stopAndClearRecordingBuffer) hasn't finished yet.
+    stopRecording()
+    await new Promise(resolve => setTimeout(resolve, 100))
+
+    const currentState = useInterviewStore.getState()
+    if (currentState.connectionStatus === 'connected' &&
+      currentState.isMicOn &&
+      !currentState.hasNavigatedAway) {
+      await startRecording(false)   // recording only, no silence detection
+      enableSpeechOnsetDetector()   // lightweight speech watcher
+    }
   }
 }
 
