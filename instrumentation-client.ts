@@ -22,6 +22,5 @@ if (process.env.NODE_ENV !== "development" && !isEUUser) {
       maskAllInputs: true,
       // maskTextSelector: "*", // GDPR: Mask all text
     },
-    persistence: "memory", // GDPR: No cookies
   });
 }
