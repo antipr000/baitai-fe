@@ -14,13 +14,21 @@ export const metadata: Metadata = {
   description: "",
 };
 
-export default function RootLayout({
+import { headers } from "next/headers";
+
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const headersList = await headers();
+  const country = headersList.get("cf-ipcountry") || "NAN";
+
   return (
     <html lang="en" suppressHydrationWarning >
+      <head>
+        <meta name="geo-country" content={country} />
+      </head>
       <body
         className={` ${inter.variable} font-sans antialiased`}
       >
