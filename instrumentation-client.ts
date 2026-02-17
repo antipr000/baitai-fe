@@ -23,7 +23,4 @@ if (process.env.NEXT_PUBLIC_ENV === 'production' && !isEUUser) {
       // maskTextSelector: "*", // GDPR: Mask all text
     },
   })
-  console.log("PostHog initialized");
-
-
 }

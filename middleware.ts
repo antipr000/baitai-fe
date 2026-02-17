@@ -10,7 +10,7 @@ const CANDIDATE_AUTH_PAGES = ['/login'];
 const COMPANY_AUTH_PAGES = ['/company/login', '/company/signup'];
 
 // Public paths for the main domain (candidate-facing)
-const MAIN_PUBLIC_PATHS = ['/', '/about', '/pricing', '/founders', ...CANDIDATE_AUTH_PAGES];
+const MAIN_PUBLIC_PATHS = ['/', '/about', '/pricing', '/founders', '/privacy', ...CANDIDATE_AUTH_PAGES];
 
 // Public paths for the team subdomain (no /company root - goes to login or dashboard)
 const TEAM_PUBLIC_PATHS = ['/company/login'];

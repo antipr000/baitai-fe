@@ -151,6 +151,9 @@ export const Footer = () => {
                 <Link href="#" className="text-[rgba(17,24,39,0.6)] hover:text-primary transition-colors">
                   Help Center
                 </Link>
+                <Link href="/privacy" className="text-[rgba(17,24,39,0.6)] hover:text-primary transition-colors">
+                  Privacy Policy
+                </Link>
               </div>
             </div>
 
