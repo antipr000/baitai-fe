@@ -172,6 +172,7 @@ export class MixedAudioContext {
 
   private audioContext: AudioContext | null = null
   private micSource: MediaStreamAudioSourceNode | null = null
+  private originalMicStream: MediaStream | null = null
   private micGainNode: GainNode | null = null
   private aiGainNode: GainNode | null = null
   private mixerNode: GainNode | null = null
@@ -218,9 +219,8 @@ export class MixedAudioContext {
     sampleRate: number = 16000
   ): Promise<MediaStream> {
     // Check if current mic source is dead
-    if (this.initialized && this.micSource) {
-      const storedStream = (this.micSource as any).mediaStream as MediaStream | undefined
-      const isAlive = storedStream?.getAudioTracks().some(t => t.readyState === 'live')
+    if (this.initialized && this.originalMicStream) {
+      const isAlive = this.originalMicStream.getAudioTracks().some(t => t.readyState === 'live')
       
       if (!isAlive) {
         console.log('[MixedAudioContext] Stored mic stream is dead, reinitializing...')
@@ -245,6 +245,7 @@ export class MixedAudioContext {
       }
 
       // Create microphone source
+      this.originalMicStream = micStream
       this.micSource = this.audioContext.createMediaStreamSource(micStream)
 
       // Create gain nodes for mixing
@@ -338,6 +339,7 @@ export class MixedAudioContext {
     // Reset all references
     this.audioContext = null
     this.micSource = null
+    this.originalMicStream = null
     this.micGainNode = null
     this.aiGainNode = null
     this.mixerNode = null

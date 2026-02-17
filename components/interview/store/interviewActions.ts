@@ -260,11 +260,32 @@ export async function applyListeningState() {
     console.log(`[State] Sending deferred artifact_opened (${artifactType})`)
     sendArtifactOpenedMessage(artifactType)
     // Backend will transition LISTENING -> ARTIFACT and send STATE_CHANGED(artifact).
-    // applyArtifactState() will handle starting recording with silence detection.
+    // applyArtifactState() will handle starting recording with speech onset detector.
     return
   }
 
-  // Start recording with silence detection
+  // If the code editor is backend-controlled (artifact section still active),
+  // use artifact audio behavior: recording + speech onset detector instead of
+  // full silence detection. This handles the case where the backend transitions
+  // ARTIFACT -> THINKING -> wait_decision -> LISTENING during an artifact section.
+  if (editorState.isBackendControlled) {
+    console.log('[State] Artifact section active → using artifact audio behavior')
+    if (store.connectionStatus === 'connected' && store.isMicOn && !store.hasNavigatedAway) {
+      stopRecording()
+      await new Promise(resolve => setTimeout(resolve, 100))
+
+      const currentState = useInterviewStore.getState()
+      if (currentState.connectionStatus === 'connected' &&
+        currentState.isMicOn &&
+        !currentState.hasNavigatedAway) {
+        await startRecording(false)   // recording only, no silence detection
+        enableSpeechOnsetDetector()   // lightweight speech watcher
+      }
+    }
+    return
+  }
+
+  // Normal listening mode: start recording with full silence detection
   if (store.connectionStatus === 'connected' && store.isMicOn && !store.hasNavigatedAway) {
     // Stop current recording first to get fresh WebM headers
     stopRecording()
@@ -338,8 +359,20 @@ export async function applyArtifactState() {
   // only when the user starts speaking. This prevents typing noise
   // from triggering false end_of_turn events while coding.
   if (store.connectionStatus === 'connected' && store.isMicOn && !store.hasNavigatedAway) {
-    await startRecording(false)   // recording only, no silence detection
-    enableSpeechOnsetDetector()   // lightweight speech watcher
+    // Stop current recording first to ensure the old MediaRecorder has
+    // fully transitioned to 'inactive'. Without this, startRecordingInternal
+    // silently bails out because the previous recorder (stopped async by
+    // applySpeakingState → stopAndClearRecordingBuffer) hasn't finished yet.
+    stopRecording()
+    await new Promise(resolve => setTimeout(resolve, 100))
+
+    const currentState = useInterviewStore.getState()
+    if (currentState.connectionStatus === 'connected' &&
+      currentState.isMicOn &&
+      !currentState.hasNavigatedAway) {
+      await startRecording(false)   // recording only, no silence detection
+      enableSpeechOnsetDetector()   // lightweight speech watcher
+    }
   }
 }
 
