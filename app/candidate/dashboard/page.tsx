@@ -55,10 +55,13 @@ interface InvitesResponse {
 }
 
 async function getInterviewInvites(): Promise<Interview[]> {
+    const start = performance.now()
     const response = await serverFetch<InvitesResponse>('/api/v1/user/interview/invites/', {
         method: 'POST',
         body: { page: 1, page_size: 2 }
     })
+    const end = performance.now()
+    console.log(`[getInterviewInvites] took ${(end - start).toFixed(2)}ms`)
 
     if (!response) {
         console.warn('Failed to fetch interview invites')
@@ -86,6 +89,7 @@ interface PracticeResponse {
 }
 
 async function getPracticeInterviews(): Promise<PracticeInterview[]> {
+    const start = performance.now()
     const response = await serverFetch<PracticeResponse>('/api/v1/user/interview/practice/filter/', {
         method: 'POST',
         body: {
@@ -94,6 +98,8 @@ async function getPracticeInterviews(): Promise<PracticeInterview[]> {
             role: ''
         }
     })
+    const end = performance.now()
+    console.log(`[getPracticeInterviews] took ${(end - start).toFixed(2)}ms`)
 
     if (!response || !response.items) {
         console.warn('Failed to fetch practice interviews')
@@ -113,10 +119,13 @@ interface ResultsResponse {
 }
 
 async function getRecentResults(): Promise<ApiResultItem[]> {
+    const start = performance.now()
     const response = await serverFetch<ResultsResponse>('/api/v1/user/interview/results/filter/', {
         method: 'POST',
         body: { page: 1, page_size: 5, status: "completed", is_scored: true }
     })
+    const end = performance.now()
+    console.log(`[getRecentResults] took ${(end - start).toFixed(2)}ms`)
 
     if (!response || !response.items) {
         return []
@@ -125,7 +134,11 @@ async function getRecentResults(): Promise<ApiResultItem[]> {
 }
 
 async function getStats(): Promise<InterviewStats> {
+    const start = performance.now()
     const response = await serverFetch<InterviewStats>('/api/v1/user/interview/stats/')
+    const end = performance.now()
+    console.log(`[getStats] took ${(end - start).toFixed(2)}ms`)
+
     if (!response) {
         console.warn('Failed to fetch interview stats')
         return { average_score: 0, total_time: 0, completed: 0, pending: 0 }
