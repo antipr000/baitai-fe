@@ -1,29 +1,13 @@
+
 import React from 'react'
 import Link from 'next/link'
 import { InterviewInviteCard } from './interview-invite-card'
 import { ArrowRight, Inbox } from 'lucide-react'
-import { serverFetch } from '@/lib/api/server'
 
-interface ApiInterview {
-    id: string
-    status: string
-    end_date: string
-    created_at: string
-    title: string
-    company_name: string
-    message: string,
-    template_id: string
-}
 
-interface ApiResponse {
-    items: ApiInterview[]
-    total: number
-    page: number
-    page_size: number
-    total_pages: number
-}
 
-interface Interview {
+
+export interface Interview {
     id: string
     company: string
     position: string
@@ -32,49 +16,15 @@ interface Interview {
     template_id: string
 }
 
-function formatDueDate(dueDate: string): string {
-    const due = new Date(dueDate)
-    const now = new Date()
-    const diffTime = due.getTime() - now.getTime()
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
-
-    if (diffDays < 0) return 'Overdue'
-    if (diffDays === 0) return 'Due today'
-    if (diffDays === 1) return 'Due tomorrow'
-    return `Due in ${diffDays} days`
-}
-
-async function getInterviewInvites(): Promise<{ interviews: Interview[] }> {
-    const response = await serverFetch<ApiResponse>('/api/v1/user/interview/invites/', {
-        method: 'POST',
-        body: { page: 1, page_size: 2 }
-    })
-
-    if (!response) {
-        console.warn('Failed to fetch interview invites')
-        return { interviews: [] }
-    }
-
-    const interviews = response.items.map((item) => ({
-        id: item.id,
-        company: item.company_name,
-        position: item.title,
-        dueIn: formatDueDate(item.end_date),
-        status: item.status,
-        template_id: item.template_id
-    }))
-
-    return { interviews }
-}
-
 interface InterviewInvitesSectionProps {
+    interviews: Interview[]
     viewMoreHref?: string
 }
 
-export async function InterviewInvitesSection({
+export function InterviewInvitesSection({
+    interviews,
     viewMoreHref = '/candidate/company-interviews'
 }: InterviewInvitesSectionProps) {
-    const { interviews } = await getInterviewInvites()
 
     return (
         <div>
