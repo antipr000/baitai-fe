@@ -40,7 +40,6 @@ function isTeamSubdomain(request: NextRequest): boolean {
 }
 
 export async function middleware(request: NextRequest) {
-  const start = Date.now();
   const { pathname } = request.nextUrl;
 
   const isTeam = isTeamSubdomain(request);
@@ -86,8 +85,6 @@ export async function middleware(request: NextRequest) {
         return NextResponse.redirect(new URL('/', request.url));
       }
 
-      // Log execution time for valid token
-      console.log(`Middleware (valid token) took ${Date.now() - start}ms for ${pathname}`);
       return NextResponse.next({
         request: {
           headers
@@ -97,9 +94,6 @@ export async function middleware(request: NextRequest) {
     handleInvalidToken: async (reason) => {
       console.info('Missing or malformed credentials', { reason });
 
-      // Log execution time for invalid token
-      console.log(`Middleware (invalid token) took ${Date.now() - start}ms for ${pathname}`);
-
       // Redirect to appropriate login (redirectToLogin handles publicPaths internally)
       return redirectToLogin(request, {
         path: loginPath,
@@ -108,9 +102,6 @@ export async function middleware(request: NextRequest) {
     },
     handleError: async (error) => {
       console.error('Unhandled authentication error', { error });
-
-      // Log execution time for error
-      console.log(`Middleware (error) took ${Date.now() - start}ms for ${pathname}`);
 
       return redirectToLogin(request, {
         path: loginPath,
