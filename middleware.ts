@@ -15,7 +15,7 @@ const MAIN_PUBLIC_PATHS = ['/', '/about', '/pricing', '/founders', '/privacy', .
 // Public paths for the team subdomain (no /company root - goes to login or dashboard)
 const TEAM_PUBLIC_PATHS = ['/company/login'];
 
-export const runtime = 'nodejs_compat';
+export const runtime = 'experimental-edge';
 
 /**
  * Detects if the request is coming from the team subdomain
