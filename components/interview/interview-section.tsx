@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { Button } from '../ui/button'
 import { Mic, Video, Volume2 } from 'lucide-react'
 import Image from 'next/image'
@@ -136,22 +136,39 @@ export default function InterviewSection({
         setAudioLevel(0)
     }
 
-    const startMicStream = async () => {
+    const startMicStream = useCallback(async () => {
         try {
-            // Use 'ideal' instead of 'exact' to allow fallback if device unavailable
             const audioConstraints = selectedMic
                 ? { deviceId: { ideal: selectedMic } }
                 : true
             const stream = await navigator.mediaDevices.getUserMedia({
                 audio: audioConstraints
             })
+
+            // Stop old stream before assigning new one (like startCamera does)
+            if (micStreamRef.current) {
+                micStreamRef.current.getTracks().forEach(track => track.stop())
+            }
+
             micStreamRef.current = stream
-            // surface mic stream to parent for reuse (e.g., ActiveInterview)
             onMicStream?.(stream)
+
+            // If mic testing is active, reconnect audio analysis to new stream
+            if (isMicTesting && audioContextRef.current) {
+                audioContextRef.current.close()
+                
+                const audioContext = new AudioContext()
+                const analyser = audioContext.createAnalyser()
+                const source = audioContext.createMediaStreamSource(stream)
+                source.connect(analyser)
+                
+                audioContextRef.current = audioContext
+                analyserRef.current = analyser
+            }
         } catch (error) {
             console.error('Mic stream error:', error)
         }
-    }
+    }, [selectedMic, onMicStream, isMicTesting])
 
     const startSpeakerTest = () => {
         const audio = new Audio('/interview/test.wav')
@@ -165,9 +182,8 @@ export default function InterviewSection({
         }, 2000);
     }
 
-    const startCamera = async () => {
+    const startCamera = useCallback(async () => {
         try {
-            // Use 'ideal' instead of 'exact' to allow fallback if device unavailable
             const videoConstraints = selectedCamera
                 ? { deviceId: { ideal: selectedCamera } }
                 : true
@@ -181,7 +197,6 @@ export default function InterviewSection({
             }
 
             cameraStreamRef.current = stream
-            // surface camera stream to parent for reuse (e.g., ActiveInterview)
             onCameraStream?.(stream)
             console.log('Camera stream started')
             if (videoElementRef.current) {
@@ -190,11 +205,11 @@ export default function InterviewSection({
         } catch (error) {
             console.error('Camera error:', error)
         }
-    }
+    }, [selectedCamera, onCameraStream])
 
-    const restartCamera = () => {
+    const restartCamera = useCallback(() => {
         startCamera()
-    }
+    }, [startCamera])
 
     useEffect(() => {
         // Initial mount - start both streams
@@ -264,7 +279,7 @@ export default function InterviewSection({
         if (selectedMic && micStreamRef.current) {
             startMicStream()
         }
-    }, [selectedCamera, selectedMic])
+    }, [selectedCamera, selectedMic, startCamera, startMicStream])
 
     return (
         <motion.div
