@@ -15,7 +15,7 @@ const MAIN_PUBLIC_PATHS = ['/', '/about', '/pricing', '/founders', '/privacy', .
 // Public paths for the team subdomain (no /company root - goes to login or dashboard)
 const TEAM_PUBLIC_PATHS = ['/company/login'];
 
-export const runtime = 'experimental-edge';
+export const runtime = 'nodejs_compat';
 
 /**
  * Detects if the request is coming from the team subdomain
@@ -50,6 +50,12 @@ export async function middleware(request: NextRequest) {
   const authPages = isTeam ? COMPANY_AUTH_PAGES : CANDIDATE_AUTH_PAGES;
   const loginPath = isTeam ? '/company/login' : '/login';
   const homePath = isTeam ? '/company/dashboard' : '/';
+
+  // SKIP AUTH for public paths on main domain
+  if (!isTeam && MAIN_PUBLIC_PATHS.includes(pathname)) {
+    return NextResponse.next();
+  }
+
 
   return authMiddleware(request, {
     loginPath: "/api/login",
