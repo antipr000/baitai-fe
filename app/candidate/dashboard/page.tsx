@@ -134,13 +134,16 @@ async function getStats(): Promise<InterviewStats> {
 }
 
 export default async function DashboardPage() {
+
     // Parallel Data Fetching
+    console.time('Dashboard Data Fetch')
     const [stats, invites, practice, results] = await Promise.all([
         getStats(),
         getInterviewInvites(),
         getPracticeInterviews(),
         getRecentResults()
     ])
+    console.timeEnd('Dashboard Data Fetch')
 
     return (
         <div className='w-full min-h-screen bg-[rgba(248,250,255,1)]'>
