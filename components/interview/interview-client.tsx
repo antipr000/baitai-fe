@@ -55,6 +55,8 @@ export default function InterviewClient({ templateId, templateData, authToken, i
     // Use refs to track streams for cleanup on unmount only
     const cameraStreamRef = useRef<MediaStream | null>(null);
     const micStreamRef = useRef<MediaStream | null>(null);
+    // Track the permission-check stream so it can be stopped on cleanup
+    const permissionStreamRef = useRef<MediaStream | null>(null);
     // Track if we've navigated away (pagehide fired) to prevent re-requesting media on back
     const hasNavigatedAwayRef = useRef(false);
 
@@ -89,6 +91,15 @@ export default function InterviewClient({ templateId, templateData, authToken, i
                 });
                 micStreamRef.current = null;
             }
+            // Stop permission-check stream if user navigates away during permission check
+            if (permissionStreamRef.current) {
+                console.log('[Page Cleanup] Stopping permission-check stream');
+                permissionStreamRef.current.getTracks().forEach(track => {
+                    track.stop();
+                    track.enabled = false;
+                });
+                permissionStreamRef.current = null;
+            }
         };
 
         const handlePageHide = () => {
@@ -122,10 +133,15 @@ export default function InterviewClient({ templateId, templateData, authToken, i
             try {
                 setPermission("pending");
 
-                await navigator.mediaDevices.getUserMedia({
+                const permissionStream = await navigator.mediaDevices.getUserMedia({
                     video: true,
                     audio: true,
                 });
+                permissionStreamRef.current = permissionStream;
+
+                // Stop the permission-check stream immediately - we only needed it to trigger the permission prompt
+                permissionStream.getTracks().forEach(track => track.stop());
+                permissionStreamRef.current = null;
 
                 setPermission("granted");
                 const devices = await navigator.mediaDevices.enumerateDevices();

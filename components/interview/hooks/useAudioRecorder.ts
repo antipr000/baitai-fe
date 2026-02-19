@@ -18,7 +18,7 @@ import {
   sendEndOfTurnMessage,
   stopSilenceDetection as stopSilenceDetectionAction,
 } from '../store/interviewActions'
-import { DEFAULT_SILENCE_CONFIG } from '../store/types'
+import { DEFAULT_SILENCE_CONFIG, ARTIFACT_SILENCE_CONFIG } from '../store/types'
 import type { SilenceDetectionConfig } from '../store/types'
 
 // ============================================
@@ -66,6 +66,13 @@ export function useAudioRecorder(
 
   // Noise floor (updates at 60fps)
   const noiseFloorRmsRef = useRef<number>(config.minNoiseFloor)
+
+  // Refs for artifact mode functions (to break circular dependencies)
+  const setupSpeechOnsetDetectorRef = useRef<(() => void) | null>(null)
+  const flushAudioForArtifactRef = useRef<(() => Promise<void>) | null>(null)
+  const setupSilenceDetectionForArtifactRef = useRef<(() => void) | null>(null)
+  const startRecordingInternalForArtifactRef = useRef<(() => Promise<void>) | null>(null)
+  const sendEndOfTurnInternalRef = useRef<(() => Promise<void>) | null>(null)
 
   // ============================================
   // Silence Detection
@@ -204,6 +211,248 @@ export function useAudioRecorder(
   }, [config, micStream, onSpeechDetected, onError])
 
   // ============================================
+  // Artifact Mode Silence Detection (1.2s timeout)
+  // ============================================
+  //
+  // Similar to setupSilenceDetection but uses ARTIFACT_SILENCE_CONFIG
+  // with a shorter 1.2s silence duration. Used after speech is detected
+  // in artifact mode.
+
+  const setupSilenceDetectionForArtifact = useCallback(() => {
+    const state = store.getState()
+    if (state.conversationState !== 'artifact') return
+
+    const artifactConfig = ARTIFACT_SILENCE_CONFIG
+
+    const stream = micStream
+    const hasLiveTrack = stream?.getAudioTracks().some((t) => t.readyState === 'live')
+
+    if (!stream || !hasLiveTrack || !state.isMicOn) {
+      console.log('[AudioRecorder] Skipping artifact silence detection - no valid stream')
+      return
+    }
+
+    try {
+      if (!audioContextRef.current || audioContextRef.current.state === 'closed') {
+        audioContextRef.current = new AudioContext()
+      }
+      if (audioContextRef.current.state === 'suspended') {
+        audioContextRef.current.resume().catch(console.error)
+      }
+
+      const source = audioContextRef.current.createMediaStreamSource(stream)
+      const analyser = audioContextRef.current.createAnalyser()
+      analyser.fftSize = 2048
+      source.connect(analyser)
+      analyserRef.current = analyser
+
+      const timeDomain = new Uint8Array(analyser.fftSize)
+      let silenceStartTime: number | null = null
+
+      const checkSilence = () => {
+        const currentState = store.getState()
+
+        // Only truly stop when analyser is nulled (via stopSilenceDetection)
+        if (!analyserRef.current) {
+          return
+        }
+
+        // Only run in artifact state with mic on
+        if (!currentState.isMicOn || currentState.conversationState !== 'artifact') {
+          silenceRAFRef.current = requestAnimationFrame(checkSilence)
+          return
+        }
+
+        analyserRef.current.getByteTimeDomainData(timeDomain)
+        let sumSq = 0
+        for (let i = 0; i < timeDomain.length; i++) {
+          const centered = (timeDomain[i] - 128) / 128
+          sumSq += centered * centered
+        }
+        const rms = Math.sqrt(sumSq / timeDomain.length)
+
+        const prevFloor = noiseFloorRmsRef.current
+        const speechThreshold = Math.max(
+          artifactConfig.minNoiseFloor + artifactConfig.speechMargin,
+          prevFloor + artifactConfig.speechMargin
+        )
+        const isSpeech = rms > speechThreshold
+
+        if (isSpeech) {
+          // User is speaking - reset silence timer
+          silenceStartTime = null
+        } else {
+          // User stopped speaking - start/check silence timer
+          if (silenceStartTime === null) {
+            silenceStartTime = Date.now()
+            console.log('[AudioRecorder] Artifact mode: silence started, waiting 1.2s')
+          } else if (Date.now() - silenceStartTime > artifactConfig.silenceDuration) {
+            console.log('[AudioRecorder] Artifact mode: 1.2s silence exceeded, sending end_of_turn')
+            // Use ref to call sendEndOfTurnInternal (breaks circular dependency)
+            sendEndOfTurnInternalRef.current?.()
+            silenceStartTime = null
+            return
+          }
+        }
+
+        silenceRAFRef.current = requestAnimationFrame(checkSilence)
+      }
+
+      checkSilence()
+      console.log('[AudioRecorder] Artifact silence detection active (1.2s timeout)')
+    } catch (error) {
+      console.error('[AudioRecorder] Error setting up artifact silence detection:', error)
+      onError?.(error instanceof Error ? error : new Error(String(error)))
+    }
+  }, [micStream, onError])
+
+  // ============================================
+  // Artifact Mode Audio Flush (immediate streaming)
+  // ============================================
+  //
+  // Flushes accumulated audio immediately when speech is detected
+  // in artifact mode, and sets up a faster periodic flush (2s)
+  // to stream audio in near real-time while user is speaking.
+
+  const flushAudioForArtifact = useCallback(async (): Promise<void> => {
+    const isRecording = mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive'
+
+    if (!isRecording) {
+      return
+    }
+
+    console.log('[AudioRecorder] Artifact mode: flushing audio on speech detection...')
+    const recorder = mediaRecorderRef.current
+
+    if (!recorder) {
+      return
+    }
+
+    // Stop current recorder to get chunks
+    const stoppedPromise = new Promise<void>((resolve) => {
+      const onStop = () => {
+        recorder.removeEventListener('stop', onStop)
+        setTimeout(resolve, 100)
+      }
+      recorder.addEventListener('stop', onStop)
+    })
+
+    try {
+      recorder.stop()
+    } catch {
+      console.error('[AudioRecorder] Error stopping media recorder for artifact flush')
+      return
+    }
+
+    await stoppedPromise
+
+    const chunksToProcess = [...audioChunksRef.current]
+    audioChunksRef.current = []
+
+    // Send audio if we have chunks
+    if (chunksToProcess.length > 0) {
+      try {
+        const pcmBuffer = await convertWebMToRawPCM(chunksToProcess)
+        store.getState().setHasSentAudioSegments(true)
+        sendAudio(pcmBuffer)
+        console.log('[AudioRecorder] Artifact mode: streamed audio to backend')
+      } catch (error) {
+        console.error('[AudioRecorder] Error converting audio for artifact flush:', error)
+        onError?.(error instanceof Error ? error : new Error(String(error)))
+      }
+    }
+
+    // Restart recorder with faster periodic flush (2s) for artifact mode
+    const currentState = store.getState()
+    if (currentState.connectionStatus === 'connected' &&
+      !currentState.hasNavigatedAway &&
+      currentState.conversationState === 'artifact') {
+      // Use ref to call startRecordingInternalForArtifact (breaks circular dependency)
+      await startRecordingInternalForArtifactRef.current?.()
+    }
+  }, [onError])
+
+  // ============================================
+  // Artifact Mode Recording (faster flush interval)
+  // ============================================
+
+  const startRecordingInternalForArtifact = useCallback(async (): Promise<void> => {
+    const state = store.getState()
+
+    if (state.connectionStatus !== 'connected' || state.hasNavigatedAway) {
+      return
+    }
+
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+      return
+    }
+
+    let stream = micStream
+    const hasLiveTrack = stream?.getAudioTracks().some((t) => t.readyState === 'live')
+
+    if (!stream || !hasLiveTrack) {
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+      } catch (error) {
+        onError?.(error instanceof Error ? error : new Error('Microphone unavailable'))
+        return
+      }
+    }
+
+    try {
+      const mixedAudioCtx = MixedAudioContext.getInstance()
+      const mixedStream = await mixedAudioCtx.initialize(stream, 16000)
+
+      const oldRecorder = mediaRecorderRef.current
+      if (oldRecorder) {
+        oldRecorder.ondataavailable = null
+        oldRecorder.onerror = null
+        oldRecorder.onstart = null
+        oldRecorder.onstop = null
+      }
+
+      const mediaRecorder = new MediaRecorder(mixedStream, {
+        mimeType: 'audio/webm;codecs=opus',
+      })
+
+      mediaRecorderRef.current = mediaRecorder
+      audioChunksRef.current = []
+
+      // Use faster 2s flush interval for artifact mode (streaming while speaking)
+      if (periodicFlushTimerRef.current) {
+        clearInterval(periodicFlushTimerRef.current)
+      }
+      // Use ref to call flushAudioForArtifact (breaks circular dependency)
+      periodicFlushTimerRef.current = setInterval(() => {
+        flushAudioForArtifactRef.current?.()
+      }, 2000)
+
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data && event.data.size > 0) {
+          audioChunksRef.current.push(event.data)
+        }
+      }
+
+      mediaRecorder.onerror = () => {
+        onError?.(new Error('Recording error'))
+      }
+
+      mediaRecorder.onstart = () => {
+        store.getState().setAudioRecording({ isRecording: true })
+      }
+
+      mediaRecorder.onstop = () => {
+        store.getState().setAudioRecording({ isRecording: false })
+      }
+
+      mediaRecorder.start(100)
+      // Note: silence detection is handled separately by setupSilenceDetectionForArtifact
+    } catch (error) {
+      onError?.(error instanceof Error ? error : new Error(String(error)))
+    }
+  }, [micStream, onError])
+
+  // ============================================
   // Speech Onset Detector (Artifact Mode Only)
   // ============================================
   //
@@ -219,7 +468,8 @@ export function useAudioRecorder(
     const state = store.getState()
     if (state.conversationState !== 'artifact') return
 
-    noiseFloorRmsRef.current = config.minNoiseFloor
+    const artifactConfig = ARTIFACT_SILENCE_CONFIG
+    noiseFloorRmsRef.current = artifactConfig.minNoiseFloor
 
     const stream = micStream
     const hasLiveTrack = stream?.getAudioTracks().some((t) => t.readyState === 'live')
@@ -269,23 +519,27 @@ export function useAudioRecorder(
 
         const prevFloor = noiseFloorRmsRef.current
         const speechThreshold = Math.max(
-          config.minNoiseFloor + config.speechMargin,
-          prevFloor + config.speechMargin
+          artifactConfig.minNoiseFloor + artifactConfig.speechMargin,
+          prevFloor + artifactConfig.speechMargin
         )
         const isSpeech = rms > speechThreshold
 
         if (!isSpeech) {
           // Update noise floor while no speech
           noiseFloorRmsRef.current = Math.max(
-            config.minNoiseFloor,
-            prevFloor * (1 - config.noiseFloorAlpha) + rms * config.noiseFloorAlpha
+            artifactConfig.minNoiseFloor,
+            prevFloor * (1 - artifactConfig.noiseFloorAlpha) + rms * artifactConfig.noiseFloorAlpha
           )
           silenceRAFRef.current = requestAnimationFrame(checkOnset)
         } else {
-          // Speech detected! Set the flag and switch to full silence detection.
+          // Speech detected! Set the flag, flush audio immediately, and switch to silence detection.
           store.getState().setHasHeardSpeech(true)
-          console.log('[AudioRecorder] Speech onset detected in artifact mode → activating silence detection')
+          console.log('[AudioRecorder] Speech onset detected in artifact mode → flushing audio and activating silence detection')
           onSpeechDetected?.()
+
+          // Immediately flush any accumulated audio to stream it to backend
+          // Use ref to call flushAudioForArtifact (breaks circular dependency)
+          flushAudioForArtifactRef.current?.()
 
           // Stop this onset loop (null analyser to break it, then set up full detection)
           analyserRef.current = null
@@ -294,8 +548,9 @@ export function useAudioRecorder(
             silenceRAFRef.current = null
           }
 
-          // Activate full silence detection which will track silence-after-speech
-          setupSilenceDetection()
+          // Activate full silence detection with artifact-specific config (1.2s)
+          // Use ref to call setupSilenceDetectionForArtifact (breaks circular dependency)
+          setupSilenceDetectionForArtifactRef.current?.()
         }
       }
 
@@ -305,7 +560,7 @@ export function useAudioRecorder(
       console.error('[AudioRecorder] Error setting up speech onset detector:', error)
       onError?.(error instanceof Error ? error : new Error(String(error)))
     }
-  }, [config, micStream, setupSilenceDetection, onSpeechDetected, onError])
+  }, [micStream, onSpeechDetected, onError])
 
   // ============================================
   // Audio Flushing
@@ -591,7 +846,44 @@ export function useAudioRecorder(
     // Successfully sent end_of_turn. The backend will respond with
     // STATE_CHANGED(thinking). Do NOT transition state locally.
     console.log('[AudioRecorder] end_of_turn sent, waiting for backend state change')
+
+    // If we were in artifact mode, reset hasHeardSpeech and restart recording
+    // with speech onset detector (waiting for next speech)
+    if (wasInArtifactState) {
+      // Reset speech flag so we can detect next speech
+      store.getState().setHasHeardSpeech(false)
+      store.getState().setHasSentAudioSegments(false)
+
+      // Wait a bit for the end_of_turn to be processed
+      await new Promise((resolve) => setTimeout(resolve, 100))
+
+      // Check if we're still in artifact mode (backend might have changed state)
+      const currentState = store.getState()
+      if (currentState.conversationState === 'artifact' &&
+        currentState.connectionStatus === 'connected' &&
+        currentState.isMicOn &&
+        !currentState.hasNavigatedAway) {
+        console.log('[AudioRecorder] Artifact mode: restarting recording with speech onset detector')
+        // Restart recording without silence detection
+        await startRecordingInternal(false)
+        // Re-enable speech onset detector to wait for next speech
+        setupSpeechOnsetDetectorRef.current?.()
+      }
+    }
   }, [stopSilenceDetection, startRecordingInternal])
+
+  // ============================================
+  // Update Refs for Artifact Mode Functions
+  // ============================================
+  // These refs allow the artifact mode functions to call each other
+  // without creating circular dependencies in useCallback
+  useEffect(() => {
+    setupSpeechOnsetDetectorRef.current = setupSpeechOnsetDetector
+    flushAudioForArtifactRef.current = flushAudioForArtifact
+    setupSilenceDetectionForArtifactRef.current = setupSilenceDetectionForArtifact
+    startRecordingInternalForArtifactRef.current = startRecordingInternalForArtifact
+    sendEndOfTurnInternalRef.current = sendEndOfTurnInternal
+  }, [setupSpeechOnsetDetector, flushAudioForArtifact, setupSilenceDetectionForArtifact, startRecordingInternalForArtifact, sendEndOfTurnInternal])
 
   // ============================================
   // Register Controls with Actions Module

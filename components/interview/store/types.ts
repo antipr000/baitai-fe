@@ -117,6 +117,14 @@ export const DEFAULT_SILENCE_CONFIG: SilenceDetectionConfig = {
   silenceMargin: 0.012,
 }
 
+export const ARTIFACT_SILENCE_CONFIG: SilenceDetectionConfig = {
+  silenceDuration: 1200,
+  noiseFloorAlpha: 0.05,
+  minNoiseFloor: 0.008,
+  speechMargin: 0.025,
+  silenceMargin: 0.012,
+}
+
 // ============================================
 // Streaming Text State
 // ============================================
