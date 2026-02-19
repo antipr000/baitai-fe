@@ -12,6 +12,7 @@ export function HeroVideo() {
                 poster="maxresdefault"
                 webp
                 noCookie
+                thumbnail="/main/hero3.webp"
                 params="rel=0&modestbranding=1"
             />
         </div>

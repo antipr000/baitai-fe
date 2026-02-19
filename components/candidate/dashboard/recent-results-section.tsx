@@ -1,10 +1,10 @@
-import { serverFetch } from '@/lib/api/server'
+
 import { ResultItem } from './result-item'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import { ScorePoller } from './score-poller'
 
-interface ApiResultItem {
+export interface ApiResultItem {
   session_id: string
   template_id: string
   template_title: string
@@ -19,13 +19,7 @@ interface ApiResultItem {
   ended_at: string
 }
 
-interface ApiResultResponse {
-  items: ApiResultItem[]
-  total: number
-  page: number
-  page_size: number
-  total_pages: number
-}
+
 
 function formatTimeAgo(dateString: string): string {
   const date = new Date(dateString)
@@ -43,22 +37,14 @@ function formatTimeAgo(dateString: string): string {
 }
 
 interface RecentResultsSectionProps {
+  results: ApiResultItem[]
   viewMoreHref?: string
 }
 
-export async function RecentResultsSection({
+export function RecentResultsSection({
+  results,
   viewMoreHref = '/results'
 }: RecentResultsSectionProps) {
-  const response = await serverFetch<ApiResultResponse>('/api/v1/user/interview/results/filter/', {
-    method: 'POST',
-    body: { page: 1, page_size: 5,status:"completed",is_scored:true }
-  })
-
-  if (!response || !response.items) {
-    return null
-  }
-
-  const results = response.items
 
 
   // const hasPending = results.some(r => !r.is_scored)

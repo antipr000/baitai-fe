@@ -259,7 +259,7 @@ export default async function Home() {
                 </p>
               </div>
               <div className="flex gap-5 md:gap-7 lg:mt-7 md:mt-4">
-                <Link href="/signup">
+                <Link href="/login">
                   <Button
                     className="flex items-center justify-center gap-2 md:rounded-xl rounded-sm px-5 py-2.5 md:px-8 md:py-5 lg:px-10 lg:py-6 border-2 border-[rgba(58,63,187,0.9)] text-sm md:text-base lg:text-lg xl:text-xl font-medium bg-[rgba(58,63,187,1)] hover:bg-transparent hover:opacity-90 text-white hover:text-[rgba(58,63,187,1)]">
                     Sign up

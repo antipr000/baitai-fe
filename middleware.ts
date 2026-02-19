@@ -10,7 +10,7 @@ const CANDIDATE_AUTH_PAGES = ['/login'];
 const COMPANY_AUTH_PAGES = ['/company/login', '/company/signup'];
 
 // Public paths for the main domain (candidate-facing)
-const MAIN_PUBLIC_PATHS = ['/', '/about', '/pricing', '/founders', ...CANDIDATE_AUTH_PAGES];
+const MAIN_PUBLIC_PATHS = ['/', '/about', '/pricing', '/founders', '/privacy', ...CANDIDATE_AUTH_PAGES];
 
 // Public paths for the team subdomain (no /company root - goes to login or dashboard)
 const TEAM_PUBLIC_PATHS = ['/company/login'];
@@ -41,6 +41,7 @@ function isTeamSubdomain(request: NextRequest): boolean {
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+
   const isTeam = isTeamSubdomain(request);
 
   // Determine which public paths to use based on subdomain
@@ -48,6 +49,12 @@ export async function middleware(request: NextRequest) {
   const authPages = isTeam ? COMPANY_AUTH_PAGES : CANDIDATE_AUTH_PAGES;
   const loginPath = isTeam ? '/company/login' : '/login';
   const homePath = isTeam ? '/company/dashboard' : '/';
+
+  // SKIP AUTH for public paths on main domain
+  if (!isTeam && MAIN_PUBLIC_PATHS.includes(pathname)) {
+    return NextResponse.next();
+  }
+
 
   return authMiddleware(request, {
     loginPath: "/api/login",
@@ -96,8 +103,6 @@ export async function middleware(request: NextRequest) {
     handleError: async (error) => {
       console.error('Unhandled authentication error', { error });
 
-
-
       return redirectToLogin(request, {
         path: loginPath,
         publicPaths: publicPaths
@@ -109,7 +114,7 @@ export async function middleware(request: NextRequest) {
 export const config = {
   matcher: [
     "/",
-    "/((?!_next|api|.*\\.).*)",
+    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
     "/api/login",
     "/api/logout",
   ],

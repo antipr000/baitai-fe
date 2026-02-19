@@ -2,9 +2,9 @@ import React from 'react'
 import Link from 'next/link'
 import { Card, CardContent } from '@/components/ui/card'
 import Image from 'next/image'
-import { RecentResultsSection } from '@/components/candidate/dashboard/recent-results-section'
-import { InterviewInvitesSection } from '@/components/candidate/dashboard/interview-invites-section'
-import { PracticeInterviewsSection } from '@/components/candidate/dashboard/practice-interviews-section'
+import { RecentResultsSection, ApiResultItem } from '@/components/candidate/dashboard/recent-results-section'
+import { InterviewInvitesSection, Interview } from '@/components/candidate/dashboard/interview-invites-section'
+import { PracticeInterviewsSection, PracticeInterview } from '@/components/candidate/dashboard/practice-interviews-section'
 import { serverFetch } from '@/lib/api/server'
 
 interface InterviewStats {
@@ -22,14 +22,143 @@ function formatTime(seconds: number): string {
     return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`
 }
 
-export default async function DashboardPage() {
+// --- Helper Functions for Data Fetching ---
+
+function formatDueDate(dueDate: string): string {
+    const due = new Date(dueDate)
+    const now = new Date()
+    const diffTime = due.getTime() - now.getTime()
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+
+    if (diffDays < 0) return 'Overdue'
+    if (diffDays === 0) return 'Due today'
+    if (diffDays === 1) return 'Due tomorrow'
+    return `Due in ${diffDays} days`
+}
+
+function capitalize(str: string): string {
+    if (!str) return 'Easy'
+    return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase() as string
+}
+
+interface InvitesResponse {
+    items: {
+        id: string
+        status: string
+        end_date: string
+        created_at: string
+        title: string
+        company_name: string
+        message: string
+        template_id: string
+    }[]
+}
+
+async function getInterviewInvites(): Promise<Interview[]> {
+    const start = performance.now()
+    const response = await serverFetch<InvitesResponse>('/api/v1/user/interview/invites/', {
+        method: 'POST',
+        body: { page: 1, page_size: 2 }
+    })
+    const end = performance.now()
+    console.log(`[getInterviewInvites] took ${(end - start).toFixed(2)}ms`)
+
+    if (!response) {
+        console.warn('Failed to fetch interview invites')
+        return []
+    }
+
+    return response.items.map((item) => ({
+        id: item.id,
+        company: item.company_name,
+        position: item.title,
+        dueIn: formatDueDate(item.end_date),
+        status: item.status,
+        template_id: item.template_id
+    }))
+}
+
+interface PracticeResponse {
+    items: {
+        id: string
+        title: string
+        role: string
+        duration: number
+        difficulty_level: string
+    }[]
+}
+
+async function getPracticeInterviews(): Promise<PracticeInterview[]> {
+    const start = performance.now()
+    const response = await serverFetch<PracticeResponse>('/api/v1/user/interview/practice/filter/', {
+        method: 'POST',
+        body: {
+            page: 1,
+            page_size: 2,
+            role: ''
+        }
+    })
+    const end = performance.now()
+    console.log(`[getPracticeInterviews] took ${(end - start).toFixed(2)}ms`)
+
+    if (!response || !response.items) {
+        console.warn('Failed to fetch practice interviews')
+        return []
+    }
+
+    return response.items.slice(0, 2).map((item) => ({
+        id: item.id,
+        title: item.title,
+        difficulty: capitalize(item.difficulty_level) as 'Easy' | 'Medium' | 'Difficult',
+        duration: `${item.duration} min`,
+    }))
+}
+
+interface ResultsResponse {
+    items: ApiResultItem[]
+}
+
+async function getRecentResults(): Promise<ApiResultItem[]> {
+    const start = performance.now()
+    const response = await serverFetch<ResultsResponse>('/api/v1/user/interview/results/filter/', {
+        method: 'POST',
+        body: { page: 1, page_size: 5, status: "completed", is_scored: true }
+    })
+    const end = performance.now()
+    console.log(`[getRecentResults] took ${(end - start).toFixed(2)}ms`)
+
+    if (!response || !response.items) {
+        return []
+    }
+    return response.items
+}
+
+async function getStats(): Promise<InterviewStats> {
+    const start = performance.now()
     const response = await serverFetch<InterviewStats>('/api/v1/user/interview/stats/')
+    const end = performance.now()
+    console.log(`[getStats] took ${(end - start).toFixed(2)}ms`)
 
     if (!response) {
         console.warn('Failed to fetch interview stats')
+        return { average_score: 0, total_time: 0, completed: 0, pending: 0 }
     }
+    return response
+}
 
-    const stats = response ?? { average_score: 0, total_time: 0, completed: 0, pending: 0 }
+export default async function DashboardPage() {
+
+
+    // Parallel Data Fetching
+    const start = performance.now()
+    const [stats, invites, practice, results] = await Promise.all([
+        getStats(),
+        getInterviewInvites(),
+        getPracticeInterviews(),
+        getRecentResults()
+    ])
+    const end = performance.now()
+    console.log(`[Dashboard Data Fetch] took ${(end - start).toFixed(2)}ms`)
 
     return (
         <div className='w-full min-h-screen bg-[rgba(248,250,255,1)]'>
@@ -108,12 +237,21 @@ export default async function DashboardPage() {
 
                     {/* Main Content - Two Columns */}
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-15">
-                        <InterviewInvitesSection viewMoreHref="/candidate/company-interviews" />
-                        <PracticeInterviewsSection viewMoreHref="/candidate/practice-interviews" />
+                        <InterviewInvitesSection
+                            interviews={invites}
+                            viewMoreHref="/candidate/company-interviews"
+                        />
+                        <PracticeInterviewsSection
+                            interviews={practice}
+                            viewMoreHref="/candidate/practice-interviews"
+                        />
                     </div>
 
                     {/* Recent Results Section */}
-                    <RecentResultsSection viewMoreHref="/results" />
+                    <RecentResultsSection
+                        results={results}
+                        viewMoreHref="/results"
+                    />
                 </div>
             </div>
         </div>
