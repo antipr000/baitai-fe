@@ -106,16 +106,33 @@ export function ResultDetailSkeleton() {
                         <div className="flex items-center justify-around">
                             {/* Left — Score Info */}
                             <div className="space-y-3">
+                                {/* Performance badge */}
                                 <Skeleton className="h-6 w-40 rounded-full" />
+                                {/* Score number */}
                                 <div className="flex items-baseline gap-1">
-                                    <Skeleton className="h-12 w-20" />
-                                    <Skeleton className="h-7 w-10" />
+                                    <Skeleton className="h-14 w-24" />
+                                    <Skeleton className="h-7 w-12" />
                                 </div>
-                                <Skeleton className="h-4 w-48" />
-                                <Skeleton className="h-5 w-56" />
+                                {/* Interview title */}
+                                <Skeleton className="h-4 w-52" />
+                                {/* Improvement line with icon */}
+                                <div className="flex items-center gap-2">
+                                    <Skeleton className="h-8 w-8 rounded" />
+                                    <Skeleton className="h-4 w-52" />
+                                </div>
                             </div>
-                            {/* Right — Radial Chart placeholder */}
-                            <Skeleton className="h-[180px] w-[180px] rounded-full" />
+
+                            {/* Right — Radial Chart placeholder with ring effect */}
+                            <div className="relative h-[180px] w-[180px]">
+                                <Skeleton className="h-[180px] w-[180px] rounded-full" />
+                                <div className="absolute inset-[16px]">
+                                    <div className="h-full w-full rounded-full bg-[rgba(245,247,255,1)]" />
+                                </div>
+                                <div className="absolute inset-0 flex flex-col items-center justify-center">
+                                    <Skeleton className="h-10 w-14 mb-1" />
+                                    <Skeleton className="h-3 w-10" />
+                                </div>
+                            </div>
                         </div>
                     </CardContent>
                 </Card>
@@ -126,7 +143,7 @@ export function ResultDetailSkeleton() {
                         <Card key={i} className="border bg-muted/50">
                             <CardContent>
                                 <div className="flex items-center gap-3">
-                                    <Skeleton className="h-8 w-8 rounded" />
+                                    <Skeleton className="mr-1 mt-2 h-8 w-8 rounded" />
                                     <div>
                                         <Skeleton className="h-4 w-24 mb-1" />
                                         <Skeleton className="h-6 w-16" />
@@ -139,7 +156,7 @@ export function ResultDetailSkeleton() {
 
                 {/* Charts Row */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-24 mt-12">
-                    {/* Performance Trend */}
+                    {/* Performance Trend — line chart with dots + axis labels */}
                     <Card className="bg-muted/30">
                         <CardHeader className="pb-2">
                             <div className="flex items-center gap-2">
@@ -148,11 +165,33 @@ export function ResultDetailSkeleton() {
                             </div>
                         </CardHeader>
                         <CardContent>
-                            <Skeleton className="h-[200px] w-full rounded" />
+                            <div className="h-[200px] w-full flex flex-col justify-between">
+                                {/* Chart area with fake line dots */}
+                                <div className="flex-1 flex items-end justify-between px-4 gap-2 relative">
+                                    {/* Horizontal grid lines */}
+                                    <div className="absolute inset-0 flex flex-col justify-between py-2">
+                                        {Array.from({ length: 4 }).map((_, i) => (
+                                            <Skeleton key={i} className="h-[1px] w-full opacity-30" />
+                                        ))}
+                                    </div>
+                                    {/* Dots representing data points */}
+                                    {[40, 55, 45, 70, 80, 75].map((h, i) => (
+                                        <div key={i} className="flex flex-col items-center justify-end flex-1 z-10" style={{ height: `${h}%` }}>
+                                            <Skeleton className="h-3 w-3 rounded-full" />
+                                        </div>
+                                    ))}
+                                </div>
+                                {/* X-axis labels */}
+                                <div className="flex justify-between px-4 pt-3">
+                                    {Array.from({ length: 6 }).map((_, i) => (
+                                        <Skeleton key={i} className="h-3 w-10" />
+                                    ))}
+                                </div>
+                            </div>
                         </CardContent>
                     </Card>
 
-                    {/* Skill Metrics */}
+                    {/* Skill Metrics — bar chart with individual bars */}
                     <Card className="bg-muted/30">
                         <CardHeader className="pb-2">
                             <div className="flex items-center gap-2">
@@ -161,7 +200,23 @@ export function ResultDetailSkeleton() {
                             </div>
                         </CardHeader>
                         <CardContent>
-                            <Skeleton className="h-[180px] w-full rounded" />
+                            <div className="h-[180px] w-full flex flex-col">
+                                {/* Bars area */}
+                                <div className="flex-1 flex items-end justify-around px-6 gap-4">
+                                    {[65, 80, 50, 72].map((h, i) => (
+                                        <Skeleton key={i} className="w-4 rounded-full" style={{ height: `${h}%` }} />
+                                    ))}
+                                </div>
+                                {/* Legend row */}
+                                <div className="flex justify-center gap-8 pt-4">
+                                    {Array.from({ length: 4 }).map((_, i) => (
+                                        <div key={i} className="flex items-center gap-1.5">
+                                            <Skeleton className="h-3 w-3 rounded-sm" />
+                                            <Skeleton className="h-3 w-16" />
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
                         </CardContent>
                     </Card>
                 </div>
@@ -173,11 +228,15 @@ export function ResultDetailSkeleton() {
                             <CardContent className="p-6 px-12">
                                 <div className="flex justify-between items-center mb-3">
                                     <Skeleton className="h-5 w-32" />
-                                    <Skeleton className="h-5 w-16" />
+                                    <div className="flex items-baseline gap-0.5">
+                                        <Skeleton className="h-5 w-8" />
+                                        <Skeleton className="h-5 w-8" />
+                                    </div>
                                 </div>
                                 <Skeleton className="h-[6px] w-full rounded-full" />
                                 <Skeleton className="h-4 w-full mt-4" />
-                                <Skeleton className="h-4 w-3/4 mt-1" />
+                                <Skeleton className="h-4 w-5/6 mt-1" />
+                                <Skeleton className="h-4 w-2/3 mt-1" />
                             </CardContent>
                         </Card>
                     ))}
@@ -185,24 +244,41 @@ export function ResultDetailSkeleton() {
 
                 {/* Key Strengths & Scope of Improvement */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-18 mx-10 mt-12">
-                    {Array.from({ length: 2 }).map((_, i) => (
-                        <Card key={i} className="bg-muted/30">
-                            <CardContent className="p-8 px-10">
-                                <div className="flex items-center gap-2 mb-4">
-                                    <Skeleton className="h-5 w-5 rounded" />
-                                    <Skeleton className="h-5 w-36" />
-                                </div>
-                                <div className="space-y-3">
-                                    {Array.from({ length: 3 }).map((_, j) => (
-                                        <div key={j} className="flex items-start gap-2">
-                                            <Skeleton className="mt-2 h-1 w-1 rounded-full shrink-0" />
-                                            <Skeleton className="h-4 w-full" />
-                                        </div>
-                                    ))}
-                                </div>
-                            </CardContent>
-                        </Card>
-                    ))}
+                    {/* Key Strengths */}
+                    <Card className="bg-muted/30">
+                        <CardContent className="p-8 px-10">
+                            <div className="flex items-center gap-2 mb-4">
+                                <Skeleton className="h-5 w-5 rounded" />
+                                <Skeleton className="h-5 w-28" />
+                            </div>
+                            <div className="space-y-3">
+                                {[100, 85, 92, 70].map((w, j) => (
+                                    <div key={j} className="flex items-start gap-2">
+                                        <Skeleton className="mt-2 h-1 w-1 rounded-full shrink-0" />
+                                        <Skeleton className="h-4 shrink-0" style={{ width: `${w}%` }} />
+                                    </div>
+                                ))}
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    {/* Scope of Improvement */}
+                    <Card className="bg-muted/30">
+                        <CardContent className="p-8 px-10">
+                            <div className="flex items-center gap-2 mb-4">
+                                <Skeleton className="h-6 w-6 rounded" />
+                                <Skeleton className="h-5 w-40" />
+                            </div>
+                            <div className="space-y-3">
+                                {[95, 80, 88, 65].map((w, j) => (
+                                    <div key={j} className="flex items-start gap-2">
+                                        <Skeleton className="mt-2 h-1 w-1 rounded-full shrink-0" />
+                                        <Skeleton className="h-4 shrink-0" style={{ width: `${w}%` }} />
+                                    </div>
+                                ))}
+                            </div>
+                        </CardContent>
+                    </Card>
                 </div>
 
                 {/* Action Buttons */}
