@@ -1,6 +1,7 @@
 import React, { Suspense } from 'react'
 import Link from 'next/link'
 import { Card, CardContent } from '@/components/ui/card'
+import { Skeleton } from '@/components/ui/skeleton'
 import Image from 'next/image'
 import { RecentResultsSection, ApiResultItem } from '@/components/candidate/dashboard/recent-results-section'
 import { InterviewInvitesSection, Interview } from '@/components/candidate/dashboard/interview-invites-section'
@@ -46,6 +47,38 @@ function capitalize(str: string): string {
 }
 
 // ─── Async server sub-components ──────────────────────────────────────────────
+
+async function HeaderActions() {
+    try {
+        const response = await serverFetch<{ credits: number }>('/api/v1/user/interview/credits/')
+        const credits = response?.credits ?? 0
+        console.log(credits)
+
+        return (
+            <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2 px-4 py-1.5 translate-y-px rounded-md text-white bg-[linear-gradient(91.24deg,#3E54FB_-35.23%,#C3CEFF_202.55%)] hover:opacity-95 transition-opacity">
+                    <Image src="/candidate/dashboard/coin.svg" alt="Credits" width={28} height={28} />
+                    <span className='font-medium'>{credits} {credits === 1 ? 'Credit' : 'Credits'}</span>
+                </div>
+                <Link href="/results" className="flex items-center gap-2 px-4 py-2 rounded-md text-white bg-[linear-gradient(91.24deg,#3E54FB_-35.23%,#C3CEFF_202.55%)] hover:opacity-90 transition-opacity">
+                    <Image src="/candidate/dashboard/note.svg" alt="Results" width={20} height={20} /> <span className='font-semibold'>View all Results</span>
+                </Link>
+            </div>
+        )
+    } catch (error) {
+        return (
+            <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2 px-4 py-1.5 translate-y-px rounded-md text-white bg-[linear-gradient(91.24deg,#3E54FB_-35.23%,#C3CEFF_202.55%)] opacity-80">
+                    <Image src="/candidate/dashboard/coin.svg" alt="Credits" width={28} height={28} />
+                    <span className='font-medium'>- Credits</span>
+                </div>
+                <Link href="/results" className="flex items-center gap-2 px-4 py-2 rounded-md text-white bg-[linear-gradient(91.24deg,#3E54FB_-35.23%,#C3CEFF_202.55%)] hover:opacity-90 transition-opacity">
+                    <Image src="/candidate/dashboard/note.svg" alt="Results" width={20} height={20} /> <span className='font-semibold'>View all Results</span>
+                </Link>
+            </div>
+        )
+    }
+}
 
 async function StatsCards() {
     const response = await serverFetch<InterviewStats>('/api/v1/user/interview/stats/')
@@ -121,14 +154,31 @@ interface InvitesResponse {
     }[]
 }
 
-async function InvitesCards() {
-    const response = await serverFetch<InvitesResponse>('/api/v1/user/interview/invites/', {
-        method: 'POST',
-        body: { page: 1, page_size: 2 }
-    })
+interface PracticeResponse {
+    items: {
+        id: string
+        title: string
+        role: string
+        difficulty_level: string
+        duration: number
+    }[]
+}
 
-    const invites: Interview[] = response
-        ? response.items.map((item) => ({
+async function InvitesAndPracticeSection() {
+    // Run both server fetches in parallel
+    const [invitesResponse, practiceResponse] = await Promise.all([
+        serverFetch<InvitesResponse>('/api/v1/user/interview/invites/', {
+            method: 'POST',
+            body: { page: 1, page_size: 2 }
+        }),
+        serverFetch<PracticeResponse>('/api/v1/user/interview/practice/filter/', {
+            method: 'POST',
+            body: { page: 1, page_size: 2, role: '' }
+        })
+    ]);
+
+    const invites: Interview[] = invitesResponse
+        ? invitesResponse.items.map((item) => ({
             id: item.id,
             company: item.company_name,
             position: item.title,
@@ -136,47 +186,29 @@ async function InvitesCards() {
             status: item.status,
             template_id: item.template_id,
         }))
-        : []
+        : [];
 
-    return (
-        <InterviewInvitesSection
-            interviews={invites}
-            viewMoreHref="/candidate/company-interviews"
-        />
-    )
-}
-
-interface PracticeResponse {
-    items: {
-        id: string
-        title: string
-        role: string
-        duration: number
-        difficulty_level: string
-    }[]
-}
-
-async function PracticeCards() {
-    const response = await serverFetch<PracticeResponse>('/api/v1/user/interview/practice/filter/', {
-        method: 'POST',
-        body: { page: 1, page_size: 2, role: '' }
-    })
-
-    const practice: PracticeInterview[] = response?.items
-        ? response.items.slice(0, 2).map((item) => ({
+    const practice: PracticeInterview[] = practiceResponse?.items
+        ? practiceResponse.items.slice(0, 2).map((item) => ({
             id: item.id,
             title: item.title,
             difficulty: capitalize(item.difficulty_level) as 'Easy' | 'Medium' | 'Difficult',
             duration: `${item.duration} min`,
         }))
-        : []
+        : [];
 
     return (
-        <PracticeInterviewsSection
-            interviews={practice}
-            viewMoreHref="/candidate/practice-interviews"
-        />
-    )
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-15">
+            <InterviewInvitesSection
+                interviews={invites}
+                viewMoreHref="/candidate/company-interviews"
+            />
+            <PracticeInterviewsSection
+                interviews={practice}
+                viewMoreHref="/candidate/practice-interviews"
+            />
+        </div>
+    );
 }
 
 interface ResultsResponse {
@@ -216,9 +248,14 @@ export default function DashboardPage() {
                             </Link>
                             <h1 className="text-2xl tracking-wide font-bold bg-[linear-gradient(91.24deg,#3E54FB_-35.23%,#C3CEFF_202.55%)] bg-clip-text text-transparent">My Dashboard</h1>
                         </div>
-                        <Link href="/results" className="flex items-center gap-2 px-4 py-2 rounded-md text-white bg-[linear-gradient(91.24deg,#3E54FB_-35.23%,#C3CEFF_202.55%)] hover:opacity-90 transition-opacity">
-                            <Image src="/candidate/dashboard/note.svg" alt="Results" width={20} height={20} /> <span className='font-semibold'>View all Results</span>
-                        </Link>
+                        <Suspense fallback={
+                            <div className="flex items-center gap-3 w-[290px] h-10">
+                                <Skeleton className="w-[120px] h-full rounded-md" />
+                                <Skeleton className="w-[160px] h-full rounded-md" />
+                            </div>
+                        }>
+                            <HeaderActions />
+                        </Suspense>
                     </div>
 
                     {/* Stats Cards */}
@@ -227,14 +264,14 @@ export default function DashboardPage() {
                     </Suspense>
 
                     {/* Interview Invites + Practice Interviews */}
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-15">
-                        <Suspense fallback={<InvitesSkeleton />}>
-                            <InvitesCards />
-                        </Suspense>
-                        <Suspense fallback={<PracticeSkeleton />}>
-                            <PracticeCards />
-                        </Suspense>
-                    </div>
+                    <Suspense fallback={
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-15">
+                            <InvitesSkeleton />
+                            <PracticeSkeleton />
+                        </div>
+                    }>
+                        <InvitesAndPracticeSection />
+                    </Suspense>
 
                     {/* Recent Results */}
                     <Suspense fallback={<ResultsSkeleton />}>

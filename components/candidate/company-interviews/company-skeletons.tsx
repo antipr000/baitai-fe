@@ -18,12 +18,12 @@ export function CompanyStatsSkeleton() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {Array.from({ length: 3 }).map((_, i) => (
                 <Card key={i} className="border bg-muted/50">
-                    <CardContent className="">
+                    <CardContent>
                         <div className="flex items-center gap-3">
-                            <Skeleton className="h-[60px] w-[60px] rounded" />
+                            <Skeleton className="h-[60px] w-[60px] rounded translate-y-1" />
                             <div>
-                                <Skeleton className="h-5 w-32 mb-1" />
-                                <Skeleton className="h-8 w-16" />
+                                <Skeleton className="h-6 w-36 mb-1" />
+                                <Skeleton className="h-7 w-12" />
                             </div>
                         </div>
                     </CardContent>
@@ -47,7 +47,7 @@ export function CompanyTableSkeleton() {
             {/* Table */}
             <div className="overflow-hidden rounded-md border">
                 <Table>
-                    <TableHeader>
+                    <TableHeader className="bg-[rgba(125,141,253,0.05)] border-[rgba(125,141,253,0.3)]">
                         <TableRow>
                             {Array.from({ length: 5 }).map((_, i) => (
                                 <TableHead key={i} className="p-4 px-3">
@@ -58,7 +58,7 @@ export function CompanyTableSkeleton() {
                     </TableHeader>
                     <TableBody>
                         {Array.from({ length: 5 }).map((_, i) => (
-                            <TableRow key={i} className="p-5 px-4">
+                            <TableRow key={i} className="border-none p-5 px-4">
                                 {Array.from({ length: 5 }).map((_, j) => (
                                     <TableCell key={j}>
                                         <Skeleton className="h-4 w-full" />
