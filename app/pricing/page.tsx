@@ -17,7 +17,7 @@ import { clientConfig, serverConfig } from "@/lib/auth/config";
 const plans = [
   {
     name: "Starter",
-    price: "$199/month",
+    price: "$29/month",
     highlight: false,
     description: "For small teams hiring smarter with AI.",
     features: [
@@ -33,7 +33,7 @@ const plans = [
   },
   {
     name: "Pro",
-    price: "$799/month",
+    price: "$99/month",
     highlight: true,
     description: "For growing teams hiring at scale.",
     features: [
@@ -54,7 +54,7 @@ const plans = [
   },
   {
     name: "Enterprise — Custom",
-    price: "starting from $2,500/month",
+    // price: "starting from $2,500/month",
     highlight: false,
     description: "For organizations building custom, large-scale AI interview systems.",
     features: [
