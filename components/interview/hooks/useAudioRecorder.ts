@@ -73,6 +73,7 @@ export function useAudioRecorder(
   const setupSilenceDetectionForArtifactRef = useRef<(() => void) | null>(null)
   const startRecordingInternalForArtifactRef = useRef<(() => Promise<void>) | null>(null)
   const sendEndOfTurnInternalRef = useRef<(() => Promise<void>) | null>(null)
+  const startRecordingInternalRef = useRef<((enableSilenceDetection: boolean) => Promise<void>) | null>(null)
 
   // ============================================
   // Silence Detection
@@ -131,6 +132,12 @@ export function useAudioRecorder(
 
         // Only truly stop when analyser is nulled (via stopSilenceDetection)
         if (!analyserRef.current) {
+          return
+        }
+
+        if (audioContextRef.current?.state === 'suspended') {
+          audioContextRef.current.resume().catch(console.error)
+          silenceRAFRef.current = requestAnimationFrame(checkSilence)
           return
         }
 
@@ -254,6 +261,12 @@ export function useAudioRecorder(
 
         // Only truly stop when analyser is nulled (via stopSilenceDetection)
         if (!analyserRef.current) {
+          return
+        }
+
+        if (audioContextRef.current?.state === 'suspended') {
+          audioContextRef.current.resume().catch(console.error)
+          silenceRAFRef.current = requestAnimationFrame(checkSilence)
           return
         }
 
@@ -503,6 +516,12 @@ export function useAudioRecorder(
           return
         }
 
+        if (audioContextRef.current?.state === 'suspended') {
+          audioContextRef.current.resume().catch(console.error)
+          silenceRAFRef.current = requestAnimationFrame(checkOnset)
+          return
+        }
+
         // Only run in artifact state with mic on
         if (!currentState.isMicOn || currentState.conversationState !== 'artifact') {
           silenceRAFRef.current = requestAnimationFrame(checkOnset)
@@ -629,7 +648,14 @@ export function useAudioRecorder(
       // In listening mode: restart with silence detection
       // In artifact mode: restart without (speech onset detector handles it separately)
       const enableSilence = stateAfterSend.conversationState === 'listening'
-      await startRecordingInternal(enableSilence)
+      await startRecordingInternalRef.current?.(enableSilence)
+
+      // startRecordingInternal(false) calls stopSilenceDetection() which nulls
+      // analyserRef, killing the speech onset detector's RAF loop. Re-establish
+      // the onset detector so it can continue watching for speech.
+      if (stateAfterSend.conversationState === 'artifact' && !stateAfterSend.hasHeardSpeech) {
+        setupSpeechOnsetDetectorRef.current?.()
+      }
     }
   }, [onError])
 
@@ -883,7 +909,8 @@ export function useAudioRecorder(
     setupSilenceDetectionForArtifactRef.current = setupSilenceDetectionForArtifact
     startRecordingInternalForArtifactRef.current = startRecordingInternalForArtifact
     sendEndOfTurnInternalRef.current = sendEndOfTurnInternal
-  }, [setupSpeechOnsetDetector, flushAudioForArtifact, setupSilenceDetectionForArtifact, startRecordingInternalForArtifact, sendEndOfTurnInternal])
+    startRecordingInternalRef.current = startRecordingInternal
+  }, [setupSpeechOnsetDetector, flushAudioForArtifact, setupSilenceDetectionForArtifact, startRecordingInternalForArtifact, sendEndOfTurnInternal, startRecordingInternal])
 
   // ============================================
   // Register Controls with Actions Module
