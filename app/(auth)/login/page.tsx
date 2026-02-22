@@ -27,7 +27,7 @@ import { toast } from "sonner";
 export default function LoginPageV2() {
     const router = useRouter();
     const [email, setEmail] = useState("");
-    const [step, setStep] = useState<"email" | "password" | "register">("email");
+    const [step, setStep] = useState<"email" | "password" | "register" | "verify">("email");
 
     // Registration state
     const [name, setName] = useState("");
@@ -178,7 +178,7 @@ export default function LoginPageV2() {
             // Sign in with Firebase to send verification email
             const credential = await signInWithEmailAndPassword(auth, email.trim(), password);
             await sendEmailVerification(credential.user);
-            toast.success("Verification email sent! Check your inbox.");
+            setStep("verify");
         } catch (err: any) {
             console.log(err);
             if (axios.isAxiosError(err)) {
@@ -351,7 +351,7 @@ export default function LoginPageV2() {
                                     </div>
                                 </form>
                             </div>
-                        ) : (
+                        ) : step === "register" ? (
                             <>
                                 {/* Back button to sign-in step */}
                                 <button
@@ -443,7 +443,41 @@ export default function LoginPageV2() {
                                     </Button>
                                 </form>
                             </>
-                        )}
+                        ) : step === "verify" ? (
+                            <div className="w-full flex flex-col items-center">
+                                {/* Back button */}
+                                <button
+                                    type="button"
+                                    onClick={() => setStep("email")}
+                                    className="self-start mb-5 flex font-medium items-center gap-1 text-sm text-[rgba(58,63,187,1)] hover:underline transition-colors"
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6" /></svg>
+                                    Back
+                                </button>
+
+                                <div className="w-16 h-16 bg-[rgba(58,63,187,0.1)] rounded-full flex flex-col items-center justify-center mb-6">
+                                    <Image src="/auth/email2.svg" alt="Email" width={32} height={32} className="opacity-80" />
+                                </div>
+
+                                <h1 className="md:text-2xl text-xl font-semibold text-center mb-2 text-[rgba(10,13,26,1)]">
+                                    Check your <span className="text-[rgba(107,124,255,1)]">Inbox</span>
+                                </h1>
+                                <p className="md:text-base text-sm text-[rgba(10,13,26,0.7)] text-center mb-10">
+                                    We've sent a verification email to <br />
+                                    <span className="font-medium text-[rgba(10,13,26,1)] block my-1">{email}</span>
+                                    Please verify your email to Login.
+                                </p>
+
+                                <Button
+                                    type="button"
+                                    className="w-full md:h-12 h-11 bg-[rgba(58,63,187,1)] hover:bg-[rgba(58,63,187,0.9)] text-white flex items-center justify-center gap-2 md:text-base text-sm font-medium rounded-md transition-colors duration-200"
+                                    onClick={() => setStep("email")}
+                                >
+                                    Return to login
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-arrow-right"><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></svg>
+                                </Button>
+                            </div>
+                        ) : null}
 
                     </CardContent>
                 </Card>

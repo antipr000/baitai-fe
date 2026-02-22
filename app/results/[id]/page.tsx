@@ -9,6 +9,8 @@ import { BackButton } from "@/components/ui/back-button"
 import { ScoreChart, PerformanceTrendChart, SkillMetricsChart } from "./result-charts"
 import { serverFetch } from "@/lib/api/server"
 import { notFound } from "next/navigation"
+import { Suspense } from "react"
+import { ResultDetailSkeleton } from "@/components/candidate/results/results-skeletons"
 
 // API Response Types
 interface PerformanceTrendItem {
@@ -59,17 +61,10 @@ function formatCategoryName(category: string): string {
         .join(' ')
 }
 
-async function getAggregates(sessionId: string): Promise<AggregatesResponse | null> {
-    return await serverFetch<AggregatesResponse>(`/api/v1/user/interview/results/${sessionId}/aggregates/`)
-}
+// ─── Async content component ─────────────────────────────────────────────────
 
-interface PageProps {
-    params: Promise<{ id: string }>
-}
-
-export default async function ResultPage({ params }: PageProps) {
-    const { id } = await params
-    const data = await getAggregates(id)
+async function ResultContent({ id }: { id: string }) {
+    const data = await serverFetch<AggregatesResponse>(`/api/v1/user/interview/results/${id}/aggregates/`)
     if (!data) {
         notFound()
     }
@@ -313,5 +308,21 @@ export default async function ResultPage({ params }: PageProps) {
                 </div>
             </div>
         </div>
+    )
+}
+
+// ─── Page ──────────────────────────────────────────────────────────────────────
+
+interface PageProps {
+    params: Promise<{ id: string }>
+}
+
+export default async function ResultPage({ params }: PageProps) {
+    const { id } = await params
+
+    return (
+        <Suspense fallback={<ResultDetailSkeleton />}>
+            <ResultContent id={id} />
+        </Suspense>
     )
 }
