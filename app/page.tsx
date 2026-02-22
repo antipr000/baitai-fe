@@ -40,6 +40,8 @@ export default async function Home() {
             <motion.div
               initial={{ opacity: 0 }}
               whileInView={{ opacity: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.2, ease: "easeOut" }}
               className="text-center lg:text-left flex flex-col items-center lg:items-start w-full"
             >
               {/* AI Badge */}
