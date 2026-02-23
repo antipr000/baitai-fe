@@ -71,53 +71,15 @@ const plans = [
 
 
 
-const consumerPlans = [
-  {
-    name: "Starter",
-    price: "Free",
-    highlight: false,
-    description: "Get started with your first AI-powered mock interview — no credit card required.",
-    features: [
-      { icon: "/pricing/person3.svg", text: "2 free AI mock interviews (worth 6 credits)" },
-      { icon: "/pricing/note.svg", text: "Resume import" },
-      { icon: "/pricing/hand.svg", text: "Interview feedback and scoring" },
-    ],
-    button: "Choose Plan",
-    note: null,
-  },
-  {
-    name: "Pro",
-    price: "$19/month",
-    highlight: true,
-    description: "For those committed to leveling up their preparation.",
-    features: [
-      { icon: "/pricing/coin.svg", text: "30 credits included every month (≈ 6–10 interviews)" },
-      { icon: "/pricing/note.svg", text: "Resume import and smart resume suggestions" },
-      { icon: "/pricing/ai.svg", text: "AI-powered resume builder and tailoring" },
-      { icon: "/pricing/chart.svg", text: "Detailed scoring and improvement feedback" },
-      { icon: "/pricing/card.svg", text: "Buy extra credits anytime at flexible rates" },
-    ],
-    extra: {
-      buyCredits: {
-        title: "Buy Credits Anytime:",
-        items: [
-          "$10 → 15 credits (≈ 3–5 interviews)",
-          "$25 → 50 credits (≈ 10–15 interviews)",
-          "$75 → 200 credits (≈ 40–60 interviews)"
-        ]
-      },
-      useCredits: {
-        title: "Use Credits for:",
-        items: [
-          "Practice interviews",
-          "Custom or role-specific mock interviews",
-          "Resume scoring and optimization tools"
-        ]
-      }
-    },
-    button: "Choose Plan",
-    note: null,
-  },
+const creditPacks = [
+  { credits: 10,   interviews: 3,   price: "$1.99" },
+  { credits: 25,   interviews: 8,   price: "$3.99" },
+  { credits: 50,   interviews: 15,  price: "$6.99" },
+  { credits: 100,  interviews: 30,  price: "$12.99", popular: true },
+  { credits: 200,  interviews: 65,  price: "$24.99" },
+  { credits: 350,  interviews: 100, price: "$39.99" },
+  { credits: 500,  interviews: 150, price: "$54.99" },
+  { credits: 1000, interviews: 300, price: "$99.99" },
 ];
 
 export default async function PricingPage() {
@@ -215,66 +177,46 @@ export default async function PricingPage() {
                 </div>
               </TabsContent>
               <TabsContent value="consumer">
-                <div className="w-full flex items-center justify-center text-sm">
-                  <div className=" flex  lg:mx-25   lg:px-0  md:flex-col lg:flex-row flex-col justify-center md:gap-20 gap-5  lg:items-start ">
-                    {consumerPlans.map((plan, idx) => (
-                      <Card
-                        key={plan.name}
+                <div className="w-full">
+                  <p className="text-sm font-medium text-[rgba(96,127,255,0.8)] mb-4 text-center">
+                    Buy credits, practice interviews — no subscription needed.
+                  </p>
+                  <div className="flex items-center justify-center gap-2 mb-6 bg-[rgba(245,255,199,0.9)] border border-[rgba(134,255,110,0.5)] rounded-full px-5 py-2 mx-auto w-fit">
+                    <span className="text-sm font-semibold text-[#4fc238]">🎉 6 free credits at signup</span>
+                    <span className="text-xs font-medium text-[rgba(32,5,117,0.6)]">— worth up to 2 free interviews</span>
+                  </div>
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 lg:mx-10">
+                    {creditPacks.map((pack) => (
+                      <div
+                        key={pack.credits}
                         className={cn(
-                          "  shadow-2xs bg-[rgba(245,255,199,0.7)] rounded-2xl border border-[rgba(58,63,187,1)] relative",
+                          "bg-[rgba(245,255,199,0.7)] rounded-2xl border border-[rgba(58,63,187,1)] p-5 flex flex-col items-center text-center relative",
+                          "popular" in pack && pack.popular && "ring-2 ring-[rgba(107,124,255,1)]",
                         )}
                       >
-                        <CardHeader className="pb-2">
-                          <div className="flex items-center justify-between">
-                            <CardTitle className="sm:text-3xl text-xl font-semibold text-[rgba(96,127,255,1)]">{plan.name}</CardTitle>
-                            <span className={cn("sm:text-lg text-base font-semibold ", plan.name === "Starter" ? "text-[#4fc238]" : "text-[rgba(96,127,255,1)]")}>{plan.price}</span>
-                          </div>
-                          <CardDescription className="text-xs mt-1 font-medium text-[rgba(96,127,255,0.6)]">{plan.description}</CardDescription>
-                          <div className="h-px w-3/4 mx-auto bg-[rgba(134,255,110,0.5)] mt-3" />
-                        </CardHeader>
-                        <CardContent className="pt-2 pb-0">
-                          <ul className="space-y-3 mb-4 sm:px-15  lg:px-0 mt-2">
-                            {plan.features.map((feature, i) => (
-                              <li key={i} className="flex items-center gap-3 sm:text-sm text-xs text-[rgba(32,5,117,1)] font-medium">
-                                <Image src={feature.icon} alt={typeof feature.text === 'string' ? feature.text : ''} width={20} height={20} className="w-6 h-6 object-contain" />
-                                <span className="text-[rgba(32,5,117,1)]">{feature.text}</span>
-                              </li>
-                            ))}
-                          </ul>
-                          {/* Render extra sections for Pro plan */}
-                          {plan.extra && plan.extra.buyCredits && (
-                            <div className=" ml-10 mt-4">
-                              <span className="font-semibold text-[rgba(32,5,117,1)]">{plan.extra.buyCredits.title}</span>
-                              <ul className="ml-6 mt-1 space-y-1 sm:text-sm text-xs text-[rgba(32,5,117,1)]">
-                                {plan.extra.buyCredits.items.map((item, idx) => (
-                                  <li className="text-[rgba(32,5,117,1)]" key={idx}>{item}</li>
-                                ))}
-                              </ul>
-                            </div>
-                          )}
-                          {plan.extra && plan.extra.useCredits && (
-                            <div className=" ml-10 mt-4">
-                              <span className="font-semibold text-[rgba(32,5,117,1)]">{plan.extra.useCredits.title}</span>
-                              <ul className="ml-6 mt-1 space-y-1 sm:text-sm text-xs text-[rgba(32,5,117,1)]">
-                                {plan.extra.useCredits.items.map((item, idx) => (
-                                  <li key={idx} className="flex items-center gap-2 text-[rgba(32,5,117,1)]">
-                                    <Image src="/pricing/tick.svg" alt="check mark" width={16} height={16} className="w-4 h-4 object-contain" aria-hidden />
-                                    <span className="">{item}</span>
-                                  </li>
-                                ))}
-                              </ul>
-                            </div>
-                          )}
-
-                        </CardContent>
-                        <CardFooter className="pt-6">
-                          <Button
-                            className="w-full py-2 sm:text-base text-xs border-2 bg-[rgba(107,124,255,1)] hover:bg-[rgba(107,124,255,1)]  hover:opacity-80 "
-                          >
-                            {plan.button}
-                          </Button>
-                        </CardFooter>
-                      </Card>
+                        {"popular" in pack && pack.popular && (
+                          <span className="absolute -top-3 bg-[rgba(107,124,255,1)] text-white text-xs font-semibold px-3 py-1 rounded-full">
+                            Most Popular
+                          </span>
+                        )}
+                        <span className="text-2xl sm:text-3xl font-bold text-[rgba(96,127,255,1)]">
+                          {pack.credits}
+                        </span>
+                        <span className="text-xs font-medium text-[rgba(32,5,117,0.6)]">
+                          credits
+                        </span>
+                        <span className="text-sm font-medium text-[rgba(32,5,117,1)] mt-2">
+                          Up to {pack.interviews} interviews
+                        </span>
+                        <span className="text-xl font-bold text-[rgba(32,5,117,1)] mt-2">
+                          {pack.price}
+                        </span>
+                        <Button
+                          className="w-full mt-3 text-sm border-2 bg-[rgba(107,124,255,1)] hover:bg-[rgba(107,124,255,1)] hover:opacity-80"
+                        >
+                          Buy
+                        </Button>
+                      </div>
                     ))}
                   </div>
                 </div>
