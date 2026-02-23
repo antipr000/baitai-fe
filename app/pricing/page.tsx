@@ -23,12 +23,13 @@ const plans = [
     features: [
       { icon: "/pricing/person.svg", text: "1 recruiter seat" },
       { icon: "/pricing/template.svg", text: "5 active AI Templates" },
-      { icon: "/pricing/brain.svg", text: "150 AI interview credits/month (≈ 30–50 interviews)" },
+      { icon: "/pricing/brain.svg", text: "30–50 interviews per month" },
       { icon: "/pricing/chart.svg", text: "Scoring, analytics, and feedback" },
       { icon: "/pricing/puzzle.svg", text: "Basic integrations" },
       { icon: "/pricing/email.svg", text: "Email Support" },
     ],
     button: "Select Plan",
+    href: null,
     note: null,
   },
   {
@@ -39,40 +40,32 @@ const plans = [
     features: [
       { icon: "/pricing/person.svg", text: "5 recruiter seats" },
       { icon: "/pricing/template.svg", text: "50 active AI interview templates" },
-      { icon: "/pricing/brain.svg", text: "1,000 AI interview credits/month (≈ 200–300 interviews)" },
+      { icon: "/pricing/brain.svg", text: "150–200 interviews per month" },
       { icon: "/pricing/wheel.svg", text: "Custom interview rubrics & feedback design" },
       { icon: "/pricing/chart.svg", text: "Scoring, analytics, and feedback" },
       { icon: "/pricing/puzzle.svg", text: "Advanced analytics & reporting" },
       { icon: "/pricing/star.svg", text: "Priority support" },
     ],
     button: "Select Plan",
-    note: {
-      icon: "/pricing/card.svg",
-      title: "Additional Credits",
-      detail: "Buy more anytime at $79 per 100 credits (≈ 20–30 extra interviews)",
-    },
+    href: null,
+    note: null,
   },
   {
-    name: "Enterprise — Custom",
-    // price: "starting from $2,500/month",
+    name: "Enterprise",
+    price: "Custom",
     highlight: false,
     description: "For organizations building custom, large-scale AI interview systems.",
     features: [
       { icon: "/pricing/loop.svg", text: "Unlimited recruiter seats & templates" },
-      { icon: "/pricing/brain.svg", text: "3,500+ AI interview credits/month (≈ 700–1,000 interviews)" },
       { icon: "/pricing/wheel.svg", text: "Custom AI models & scoring logic" },
       { icon: "/pricing/laptop.svg", text: "Integrated coding IDE & design interview builder" },
       { icon: "/pricing/shield.svg", text: "SSO & enterprise-grade security" },
       { icon: "/pricing/person2.svg", text: "Dedicated success manager" },
       { icon: "/pricing/star.svg", text: "Custom integrations & SLA support" },
     ],
-    button: "Select Plan",
-
-    note: {
-      icon: "/pricing/card.svg",
-      title: "Additional Credits",
-      detail: "Buy more anytime at $69 per 100 credits (≈ 20–30 extra interviews)",
-    },
+    button: "Chat with us",
+    href: "https://cal.com/soham-mukherjee-8yzald/30min",
+    note: null,
   },
 ];
 
@@ -200,11 +193,21 @@ export default async function PricingPage() {
                           )}
                         </CardContent>
                         <CardFooter className="pt-6">
-                          <Button
-                            className="w-full py-2 sm:text-base text-xs border-2  font-semibold border-[rgba(255,255,255,1)] text-white hover:text-white hover:opacity-80 bg-transparent hover:bg-transparent "
-                          >
-                            {plan.button}
-                          </Button>
+                          {plan.href ? (
+                            <Link href={plan.href} target="_blank" rel="noopener noreferrer" className="w-full">
+                              <Button
+                                className="w-full py-2 sm:text-base text-xs border-2 font-semibold border-[rgba(255,255,255,1)] text-white hover:text-white hover:opacity-80 bg-transparent hover:bg-transparent"
+                              >
+                                {plan.button}
+                              </Button>
+                            </Link>
+                          ) : (
+                            <Button
+                              className="w-full py-2 sm:text-base text-xs border-2 font-semibold border-[rgba(255,255,255,1)] text-white hover:text-white hover:opacity-80 bg-transparent hover:bg-transparent"
+                            >
+                              {plan.button}
+                            </Button>
+                          )}
                         </CardFooter>
                       </Card>
                     ))}
