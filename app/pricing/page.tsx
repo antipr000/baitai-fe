@@ -30,7 +30,6 @@ const plans = [
     ],
     button: "Select Plan",
     href: null,
-    note: null,
   },
   {
     name: "Pro",
@@ -48,7 +47,6 @@ const plans = [
     ],
     button: "Select Plan",
     href: null,
-    note: null,
   },
   {
     name: "Enterprise",
@@ -65,7 +63,6 @@ const plans = [
     ],
     button: "Chat with us",
     href: "https://cal.com/soham-mukherjee-8yzald/30min",
-    note: null,
   },
 ];
 
@@ -144,15 +141,6 @@ export default async function PricingPage() {
                               </li>
                             ))}
                           </ul>
-                          {plan.note && (
-                            <div className="border rounded-2xl bg-transparent border-[rgba(32,5,117,1)] p-3 flex items-start gap-3 mt-4 text-sm">
-                              <Image src={plan.note.icon} alt="credit card" width={24} height={24} className="w-6 h-6 object-contain mt-0.5" aria-hidden />
-                              <div className="text-[rgba(255,255,255,1)]">
-                                <div className="font-bold mb-1">{plan.note.title}</div>
-                                <div className="sm:text-xs text-xs font-medium">{plan.note.detail}</div>
-                              </div>
-                            </div>
-                          )}
                         </CardContent>
                         <CardFooter className="pt-6">
                           {plan.href ? (
