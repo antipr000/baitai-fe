@@ -28,7 +28,8 @@ export function SubscribeButton({ planId, className, children }: SubscribeButton
     setLoading(true);
     try {
       const returnUrl = `${window.location.origin}/billing/result`;
-      const { payment_url } = await subscribeCompany(planId, returnUrl);
+      const { payment_url, money_in_id } = await subscribeCompany(planId, returnUrl);
+      localStorage.setItem("pending_money_in_id", money_in_id);
       window.location.href = payment_url;
     } catch {
       toast.error("Something went wrong. Please try again.");

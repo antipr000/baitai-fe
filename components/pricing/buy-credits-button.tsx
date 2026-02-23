@@ -27,7 +27,8 @@ export function BuyCreditsButton({ planId, className }: BuyCreditsButtonProps) {
     setLoading(true);
     try {
       const returnUrl = `${window.location.origin}/credits/result`;
-      const { payment_url } = await purchaseUserCredits(planId, returnUrl);
+      const { payment_url, money_in_id } = await purchaseUserCredits(planId, returnUrl);
+      localStorage.setItem("pending_money_in_id", money_in_id);
       window.location.href = payment_url;
     } catch {
       toast.error("Something went wrong. Please try again.");
