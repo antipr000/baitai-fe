@@ -148,7 +148,7 @@ export const Footer = () => {
             <div className="flex flex-col gap-4">
               <h3 className="font-semibold text-[rgba(17,24,39,0.9)]">Resources</h3>
               <div className="flex flex-col gap-3">
-                <Link href="#" className="text-[rgba(17,24,39,0.6)] hover:text-primary transition-colors">
+                <Link href="/support" className="text-[rgba(17,24,39,0.6)] hover:text-primary transition-colors">
                   Help Center
                 </Link>
                 <Link href="/privacy" className="text-[rgba(17,24,39,0.6)] hover:text-primary transition-colors">
