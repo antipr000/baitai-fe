@@ -13,10 +13,13 @@ import Link from "next/link";
 import { getTokens } from "next-firebase-auth-edge";
 import { cookies } from "next/headers";
 import { clientConfig, serverConfig } from "@/lib/auth/config";
+import { BuyCreditsButton } from "@/components/pricing/buy-credits-button";
+import { SubscribeButton } from "@/components/pricing/subscribe-button";
 
 const plans = [
   {
     name: "Starter",
+    planId: "pln_starter",
     price: "$29/month",
     highlight: false,
     description: "For small teams hiring smarter with AI.",
@@ -33,6 +36,7 @@ const plans = [
   },
   {
     name: "Pro",
+    planId: "pln_pro",
     price: "$99/month",
     highlight: true,
     description: "For growing teams hiring at scale.",
@@ -50,6 +54,7 @@ const plans = [
   },
   {
     name: "Enterprise",
+    planId: null,
     price: "Custom",
     highlight: false,
     description: "For organizations building custom, large-scale AI interview systems.",
@@ -69,14 +74,14 @@ const plans = [
 
 
 const creditPacks = [
-  { credits: 10,   interviews: 3,   price: "$1.99" },
-  { credits: 25,   interviews: 8,   price: "$3.99" },
-  { credits: 50,   interviews: 15,  price: "$6.99" },
-  { credits: 100,  interviews: 30,  price: "$12.99", popular: true },
-  { credits: 200,  interviews: 65,  price: "$24.99" },
-  { credits: 350,  interviews: 100, price: "$39.99" },
-  { credits: 500,  interviews: 150, price: "$54.99" },
-  { credits: 1000, interviews: 300, price: "$99.99" },
+  { credits: 10,   interviews: 3,   price: "$1.99",  planId: "ucpln_10_credits" },
+  { credits: 25,   interviews: 8,   price: "$3.99",  planId: "ucpln_25_credits" },
+  { credits: 50,   interviews: 15,  price: "$6.99",  planId: "ucpln_50_credits" },
+  { credits: 100,  interviews: 30,  price: "$12.99", planId: "ucpln_100_credits", popular: true },
+  { credits: 200,  interviews: 65,  price: "$24.99", planId: "ucpln_200_credits" },
+  { credits: 350,  interviews: 100, price: "$39.99", planId: "ucpln_350_credits" },
+  { credits: 500,  interviews: 150, price: "$54.99", planId: "ucpln_500_credits" },
+  { credits: 1000, interviews: 300, price: "$99.99", planId: "ucpln_1000_credits" },
 ];
 
 export default async function PricingPage() {
@@ -151,6 +156,13 @@ export default async function PricingPage() {
                                 {plan.button}
                               </Button>
                             </Link>
+                          ) : plan.planId ? (
+                            <SubscribeButton
+                              planId={plan.planId}
+                              className="w-full py-2 sm:text-base text-xs border-2 font-semibold border-[rgba(255,255,255,1)] text-white hover:text-white hover:opacity-80 bg-transparent hover:bg-transparent"
+                            >
+                              {plan.button}
+                            </SubscribeButton>
                           ) : (
                             <Button
                               className="w-full py-2 sm:text-base text-xs border-2 font-semibold border-[rgba(255,255,255,1)] text-white hover:text-white hover:opacity-80 bg-transparent hover:bg-transparent"
@@ -199,11 +211,10 @@ export default async function PricingPage() {
                         <span className="text-xl font-bold text-[rgba(32,5,117,1)] mt-2">
                           {pack.price}
                         </span>
-                        <Button
+                        <BuyCreditsButton
+                          planId={pack.planId}
                           className="w-full mt-3 text-sm border-2 bg-[rgba(107,124,255,1)] hover:bg-[rgba(107,124,255,1)] hover:opacity-80"
-                        >
-                          Buy
-                        </Button>
+                        />
                       </div>
                     ))}
                   </div>
