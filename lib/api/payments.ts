@@ -18,10 +18,14 @@ export async function purchaseUserCredits(planId: string, returnUrl: string): Pr
   return response.data as PurchaseResponse
 }
 
-export async function verifyUserSession(sessionId: string): Promise<VerifySessionResponse> {
+export async function verifyUserSession(sessionId: string, token?: string): Promise<VerifySessionResponse> {
+  const headers: Record<string, string> = {}
+  if (token) {
+    headers.Authorization = `Bearer ${token}`
+  }
   const response = await api.post('/api/v1/subscriptions/payments/user/verify-session/', {
     session_id: sessionId,
-  })
+  }, { headers })
   return response.data as VerifySessionResponse
 }
 
