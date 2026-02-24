@@ -2,7 +2,7 @@
 
 import axios from "axios";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { auth } from "@/lib/firebase";
@@ -26,6 +26,8 @@ import { toast } from "sonner";
 
 export default function LoginPageV2() {
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const redirectTo = searchParams.get("redirect") || "/candidate/dashboard";
     const [email, setEmail] = useState("");
     const [step, setStep] = useState<"email" | "password" | "register" | "verify">("email");
 
@@ -85,7 +87,7 @@ export default function LoginPageV2() {
                 },
             });
             toast.success("Successfully logged in! Redirecting...");
-            window.location.href = "/candidate/dashboard";
+            window.location.href = redirectTo;
         } catch (err: any) {
             console.log(err);
             if (axios.isAxiosError(err)) {
@@ -116,7 +118,7 @@ export default function LoginPageV2() {
                         Authorization: `Bearer ${idToken}`,
                     },
                 });
-                window.location.href = "/candidate/dashboard";
+                window.location.href = redirectTo;
             } else {
                 toast.error("Please verify your email before signing in.");
             }
