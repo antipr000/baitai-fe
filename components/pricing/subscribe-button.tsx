@@ -3,32 +3,24 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { subscribeCompany } from "@/lib/api/payments";
-import { useAuth } from "@/lib/auth/authContext";
-import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 
 interface SubscribeButtonProps {
   planId: string;
+  authToken?: string;
   className?: string;
   children: React.ReactNode;
 }
 
-export function SubscribeButton({ planId, className, children }: SubscribeButtonProps) {
+export function SubscribeButton({ planId, authToken, className, children }: SubscribeButtonProps) {
   const [loading, setLoading] = useState(false);
-  const { user } = useAuth();
-  const router = useRouter();
 
   const handleSubscribe = async () => {
-    if (!user) {
-      router.push("/login");
-      return;
-    }
-
     setLoading(true);
     try {
       const returnUrl = `${window.location.origin}/billing/result`;
-      const { payment_url, money_in_id } = await subscribeCompany(planId, returnUrl);
+      const { payment_url, money_in_id } = await subscribeCompany(planId, returnUrl, authToken);
       localStorage.setItem("pending_money_in_id", money_in_id);
       window.location.href = payment_url;
     } catch {

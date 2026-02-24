@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { cn } from "@/lib/utils";
+import { cn, rootDomain } from "@/lib/utils";
 import { Separator } from "@radix-ui/react-separator";
 import { Menu } from "lucide-react";
 import Image from "next/image";
@@ -14,7 +14,9 @@ import { getTokens } from "next-firebase-auth-edge";
 import { cookies } from "next/headers";
 import { clientConfig, serverConfig } from "@/lib/auth/config";
 import { BuyCreditsButton } from "@/components/pricing/buy-credits-button";
-import { SubscribeButton } from "@/components/pricing/subscribe-button";
+
+const teamProtocol = rootDomain.includes("localhost") ? "http" : "https";
+const teamPricingUrl = `${teamProtocol}://team.${rootDomain}/company/pricing`;
 
 const plans = [
   {
@@ -157,12 +159,13 @@ export default async function PricingPage() {
                               </Button>
                             </Link>
                           ) : plan.planId ? (
-                            <SubscribeButton
-                              planId={plan.planId}
-                              className="w-full py-2 sm:text-base text-xs border-2 font-semibold border-[rgba(255,255,255,1)] text-white hover:text-white hover:opacity-80 bg-transparent hover:bg-transparent"
-                            >
-                              {plan.button}
-                            </SubscribeButton>
+                            <Link href={teamPricingUrl} className="w-full">
+                              <Button
+                                className="w-full py-2 sm:text-base text-xs border-2 font-semibold border-[rgba(255,255,255,1)] text-white hover:text-white hover:opacity-80 bg-transparent hover:bg-transparent"
+                              >
+                                {plan.button}
+                              </Button>
+                            </Link>
                           ) : (
                             <Button
                               className="w-full py-2 sm:text-base text-xs border-2 font-semibold border-[rgba(255,255,255,1)] text-white hover:text-white hover:opacity-80 bg-transparent hover:bg-transparent"

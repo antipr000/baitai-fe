@@ -25,17 +25,25 @@ export async function verifyUserSession(sessionId: string): Promise<VerifySessio
   return response.data as VerifySessionResponse
 }
 
-export async function subscribeCompany(planId: string, returnUrl: string): Promise<PurchaseResponse> {
+export async function subscribeCompany(planId: string, returnUrl: string, token?: string): Promise<PurchaseResponse> {
+  const headers: Record<string, string> = {}
+  if (token) {
+    headers.Authorization = `Bearer ${token}`
+  }
   const response = await api.post('/api/v1/subscriptions/payments/company/subscribe/', {
     plan_id: planId,
     return_url: returnUrl,
-  })
+  }, { headers })
   return response.data as PurchaseResponse
 }
 
-export async function verifyCompanySession(sessionId: string): Promise<VerifySessionResponse> {
+export async function verifyCompanySession(sessionId: string, token?: string): Promise<VerifySessionResponse> {
+  const headers: Record<string, string> = {}
+  if (token) {
+    headers.Authorization = `Bearer ${token}`
+  }
   const response = await api.post('/api/v1/subscriptions/payments/company/verify-session/', {
     session_id: sessionId,
-  })
+  }, { headers })
   return response.data as VerifySessionResponse
 }

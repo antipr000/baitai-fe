@@ -20,7 +20,7 @@ export function BuyCreditsButton({ planId, className }: BuyCreditsButtonProps) {
 
   const handleBuy = async () => {
     if (!user) {
-      router.push("/login");
+      router.push("/login?redirect=/pricing");
       return;
     }
 
