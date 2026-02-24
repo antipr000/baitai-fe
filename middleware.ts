@@ -76,7 +76,7 @@ export async function middleware(request: NextRequest) {
       }
 
       // Block non-company routes on team subdomain (except API routes)
-      if (isTeam && !pathname.startsWith('/company') && !pathname.startsWith('/api') && !pathname.startsWith('/results/')) {
+      if (isTeam && !pathname.startsWith('/company') && !pathname.startsWith('/api') && !pathname.startsWith('/results/') && !pathname.startsWith('/billing/')) {
         return NextResponse.redirect(new URL('/company/dashboard', request.url));
       }
 
