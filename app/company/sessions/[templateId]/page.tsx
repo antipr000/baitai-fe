@@ -9,6 +9,9 @@ import { BackButton } from '@/components/ui/back-button'
 import { InviteForm } from '@/components/invite-form'
 import { serverFetch } from '@/lib/api/server'
 import { formatDate } from '@/lib/utils'
+import { cookies } from 'next/headers'
+import { getTokens } from 'next-firebase-auth-edge'
+import { clientConfig, serverConfig } from '@/lib/auth/config'
 
 interface SessionItem {
     id: string
@@ -62,10 +65,17 @@ async function getSessions(templateId: string): Promise<Candidate[]> {
 
 export default async function SessionPage({ params }: { params: Promise<{ templateId: string }> }) {
     const { templateId } = await params
-    const [candidates, stats] = await Promise.all([
+    const [candidates, stats, tokens] = await Promise.all([
         getSessions(templateId),
-        getStats(templateId)
+        getStats(templateId),
+        getTokens(await cookies(), {
+            apiKey: clientConfig.apiKey,
+            cookieName: serverConfig.cookieName,
+            cookieSignatureKeys: serverConfig.cookieSignatureKeys,
+            serviceAccount: serverConfig.serviceAccount,
+        })
     ])
+    const authToken = tokens?.token
 
     return (
         <div className='w-full min-h-screen bg-[rgba(248,250,255,1)]'>
@@ -81,7 +91,7 @@ export default async function SessionPage({ params }: { params: Promise<{ templa
                                 <p className="text-[rgba(84,86,95,0.5)]  font-medium">Interview Dashboard</p>
                             </div>
                         </div>
-                        <InviteForm templateId={templateId}>
+                        <InviteForm templateId={templateId} authToken={authToken}>
                             <Button size="lg" className="bg-[linear-gradient(93.21deg,rgba(242,129,68,0.9)_-31.21%,rgba(255,178,136,0.9)_174.4%)] hover:opacity-90 text-white flex items-center gap-2 rounded-lg px-6 ">
                                 <Image src="/company/candidates/mail.svg" alt="Mail" width={20} height={20} className="h-4 w-4" />
                                 <span className="font-semibold">Send Invites</span>

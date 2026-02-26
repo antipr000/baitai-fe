@@ -12,9 +12,10 @@ import Image from "next/image";
 interface WaitlistFormProps {
   children: React.ReactNode;
   templateId: string;
+  authToken?: string;
 }
 
-export function InviteForm({ children, templateId }: WaitlistFormProps) {
+export function InviteForm({ children, templateId, authToken }: WaitlistFormProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [emails, setEmails] = useState("");
   const [message, setMessage] = useState("");
@@ -36,6 +37,8 @@ export function InviteForm({ children, templateId }: WaitlistFormProps) {
         template_id: templateId,
         emails: emailList,
         message
+      }, {
+        headers: authToken ? { Authorization: `Bearer ${authToken}` } : undefined
       });
 
       toast.success("Invites sent successfully!");
