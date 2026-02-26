@@ -21,7 +21,8 @@ import {
     type Section,
     type EvaluationCriteria,
     type EvalCategory,
-    type DifficultyLevel
+    type DifficultyLevel,
+    type ArtifactType
 } from '@/stores/interview-store'
 
 const EVAL_CATEGORIES: { value: EvalCategory; label: string }[] = [
@@ -102,6 +103,27 @@ export const SectionList = () => {
                                     placeholder="e.g., Technical Skills Assessment"
                                     className="bg-indigo-50/20 border-gray-200"
                                 />
+                            </div>
+
+                            {/* Assessment Format */}
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium text-[rgba(10,13,26,0.82)] block">
+                                    Assessment Format
+                                </label>
+                                <Select
+                                    value={section.artifactType || 'none'}
+                                    onValueChange={(val: ArtifactType) => updateSection(sectionIndex, { artifactType: val })}
+                                >
+                                    <SelectTrigger className="bg-white border-[rgba(55,58,70,0.05)]">
+                                        <SelectValue placeholder="-Choose Format-" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="none">None</SelectItem>
+                                        <SelectItem value="document">Document</SelectItem>
+                                        <SelectItem value="diagram">Diagram</SelectItem>
+                                        <SelectItem value="code">Code</SelectItem>
+                                    </SelectContent>
+                                </Select>
                             </div>
 
                             {/* Top Config Row */}
