@@ -1,6 +1,5 @@
 import React, { Suspense } from 'react'
 import Link from 'next/link'
-import { redirect } from 'next/navigation'
 import { Card, CardContent } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import Image from 'next/image'
@@ -233,18 +232,7 @@ async function ResultsCards() {
 }
 
 
-interface UserPreferences {
-    role: string | null
-    experience: string | null
-    preferences_set: boolean
-}
-
-export default async function DashboardPage() {
-    const prefs = await serverFetch<UserPreferences>('/api/v1/user/preferences/')
-    if (prefs && prefs.preferences_set === false) {
-        redirect('/preferences')
-    }
-
+export default function DashboardPage() {
     return (
         <div className='w-full min-h-screen bg-[rgba(248,250,255,1)]'>
             <div className="min-h-screen max-w-full md:max-w-4xl lg:max-w-5xl xl:max-w-7xl mx-auto">
