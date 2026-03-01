@@ -76,8 +76,7 @@ export default function LoginPageV2() {
             const userCredential = await signInWithPopup(auth, provider);
             const idToken = await userCredential.user.getIdToken();
 
-            // Send token to backend
-            await api.post("api/v1/user/auth/token/", {
+            const tokenResponse = await api.post("api/v1/user/auth/token/", {
                 token: idToken,
             });
 
@@ -87,7 +86,8 @@ export default function LoginPageV2() {
                 },
             });
             toast.success("Successfully logged in! Redirecting...");
-            window.location.href = redirectTo;
+            const preferencesSet = tokenResponse.data?.preferences_set;
+            window.location.href = preferencesSet === false ? "/preferences" : redirectTo;
         } catch (err: any) {
             console.log(err);
             if (axios.isAxiosError(err)) {
@@ -118,7 +118,9 @@ export default function LoginPageV2() {
                         Authorization: `Bearer ${idToken}`,
                     },
                 });
-                window.location.href = redirectTo;
+                const prefsResponse = await api.get("/api/v1/user/preferences/");
+                const preferencesSet = prefsResponse.data?.preferences_set;
+                window.location.href = preferencesSet === false ? "/preferences" : redirectTo;
             } else {
                 toast.error("Please verify your email before signing in.");
             }
