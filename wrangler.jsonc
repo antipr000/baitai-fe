@@ -1,7 +1,7 @@
 {
   "$schema": "./node_modules/wrangler/config-schema.json",
   "main": ".open-next/worker.js",
-  "name": "baitai-fe-test",
+  "name": "baitai-fe",
   "compatibility_date": "2025-12-30",
   "compatibility_flags": [
     "nodejs_compat"
@@ -10,6 +10,16 @@
     "directory": ".open-next/assets",
     "binding": "ASSETS"
   },
+  "placement": {
+    "mode": "smart"
+  },
+  // Add your routes here when you have the domain configured
+  // Uncomment and update with your actual domain
+  // "routes": [
+  //   { "pattern": "baitai.com/*", "zone_name": "baitai.com" },
+  //   { "pattern": "www.baitai.com/*", "zone_name": "baitai.com" },
+  //   { "pattern": "company.baitai.com/*", "zone_name": "baitai.com" }
+  // ],
   "observability": {
     "logs": {
       "enabled": true,
@@ -18,9 +28,9 @@
       "persist": true
     },
     "traces": {
-      "enabled": false,
-      "persist": true,
-      "head_sampling_rate": 1
+      "enabled": true,
+      "head_sampling_rate": 1,
+      "persist": true
     }
   }
 }

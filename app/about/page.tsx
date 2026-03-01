@@ -3,7 +3,6 @@ import { MobileNavBar } from "@/components/mobile-navbar";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
-import { motion, AnimatePresence } from "motion/react";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import Image from "next/image";
 
@@ -70,7 +69,7 @@ export default async function AboutPage() {
 
                 <Card className="flex flex-col items-center p-6 bg-white pb-10">
                     < Image
-                        src="/about/hero.png"
+                        src="/about/hero.webp"
                         alt="AI Interview Illustration"
                         width={800}
                         height={800}

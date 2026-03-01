@@ -2,67 +2,24 @@ import React from 'react'
 import Link from 'next/link'
 import { PracticeInterviewCard } from './practice-interview-card'
 import { ArrowRight, BookOpen } from 'lucide-react'
-import { serverFetch } from '@/lib/api/server'
 
-interface ApiPracticeInterview {
-  id: string
-  title: string
-  role: string
-  duration: number
-  difficulty_level: string
-}
 
-interface ApiResponse {
-  items: ApiPracticeInterview[]
-  total: number
-  page: number
-  page_size: number
-  total_pages: number
-}
-
-interface PracticeInterview {
+export interface PracticeInterview {
   id: string
   title: string
   difficulty: 'Easy' | 'Medium' | 'Difficult'
   duration: string
 }
 
-function capitalize(str: string): string {
-  if (!str) return 'Easy'
-  return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase() as 'Easy' | 'Medium' | 'Difficult'
-}
-
-async function getPracticeInterviews(): Promise<PracticeInterview[]> {
-  const response = await serverFetch<ApiResponse>('/api/v1/user/interview/practice/filter/', {
-    method: 'POST',
-    body: {
-      page: 1,
-      page_size: 2,
-      role: ''
-    }
-  })
-
-  if (!response || !response.items) {
-    console.warn('Failed to fetch practice interviews')
-    return []
-  }
-
-  return response.items.slice(0, 2).map((item) => ({
-    id: item.id,
-    title: item.title,
-    difficulty: capitalize(item.difficulty_level) as PracticeInterview['difficulty'],
-    duration: `${item.duration} min`,
-  }))
-}
-
 interface PracticeInterviewsSectionProps {
+  interviews: PracticeInterview[]
   viewMoreHref?: string
 }
 
-export async function PracticeInterviewsSection({
+export function PracticeInterviewsSection({
+  interviews,
   viewMoreHref = '/candidate/practice-interviews'
 }: PracticeInterviewsSectionProps) {
-  const interviews = await getPracticeInterviews()
 
   return (
     <div>
