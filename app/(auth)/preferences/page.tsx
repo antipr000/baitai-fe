@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
@@ -15,40 +15,44 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import api from "@/lib/api/client";
+import { useAuth } from "@/lib/auth/authContext";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 
-interface MetadataOption {
-    value: string;
-    label: string;
-}
+const ROLES = [
+    { value: "software_engineer", label: "Software Engineer" },
+    { value: "frontend_engineer", label: "Frontend Engineer" },
+    { value: "backend_engineer", label: "Backend Engineer" },
+    { value: "fullstack_engineer", label: "Fullstack Engineer" },
+    { value: "data_scientist", label: "Data Scientist" },
+    { value: "data_engineer", label: "Data Engineer" },
+    { value: "ml_engineer", label: "ML Engineer" },
+    { value: "devops_engineer", label: "DevOps Engineer" },
+    { value: "mobile_engineer", label: "Mobile Engineer" },
+    { value: "qa_engineer", label: "QA Engineer" },
+    { value: "product_manager", label: "Product Manager" },
+    { value: "designer", label: "Designer" },
+    { value: "other", label: "Other" },
+] as const;
 
-interface PreferencesMetadata {
-    roles: MetadataOption[];
-    experience_levels: MetadataOption[];
-}
+const EXPERIENCE_LEVELS = [
+    { value: "entry_level", label: "Entry Level" },
+    { value: "mid_level", label: "Mid Level" },
+    { value: "senior", label: "Senior" },
+    { value: "staff", label: "Staff" },
+    { value: "principal", label: "Principal" },
+    { value: "manager", label: "Manager" },
+    { value: "director", label: "Director" },
+    { value: "vp", label: "VP" },
+    { value: "c_level", label: "C-Level" },
+] as const;
 
 export default function PreferencesPage() {
     const router = useRouter();
+    const { setPreferencesStatus } = useAuth();
     const [role, setRole] = useState("");
     const [experience, setExperience] = useState("");
-    const [metadata, setMetadata] = useState<PreferencesMetadata | null>(null);
     const [loading, setLoading] = useState(false);
-    const [fetching, setFetching] = useState(true);
-
-    useEffect(() => {
-        const fetchMetadata = async () => {
-            try {
-                const response = await api.get("/api/v1/user/preferences/metadata/");
-                setMetadata(response.data);
-            } catch {
-                toast.error("Failed to load preferences options.");
-            } finally {
-                setFetching(false);
-            }
-        };
-        fetchMetadata();
-    }, []);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -65,6 +69,7 @@ export default function PreferencesPage() {
         setLoading(true);
         try {
             await api.post("/api/v1/user/preferences/", { role, experience });
+            setPreferencesStatus(true);
             toast.success("Preferences saved!");
             router.push("/candidate/dashboard");
         } catch {
@@ -124,40 +129,89 @@ export default function PreferencesPage() {
                             Help us personalize your experience
                         </p>
 
-                        {fetching ? (
-                            <div className="flex items-center justify-center py-12">
-                                <Loader2 className="size-8 animate-spin text-[rgba(58,63,187,1)]" />
+                        <form onSubmit={handleSubmit} className="w-full space-y-5">
+                            {/* Role */}
+                            <div className="space-y-2">
+                                <label className="flex items-center gap-2 md:text-base text-sm font-medium text-[rgba(10,13,26,1)]">
+                                    <Image
+                                        src="/auth/user2.svg"
+                                        alt="Role"
+                                        width={20}
+                                        height={20}
+                                    />
+                                    Your Role
+                                </label>
+                                <Select value={role} onValueChange={setRole}>
+                                    <SelectTrigger className="w-full md:h-12 h-11 bg-[rgba(245,247,255,1)] border-[rgba(58,63,187,0.2)] text-sm md:text-base">
+                                        <SelectValue placeholder="Select your role" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {ROLES.map((r) => (
+                                            <SelectItem key={r.value} value={r.value}>
+                                                {r.label}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
                             </div>
-                        ) : (
-                            <form onSubmit={handleSubmit} className="w-full space-y-5">
-                                {/* Role */}
-                                <div className="space-y-2">
-                                    <label className="flex items-center gap-2 md:text-base text-sm font-medium text-[rgba(10,13,26,1)]">
-                                        <Image
-                                            src="/auth/user2.svg"
-                                            alt="Role"
-                                            width={20}
-                                            height={20}
-                                        />
-                                        Your Role
-                                    </label>
-                                    <Select value={role} onValueChange={setRole}>
-                                        <SelectTrigger className="w-full md:h-12 h-11 bg-[rgba(245,247,255,1)] border-[rgba(58,63,187,0.2)] text-sm md:text-base">
-                                            <SelectValue placeholder="Select your role" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {metadata?.roles.map((r) => (
-                                                <SelectItem key={r.value} value={r.value}>
-                                                    {r.label}
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                </div>
 
-                                {/* Experience */}
-                                <div className="space-y-2">
-                                    <label className="flex items-center gap-2 md:text-base text-sm font-medium text-[rgba(10,13,26,1)]">
+                            {/* Experience */}
+                            <div className="space-y-2">
+                                <label className="flex items-center gap-2 md:text-base text-sm font-medium text-[rgba(10,13,26,1)]">
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        width="20"
+                                        height="20"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        strokeWidth="2"
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        className="text-[rgba(10,13,26,0.8)]"
+                                    >
+                                        <path d="M12 20a8 8 0 1 0 0-16 8 8 0 0 0 0 16Z" />
+                                        <path d="M12 14a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z" />
+                                        <path d="M12 2v2" />
+                                        <path d="M12 22v-2" />
+                                        <path d="m17 20.66-1-1.73" />
+                                        <path d="M11 10.27 7 3.34" />
+                                        <path d="m20.66 17-1.73-1" />
+                                        <path d="m3.34 7 1.73 1" />
+                                        <path d="M14 12h8" />
+                                        <path d="M2 12h2" />
+                                        <path d="m20.66 7-1.73 1" />
+                                        <path d="m3.34 17 1.73-1" />
+                                        <path d="m17 3.34-1 1.73" />
+                                        <path d="m11 13.73-4 6.93" />
+                                    </svg>
+                                    Experience Level
+                                </label>
+                                <Select value={experience} onValueChange={setExperience}>
+                                    <SelectTrigger className="w-full md:h-12 h-11 bg-[rgba(245,247,255,1)] border-[rgba(58,63,187,0.2)] text-sm md:text-base">
+                                        <SelectValue placeholder="Select your experience level" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {EXPERIENCE_LEVELS.map((exp) => (
+                                            <SelectItem key={exp.value} value={exp.value}>
+                                                {exp.label}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+
+                            {/* Submit Button */}
+                            <Button
+                                type="submit"
+                                className="w-full md:h-14 h-12 bg-[rgba(58,63,187,1)] hover:bg-[rgba(58,63,187,0.9)] text-white flex items-center justify-center gap-2 md:text-base text-sm font-medium rounded-md transition-colors duration-200 mt-4"
+                                disabled={loading || !role || !experience}
+                            >
+                                {loading ? (
+                                    <Loader2 className="size-5 animate-spin" />
+                                ) : (
+                                    <>
+                                        Continue
                                         <svg
                                             xmlns="http://www.w3.org/2000/svg"
                                             width="20"
@@ -168,70 +222,15 @@ export default function PreferencesPage() {
                                             strokeWidth="2"
                                             strokeLinecap="round"
                                             strokeLinejoin="round"
-                                            className="text-[rgba(10,13,26,0.8)]"
+                                            className="lucide lucide-arrow-right"
                                         >
-                                            <path d="M12 20a8 8 0 1 0 0-16 8 8 0 0 0 0 16Z" />
-                                            <path d="M12 14a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z" />
-                                            <path d="M12 2v2" />
-                                            <path d="M12 22v-2" />
-                                            <path d="m17 20.66-1-1.73" />
-                                            <path d="M11 10.27 7 3.34" />
-                                            <path d="m20.66 17-1.73-1" />
-                                            <path d="m3.34 7 1.73 1" />
-                                            <path d="M14 12h8" />
-                                            <path d="M2 12h2" />
-                                            <path d="m20.66 7-1.73 1" />
-                                            <path d="m3.34 17 1.73-1" />
-                                            <path d="m17 3.34-1 1.73" />
-                                            <path d="m11 13.73-4 6.93" />
+                                            <path d="M5 12h14" />
+                                            <path d="m12 5 7 7-7 7" />
                                         </svg>
-                                        Experience Level
-                                    </label>
-                                    <Select value={experience} onValueChange={setExperience}>
-                                        <SelectTrigger className="w-full md:h-12 h-11 bg-[rgba(245,247,255,1)] border-[rgba(58,63,187,0.2)] text-sm md:text-base">
-                                            <SelectValue placeholder="Select your experience level" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {metadata?.experience_levels.map((exp) => (
-                                                <SelectItem key={exp.value} value={exp.value}>
-                                                    {exp.label}
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-
-                                {/* Submit Button */}
-                                <Button
-                                    type="submit"
-                                    className="w-full md:h-14 h-12 bg-[rgba(58,63,187,1)] hover:bg-[rgba(58,63,187,0.9)] text-white flex items-center justify-center gap-2 md:text-base text-sm font-medium rounded-md transition-colors duration-200 mt-4"
-                                    disabled={loading || !role || !experience}
-                                >
-                                    {loading ? (
-                                        <Loader2 className="size-5 animate-spin" />
-                                    ) : (
-                                        <>
-                                            Continue
-                                            <svg
-                                                xmlns="http://www.w3.org/2000/svg"
-                                                width="20"
-                                                height="20"
-                                                viewBox="0 0 24 24"
-                                                fill="none"
-                                                stroke="currentColor"
-                                                strokeWidth="2"
-                                                strokeLinecap="round"
-                                                strokeLinejoin="round"
-                                                className="lucide lucide-arrow-right"
-                                            >
-                                                <path d="M5 12h14" />
-                                                <path d="m12 5 7 7-7 7" />
-                                            </svg>
-                                        </>
-                                    )}
-                                </Button>
-                            </form>
-                        )}
+                                    </>
+                                )}
+                            </Button>
+                        </form>
                     </CardContent>
                 </Card>
             </div>
