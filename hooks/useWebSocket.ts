@@ -44,6 +44,7 @@ export const useWebSocket = ({
         if (!sessionId) return;
 
         let isUnmounted = false;
+        let keepaliveInterval: NodeJS.Timeout | null = null;
 
         const connectWebSocket = () => {
             const apiUrl = process.env.NEXT_PUBLIC_API_URL;
@@ -67,6 +68,26 @@ export const useWebSocket = ({
                 console.log('[WebSocket] WebSocket connected');
                 setIsConnected(true);
                 onConnectRef.current?.();
+
+                // Start keepalive ping every 30 seconds
+                keepaliveInterval = setInterval(() => {
+                    if (socket.readyState === WebSocket.OPEN) {
+                        try {
+                            const pingMessage = JSON.stringify({ type: 'ping' });
+                            socket.send(pingMessage);
+                            console.log('[WebSocket] Sent keepalive ping');
+                        } catch (error) {
+                            console.error('[WebSocket] Error sending keepalive ping:', error);
+                        }
+                    } else {
+                        console.warn('[WebSocket] Cannot send keepalive ping, socket not open');
+                        if (keepaliveInterval) {
+                            clearInterval(keepaliveInterval);
+                            keepaliveInterval = null;
+                        }
+                    }
+                }, 30000); // Send ping every 30 seconds
+                console.log('[WebSocket] Started keepalive interval (30s)');
             };
 
             socket.onmessage = (event) => {
@@ -91,6 +112,13 @@ export const useWebSocket = ({
                 setIsConnected(false);
                 onDisconnectRef.current?.();
 
+                // Clear keepalive interval
+                if (keepaliveInterval) {
+                    clearInterval(keepaliveInterval);
+                    keepaliveInterval = null;
+                    console.log('[WebSocket] Cleared keepalive interval');
+                }
+
                 // Reconnection logic could go here if needed, 
                 // but we respect server-initiated closes 4000/4001
                 if (event.code === 4000 || event.code === 4001) {
@@ -104,6 +132,10 @@ export const useWebSocket = ({
         // Cleanup on unmount or sessionId change
         return () => {
             isUnmounted = true;
+            if (keepaliveInterval) {
+                clearInterval(keepaliveInterval);
+                keepaliveInterval = null;
+            }
             if (ws.current) {
                 if (ws.current.readyState === WebSocket.OPEN || ws.current.readyState === WebSocket.CONNECTING) {
                     console.log('[WebSocket] Closing WebSocket during cleanup');

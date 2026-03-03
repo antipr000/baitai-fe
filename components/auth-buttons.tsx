@@ -16,12 +16,19 @@ export function AuthButtons({ isAuthenticated }: AuthButtonsProps) {
     async function handleLogout() {
         try {
             await signOut(auth);
-            await fetch("/api/logout", { method: "POST" });
-            router.push("/login");
+            // Call logout API and wait for it to complete
+            const response = await fetch("/api/logout");
+            if (response.ok) {
+                // Hard reload to clear all cached pages
+                window.location.href = "/login";
+            }
+            else {
+                toast.error("Logout failed");
+            }
         } catch (error) {
             console.error("Logout failed:", error);
-            router.push("/login");
             toast.error("Logout failed");
+            window.location.href = "/login";
         }
     }
 
@@ -29,29 +36,26 @@ export function AuthButtons({ isAuthenticated }: AuthButtonsProps) {
         <>
             {isAuthenticated ? (
                 <>
+
                     <Link href="/candidate/dashboard">
-                        <Button className="flex rounded-full items-center overflow-hidden p-5 lg:text-base text-sm bg-[linear-gradient(106.03deg,#677CFF_0%,#A3D9F8_238.47%)] hover:opacity-70 text-[rgba(238,246,251,1)] font-medium">
-                            Go to Dashboard
+                        <Button variant="ghost" className="rounded-full lg:text-base text-sm border border-[rgba(58,63,187,1)] text-[rgba(58,63,187,1)] hover:bg-[rgba(58,63,187,1)] hover:text-white font-medium px-7 py-2  transition-colors">
+                            Dashboard
                         </Button>
                     </Link>
-                    <Button
-                        variant="ghost"
-                        onClick={handleLogout}
-                        className="lg:text-base rounded-full text-sm hover:bg-[linear-gradient(106.03deg,rgba(239,246,254,0.5)_0%,rgba(163,217,248,0.5)_238.47%)] hover:opacity-80 bg-[linear-gradient(106.03deg,rgba(239,246,254,0.5)_0%,rgba(163,217,248,0.5)_238.47%)] text-[rgba(108,132,255,1)] hover:text-[rgba(108,132,255,1)] border font-medium border-[rgba(108,132,255,0.9)] p-5"
-                    >
+                    <Button onClick={handleLogout} className="flex rounded-full items-center overflow-hidden border border-[rgba(58,63,187,1)] px-8 py-2 lg:text-base text-sm bg-[rgba(58,63,187,1)] hover:bg-white hover:text-[rgba(58,63,187,1)] font-medium transition-colors sm:px-13 sm:py-2">
                         Logout
                     </Button>
                 </>
             ) : (
                 <>
                     <Link href="/login">
-                        <Button className="flex rounded-full items-center overflow-hidden p-5 lg:text-base text-sm bg-[linear-gradient(106.03deg,#677CFF_0%,#A3D9F8_238.47%)] hover:opacity-70 text-[rgba(238,246,251,1)] font-medium">
+                        <Button variant="ghost" className="rounded-full lg:text-base text-sm border border-[rgba(58,63,187,1)] text-[rgba(58,63,187,1)] hover:bg-[rgba(58,63,187,1)] hover:text-white font-medium lg:px-10 md:px-6 px-6 py-2  transition-colors">
                             Login
                         </Button>
                     </Link>
-                    <Link href="/signup">
-                        <Button variant="ghost" className="lg:text-base rounded-full text-sm hover:bg-[linear-gradient(106.03deg,rgba(239,246,254,0.5)_0%,rgba(163,217,248,0.5)_238.47%)] hover:opacity-80 bg-[linear-gradient(106.03deg,rgba(239,246,254,0.5)_0%,rgba(163,217,248,0.5)_238.47%)] text-[rgba(108,132,255,1)] hover:text-[rgba(108,132,255,1)] border font-medium border-[rgba(108,132,255,0.9)]">
-                            Sign up
+                    <Link href="https://cal.com/soham-mukherjee-8yzald/30min" target="_blank" rel="noopener noreferrer">
+                        <Button className="flex rounded-full items-center overflow-hidden border border-[rgba(58,63,187,1)] lg:px-10 md:px-6 px-6 py-2 lg:text-base text-sm bg-[rgba(58,63,187,1)] hover:bg-white hover:text-[rgba(58,63,187,1)] font-medium transition-colors">
+                            Request a Demo
                         </Button>
                     </Link>
                 </>

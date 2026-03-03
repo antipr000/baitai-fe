@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { cn } from "@/lib/utils";
+import { cn, rootDomain } from "@/lib/utils";
 import { Separator } from "@radix-ui/react-separator";
 import { Menu } from "lucide-react";
 import Image from "next/image";
@@ -13,118 +13,77 @@ import Link from "next/link";
 import { getTokens } from "next-firebase-auth-edge";
 import { cookies } from "next/headers";
 import { clientConfig, serverConfig } from "@/lib/auth/config";
+import { BuyCreditsButton } from "@/components/pricing/buy-credits-button";
+
+const teamProtocol = rootDomain.includes("localhost") ? "http" : "https";
+const teamPricingUrl = `${teamProtocol}://team.${rootDomain}/company/pricing`;
 
 const plans = [
   {
     name: "Starter",
-    price: "$199/month",
+    planId: "pln_starter",
+    price: "$29/month",
     highlight: false,
     description: "For small teams hiring smarter with AI.",
     features: [
       { icon: "/pricing/person.svg", text: "1 recruiter seat" },
       { icon: "/pricing/template.svg", text: "5 active AI Templates" },
-      { icon: "/pricing/brain.svg", text: "150 AI interview credits/month (≈ 30–50 interviews)" },
+      { icon: "/pricing/brain.svg", text: "30–50 interviews per month" },
       { icon: "/pricing/chart.svg", text: "Scoring, analytics, and feedback" },
       { icon: "/pricing/puzzle.svg", text: "Basic integrations" },
       { icon: "/pricing/email.svg", text: "Email Support" },
     ],
     button: "Select Plan",
-    note: null,
+    href: null,
   },
   {
     name: "Pro",
-    price: "$799/month",
+    planId: "pln_pro",
+    price: "$99/month",
     highlight: true,
     description: "For growing teams hiring at scale.",
     features: [
       { icon: "/pricing/person.svg", text: "5 recruiter seats" },
       { icon: "/pricing/template.svg", text: "50 active AI interview templates" },
-      { icon: "/pricing/brain.svg", text: "1,000 AI interview credits/month (≈ 200–300 interviews)" },
+      { icon: "/pricing/brain.svg", text: "150–200 interviews per month" },
       { icon: "/pricing/wheel.svg", text: "Custom interview rubrics & feedback design" },
       { icon: "/pricing/chart.svg", text: "Scoring, analytics, and feedback" },
       { icon: "/pricing/puzzle.svg", text: "Advanced analytics & reporting" },
       { icon: "/pricing/star.svg", text: "Priority support" },
     ],
     button: "Select Plan",
-    note: {
-      icon: "/pricing/card.svg",
-      title: "Additional Credits",
-      detail: "Buy more anytime at $79 per 100 credits (≈ 20–30 extra interviews)",
-    },
+    href: null,
   },
   {
-    name: "Enterprise — Custom",
-    price: "starting from $2,500/month",
+    name: "Enterprise",
+    planId: null,
+    price: "Custom",
     highlight: false,
     description: "For organizations building custom, large-scale AI interview systems.",
     features: [
       { icon: "/pricing/loop.svg", text: "Unlimited recruiter seats & templates" },
-      { icon: "/pricing/brain.svg", text: "3,500+ AI interview credits/month (≈ 700–1,000 interviews)" },
       { icon: "/pricing/wheel.svg", text: "Custom AI models & scoring logic" },
       { icon: "/pricing/laptop.svg", text: "Integrated coding IDE & design interview builder" },
       { icon: "/pricing/shield.svg", text: "SSO & enterprise-grade security" },
       { icon: "/pricing/person2.svg", text: "Dedicated success manager" },
       { icon: "/pricing/star.svg", text: "Custom integrations & SLA support" },
     ],
-    button: "Select Plan",
-
-    note: {
-      icon: "/pricing/card.svg",
-      title: "Additional Credits",
-      detail: "Buy more anytime at $69 per 100 credits (≈ 20–30 extra interviews)",
-    },
+    button: "Chat with us",
+    href: "https://cal.com/soham-mukherjee-8yzald/30min",
   },
 ];
 
 
 
-const consumerPlans = [
-  {
-    name: "Starter",
-    price: "Free",
-    highlight: false,
-    description: "Get started with your first AI-powered mock interview — no credit card required.",
-    features: [
-      { icon: "/pricing/person3.svg", text: "1 free AI mock interview (worth 3 credits)" },
-      { icon: "/pricing/note.svg", text: "Resume import" },
-      { icon: "/pricing/hand.svg", text: "Interview feedback and scoring" },
-    ],
-    button: "Choose Plan",
-    note: null,
-  },
-  {
-    name: "Pro",
-    price: "$19/month",
-    highlight: true,
-    description: "For those committed to leveling up their preparation.",
-    features: [
-      { icon: "/pricing/coin.svg", text: "30 credits included every month (≈ 6–10 interviews)" },
-      { icon: "/pricing/note.svg", text: "Resume import and smart resume suggestions" },
-      { icon: "/pricing/ai.svg", text: "AI-powered resume builder and tailoring" },
-      { icon: "/pricing/chart.svg", text: "Detailed scoring and improvement feedback" },
-      { icon: "/pricing/card.svg", text: "Buy extra credits anytime at flexible rates" },
-    ],
-    extra: {
-      buyCredits: {
-        title: "Buy Credits Anytime:",
-        items: [
-          "$10 → 15 credits (≈ 3–5 interviews)",
-          "$25 → 50 credits (≈ 10–15 interviews)",
-          "$75 → 200 credits (≈ 40–60 interviews)"
-        ]
-      },
-      useCredits: {
-        title: "Use Credits for:",
-        items: [
-          "Practice interviews",
-          "Custom or role-specific mock interviews",
-          "Resume scoring and optimization tools"
-        ]
-      }
-    },
-    button: "Choose Plan",
-    note: null,
-  },
+const creditPacks = [
+  { credits: 10,   interviews: 3,   price: "$1.99",  planId: "ucpln_10_credits" },
+  { credits: 25,   interviews: 8,   price: "$3.99",  planId: "ucpln_25_credits" },
+  { credits: 50,   interviews: 15,  price: "$6.99",  planId: "ucpln_50_credits" },
+  { credits: 100,  interviews: 30,  price: "$12.99", planId: "ucpln_100_credits", popular: true },
+  { credits: 200,  interviews: 65,  price: "$24.99", planId: "ucpln_200_credits" },
+  { credits: 350,  interviews: 100, price: "$39.99", planId: "ucpln_350_credits" },
+  { credits: 500,  interviews: 150, price: "$54.99", planId: "ucpln_500_credits" },
+  { credits: 1000, interviews: 300, price: "$99.99", planId: "ucpln_1000_credits" },
 ];
 
 export default async function PricingPage() {
@@ -136,7 +95,7 @@ export default async function PricingPage() {
   });
 
   return (
-    <div className="min-h-screen bg-[linear-gradient(297.94deg,#E6FDFF_13.44%,#DDFBFE_108.79%)] flex flex-col items-center py-10 px-2">
+    <div className="min-h-screen bg-[rgba(245,247,255,1)] flex flex-col items-center py-10 px-2">
       <div className="max-w-7xl p-5 mx-auto w-full flex justify-between items-center mb-8">
         <div className="w-full ">
           <div className="flex sm:hidden mb-5 -translate-y-4">
@@ -151,7 +110,7 @@ export default async function PricingPage() {
             </div>
             <div className="hidden sm:block">
               <Link href="/">
-                <Button variant="default" className="bg-[rgba(227,252,254,1)] font-semibold hover:bg-[rgba(227,252,254,1)] hover:opacity-80 border-2 border-[rgba(52,31,131,0.6)] hover:border-[rgba(52,31,131,0.6)] text-[rgba(52,31,131,1)]">Back Home</Button>
+                <Button variant="default" className="bg-transparent hover:bg-transparent font-semibold  hover:opacity-80 border-2 border-[rgba(52,31,131,0.6)] hover:border-[rgba(52,31,131,0.6)] text-[rgba(52,31,131,1)]">Back Home</Button>
               </Link>
             </div>
           </div>
@@ -169,42 +128,51 @@ export default async function PricingPage() {
                       <Card
                         key={plan.name}
                         className={cn(
-                          "w-full  shadow-2xs bg-[linear-gradient(156.96deg,rgba(211,251,31,0.7)_-3.8%,rgba(255,255,255,1)_118.22%)] rounded-2xl border border-[rgba(239,254,210,1)] relative",
+                          "w-full  shadow-2xs bg-[rgba(58,63,187,1)] rounded-2xl border border-[rgba(58,63,187,0.2)] relative",
                         )}
                       >
                         <CardHeader className="pb-2">
                           <div className="flex lg:flex-row md:flex-col flex-row items-center  justify-between">
-                            <CardTitle className="sm:text-3xl text-xl font-semibold  text-[rgba(96,127,255,1)]">{plan.name}</CardTitle>
-                            <span className="sm:text-lg text-base font-semibold text-[rgba(32,5,117,1)]">{plan.price}</span>
+                            <CardTitle className="sm:text-3xl text-xl font-semibold  text-[rgba(255,255,255,1)]">{plan.name}</CardTitle>
+                            <span className="sm:text-lg text-base font-semibold text-[rgba(255,255,255,0.9)]">{plan.price}</span>
                           </div>
-                          <CardDescription className="text-xs mt-1 font-medium text-[rgba(96,127,255,0.6)]">{plan.description}</CardDescription>
+                          <CardDescription className="text-xs mt-1 font-medium text-[rgba(255,255,255,0.9)]">{plan.description}</CardDescription>
                           <div className="h-px w-full bg-[rgba(32,5,116,0.1)] mt-3" />
                         </CardHeader>
                         <CardContent className="pt-2 pb-0">
                           <ul className="space-y-3 mb-4 mt-2">
                             {plan.features.map((feature, i) => (
-                              <li key={i} className="flex items-center gap-3 sm:text-sm text-xs text-[rgba(32,5,117,1)] font-medium">
+                              <li key={i} className="flex items-center gap-3 sm:text-sm text-xs text-[rgba(255,255,255,0.9)] font-medium">
                                 <Image src={feature.icon} alt={feature.text} width={20} height={20} className="w-6 h-6 object-contain" aria-hidden />
                                 <span className="sm:text-sm text-xs">{feature.text}</span>
                               </li>
                             ))}
                           </ul>
-                          {plan.note && (
-                            <div className="border rounded-2xl bg-transparent border-[rgba(32,5,117,1)] p-3 flex items-start gap-3 mt-4 text-sm">
-                              <Image src={plan.note.icon} alt="credit card" width={24} height={24} className="w-6 h-6 object-contain mt-0.5" aria-hidden />
-                              <div className="text-[rgba(32,5,117,0.9)]">
-                                <div className="font-bold mb-1">{plan.note.title}</div>
-                                <div className="sm:text-xs text-xs font-medium">{plan.note.detail}</div>
-                              </div>
-                            </div>
-                          )}
                         </CardContent>
                         <CardFooter className="pt-6">
-                          <Button
-                            className="w-full py-2 sm:text-base text-xs border-2 hover:bg-[linear-gradient(93.76deg,#3E54FB_-30.83%,#C3CEFF_172.66%)] font-semibold border-[rgba(158,172,255,0.3)] text-white bg-[linear-gradient(93.76deg,#3E54FB_-30.83%,#C3CEFF_172.66%)]  btn-pricing "
-                          >
-                            {plan.button}
-                          </Button>
+                          {plan.href ? (
+                            <Link href={plan.href} target="_blank" rel="noopener noreferrer" className="w-full">
+                              <Button
+                                className="w-full py-2 sm:text-base text-xs border-2 font-semibold border-[rgba(255,255,255,1)] text-white hover:text-white hover:opacity-80 bg-transparent hover:bg-transparent"
+                              >
+                                {plan.button}
+                              </Button>
+                            </Link>
+                          ) : plan.planId ? (
+                            <Link href={teamPricingUrl} className="w-full">
+                              <Button
+                                className="w-full py-2 sm:text-base text-xs border-2 font-semibold border-[rgba(255,255,255,1)] text-white hover:text-white hover:opacity-80 bg-transparent hover:bg-transparent"
+                              >
+                                {plan.button}
+                              </Button>
+                            </Link>
+                          ) : (
+                            <Button
+                              className="w-full py-2 sm:text-base text-xs border-2 font-semibold border-[rgba(255,255,255,1)] text-white hover:text-white hover:opacity-80 bg-transparent hover:bg-transparent"
+                            >
+                              {plan.button}
+                            </Button>
+                          )}
                         </CardFooter>
                       </Card>
                     ))}
@@ -212,66 +180,45 @@ export default async function PricingPage() {
                 </div>
               </TabsContent>
               <TabsContent value="consumer">
-                <div className="w-full flex items-center justify-center text-sm">
-                  <div className=" flex  lg:mx-25   lg:px-0  md:flex-col lg:flex-row flex-col justify-center md:gap-20 gap-5  lg:items-start ">
-                    {consumerPlans.map((plan, idx) => (
-                      <Card
-                        key={plan.name}
+                <div className="w-full">
+                  <p className="text-sm font-medium text-[rgba(96,127,255,0.8)] mb-4 text-center">
+                    Buy credits, practice interviews — no subscription needed.
+                  </p>
+                  <div className="flex items-center justify-center gap-2 mb-6 bg-[rgba(245,255,199,0.9)] border border-[rgba(134,255,110,0.5)] rounded-full px-5 py-2 mx-auto w-fit">
+                    <span className="text-sm font-semibold text-[#4fc238]">🎉 6 free credits at signup</span>
+                    <span className="text-xs font-medium text-[rgba(32,5,117,0.6)]">— worth up to 2 free interviews</span>
+                  </div>
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 lg:mx-10">
+                    {creditPacks.map((pack) => (
+                      <div
+                        key={pack.credits}
                         className={cn(
-                          "  shadow-2xs bg-[linear-gradient(150.84deg,#242995_8.25%,#595DC9_102.41%)] rounded-2xl border border-[rgba(140,157,255,0.2)] relative",
+                          "bg-[rgba(245,255,199,0.7)] rounded-2xl border border-[rgba(58,63,187,1)] p-5 flex flex-col items-center text-center relative",
+                          "popular" in pack && pack.popular && "ring-2 ring-[rgba(107,124,255,1)]",
                         )}
                       >
-                        <CardHeader className="pb-2">
-                          <div className="flex items-center justify-between">
-                            <CardTitle className="sm:text-3xl text-xl font-semibold text-white">{plan.name}</CardTitle>
-                            <span className={cn("sm:text-lg text-base font-semibold ", plan.name === "Starter" ? "text-[rgba(134,255,110,1)]" : "text-white")}>{plan.price}</span>
-                          </div>
-                          <CardDescription className="text-xs mt-1 font-medium text-white/70">{plan.description}</CardDescription>
-                          <div className="h-px w-3/4 mx-auto bg-[rgba(134,255,110,0.5)] mt-3" />
-                        </CardHeader>
-                        <CardContent className="pt-2 pb-0">
-                          <ul className="space-y-3 mb-4 sm:px-15  lg:px-0 mt-2">
-                            {plan.features.map((feature, i) => (
-                              <li key={i} className="flex items-center gap-3 sm:text-sm text-xs text-[rgba(32,5,117,1)] font-medium">
-                                <Image src={feature.icon} alt={typeof feature.text === 'string' ? feature.text : ''} width={20} height={20} className="w-6 h-6 object-contain" />
-                                <span className="text-white">{feature.text}</span>
-                              </li>
-                            ))}
-                          </ul>
-                          {/* Render extra sections for Pro plan */}
-                          {plan.extra && plan.extra.buyCredits && (
-                            <div className=" ml-10 mt-4">
-                              <span className="font-semibold text-white">{plan.extra.buyCredits.title}</span>
-                              <ul className="ml-6 mt-1 space-y-1 sm:text-sm text-xs text-white">
-                                {plan.extra.buyCredits.items.map((item, idx) => (
-                                  <li className="text-white" key={idx}>{item}</li>
-                                ))}
-                              </ul>
-                            </div>
-                          )}
-                          {plan.extra && plan.extra.useCredits && (
-                            <div className=" ml-10 mt-4">
-                              <span className="font-semibold text-white">{plan.extra.useCredits.title}</span>
-                              <ul className="ml-6 mt-1 space-y-1 sm:text-sm text-xs text-white">
-                                {plan.extra.useCredits.items.map((item, idx) => (
-                                  <li key={idx} className="flex items-center gap-2 text-white">
-                                    <Image src="/pricing/tick.svg" alt="check mark" width={16} height={16} className="w-4 h-4 object-contain" aria-hidden />
-                                    <span className="">{item}</span>
-                                  </li>
-                                ))}
-                              </ul>
-                            </div>
-                          )}
-
-                        </CardContent>
-                        <CardFooter className="pt-6">
-                          <Button
-                            className="w-full py-2 sm:text-base text-xs border-2 bg-transparent hover:bg-transparent  hover:opacity-80 "
-                          >
-                            {plan.button}
-                          </Button>
-                        </CardFooter>
-                      </Card>
+                        {"popular" in pack && pack.popular && (
+                          <span className="absolute -top-3 bg-[rgba(107,124,255,1)] text-white text-xs font-semibold px-3 py-1 rounded-full">
+                            Most Popular
+                          </span>
+                        )}
+                        <span className="text-2xl sm:text-3xl font-bold text-[rgba(96,127,255,1)]">
+                          {pack.credits}
+                        </span>
+                        <span className="text-xs font-medium text-[rgba(32,5,117,0.6)]">
+                          credits
+                        </span>
+                        <span className="text-sm font-medium text-[rgba(32,5,117,1)] mt-2">
+                          Up to {pack.interviews} interviews
+                        </span>
+                        <span className="text-xl font-bold text-[rgba(32,5,117,1)] mt-2">
+                          {pack.price}
+                        </span>
+                        <BuyCreditsButton
+                          planId={pack.planId}
+                          className="w-full mt-3 text-sm border-2 bg-[rgba(107,124,255,1)] hover:bg-[rgba(107,124,255,1)] hover:opacity-80"
+                        />
+                      </div>
                     ))}
                   </div>
                 </div>

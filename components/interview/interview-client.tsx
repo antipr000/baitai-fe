@@ -2,13 +2,15 @@
 "use client"
 
 import api from '@/lib/api/client';
+import { ResumeCheckResponse } from '@/lib/api/resume';
+import { useAuth } from '@/lib/auth/authContext';
 
 import LeftSection from "@/components/interview/left-section"
 import InterviewSection from "@/components/interview/interview-section"
 import UploadSection from "@/components/interview/upload-section"
-import ActiveInterview from "@/components/interview/active-interview"
 import { useEffect, useState, useRef } from "react"
 import { toast } from "sonner"
+import ActiveInterview from './ActiveInterview';
 
 
 type MediaDevice = MediaDeviceInfo;
@@ -28,10 +30,13 @@ interface InterviewClientProps {
     templateId: string
     templateData: InterviewTemplateData | null
     authToken?: string
+    initialResumeCheck: ResumeCheckResponse | null
 }
 
-export default function InterviewClient({ templateId, templateData, authToken }: InterviewClientProps) {
-    const [activeSection, setActiveSection] = useState<'upload' | 'interview'>('upload')
+export default function InterviewClient({ templateId, templateData, authToken, initialResumeCheck }: InterviewClientProps) {
+    const { loading: authLoading } = useAuth();
+    const hasResume = initialResumeCheck?.has_resume ?? false;
+    const [activeSection, setActiveSection] = useState<'upload' | 'interview'>(hasResume ? 'interview' : 'upload')
     const [isInterviewActive, setIsInterviewActive] = useState(false)
     const [cameras, setCameras] = useState<MediaDevice[]>([]);
     const [microphones, setMicrophones] = useState<MediaDevice[]>([]);
@@ -43,13 +48,15 @@ export default function InterviewClient({ templateId, templateData, authToken }:
     const [selectedSpeaker, setSelectedSpeaker] = useState<string | null>(null);
     const [cameraStream, setCameraStream] = useState<MediaStream | null>(null);
     const [micStream, setMicStream] = useState<MediaStream | null>(null);
-    const [resumeUploaded, setResumeUploaded] = useState(false);
+    const [resumeUploaded, setResumeUploaded] = useState(hasResume);
 
     const [sessionId, setSessionId] = useState<string | null>(null);
 
     // Use refs to track streams for cleanup on unmount only
     const cameraStreamRef = useRef<MediaStream | null>(null);
     const micStreamRef = useRef<MediaStream | null>(null);
+    // Track the permission-check stream so it can be stopped on cleanup
+    const permissionStreamRef = useRef<MediaStream | null>(null);
     // Track if we've navigated away (pagehide fired) to prevent re-requesting media on back
     const hasNavigatedAwayRef = useRef(false);
 
@@ -84,6 +91,15 @@ export default function InterviewClient({ templateId, templateData, authToken }:
                 });
                 micStreamRef.current = null;
             }
+            // Stop permission-check stream if user navigates away during permission check
+            if (permissionStreamRef.current) {
+                console.log('[Page Cleanup] Stopping permission-check stream');
+                permissionStreamRef.current.getTracks().forEach(track => {
+                    track.stop();
+                    track.enabled = false;
+                });
+                permissionStreamRef.current = null;
+            }
         };
 
         const handlePageHide = () => {
@@ -117,10 +133,15 @@ export default function InterviewClient({ templateId, templateData, authToken }:
             try {
                 setPermission("pending");
 
-                await navigator.mediaDevices.getUserMedia({
+                const permissionStream = await navigator.mediaDevices.getUserMedia({
                     video: true,
                     audio: true,
                 });
+                permissionStreamRef.current = permissionStream;
+
+                // Stop the permission-check stream immediately - we only needed it to trigger the permission prompt
+                permissionStream.getTracks().forEach(track => track.stop());
+                permissionStreamRef.current = null;
 
                 setPermission("granted");
                 const devices = await navigator.mediaDevices.enumerateDevices();
@@ -216,6 +237,8 @@ export default function InterviewClient({ templateId, templateData, authToken }:
 
 
 
+
+
     const handleStartInterview = async () => {
         if (!templateId) {
             toast.error('Template ID is missing');
@@ -248,7 +271,7 @@ export default function InterviewClient({ templateId, templateData, authToken }:
     };
 
     if (isInterviewActive && permission === 'granted' && templateId && sessionId) {  // could check for resume uploaded also if want to make it mandatory
-        return <ActiveInterview cameraStream={cameraStream} micStream={micStream} templateId={templateId} sessionId={sessionId} />
+        return <ActiveInterview cameraStream={cameraStream} micStream={micStream} templateId={templateId} sessionId={sessionId} authToken={authToken} />
     }
 
     return (
@@ -259,6 +282,7 @@ export default function InterviewClient({ templateId, templateData, authToken }:
                     setActiveSection={setActiveSection}
                     title={templateData?.title}
                     duration={templateData?.duration}
+                    resumeUploaded={resumeUploaded}
                 />
             </div>
             <div className="bg-[rgba(245,247,255,1)] flex-1 min-w-0">
@@ -266,7 +290,7 @@ export default function InterviewClient({ templateId, templateData, authToken }:
                     <UploadSection onUploadComplete={() => {
                         setResumeUploaded(true);
                         setActiveSection('interview');
-                    }} />
+                    }} authToken={authToken} />
                 ) : (
                     <InterviewSection
                         cameras={cameras}

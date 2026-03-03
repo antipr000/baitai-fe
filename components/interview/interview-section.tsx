@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { Button } from '../ui/button'
 import { Mic, Video, Volume2 } from 'lucide-react'
 import Image from 'next/image'
@@ -17,7 +17,7 @@ type InterviewSectionProps = {
     setSelectedMic: (id: string | null) => void
     setSelectedSpeaker: (id: string | null) => void
     saveSelection: (key: string, value: string) => void
-    startInterview: () => void
+    startInterview: () => void | Promise<void>
     onCameraStream?: (stream: MediaStream) => void
     onMicStream?: (stream: MediaStream) => void
     keepCameraStreamOnUnmount?: boolean
@@ -79,39 +79,82 @@ export default function InterviewSection({
     const [isMicTesting, setIsMicTesting] = useState(false)
     const [audioLevel, setAudioLevel] = useState(0)
     const [isSpeakerTesting, setIsSpeakerTesting] = useState(false)
+    const [isStarting, setIsStarting] = useState(false)
     const audioContextRef = useRef<AudioContext | null>(null)
     const analyserRef = useRef<AnalyserNode | null>(null)
     const micStreamRef = useRef<MediaStream | null>(null)
     const animationFrameRef = useRef<number | null>(null)
     const videoElementRef = useRef<HTMLVideoElement | null>(null)
     const cameraStreamRef = useRef<MediaStream | null>(null)
+    const isMicTestingRef = useRef(false)
+
+    // Keep ref in sync with state
+    useEffect(() => {
+        isMicTestingRef.current = isMicTesting
+    }, [isMicTesting])
+
+    const handleStart = async () => {
+        if (permission !== 'granted' || isStarting) return
+        setIsStarting(true)
+        try {
+            await startInterview()
+        } finally {
+            setIsStarting(false)
+        }
+    }
+
+    const startAudioLevelLoop = useCallback(() => {
+        // Cancel any existing loop
+        if (animationFrameRef.current) {
+            cancelAnimationFrame(animationFrameRef.current)
+        }
+
+        const updateLevel = () => {
+            const analyser = analyserRef.current
+            if (!analyser) {
+                setAudioLevel(0)
+                return
+            }
+            const buffer = new Uint8Array(analyser.frequencyBinCount)
+            analyser.getByteFrequencyData(buffer)
+            const avg = buffer.reduce((sum, val) => sum + val, 0) / buffer.length
+            setAudioLevel(avg / 255)
+            animationFrameRef.current = requestAnimationFrame(updateLevel)
+        }
+
+        updateLevel()
+    }, [])
 
     const startMicTest = async () => {
         try {
-            // Reuse existing stream if available, otherwise create new one
-            const stream = micStreamRef.current || await navigator.mediaDevices.getUserMedia({ audio: true })
+            // Always get a fresh stream with the selected device using exact constraint
+            if (micStreamRef.current) {
+                micStreamRef.current.getTracks().forEach(track => track.stop())
+            }
+            if (audioContextRef.current) {
+                audioContextRef.current.close()
+            }
+
+            const audioConstraints = selectedMic
+                ? { deviceId: { exact: selectedMic } }
+                : true
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: audioConstraints })
+            
             const audioContext = new AudioContext()
             const analyser = audioContext.createAnalyser()
             const source = audioContext.createMediaStreamSource(stream)
-            source.connect(analyser)  // Connect source to analyser
+            source.connect(analyser)
 
             micStreamRef.current = stream
             audioContextRef.current = audioContext
             analyserRef.current = analyser
+            onMicStream?.(stream)
 
-
-            const buffer = new Uint8Array(analyser.frequencyBinCount)
-            const updateLevel = () => {
-                analyser.getByteFrequencyData(buffer)
-                const avg = buffer.reduce((sum, val) => sum + val, 0) / buffer.length
-                setAudioLevel(avg / 255)
-                animationFrameRef.current = requestAnimationFrame(updateLevel)
-            }
-
-            updateLevel()
+            startAudioLevelLoop()
             setIsMicTesting(true)
         } catch (error) {
             console.error('Mic error:', error)
+            setAudioLevel(0)
         }
     }
 
@@ -125,22 +168,44 @@ export default function InterviewSection({
         setAudioLevel(0)
     }
 
-    const startMicStream = async () => {
+    const startMicStream = useCallback(async () => {
         try {
-            // Use 'ideal' instead of 'exact' to allow fallback if device unavailable
+            // Use exact constraint to ensure we get the requested device (not fallback)
             const audioConstraints = selectedMic
-                ? { deviceId: { ideal: selectedMic } }
+                ? { deviceId: { exact: selectedMic } }
                 : true
             const stream = await navigator.mediaDevices.getUserMedia({
                 audio: audioConstraints
             })
+
+            // Stop old stream before assigning new one (like startCamera does)
+            if (micStreamRef.current) {
+                micStreamRef.current.getTracks().forEach(track => track.stop())
+            }
+
             micStreamRef.current = stream
-            // surface mic stream to parent for reuse (e.g., ActiveInterview)
             onMicStream?.(stream)
+
+            // If mic testing is active, reconnect audio analysis to new stream
+            // Use ref to get current value, not stale closure value
+            if (isMicTestingRef.current && audioContextRef.current) {
+                audioContextRef.current.close()
+
+                const audioContext = new AudioContext()
+                const analyser = audioContext.createAnalyser()
+                const source = audioContext.createMediaStreamSource(stream)
+                source.connect(analyser)
+
+                audioContextRef.current = audioContext
+                analyserRef.current = analyser
+
+                // Restart the audio level loop with the new analyser
+                startAudioLevelLoop()
+            }
         } catch (error) {
             console.error('Mic stream error:', error)
         }
-    }
+    }, [selectedMic, onMicStream, startAudioLevelLoop])
 
     const startSpeakerTest = () => {
         const audio = new Audio('/interview/test.wav')
@@ -154,9 +219,8 @@ export default function InterviewSection({
         }, 2000);
     }
 
-    const startCamera = async () => {
+    const startCamera = useCallback(async () => {
         try {
-            // Use 'ideal' instead of 'exact' to allow fallback if device unavailable
             const videoConstraints = selectedCamera
                 ? { deviceId: { ideal: selectedCamera } }
                 : true
@@ -170,7 +234,6 @@ export default function InterviewSection({
             }
 
             cameraStreamRef.current = stream
-            // surface camera stream to parent for reuse (e.g., ActiveInterview)
             onCameraStream?.(stream)
             console.log('Camera stream started')
             if (videoElementRef.current) {
@@ -179,11 +242,11 @@ export default function InterviewSection({
         } catch (error) {
             console.error('Camera error:', error)
         }
-    }
+    }, [selectedCamera, onCameraStream])
 
-    const restartCamera = () => {
+    const restartCamera = useCallback(() => {
         startCamera()
-    }
+    }, [startCamera])
 
     useEffect(() => {
         // Initial mount - start both streams
@@ -253,7 +316,7 @@ export default function InterviewSection({
         if (selectedMic && micStreamRef.current) {
             startMicStream()
         }
-    }, [selectedCamera, selectedMic])
+    }, [selectedCamera, selectedMic, startCamera, startMicStream])
 
     return (
         <motion.div
@@ -416,11 +479,11 @@ export default function InterviewSection({
                         {/* Start Now Button */}
                         <div className="text-center mb-4">
                             <Button
-                                disabled={permission !== 'granted'}
-                                onClick={startInterview}
-                                className={`w-full hover:bg-transparent border-2 border-[rgba(104,100,247,1)] hover:text-[rgba(104,100,247,1)] bg-[rgba(104,100,247,1)] text-white py-3 rounded-lg font-semibold text-lg ${permission !== 'granted' ? 'bg-gray-300 text-gray-500 border-gray-300 cursor-not-allowed' : ''}`}
+                                disabled={permission !== 'granted' || isStarting}
+                                onClick={handleStart}
+                                className={`w-full hover:bg-transparent border-2 border-[rgba(104,100,247,1)] hover:text-[rgba(104,100,247,1)] bg-[rgba(104,100,247,1)] text-white py-3 rounded-lg font-semibold text-lg ${permission !== 'granted' || isStarting ? 'bg-gray-300 text-gray-500 border-gray-300 cursor-not-allowed' : ''}`}
                             >
-                                Start Now
+                                {isStarting ? 'Starting...' : 'Start Now'}
                             </Button>
                         </div>
                     </div>

@@ -1,4 +1,5 @@
 import { cookies } from 'next/headers'
+import { cache } from 'react'
 import { getTokens } from 'next-firebase-auth-edge'
 import { clientConfig, serverConfig } from '@/lib/auth/config'
 
@@ -9,13 +10,17 @@ interface FetchOptions {
     body?: Record<string, unknown>
 }
 
-export async function serverFetch<T>(url: string, options?: FetchOptions): Promise<T | null> {
-    const tokens = await getTokens(await cookies(), {
+const getCachedTokens = cache(async () => {
+    return getTokens(await cookies(), {
         apiKey: clientConfig.apiKey,
         cookieName: serverConfig.cookieName,
         cookieSignatureKeys: serverConfig.cookieSignatureKeys,
         serviceAccount: serverConfig.serviceAccount,
     })
+})
+
+export async function serverFetch<T>(url: string, options?: FetchOptions): Promise<T | null> {
+    const tokens = await getCachedTokens()
 
     if (!tokens?.token) {
         console.error(`[serverFetch] No auth token available for ${url}`)

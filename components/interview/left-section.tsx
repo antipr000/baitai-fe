@@ -9,9 +9,10 @@ interface LeftSectionProps {
     setActiveSection: (section: 'upload' | 'interview') => void
     title?: string
     duration?: number
+    resumeUploaded?: boolean
 }
 
-export default function LeftSection({ activeSection, setActiveSection, title, duration }: LeftSectionProps) {
+export default function LeftSection({ activeSection, setActiveSection, title, duration, resumeUploaded }: LeftSectionProps) {
     return (
         <div className='bg-white flex-1 '>
             <div className="flex items-center justify-between px-6 py-4 ">
@@ -31,24 +32,36 @@ export default function LeftSection({ activeSection, setActiveSection, title, du
 
                     {/* Progress Bar */}
                     <div className="w-full">
-                        <Progress value={50} className="h-2 [&>div]:bg-[rgba(98,117,252,0.9)]" />
+                        <Progress value={resumeUploaded ? (activeSection === 'interview' ? 50 : 25) : 0} className="h-2 [&>div]:bg-[rgba(98,117,252,0.9)]" />
                     </div>
 
                     <div className="space-y-6">
                         {/* Upload Resume Step */}
                         <div
-                            className="flex items-center justify-between w-full p-4 rounded-lg cursor-pointer transition-all border-2 border-transparent hover:border-[rgba(98,117,252,0.6)]"
-                            onClick={() => setActiveSection('upload')}>
+                            className={`flex items-center justify-between w-full p-4 rounded-lg transition-all border-2 border-transparent ${resumeUploaded ? 'cursor-default' : 'cursor-pointer hover:border-[rgba(98,117,252,0.6)]'}`}
+                            onClick={() => !resumeUploaded && setActiveSection('upload')}>
                             <div className="flex items-center gap-3">
                                 <Image src="/interview/file.svg" alt="Upload Icon" width={16} height={16} />
                                 <div>
-                                    <h3 className="font-medium text-muted-foreground">Upload Resume</h3>
+                                    <h3 className={`font-medium ${resumeUploaded ? 'text-green-600' : 'text-muted-foreground'}`}>
+                                        Upload Resume
+                                    </h3>
+                                    {resumeUploaded && (
+                                        <p className="text-sm text-left text-green-500">Completed</p>
+                                    )}
                                 </div>
                             </div>
-                            {activeSection === 'upload' ? <div className="bg-[rgba(98,117,252,0.9)] p-1 rounded-full">
-                                <Image src="/interview/tick.svg" alt="check" width={16} height={16} />
-                            </div> : <div className="border border-[rgba(98,117,252,0.9)] p-3 rounded-full" />
-                            }
+                            {resumeUploaded ? (
+                                <div className="bg-green-500 p-1 rounded-full">
+                                    <Image src="/interview/tick.svg" alt="check" width={16} height={16} />
+                                </div>
+                            ) : activeSection === 'upload' ? (
+                                <div className="bg-[rgba(98,117,252,0.9)] p-1 rounded-full">
+                                    <Image src="/interview/tick.svg" alt="check" width={16} height={16} />
+                                </div>
+                            ) : (
+                                <div className="border border-[rgba(98,117,252,0.9)] p-3 rounded-full" />
+                            )}
                         </div>
 
                         {/* Domain Expert Interview Step */}
