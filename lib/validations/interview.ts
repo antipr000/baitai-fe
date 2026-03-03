@@ -39,7 +39,7 @@ export const questionSchema = z.object({
 // EvaluationCriteriaCreate: ALL fields required
 export const evaluationCriteriaSchema = z.object({
     category: evalCategorySchema,
-    weight: z.number().int().min(1, 'Weight must be at least 1').max(10),
+    weight: z.number().int().min(1, 'Weight must be at least 1'),
     evaluation_prompt: z.string().min(1, 'Evaluation prompt is required'),
     scoring_scale: z.number().int().min(1, 'Scoring scale must be at least 1').max(100)
 })
@@ -120,3 +120,64 @@ export function formatZodErrors(errors: z.ZodError['issues']): string[] {
 // QuestionTemplateCreate: difficulty_level, ai_instructions, order
 // EvaluationCriteriaCreate: category, weight, evaluation_prompt, scoring_scale
 // FollowUpRule: trigger_condition, ai_instructions, max_depth
+
+// --- Edit Schemas (with optional IDs for existing items) ---
+
+export const followupRuleEditSchema = followupRuleSchema.extend({
+    id: z.string().optional()
+})
+
+export const questionEditSchema = z.object({
+    id: z.string().optional(),
+    difficulty_level: difficultyLevelSchema,
+    ai_instructions: z.string().min(1, 'Question AI instructions are required'),
+    context_hints: z.string().nullable().optional(),
+    order: z.number().int().min(1),
+    followup_rules: z.array(followupRuleEditSchema).default([])
+})
+
+export const evaluationCriteriaEditSchema = evaluationCriteriaSchema.extend({
+    id: z.string().optional()
+})
+
+export const sectionEditSchema = z.object({
+    id: z.string().optional(),
+    name: z.string().min(1, 'Section name is required'),
+    order: z.number().int().min(1),
+    duration: z.number().int().min(1, 'Section duration must be at least 1 minute'),
+    section_type: sectionTypeSchema,
+    ai_instructions: z.string().min(1, 'Section AI instructions are required'),
+    min_questions: z.number().int().nullable().optional(),
+    max_questions: z.number().int().nullable().optional(),
+    artifact_type: artifactTypeSchema.nullable().optional(),
+    questions: z.array(questionEditSchema).default([]),
+    evaluation_criterias: z.array(evaluationCriteriaEditSchema).default([])
+})
+
+export const interviewEditSchema = z.object({
+    title: z.string().min(1, 'Interview title is required').max(200, 'Title must be less than 200 characters'),
+    description: z.string().nullable().optional(),
+    is_public: z.boolean().default(false),
+    duration: z.number().int().min(1, 'Total duration must be at least 1 minute'),
+    role: z.string().min(1, 'Role/Job title is required').max(200, 'Role must be less than 200 characters'),
+    llm_config: z.record(z.string(), z.unknown()).default({}),
+    screen_share: z.boolean().default(false),
+    credits: z.number().int().min(0).default(0),
+    sections: z.array(sectionEditSchema).default([])
+})
+
+export type InterviewEditPayload = z.infer<typeof interviewEditSchema>
+
+export function validateInterviewEditPayload(payload: unknown): {
+    success: true;
+    data: InterviewEditPayload
+} | {
+    success: false;
+    errors: z.ZodError['issues']
+} {
+    const result = interviewEditSchema.safeParse(payload)
+    if (result.success) {
+        return { success: true, data: result.data }
+    }
+    return { success: false, errors: result.error.issues }
+}

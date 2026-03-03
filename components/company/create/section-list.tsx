@@ -134,6 +134,8 @@ export const SectionList = () => {
                                         <Clock className="h-4 w-4 text-[rgba(84,104,252,0.6)]" />
                                         <Input
                                             type="number"
+                                            min={1}
+                                            max={180}
                                             value={section.duration}
                                             onChange={(e) => updateSection(sectionIndex, { duration: Number(e.target.value) })}
                                             className="bg-indigo-50/20 border-gray-200"
@@ -144,6 +146,8 @@ export const SectionList = () => {
                                     <label className="text-sm font-medium text-[rgba(10,13,26,0.82)] block">Max Questions</label>
                                     <Input
                                         type="number"
+                                        min={1}
+                                        max={50}
                                         value={section.maxQuestions || 3}
                                         onChange={(e) => updateSection(sectionIndex, { maxQuestions: Number(e.target.value) })}
                                         className="bg-indigo-50/20 border-gray-200"
@@ -204,6 +208,8 @@ export const SectionList = () => {
                                                 <Label className="text-xs">Weight <span className="text-red-500">*</span></Label>
                                                 <Input
                                                     type="number"
+                                                    min={1}
+                                                    max={100}
                                                     value={criteria.weight}
                                                     onChange={(e) => updateSectionCriteria(sectionIndex, cIndex, 'weight', Number(e.target.value))}
                                                     className="bg-white"
@@ -223,6 +229,8 @@ export const SectionList = () => {
                                             <Label className="text-xs">Scoring Scale <span className="text-red-500">*</span></Label>
                                             <Input
                                                 type="number"
+                                                min={1}
+                                                max={100}
                                                 value={criteria.scoringScale}
                                                 onChange={(e) => updateSectionCriteria(sectionIndex, cIndex, 'scoringScale', Number(e.target.value))}
                                                 placeholder="10"
@@ -340,6 +348,8 @@ export const SectionList = () => {
                                                         <label className="text-xs font-medium text-[rgba(10,13,26,0.82)] block">Max Depth <span className="text-red-500">*</span></label>
                                                         <Input
                                                             type="number"
+                                                            min={1}
+                                                            max={10}
                                                             value={rule.maxDepth}
                                                             onChange={(e) => updateQuestionFollowUp(sectionIndex, qIndex, rIndex, 'maxDepth', Number(e.target.value))}
                                                             className="bg-indigo-50/20 border-gray-200 h-8 text-sm"

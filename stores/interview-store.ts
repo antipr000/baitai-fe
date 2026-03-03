@@ -16,9 +16,64 @@ export type EvalCategory =
     | 'time_management'
     | 'decision_making'
 
+// --- API Response Types (snake_case from backend) ---
+
+interface ApiFollowupRule {
+    id: string
+    trigger_condition: string
+    ai_instructions: string
+    order: number
+    max_depth: number
+}
+
+interface ApiQuestion {
+    id: string
+    difficulty_level: DifficultyLevel
+    ai_instructions: string
+    context_hints: string | null
+    order: number
+    followup_rules: ApiFollowupRule[]
+}
+
+interface ApiEvaluationCriteria {
+    id: string
+    category: EvalCategory
+    weight: number
+    evaluation_prompt: string
+    scoring_scale: number
+}
+
+interface ApiSection {
+    id: string
+    name: string
+    order: number
+    duration: number
+    section_type: SectionType
+    ai_instructions: string
+    min_questions: number | null
+    max_questions: number | null
+    artifact_type: ArtifactType | null
+    questions: ApiQuestion[]
+    evaluation_criterias: ApiEvaluationCriteria[]
+}
+
+export interface ApiTemplateData {
+    title: string
+    description?: string | null
+    company_id: string
+    is_public: boolean
+    duration: number
+    role: string
+    credits: number
+    screen_share: boolean
+    llm_config: Record<string, unknown>
+    sections: ApiSection[]
+}
+
 // --- Interfaces matching Backend API ---
 
 export interface FollowUpRule {
+    id?: string
     triggerCondition: string
     aiInstructions: string
     maxDepth: number
@@ -26,6 +81,7 @@ export interface FollowUpRule {
 }
 
 export interface Question {
+    id?: string
     difficultyLevel: DifficultyLevel
     aiInstructions: string
     order: number
@@ -34,6 +90,7 @@ export interface Question {
 }
 
 export interface EvaluationCriteria {
+    id?: string
     category: EvalCategory | ''
     weight: number
     evaluationPrompt: string
@@ -41,6 +98,7 @@ export interface EvaluationCriteria {
 }
 
 export interface Section {
+    id?: string
     name: string
     order: number
     duration: number
@@ -75,6 +133,7 @@ export interface InterviewState {
     setCredits: (credits: number) => void
     setScreenShare: (screenShare: boolean) => void
     setCompanyId: (companyId: string) => void
+    initializeFromTemplate: (data: ApiTemplateData) => void
 
     // Section Actions
     addSection: (section: Partial<Section>) => void
@@ -176,6 +235,50 @@ export const useInterviewStore = create<InterviewState>((set, get) => ({
     setCredits: (credits) => set({ credits }),
     setScreenShare: (screenShare) => set({ screenShare }),
     setCompanyId: (companyId) => set({ companyId }),
+
+    initializeFromTemplate: (data) => set({
+        title: data.title || '',
+        description: data.description || '',
+        role: data.role || '',
+        duration: data.duration || 60,
+        isPublic: data.is_public ?? false,
+        credits: data.credits || 0,
+        screenShare: data.screen_share ?? false,
+        companyId: data.company_id || '',
+        llmConfig: data.llm_config || {},
+        sections: (data.sections || []).map((s: ApiSection): Section => ({
+            id: s.id,
+            name: s.name || '',
+            order: s.order || 0,
+            duration: s.duration || 0,
+            sectionType: s.section_type || 'questioning',
+            aiInstructions: s.ai_instructions || '',
+            minQuestions: s.min_questions ?? null,
+            maxQuestions: s.max_questions ?? null,
+            artifactType: s.artifact_type || 'none',
+            questions: (s.questions || []).map((q: ApiQuestion): Question => ({
+                id: q.id,
+                difficultyLevel: q.difficulty_level || 'medium',
+                aiInstructions: q.ai_instructions || '',
+                contextHints: q.context_hints || null,
+                order: q.order || 0,
+                followupRules: (q.followup_rules || []).map((r: ApiFollowupRule): FollowUpRule => ({
+                    id: r.id,
+                    triggerCondition: r.trigger_condition || '',
+                    aiInstructions: r.ai_instructions || '',
+                    maxDepth: r.max_depth || 1,
+                    order: r.order || 0
+                }))
+            })),
+            evaluationCriterias: (s.evaluation_criterias || []).map((c: ApiEvaluationCriteria): EvaluationCriteria => ({
+                id: c.id,
+                category: c.category || '',
+                weight: c.weight || 1,
+                evaluationPrompt: c.evaluation_prompt || '',
+                scoringScale: c.scoring_scale || 10
+            }))
+        }))
+    }),
 
     addSection: (sectionPartial) => set((state) => {
         const sections = [...state.sections]
@@ -372,6 +475,55 @@ export function buildInterviewPayload(state: InterviewState) {
             evaluation_criterias: section.evaluationCriterias
                 .filter(c => c.category) // Only include if category is set
                 .map(c => ({
+                    category: c.category,
+                    weight: c.weight,
+                    evaluation_prompt: c.evaluationPrompt,
+                    scoring_scale: c.scoringScale
+                }))
+        }))
+    }
+}
+
+// --- Edit Payload Builder (for API PUT - includes IDs) ---
+
+export function buildEditPayload(state: InterviewState) {
+    return {
+        title: state.title,
+        description: state.description || null,
+        is_public: state.isPublic,
+        duration: state.duration,
+        llm_config: state.llmConfig,
+        role: state.role,
+        screen_share: state.screenShare,
+        credits: state.credits,
+        sections: state.sections.map(section => ({
+            ...(section.id ? { id: section.id } : {}),
+            name: section.name,
+            order: section.order,
+            duration: section.duration,
+            section_type: section.sectionType,
+            ai_instructions: section.aiInstructions,
+            min_questions: section.minQuestions,
+            max_questions: section.maxQuestions,
+            artifact_type: section.artifactType || null,
+            questions: section.questions.map(q => ({
+                ...(q.id ? { id: q.id } : {}),
+                difficulty_level: q.difficultyLevel,
+                ai_instructions: q.aiInstructions,
+                context_hints: q.contextHints || null,
+                order: q.order,
+                followup_rules: q.followupRules.map((rule, idx) => ({
+                    ...(rule.id ? { id: rule.id } : {}),
+                    trigger_condition: rule.triggerCondition,
+                    ai_instructions: rule.aiInstructions,
+                    max_depth: rule.maxDepth,
+                    order: rule.order ?? idx
+                }))
+            })),
+            evaluation_criterias: section.evaluationCriterias
+                .filter(c => c.category)
+                .map(c => ({
+                    ...(c.id ? { id: c.id } : {}),
                     category: c.category,
                     weight: c.weight,
                     evaluation_prompt: c.evaluationPrompt,
