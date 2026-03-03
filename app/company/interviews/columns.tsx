@@ -179,7 +179,10 @@ export const columns: ColumnDef<Interview>[] = [
         cell: ({ row }) => {
             const interview = row.original
             return (
-                <div className="flex justify-center">
+                <div
+                    className="flex justify-center"
+                    onClick={(e) => e.stopPropagation()}
+                >
                     <Link href={`/company/edit/${interview.template_id}`}>
                         <Button variant="ghost" className="bg-[rgba(255,241,234,1)] hover:bg-[rgba(255,144,85,0.2)] border border-[rgba(255,144,85,0.1)] rounded-full px-4 text-[rgba(10,13,26,0.7)] h-8" >
                             {/* Using pencil icon similar to mockup */}

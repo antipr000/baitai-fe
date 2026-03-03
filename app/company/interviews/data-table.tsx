@@ -25,6 +25,7 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Filter } from "lucide-react"
+import { useRouter } from "next/navigation"
 
 interface DataTableProps<TData, TValue> {
     columns: ColumnDef<TData, TValue>[]
@@ -35,6 +36,7 @@ export function DataTable<TData, TValue>({
     columns,
     data,
 }: DataTableProps<TData, TValue>) {
+    const router = useRouter()
     const [globalFilter, setGlobalFilter] = useState("")
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
     const [sorting, setSorting] = useState<SortingState>([])
@@ -124,9 +126,10 @@ export function DataTable<TData, TValue>({
                     <TableBody>
                         {table.getRowModel().rows?.length ? (
                             table.getRowModel().rows.map((row) => (
-                                <TableRow className="border-b border-gray-100 last:border-0 hover:bg-[rgba(248,250,255,1)] transition-colors"
+                                <TableRow className="border-b border-gray-100 last:border-0 hover:bg-[rgba(248,250,255,1)] transition-colors cursor-pointer"
                                     key={row.id}
                                     data-state={row.getIsSelected() && "selected"}
+                                    onClick={() => router.push(`/company/sessions/${(row.original as TData & { template_id: string }).template_id}`)}
                                 >
                                     {row.getVisibleCells().map((cell) => (
                                         <TableCell key={cell.id} className="py-5 px-2">
