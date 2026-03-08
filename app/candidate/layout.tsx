@@ -2,7 +2,7 @@ import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar"
 import { AppSidebar } from "@/components/candidate/navigation/app-sidebar"
 import { TopHeader } from "@/components/candidate/navigation/top-header"
 import { Suspense } from "react"
-import ClientAuthWrapper from "./client-auth-wrapper"
+import PreferenceWrapper from "./preference-wrapper"
 
 export default function CandidateLayout({
     children,
@@ -10,7 +10,7 @@ export default function CandidateLayout({
     children: React.ReactNode
 }) {
     return (
-        <ClientAuthWrapper>
+        <PreferenceWrapper>
             <div className="flex flex-col h-screen overflow-hidden">
                 <Suspense fallback={<header className="h-[72px] bg-white border-b border-[#E2E8F0]" />}>
                     <TopHeader />
@@ -22,6 +22,6 @@ export default function CandidateLayout({
                     </SidebarInset>
                 </SidebarProvider>
             </div>
-        </ClientAuthWrapper>
+        </PreferenceWrapper>
     )
 }

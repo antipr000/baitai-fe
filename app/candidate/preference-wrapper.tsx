@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth/authContext";
 import { Loader2 } from "lucide-react";
 
-export default function ClientAuthWrapper({ children }: { children: React.ReactNode }) {
+export default function PreferenceWrapper({ children }: { children: React.ReactNode }) {
     const { preferencesSet, preferencesLoading, loading } = useAuth();
     const router = useRouter();
 

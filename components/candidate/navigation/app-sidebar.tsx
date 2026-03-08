@@ -38,7 +38,7 @@ const navItems = [
     },
     {
         title: "Results",
-        url: "/results2",
+        url: "/candidate/results",
         icon: "/candidate/dashboard2/score.svg",
     },
 ]
