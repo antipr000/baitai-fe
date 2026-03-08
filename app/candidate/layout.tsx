@@ -1,35 +1,27 @@
-"use client";
+import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar"
+import { AppSidebar } from "@/components/candidate/navigation/app-sidebar"
+import { TopHeader } from "@/components/candidate/navigation/top-header"
+import { Suspense } from "react"
+import ClientAuthWrapper from "./client-auth-wrapper"
 
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { useAuth } from "@/lib/auth/authContext";
-import { Loader2 } from "lucide-react";
-
-export default function CandidateLayout({ children }: { children: React.ReactNode }) {
-    const { preferencesSet, preferencesLoading, loading } = useAuth();
-    const router = useRouter();
-
-    useEffect(() => {
-        if (!loading && !preferencesLoading && preferencesSet === false) {
-            router.replace("/preferences");
-        }
-    }, [loading, preferencesLoading, preferencesSet, router]);
-
-    if (loading || preferencesLoading) {
-        return (
-            <div className="min-h-screen bg-[rgba(248,250,255,1)] flex items-center justify-center">
-                <Loader2 className="size-8 animate-spin text-[rgba(58,63,187,1)]" />
+export default function CandidateLayout({
+    children,
+}: {
+    children: React.ReactNode
+}) {
+    return (
+        <ClientAuthWrapper>
+            <div className="flex flex-col h-screen overflow-hidden">
+                <Suspense fallback={<header className="h-[72px] bg-white border-b border-[#E2E8F0]" />}>
+                    <TopHeader />
+                </Suspense>
+                <SidebarProvider className="flex flex-1 min-h-0 overflow-hidden bg-[rgba(245,247,255,1)]">
+                    <AppSidebar />
+                    <SidebarInset className="flex w-full min-h-0 mb-4 flex-col bg-white overflow-y-auto">
+                        {children}
+                    </SidebarInset>
+                </SidebarProvider>
             </div>
-        );
-    }
-
-    if (preferencesSet === false) {
-        return (
-            <div className="min-h-screen bg-[rgba(248,250,255,1)] flex items-center justify-center">
-                <Loader2 className="size-8 animate-spin text-[rgba(58,63,187,1)]" />
-            </div>
-        );
-    }
-
-    return <>{children}</>;
+        </ClientAuthWrapper>
+    )
 }

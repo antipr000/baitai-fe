@@ -8,7 +8,6 @@ import {
     Sidebar,
     SidebarContent,
     SidebarFooter,
-    SidebarHeader,
     SidebarMenu,
     SidebarMenuButton,
     SidebarMenuItem,
@@ -38,8 +37,8 @@ const navItems = [
         icon: "/candidate/dashboard2/target.svg",
     },
     {
-        title: "Latest Results",
-        url: "/candidate/results2",
+        title: "Results",
+        url: "/results2",
         icon: "/candidate/dashboard2/score.svg",
     },
 ]

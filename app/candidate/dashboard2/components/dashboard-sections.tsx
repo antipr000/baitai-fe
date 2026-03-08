@@ -28,6 +28,13 @@ function formatDateAgo(dateString: string): string {
     return `${diffDays} days ago`
 }
 
+function getDifficultyColor(difficulty: string): string {
+    const d = difficulty?.toLowerCase()
+    if (d === 'easy') return 'border-[rgba(3,231,41,1)] text-[rgba(3,231,41,1)]'
+    if (d === 'medium') return 'border-[rgba(231,90,3,1)] text-[rgba(231,90,3,1)]'
+    return 'border-[rgba(255,35,35,1)] text-[rgba(255,35,35,1)]'
+}
+
 export function InterviewInvitesCard({ items }: { items: any[] }) {
     return (
         <Card className="border-[rgba(212,217,255,1)] bg-[rgba(245,247,255,1)] shadow-sm flex flex-col h-full">
@@ -101,7 +108,7 @@ export function CompanyPracticeCard({ items }: { items: any[] }) {
                             <div>
                                 <h4 className="font-medium text-[rgba(10,13,26,1)] leading-snug mb-1">{item.title}</h4>
                                 <div className="flex items-center gap-2 text-sm text-[rgba(10,13,26,0.7)]">
-                                    <span className={`px-2 py-0.5 rounded-full border text-[11px] font-medium ${item.difficulty?.toLowerCase() === 'easy' ? 'border-[rgba(3,231,41,1)] text-[rgba(3,231,41,1)]' : 'border-[rgba(255,35,35,1)] text-[rgba(255,35,35,1)]'}`}>
+                                    <span className={`px-2 py-0.5 rounded-full border text-[11px] font-medium ${getDifficultyColor(item.difficulty)}`}>
                                         {item.difficulty || 'Easy'}
                                     </span>
                                     <span className="flex items-center gap-1 text-xs">
@@ -143,7 +150,7 @@ export function PracticeInterviewsCard({ items }: { items: any[] }) {
                                 <div>
                                     <h4 className="font-medium text-[rgba(10,13,26,1)] leading-snug mb-1">{item.title}</h4>
                                     <div className="flex items-center gap-3">
-                                        <span className={`inline-block px-2 py-0.5 rounded-full border text-[11px] font-medium ${item.difficulty_level?.toLowerCase() === 'easy' ? 'border-[rgba(3,231,41,1)] text-[rgba(3,231,41,1)]' : 'border-[rgba(255,35,35,1)] text-[rgba(255,35,35,1)]'}`}>
+                                        <span className={`inline-block px-2 py-0.5 rounded-full border text-[11px] font-medium ${getDifficultyColor(item.difficulty_level)}`}>
                                             {item.difficulty_level || 'Easy'}
                                         </span>
                                         <div className="flex items-center gap-1 text-xs text-[rgba(10,13,26,0.7)] shrink-0">
