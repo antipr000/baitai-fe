@@ -1,0 +1,213 @@
+import React from 'react'
+import Link from 'next/link'
+import Image from 'next/image'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+
+function formatDueDate(dueDate: string): string {
+    const due = new Date(dueDate)
+    const now = new Date()
+    const diffTime = due.getTime() - now.getTime()
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+
+    if (diffDays < 0) return 'Overdue'
+    if (diffDays === 0) return 'Due today'
+    if (diffDays === 1) return 'Due tomorrow'
+    return `Due in ${diffDays} days`
+}
+
+function formatDateAgo(dateString: string): string {
+    if (!dateString) return ''
+    const date = new Date(dateString)
+    const now = new Date()
+    const diffTime = now.getTime() - date.getTime()
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24))
+
+    if (diffDays === 0) return 'Today'
+    if (diffDays === 1) return 'Yesterday'
+    return `${diffDays} days ago`
+}
+
+export function InterviewInvitesCard({ items }: { items: any[] }) {
+    return (
+        <Card className="border-[rgba(212,217,255,1)] bg-[rgba(245,247,255,1)] shadow-sm flex flex-col h-full">
+            <CardHeader className="flex flex-row items-center justify-between px-6">
+                <CardTitle className="font-semibold text-[rgba(10,13,26,1)] flex items-center gap-2">
+                    <Image src="/candidate/dashboard2/doc.svg" alt="doc" width={18} height={18} />
+                    Interview Invites
+                </CardTitle>
+                <Link href="/candidate/dashboard2/invites">
+                    <Button variant="outline" className="border-[rgba(58,63,187,1)] text-[rgba(10,13,26,1)] h-8 px-4 font-semibold">View all</Button>
+                </Link>
+            </CardHeader>
+            <CardContent className="p-0 flex flex-col flex-1">
+                {items.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center p-8 gap-4">
+                        <p className="text-[rgba(10,13,26,0.7)] text-sm">No pending invites.</p>
+                        <Link href="/candidate/dashboard2/practice">
+                            <Button className="bg-[rgba(58,63,187,1)] hover:bg-[rgba(58,63,187,0.9)] text-white font-semibold text-xs rounded-sm px-8">
+                                Try Practice Interviews
+                            </Button>
+                        </Link>
+                    </div>
+                ) : (
+                    <div className="flex flex-col gap-3 px-6 ">
+                        {items.map((item, idx) => (
+                            <div key={idx} className="flex items-center justify-between bg-white p-4 border border-[rgba(107,124,255,1)] rounded-lg">
+                                <div>
+                                    <h4 className="font-medium text-[rgba(10,13,26,1)] leading-snug mb-1">{item.company_name}</h4>
+                                    <div className="flex items-center gap-3">
+                                        <p className="text-sm text-[rgba(10,13,26,0.7)]">{item.title}</p>
+                                        <span className="px-2 py-0.5 rounded-full border border-[rgba(255,20,20,1)] text-[rgba(255,20,20,1)] text-[11px] font-medium ">
+                                            {formatDueDate(item.end_date)}
+                                        </span>
+                                    </div>
+                                </div>
+                                <Button className="bg-[rgba(58,63,187,1)] hover:bg-[rgba(58,63,187,0.9)] text-white font-semibold text-xs rounded-sm px-8">
+                                    Start Interview
+                                </Button>
+                            </div>
+                        ))}
+                    </div>
+                )}
+            </CardContent>
+        </Card>
+    )
+}
+
+export function CompanyPracticeCard({ items }: { items: any[] }) {
+    // We are mocking the data structure slightly for company since we don't have separate company practice endpoint
+    // Fallback if no specific data is provided
+    const displayItems = items.length > 0 ? items : [
+        { title: "Microsoft", role: "Frontend Developer", difficulty: "Easy", duration: 30 },
+        { title: "Google", role: "Backend Developer", difficulty: "Difficult", duration: 45 }
+    ]
+
+    return (
+        <Card className="border-[rgba(212,217,255,1)] bg-[rgba(245,247,255,1)] shadow-sm flex flex-col h-full">
+            <CardHeader className="flex flex-row items-center justify-between   px-6 ">
+                <CardTitle className=" font-semibold text-[rgba(10,13,26,1)] flex items-center gap-2">
+                    <Image src="/candidate/dashboard2/company.svg" alt="company" width={18} height={18} />
+                    Company-specific Practice Interviews
+                </CardTitle>
+                <Link href="/candidate/dashboard2/company-interviews">
+                    <Button variant="outline" className="border-[rgba(58,63,187,1)] text-[rgba(10,13,26,1)] h-8 px-4 font-semibold">View all</Button>
+                </Link>
+            </CardHeader>
+            <CardContent className="p-0 flex flex-col flex-1 ">
+                <div className="flex flex-col gap-3 px-6 pb-6">
+                    {displayItems.map((item, idx) => (
+                        <div key={idx} className="flex items-center justify-between bg-white p-4 border border-[rgba(107,124,255,1)] rounded-lg">
+                            <div>
+                                <h4 className="font-medium text-[rgba(10,13,26,1)] leading-snug mb-1">{item.title}</h4>
+                                <div className="flex items-center gap-2 text-sm text-[rgba(10,13,26,0.7)]">
+                                    <span className={`px-2 py-0.5 rounded-full border text-[11px] font-medium ${item.difficulty?.toLowerCase() === 'easy' ? 'border-[rgba(3,231,41,1)] text-[rgba(3,231,41,1)]' : 'border-[rgba(255,35,35,1)] text-[rgba(255,35,35,1)]'}`}>
+                                        {item.difficulty || 'Easy'}
+                                    </span>
+                                    <span className="flex items-center gap-1 text-xs">
+                                        <Image src="/candidate/dashboard2/time.svg" alt="time" width={14} height={14} />
+                                        {item.duration || 30} min
+                                    </span>
+                                </div>
+                            </div>
+                            <Button className="bg-[rgba(58,63,187,1)] hover:bg-[rgba(58,63,187,0.9)] text-white font-semibold text-xs rounded-sm px-8">
+                                View List
+                            </Button>
+                        </div>
+                    ))}
+                </div>
+            </CardContent>
+        </Card>
+    )
+}
+
+export function PracticeInterviewsCard({ items }: { items: any[] }) {
+    return (
+        <Card className="border-[rgba(212,217,255,1)] bg-[rgba(245,247,255,1)] shadow-sm flex flex-col h-full">
+            <CardHeader className="flex flex-row items-center justify-between px-6">
+                <CardTitle className="font-semibold text-[rgba(10,13,26,1)] flex items-center gap-2">
+                    <Image src="/candidate/dashboard2/target.svg" alt="target" width={18} height={18} />
+                    Practice Interviews
+                </CardTitle>
+                <Link href="/candidate/dashboard2/practice">
+                    <Button variant="outline" className="border-[rgba(58,63,187,1)] text-[rgba(10,13,26,1)] h-8 px-4 font-semibold">View all</Button>
+                </Link>
+            </CardHeader>
+            <CardContent className="p-0 flex flex-col flex-1">
+                {items.length === 0 ? (
+                    <div className="flex items-center justify-center p-8 text-[rgba(10,13,26,0.7)] text-sm">No practice interviews.</div>
+                ) : (
+                    <div className="flex flex-col gap-3 px-6 pb-6">
+                        {items.map((item, idx) => (
+                            <div key={idx} className="flex items-center justify-between bg-white p-4 border border-[rgba(107,124,255,1)] rounded-lg">
+                                <div>
+                                    <h4 className="font-medium text-[rgba(10,13,26,1)] leading-snug mb-1">{item.title}</h4>
+                                    <div className="flex items-center gap-3">
+                                        <span className={`inline-block px-2 py-0.5 rounded-full border text-[11px] font-medium ${item.difficulty_level?.toLowerCase() === 'easy' ? 'border-[rgba(3,231,41,1)] text-[rgba(3,231,41,1)]' : 'border-[rgba(255,35,35,1)] text-[rgba(255,35,35,1)]'}`}>
+                                            {item.difficulty_level || 'Easy'}
+                                        </span>
+                                        <div className="flex items-center gap-1 text-xs text-[rgba(10,13,26,0.7)] shrink-0">
+                                            <Image src="/candidate/dashboard2/time.svg" alt="time" width={14} height={14} />
+                                            {item.duration || 30} min
+                                        </div>
+                                    </div>
+                                </div>
+                                <Button className="bg-[rgba(58,63,187,1)] hover:bg-[rgba(58,63,187,0.9)] text-white font-semibold text-xs rounded-sm px-8">
+                                    Start Interview
+                                </Button>
+                            </div>
+                        ))}
+                    </div>
+                )}
+            </CardContent>
+        </Card>
+    )
+}
+
+export function LatestResultsCard({ items }: { items: any[] }) {
+    return (
+        <Card className="border-[rgba(212,217,255,1)] bg-[rgba(245,247,255,1)] shadow-sm flex flex-col h-full">
+            <CardHeader className="flex flex-row items-center justify-between px-6">
+                <CardTitle className="font-semibold text-[rgba(10,13,26,1)] flex items-center gap-2">
+                    <Image src="/candidate/dashboard2/score.svg" alt="score" width={18} height={18} />
+                    Latest Results
+                </CardTitle>
+                <Link href="/candidate/dashboard2/results">
+                    <Button variant="outline" className="border-[rgba(58,63,187,1)] text-[rgba(10,13,26,1)] h-8 px-4 font-semibold">View all</Button>
+                </Link>
+            </CardHeader>
+            <CardContent className="p-0 flex flex-col flex-1">
+                {items.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center p-8 gap-4">
+                        <p className="text-[rgba(10,13,26,0.7)] text-sm">No recent results.</p>
+                        <Link href="/candidate/dashboard2/practice">
+                            <Button className="bg-[rgba(58,63,187,1)] hover:bg-[rgba(58,63,187,0.9)] text-white font-semibold text-xs rounded-sm px-8">
+                                Try Practice Interviews
+                            </Button>
+                        </Link>
+                    </div>
+                ) : (
+                    <div className="flex flex-col gap-3 px-6 pb-6">
+                        {items.map((item, idx) => (
+                            <div key={idx} className="flex items-center justify-between bg-white p-4 border border-[rgba(107,124,255,1)] rounded-lg">
+                                <div>
+                                    <h4 className="font-medium text-[rgba(10,13,26,1)] mb-1">{item.template_title || item.title}</h4>
+                                    <p className="text-sm text-[rgba(10,13,26,0.7)]">{formatDateAgo(item.date || item.ended_at || item.completed_at || item.created_at)}</p>
+                                </div>
+                                <div className="flex items-center gap-6">
+                                    <div className="flex flex-col items-center">
+                                        <span className="text-[rgba(58,63,187,1)] font-medium text-lg">{item.score ?? '0'}%</span>
+                                        <span className="text-[rgba(10,13,26,0.7)] text-xs">Score</span>
+                                    </div>
+                                    <Button className="bg-[rgba(58,63,187,1)] hover:bg-[rgba(58,63,187,0.9)] text-white font-semibold text-xs rounded-sm px-8">
+                                        View Details
+                                    </Button>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                )}
+            </CardContent>
+        </Card>
+    )
+}
