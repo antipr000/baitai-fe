@@ -28,7 +28,7 @@ const navItems = [
     },
     {
         title: "Company Practice Interviews",
-        url: "/candidate/practice-interviews2",
+        url: "/candidate/company-practice",
         icon: "/candidate/dashboard2/company.svg",
     },
     {

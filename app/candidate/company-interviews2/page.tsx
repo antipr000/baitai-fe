@@ -44,11 +44,12 @@ async function CompanyHeader() {  // need to optimize
     return (
         <div className="flex flex-col gap-1.5 pt-2">
             <h1 className="text-3xl font-semibold text-[rgba(17,24,39,1)] tracking-tight">Interview Invites</h1>
-            {stats.pending > 0 && (
-                <p className="text-[rgba(255,107,107,1)] font-medium text-base">
-                    You have {stats.pending} pending interviews
-                </p>
-            )}
+            <p className="text-[rgba(17,24,39,0.6)] text-base">
+                You have{' '}
+                <span className={stats.pending > 0 ? 'text-[rgba(255,107,107,1)]' : 'text-[rgba(14,163,3,1)]'}>
+                    {stats.pending} pending interviews
+                </span>
+            </p>
         </div>
     )
 }
@@ -58,7 +59,7 @@ async function CompanyStats() {
     const stats = data ?? { pending: 0, companies: 0, positions: 0 }
 
     return (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-23">
             {/* Pending Interviews */}
             <Card className="border border-[rgba(58,63,187,1)] shadow-sm bg-white rounded-[12px]">
                 <CardContent className="">

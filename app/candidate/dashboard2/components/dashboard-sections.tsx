@@ -43,7 +43,7 @@ export function InterviewInvitesCard({ items }: { items: any[] }) {
                     <Image src="/candidate/dashboard2/doc.svg" alt="doc" width={18} height={18} />
                     Interview Invites
                 </CardTitle>
-                <Link href="/candidate/dashboard2/invites">
+                <Link href="/candidate/company-interviews2">
                     <Button variant="outline" className="border-[rgba(58,63,187,1)] text-[rgba(10,13,26,1)] h-8 px-4 font-semibold">View all</Button>
                 </Link>
             </CardHeader>
@@ -51,7 +51,7 @@ export function InterviewInvitesCard({ items }: { items: any[] }) {
                 {items.length === 0 ? (
                     <div className="flex flex-col items-center justify-center p-8 gap-4">
                         <p className="text-[rgba(10,13,26,0.7)] text-sm">No pending invites.</p>
-                        <Link href="/candidate/dashboard2/practice">
+                        <Link href="/candidate/practice-interviews2">
                             <Button className="bg-[rgba(58,63,187,1)] hover:bg-[rgba(58,63,187,0.9)] text-white font-semibold text-xs rounded-sm px-8">
                                 Try Practice Interviews
                             </Button>
@@ -83,12 +83,32 @@ export function InterviewInvitesCard({ items }: { items: any[] }) {
 }
 
 export function CompanyPracticeCard({ items }: { items: any[] }) {
-    // We are mocking the data structure slightly for company since we don't have separate company practice endpoint
-    // Fallback if no specific data is provided
-    const displayItems = items.length > 0 ? items : [
-        { title: "Microsoft", role: "Frontend Developer", difficulty: "Easy", duration: 30 },
-        { title: "Google", role: "Backend Developer", difficulty: "Difficult", duration: 45 }
-    ]
+    const normalizeDifficulty = (value: string | undefined): string => {
+        const d = value?.toLowerCase()
+        if (d === 'hard' || d === 'difficult') return 'Difficult'
+        if (d === 'medium') return 'Medium'
+        if (d === 'easy') return 'Easy'
+        return 'Easy'
+    }
+
+    const displayItems = items
+        .map((item) => {
+            const companyName = item.tags?.find((t: any) => t.tag_type === 'company')?.value
+            if (!companyName) return null
+            return {
+                companyName,
+                role: item.role || 'General',
+                difficulty: normalizeDifficulty(item.difficulty),
+                duration: item.duration 
+            }
+        })
+        .filter(Boolean)
+        .slice(0, 2) as Array<{
+        companyName: string
+        role: string
+        difficulty: string
+        duration: number
+    }>
 
     return (
         <Card className="border-[rgba(212,217,255,1)] bg-[rgba(245,247,255,1)] shadow-sm flex flex-col h-full">
@@ -97,32 +117,36 @@ export function CompanyPracticeCard({ items }: { items: any[] }) {
                     <Image src="/candidate/dashboard2/company.svg" alt="company" width={18} height={18} />
                     Company-specific Practice Interviews
                 </CardTitle>
-                <Link href="/candidate/dashboard2/company-interviews">
+                <Link href="/candidate/company-practice">
                     <Button variant="outline" className="border-[rgba(58,63,187,1)] text-[rgba(10,13,26,1)] h-8 px-4 font-semibold">View all</Button>
                 </Link>
             </CardHeader>
             <CardContent className="p-0 flex flex-col flex-1 ">
-                <div className="flex flex-col gap-3 px-6 pb-6">
-                    {displayItems.map((item, idx) => (
-                        <div key={idx} className="flex items-center justify-between bg-white p-4 border border-[rgba(107,124,255,1)] rounded-lg">
-                            <div>
-                                <h4 className="font-medium text-[rgba(10,13,26,1)] leading-snug mb-1">{item.title}</h4>
-                                <div className="flex items-center gap-2 text-sm text-[rgba(10,13,26,0.7)]">
-                                    <span className={`px-2 py-0.5 rounded-full border text-[11px] font-medium ${getDifficultyColor(item.difficulty)}`}>
-                                        {item.difficulty || 'Easy'}
-                                    </span>
-                                    <span className="flex items-center gap-1 text-xs">
-                                        <Image src="/candidate/dashboard2/time.svg" alt="time" width={14} height={14} />
-                                        {item.duration || 30} min
-                                    </span>
+                {displayItems.length === 0 ? (
+                    <div className="flex items-center justify-center p-8 text-[rgba(10,13,26,0.7)] text-sm">No company-specific practice interviews.</div>
+                ) : (
+                    <div className="flex flex-col gap-3 px-6 pb-6">
+                        {displayItems.map((item, idx) => (
+                            <div key={idx} className="flex items-center justify-between bg-white p-4 border border-[rgba(107,124,255,1)] rounded-lg">
+                                <div>
+                                    <h4 className="font-medium text-[rgba(10,13,26,1)] leading-snug mb-1">{item.companyName}</h4>
+                                    <div className="flex items-center gap-2 text-sm text-[rgba(10,13,26,0.7)]">
+                                        <span className={`px-2 py-0.5 rounded-full border text-[11px] font-medium ${getDifficultyColor(item.difficulty)}`}>
+                                            {item.difficulty}
+                                        </span>
+                                        <span className="flex items-center gap-1 text-xs">
+                                            <Image src="/candidate/dashboard2/time.svg" alt="time" width={14} height={14} />
+                                            {item.duration} min
+                                        </span>
+                                    </div>
                                 </div>
+                                <Button className="bg-[rgba(58,63,187,1)] hover:bg-[rgba(58,63,187,0.9)] text-white font-semibold text-xs rounded-sm px-8">
+                                    View List
+                                </Button>
                             </div>
-                            <Button className="bg-[rgba(58,63,187,1)] hover:bg-[rgba(58,63,187,0.9)] text-white font-semibold text-xs rounded-sm px-8">
-                                View List
-                            </Button>
-                        </div>
-                    ))}
-                </div>
+                        ))}
+                    </div>
+                )}
             </CardContent>
         </Card>
     )
@@ -136,7 +160,7 @@ export function PracticeInterviewsCard({ items }: { items: any[] }) {
                     <Image src="/candidate/dashboard2/target.svg" alt="target" width={18} height={18} />
                     Practice Interviews
                 </CardTitle>
-                <Link href="/candidate/dashboard2/practice">
+                <Link href="/candidate/practice-interviews2">
                     <Button variant="outline" className="border-[rgba(58,63,187,1)] text-[rgba(10,13,26,1)] h-8 px-4 font-semibold">View all</Button>
                 </Link>
             </CardHeader>
@@ -179,7 +203,7 @@ export function LatestResultsCard({ items }: { items: any[] }) {
                     <Image src="/candidate/dashboard2/score.svg" alt="score" width={18} height={18} />
                     Latest Results
                 </CardTitle>
-                <Link href="/candidate/dashboard2/results">
+                <Link href="/candidate/results">
                     <Button variant="outline" className="border-[rgba(58,63,187,1)] text-[rgba(10,13,26,1)] h-8 px-4 font-semibold">View all</Button>
                 </Link>
             </CardHeader>

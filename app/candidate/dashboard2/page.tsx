@@ -36,7 +36,7 @@ async function DashboardHeader() {
         <div className="mb-4">
             <h1 className="text-3xl font-semibold text-[rgba(17,24,39,1)] mb-2 tracking-tight">Dashboard</h1>
             <p className="text-[rgba(17,24,39,0.6)] text-base">
-                You have <span className="text-[rgba(255,20,20,1)]">{pending} pending interviews</span> this week
+                You have <span className={pending > 0 ? "text-[rgba(255,20,20,1)]" : "text-[rgba(14,163,3,1)]"}>{pending} pending interviews</span> this week
             </p>
         </div>
     )
@@ -136,6 +136,58 @@ interface ResultsResponse {
     items: any[]
 }
 
+function DashboardHeaderSkeleton() {
+    return (
+        <div className="mb-4 space-y-2">
+            <Skeleton className="h-9 w-44" />
+            <Skeleton className="h-5 w-72" />
+        </div>
+    )
+}
+
+function StatsCardsSkeleton() {
+    return (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            {Array.from({ length: 4 }).map((_, i) => (
+                <Card key={i} className=" shadow-sm py-2">
+                    <CardContent className="p-5 flex flex-col gap-3">
+                        <div className="flex items-start justify-between">
+                            <Skeleton className="h-8 w-8 rounded-md" />
+                            <Skeleton className="h-3 w-16" />
+                        </div>
+                        <div className="space-y-1">
+                            <Skeleton className="h-8 w-16" />
+                            <Skeleton className="h-4 w-20" />
+                        </div>
+                    </CardContent>
+                </Card>
+            ))}
+        </div>
+    )
+}
+
+function MainGridSkeleton() {
+    return (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {Array.from({ length: 4 }).map((_, i) => (
+                <Card key={i} className="border shadow-sm">
+                    <CardContent className="p-5 space-y-4">
+                        <Skeleton className="h-6 w-40" />
+                        <div className="space-y-3">
+                            {Array.from({ length: 2 }).map((__, j) => (
+                                <div key={j} className="flex items-center justify-between">
+                                    <Skeleton className="h-4 w-32" />
+                                    <Skeleton className="h-8 w-20 rounded-md" />
+                                </div>
+                            ))}
+                        </div>
+                    </CardContent>
+                </Card>
+            ))}
+        </div>
+    )
+}
+
 async function MainGrid() {
     const [invitesResponse, practiceResponse, resultsResponse] = await Promise.all([
         serverFetch<InvitesResponse>('/api/v1/user/interview/invites/', {
@@ -159,7 +211,7 @@ async function MainGrid() {
     return (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <InterviewInvitesCard items={invites} />
-            <CompanyPracticeCard items={[]} />
+            <CompanyPracticeCard items={practice} />
             <PracticeInterviewsCard items={practice} />
             <LatestResultsCard items={results} />
         </div>
@@ -172,19 +224,19 @@ export default function Dashboard2Page() {
             {/* Header Area */}
             <div className="flex justify-between items-start mb-8">
                 <div className="flex items-center gap-3">
-                    <Suspense fallback={<Skeleton className="h-16 w-[300px]" />}>
+                    <Suspense fallback={<DashboardHeaderSkeleton />}>
                         <DashboardHeader />
                     </Suspense>
                 </div>
             </div>
 
             {/* Stats Cards */}
-            <Suspense fallback={<Skeleton className="h-[140px] w-full" />}>
+            <Suspense fallback={<StatsCardsSkeleton />}>
                 <StatsCards />
             </Suspense>
 
             {/* Grids */}
-            <Suspense fallback={<Skeleton className="h-[400px] w-full" />}>
+            <Suspense fallback={<MainGridSkeleton />}>
                 <MainGrid />
             </Suspense>
         </div>
