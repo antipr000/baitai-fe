@@ -98,7 +98,7 @@ export default async function CompanyDashboard() {
                     {/* Stats Cards */}
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-16">
                         {/* Total Interviews */}
-                        <Card className="bg-[rgba(104,100,247,0.1)] border border-[rgba(104,100,247,0.5)]">
+                        <Card className="bg-[rgba(104,100,247,0.1)] rounded-4xl border border-[rgba(104,100,247,0.5)]">
                             <CardContent className="pt-6 ">
                                 <div className="group flex items-center justify-center gap-5">
                                     <Image src="/company/dashboard/note.svg" alt="note" width={48} height={48} className="h-12 w-12 group-hover:-rotate-10 transition-all duration-400" />
@@ -111,7 +111,7 @@ export default async function CompanyDashboard() {
                         </Card>
 
                         {/* Candidates  */}
-                        <Card className="bg-[rgba(253,96,80,0.1)] border border-[rgba(253,96,80,0.5)]">
+                        <Card className="bg-[rgba(253,96,80,0.1)] rounded-4xl border border-[rgba(253,96,80,0.5)]">
                             <CardContent className="pt-6">
                                 <div className="group flex items-center justify-center gap-5">
                                     <Image src="/company/dashboard/people.svg" alt="people" width={48} height={48} className="h-12 w-12 group-hover:-rotate-10 transition-all duration-400" />
@@ -125,7 +125,7 @@ export default async function CompanyDashboard() {
                         </Card>
 
                         {/* Avg Duration */}
-                        <Card className="bg-[rgba(51,204,204,0.1)] border border-[rgba(51,204,204,0.5)]">
+                        <Card className="bg-[rgba(51,204,204,0.1)] rounded-4xl border border-[rgba(51,204,204,0.5)]">
                             <CardContent className="pt-6">
                                 <div className="group flex items-center justify-center gap-5">
                                     <Image src="/company/dashboard/time.svg" alt="time" width={48} height={48} className="h-12 w-12 group-hover:-rotate-10 transition-all duration-400" />
@@ -139,7 +139,7 @@ export default async function CompanyDashboard() {
                         </Card>
 
                         {/* Active  */}
-                        <Card className="bg-[rgba(113,184,108,0.1)] border border-[rgba(113,184,108,0.5)]">
+                        <Card className="bg-[rgba(113,184,108,0.1)] rounded-4xl border border-[rgba(113,184,108,0.5)]">
                             <CardContent className="pt-6">
                                 <div className="group flex items-center justify-center gap-5">
                                     <Image src="/company/dashboard/wheel.svg" alt="settings" width={48} height={48} className="h-12 w-12 group-hover:-rotate-10 transition-all duration-400" />
@@ -155,7 +155,12 @@ export default async function CompanyDashboard() {
 
                     {/* Your Interviews Section */}
                     <div className="space-y-6">
-                        <div className="flex justify-end">
+                        <div className="flex justify-between">
+
+                            <div className='font-medium text-xl text-[rgba(10,13,26,0.7)]'>
+                                Your Interviews
+                            </div>
+
                             <Link
                                 href="/company/interviews"
                                 className="text-[rgba(255,100,27,0.9)] font-semibold hover:underline flex items-center gap-2"
@@ -164,10 +169,10 @@ export default async function CompanyDashboard() {
                             </Link>
                         </div>
 
-                        <div className="space-y-4">
+                        <div className="space-y-4.5">
                             {recentInterviews.length > 0 ? (
                                 recentInterviews.map((interview) => (
-                                    <Card key={interview.id} className="relative hover:border-[rgba(106,125,252,1)] transition-hover duration-200 ease-in-out border-[rgba(106,125,252,0.3)]">
+                                    <Card key={interview.id} className="relative rounded-4xl hover:border-[rgba(106,125,252,1)] transition-hover duration-200 ease-in-out border-[rgba(106,125,252,0.5)]">
                                         <Link href={`/company/sessions/${interview.template_id}`} className="absolute inset-0" />
                                         <CardContent className="p-6 flex items-center justify-between relative z-10 pointer-events-none">
                                             <div className="space-y-4">

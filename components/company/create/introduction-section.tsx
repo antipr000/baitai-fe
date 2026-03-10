@@ -27,7 +27,7 @@ export const IntroductionSection = () => {
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                         <Image src="/company/create/section.svg" alt="section" width={20} height={20} className="h-5 w-5 text-muted-foreground/50" />
-                        <span className="text-lg font-medium text-[rgba(100,119,252,0.7)]">Introduction</span>
+                        <span className="text-lg font-medium text-[rgba(58,63,187,1)]">Introduction</span>
                     </div>
 
                     <div className="flex items-center gap-6">
@@ -39,7 +39,7 @@ export const IntroductionSection = () => {
                         </div>
 
                         <div className="flex items-center gap-2 ">
-                            <Clock className="h-4 w-4 text-[rgba(84,104,252,0.6)]" />
+                            <Clock className="h-4 w-4 text-[rgba(58,63,187,1)]" />
                             <span className="text-sm font-medium text-[rgba(34,37,49,0.9)]">{section.duration} min</span>
                         </div>
                     </div>

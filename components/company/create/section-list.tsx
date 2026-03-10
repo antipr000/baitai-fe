@@ -75,7 +75,7 @@ export const SectionList = () => {
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-3">
                                     <Image src="/company/create/section.svg" alt="section" width={20} height={20} />
-                                    <span className="text-lg font-medium text-[rgba(84,104,252,0.7)]">
+                                    <span className="text-lg font-medium text-[rgba(58,63,187,1)]">
                                         Section {sectionIndex + 1}
                                     </span>
                                 </div>
@@ -131,7 +131,7 @@ export const SectionList = () => {
                                 <div className="space-y-2">
                                     <label className="text-sm font-medium text-[rgba(10,13,26,0.82)] block">Duration (min) <span className="text-red-500">*</span></label>
                                     <div className="flex items-center gap-2">
-                                        <Clock className="h-4 w-4 text-[rgba(84,104,252,0.6)]" />
+                                        <Clock className="h-4 w-4 text-[rgba(58,63,187,1)]" />
                                         <Input
                                             type="number"
                                             min={1}
@@ -174,10 +174,10 @@ export const SectionList = () => {
                                         variant="outline"
                                         size="sm"
                                         onClick={() => addSectionCriteria(sectionIndex)}
-                                        className="text-primary border-[rgba(84,104,252,0.5)] gap-2"
+                                        className="text-primary border-[rgba(58,63,187,1)] gap-2"
                                     >
-                                        <Plus className="h-4 w-4 text-[rgba(84,104,252,1)]" />
-                                        <span className="text-[rgba(84,104,252,0.7)]">Add Criteria</span>
+                                        <Plus className="h-4 w-4 text-[rgba(58,63,187,1)]" />
+                                        <span className="text-[rgba(58,63,187,1)]">Add Criteria</span>
                                     </Button>
                                 </div>
 
@@ -249,10 +249,10 @@ export const SectionList = () => {
                                         variant="outline"
                                         size="sm"
                                         onClick={() => addSectionQuestion(sectionIndex)}
-                                        className="text-primary border-[rgba(84,104,252,0.5)] gap-2"
+                                        className="text-primary border-[rgba(58,63,187,0.5)] gap-2"
                                     >
-                                        <Plus className="h-4 w-4 text-[rgba(84,104,252,1)]" />
-                                        <span className="text-[rgba(84,104,252,0.7)]">Add Question</span>
+                                        <Plus className="h-4 w-4 text-[rgba(58,63,187,1)]" />
+                                        <span className="text-[rgba(58,63,187,1)]">Add Question</span>
                                     </Button>
                                 </div>
 
@@ -279,15 +279,15 @@ export const SectionList = () => {
                                                 className="flex items-center gap-6"
                                             >
                                                 <div className="flex items-center space-x-2">
-                                                    <RadioGroupItem value="easy" id={`easy-${sectionIndex}-${qIndex}`} className="data-[state=checked]:border-[rgba(84,104,252,1)] [&_svg]:fill-[rgba(84,104,252,1)]" />
+                                                    <RadioGroupItem value="easy" id={`easy-${sectionIndex}-${qIndex}`} className="data-[state=checked]:border-[rgba(58,63,187,1)] [&_svg]:fill-[rgba(58,63,187,1)]" />
                                                     <Label htmlFor={`easy-${sectionIndex}-${qIndex}`} className="font-normal cursor-pointer">Easy</Label>
                                                 </div>
                                                 <div className="flex items-center space-x-2">
-                                                    <RadioGroupItem value="medium" id={`medium-${sectionIndex}-${qIndex}`} className="data-[state=checked]:border-[rgba(84,104,252,1)] [&_svg]:fill-[rgba(84,104,252,1)]" />
+                                                    <RadioGroupItem value="medium" id={`medium-${sectionIndex}-${qIndex}`} className="data-[state=checked]:border-[rgba(58,63,187,1)] [&_svg]:fill-[rgba(58,63,187,1)]" />
                                                     <Label htmlFor={`medium-${sectionIndex}-${qIndex}`} className="font-normal cursor-pointer">Medium</Label>
                                                 </div>
                                                 <div className="flex items-center space-x-2">
-                                                    <RadioGroupItem value="hard" id={`hard-${sectionIndex}-${qIndex}`} className="data-[state=checked]:border-[rgba(84,104,252,1)] [&_svg]:fill-[rgba(84,104,252,1)]" />
+                                                    <RadioGroupItem value="hard" id={`hard-${sectionIndex}-${qIndex}`} className="data-[state=checked]:border-[rgba(58,63,187,1)] [&_svg]:fill-[rgba(58,63,187,1)]" />
                                                     <Label htmlFor={`hard-${sectionIndex}-${qIndex}`} className="font-normal cursor-pointer">Hard</Label>
                                                 </div>
                                             </RadioGroup>
@@ -305,17 +305,17 @@ export const SectionList = () => {
                                         </div>
 
                                         {/* Follow-up Rules */}
-                                        <div className="pl-4 ml-4 border-l-2 border-[rgba(84,104,252,0.1)] rounded-lg space-y-4">
+                                        <div className="pl-4 ml-4 border-l-2 border-[rgba(58,63,187,0.1)] rounded-lg space-y-4">
                                             <div className="flex items-center justify-between">
-                                                <span className="text-sm font-medium text-[rgba(150,162,253,0.9)]">Follow-up Logic</span>
+                                                <span className="text-sm font-medium text-[rgba(58,63,187,0.9)]">Follow-up Logic</span>
                                                 <Button
                                                     variant="outline"
                                                     size="sm"
                                                     onClick={() => addQuestionFollowUp(sectionIndex, qIndex)}
-                                                    className="text-primary border-[rgba(84,104,252,0.5)] gap-2 h-8"
+                                                    className="text-primary border-[rgba(58,63,187,1)] gap-2 h-8"
                                                 >
-                                                    <Plus className="h-3 w-3 text-[rgba(84,104,252,1)]" />
-                                                    <span className="text-[rgba(84,104,252,0.7)]">Add Rule</span>
+                                                    <Plus className="h-3 w-3 text-[rgba(58,63,187,1)]" />
+                                                    <span className="text-[rgba(58,63,187,1)]">Add Rule</span>
                                                 </Button>
                                             </div>
 
@@ -371,10 +371,10 @@ export const SectionList = () => {
                 <Button
                     variant="outline"
                     onClick={handleAddSection}
-                    className="text-primary border-[rgba(84,104,252,0.5)] gap-2"
+                    className="text-primary border-[rgba(58,63,187,1)] gap-2"
                 >
-                    <PlusCircle className="h-4 w-4 text-[rgba(84,104,252,1)]" />
-                    <span className="text-[rgba(84,104,252,0.7)]">Add Section</span>
+                    <PlusCircle className="h-4 w-4 text-[rgba(58,63,187,1)]" />
+                    <span className="text-[rgba(58,63,187,1)]">Add Section</span>
                 </Button>
             </div>
         </div>

@@ -17,7 +17,7 @@ export const InterviewDetails = () => {
         <Card className=" bg-[rgba(0,215,255,0.02)] border border-[rgba(84,104,252,0.1)]">
             <CardHeader className="pb-4">
                 <div className="flex items-center justify-between">
-                    <CardTitle className="text-xl font-semibold text-[rgba(84,104,252,0.73)]">Interview Details</CardTitle>
+                    <CardTitle className="text-xl font-semibold text-[rgba(58,63,187,1)]">Interview Details</CardTitle>
 
                     {/* Toggles */}
                     <div className="flex items-center gap-6">
@@ -26,7 +26,7 @@ export const InterviewDetails = () => {
                             <Switch
                                 checked={isPublic}
                                 onCheckedChange={setIsPublic}
-                                className="data-[state=checked]:bg-[rgba(84,104,252,1)]"
+                                className="data-[state=checked]:bg-[rgba(58,63,187,1)]"
                             />
                         </div>
                         <div className="flex items-center gap-2">
@@ -34,7 +34,7 @@ export const InterviewDetails = () => {
                             <Switch
                                 checked={screenShare}
                                 onCheckedChange={setScreenShare}
-                                className="data-[state=checked]:bg-[rgba(84,104,252,1)]"
+                                className="data-[state=checked]:bg-[rgba(58,63,187,1)]"
                             />
                         </div>
                     </div>

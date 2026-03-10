@@ -27,7 +27,7 @@ export const ConclusionSection = () => {
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                         <Image src="/company/create/section.svg" alt="section" width={24} height={24} />
-                        <span className="text-lg font-medium text-[rgba(84,104,252,0.7)]">Conclusion</span>
+                        <span className="text-lg font-medium text-[rgba(58,63,187,1)]">Conclusion</span>
                     </div>
 
                     <div className="flex items-center gap-6">

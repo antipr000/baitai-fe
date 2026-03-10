@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { BackButton } from '@/components/ui/back-button'
 import { toast } from 'sonner'
@@ -109,9 +110,14 @@ export function EditInterviewForm({ templateId, templateData, authToken }: EditI
                 <div className="container mx-auto max-w-6xl py-8 space-y-8 pb-20">
                     {/* Header */}
                     <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-4">
-                            <BackButton />
-                            <h1 className="text-2xl font-semibold text-transparent bg-clip-text bg-[linear-gradient(91.24deg,#3E54FB_35.23%,#C3CEFF_202.55%)]">
+                        <div className="flex items-center gap-2">
+                            <button
+                                onClick={() => router.back()}
+                                className={`cursor-pointer`}
+                            >
+                                <Image src="/company/left-arrow.svg" alt="Back" width={26} height={26} />
+                            </button>
+                            <h1 className="text-2xl font-semibold text-[rgba(58,63,187,1)]">
                                 Edit Interview
                             </h1>
                         </div>
@@ -121,7 +127,7 @@ export function EditInterviewForm({ templateId, templateData, authToken }: EditI
                                 variant="outline"
                                 onClick={() => router.back()}
                                 disabled={isSubmitting}
-                                className="rounded-full px-6 bg-clip-text font-semibold text-transparent bg-[linear-gradient(91.24deg,#3E54FB_35.23%,#C3CEFF_202.55%)] hover:text-transparent hover:opacity-80 border border-[#7082FD]"
+                                className="rounded-full px-8 hover:text-[rgba(58,63,187,1)] hover:bg-white font-semibold text-[rgba(58,63,187,1)] hover:opacity-90 border border-[rgba(58,63,187,1)]"
                             >
                                 Cancel
                             </Button>
@@ -129,7 +135,7 @@ export function EditInterviewForm({ templateId, templateData, authToken }: EditI
                                 size={"lg"}
                                 onClick={handleSave}
                                 disabled={isSubmitting}
-                                className="rounded-full px-6 bg-[rgba(84,104,252,1)] font-semibold hover:bg-[rgba(84,104,252,1)] opacity-80 text-white shadow-md"
+                                className="rounded-full hover:bg-[rgba(58,63,187,1)] px-10 bg-[rgba(58,63,187,1)] font-semibold hover:opacity-90 text-white shadow-md"
                             >
                                 {isSubmitting ? 'Saving...' : 'Save Changes'}
                             </Button>
@@ -143,7 +149,7 @@ export function EditInterviewForm({ templateId, templateData, authToken }: EditI
 
                     {/* Interview Sections */}
                     <div className="space-y-4 max-w-5xl mx-auto">
-                        <h2 className="text-xl font-semibold text-[rgba(84,104,252,0.9)]">Interview Sections</h2>
+                        <h2 className="text-xl font-semibold text-[rgba(58,63,187,1)]">Interview Sections</h2>
 
                         <IntroductionSection />
 

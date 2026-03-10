@@ -32,7 +32,7 @@ export function CreateInterviewForm({ companyId, authToken }: CreateInterviewFor
 
             {/* Interview Sections */}
             <div className="space-y-4 max-w-5xl mx-auto">
-                <h2 className="text-xl font-semibold text-[rgba(84,104,252,0.9)]">Interview Sections</h2>
+                <h2 className="text-xl font-semibold text-[rgba(58,63,187,1)]">Interview Sections</h2>
 
                 <IntroductionSection />
 
