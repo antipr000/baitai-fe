@@ -161,7 +161,7 @@ export interface InterviewState {
 
 // --- Default Section Templates ---
 
-const createDefaultQuestion = (order: number = 1): Question => ({
+const createDefaultQuestion = (order: number = 0): Question => ({
     difficultyLevel: 'medium',
     aiInstructions: '',
     order,
@@ -177,7 +177,7 @@ const createDefaultCriteria = (): EvaluationCriteria => ({
 
 const createDefaultIntroSection = (): Section => ({
     name: 'Introduction',
-    order: 1,
+    order: 0,
     duration: 5,
     sectionType: 'intro',
     artifactType: 'none',
@@ -188,7 +188,7 @@ const createDefaultIntroSection = (): Section => ({
     questions: [{
         difficultyLevel: 'easy',
         aiInstructions: 'Ask about their background.',
-        order: 1,
+        order: 0,
         followupRules: []
     }]
 })
@@ -285,7 +285,7 @@ export const useInterviewStore = create<InterviewState>((set, get) => ({
 
         // Calculate order (before conclusion)
         const conclusionIndex = sections.findIndex(s => s.sectionType === 'closing')
-        const newOrder = conclusionIndex > 0 ? sections[conclusionIndex - 1].order + 1 : sections.length + 1
+        const newOrder = conclusionIndex > 0 ? sections[conclusionIndex - 1].order + 1 : sections.length
 
         // Create section with defaults
         const newSection: Section = {
@@ -337,7 +337,7 @@ export const useInterviewStore = create<InterviewState>((set, get) => ({
     addSectionQuestion: (sectionIndex) => set((state) => {
         const newSections = [...state.sections]
         const section = { ...newSections[sectionIndex] }
-        const newOrder = section.questions.length + 1
+        const newOrder = section.questions.length
         section.questions = [...section.questions, createDefaultQuestion(newOrder)]
         newSections[sectionIndex] = section
         return { sections: newSections }

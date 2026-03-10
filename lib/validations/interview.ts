@@ -32,7 +32,7 @@ export const questionSchema = z.object({
     difficulty_level: difficultyLevelSchema,
     ai_instructions: z.string().min(1, 'Question AI instructions are required'),
     context_hints: z.string().nullable().optional(),
-    order: z.number().int().min(1),
+    order: z.number().int().min(0),
     followup_rules: z.array(followupRuleSchema).default([])
 })
 
@@ -47,7 +47,7 @@ export const evaluationCriteriaSchema = z.object({
 // InterviewSectionCreate: name, order, duration, section_type, ai_instructions are required
 export const sectionSchema = z.object({
     name: z.string().min(1, 'Section name is required'),
-    order: z.number().int().min(1),
+    order: z.number().int().min(0),
     duration: z.number().int().min(1, 'Section duration must be at least 1 minute'),
     section_type: sectionTypeSchema,
     ai_instructions: z.string().min(1, 'Section AI instructions are required'),
@@ -132,7 +132,7 @@ export const questionEditSchema = z.object({
     difficulty_level: difficultyLevelSchema,
     ai_instructions: z.string().min(1, 'Question AI instructions are required'),
     context_hints: z.string().nullable().optional(),
-    order: z.number().int().min(1),
+    order: z.number().int().min(0),
     followup_rules: z.array(followupRuleEditSchema).default([])
 })
 
@@ -143,7 +143,7 @@ export const evaluationCriteriaEditSchema = evaluationCriteriaSchema.extend({
 export const sectionEditSchema = z.object({
     id: z.string().optional(),
     name: z.string().min(1, 'Section name is required'),
-    order: z.number().int().min(1),
+    order: z.number().int().min(0),
     duration: z.number().int().min(1, 'Section duration must be at least 1 minute'),
     section_type: sectionTypeSchema,
     ai_instructions: z.string().min(1, 'Section AI instructions are required'),
