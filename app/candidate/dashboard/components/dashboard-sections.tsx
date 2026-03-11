@@ -161,6 +161,14 @@ export function CompanyPracticeCard({ items }: { items: any[] }) {
 }
 
 export function PracticeInterviewsCard({ items }: { items: any[] }) {
+    const normalizeDifficulty = (value: string | undefined): string => {
+        const d = value?.toLowerCase()
+        if (d === 'hard' ) return 'Hard'
+        if (d === 'medium') return 'Medium'
+        if (d === 'easy') return 'Easy'
+        return 'Easy'
+    }
+
     return (
         <Card className="border-[rgba(212,217,255,1)] bg-[rgba(245,247,255,1)] shadow-sm flex flex-col h-full">
             <CardHeader className="flex flex-row items-center justify-between px-6">
@@ -183,7 +191,7 @@ export function PracticeInterviewsCard({ items }: { items: any[] }) {
                                     <h4 className="font-medium text-[rgba(10,13,26,1)] leading-snug mb-1">{item.title}</h4>
                                     <div className="flex items-center gap-3">
                                         <span className={`inline-block px-2 py-0.5 rounded-full border text-[11px] font-medium ${getDifficultyColor(item.difficulty_level)}`}>
-                                            {item.difficulty_level || 'Easy'}
+                                            {normalizeDifficulty(item.difficulty_level)}
                                         </span>
                                         <div className="flex items-center gap-1 text-xs text-[rgba(10,13,26,0.7)] shrink-0">
                                             <Image src="/candidate/dashboard/time.svg" alt="time" width={14} height={14} />
