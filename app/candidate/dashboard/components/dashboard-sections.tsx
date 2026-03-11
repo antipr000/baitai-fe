@@ -62,13 +62,13 @@ export function InterviewInvitesCard({ items }: { items: any[] }) {
                         {items.map((item, idx) => (
                             <div key={idx} className="flex items-center justify-between bg-white p-4 border border-[rgba(107,124,255,1)] rounded-lg">
                                 <div>
-                                    <h4 className="font-medium text-[rgba(10,13,26,1)] leading-snug mb-1">{item.company_name}</h4>
-                                    <div className="flex items-center gap-3">
-                                        <p className="text-sm text-[rgba(10,13,26,0.7)]">{item.title}</p>
-                                        <span className="px-2 py-0.5 rounded-full border border-[rgba(255,20,20,1)] text-[rgba(255,20,20,1)] text-[11px] font-medium ">
+                                    <div className="flex items-center gap-3 mb-1">
+                                        <h4 className="font-medium text-[rgba(10,13,26,1)] leading-snug">{item.company_name}</h4>
+                                        <span className="px-3 py-0.5 w-max rounded-full border border-[rgba(255,20,20,1)] text-[rgba(255,20,20,1)] text-[11px] font-medium ">
                                             {formatDueDate(item.end_date)}
                                         </span>
                                     </div>
+                                    <p className="text-xs text-[rgba(10,13,26,0.7)] mt-1.5">{item.role || item.title}</p>
                                 </div>
                                 <Link href={`/interview/${item.template_id}`}>
                                     <Button className="bg-[rgba(58,63,187,1)] hover:bg-[rgba(58,63,187,0.9)] text-white font-semibold text-xs rounded-sm px-8">
@@ -103,18 +103,18 @@ export function CompanyPracticeCard({ items }: { items: any[] }) {
                 companyName,
                 role: item.role || 'General',
                 difficulty: normalizeDifficulty(item.difficulty),
-                duration: item.duration 
+                duration: item.duration
             }
         })
         .filter(Boolean)
         .slice(0, 2) as Array<{
-        id: string
-        title: string
-        companyName: string
-        role: string
-        difficulty: string
-        duration: number
-    }>
+            id: string
+            title: string
+            companyName: string
+            role: string
+            difficulty: string
+            duration: number
+        }>
 
     return (
         <Card className="border-[rgba(212,217,255,1)] bg-[rgba(245,247,255,1)] shadow-sm flex flex-col h-full">

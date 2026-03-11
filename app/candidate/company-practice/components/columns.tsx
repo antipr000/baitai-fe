@@ -10,7 +10,7 @@ export type PracticeInterview = {
     id: string
     title: string
     category: string
-    difficulty: "Easy" | "Medium" | "Difficult"
+    difficulty: "Easy" | "Medium" | "Hard"
     duration: string
     companyLogo?: string
     companyName?: string
@@ -33,7 +33,7 @@ export const columns: ColumnDef<PracticeInterview>[] = [
                         return "border-[rgba(3,231,41,1)] text-[rgba(3,231,41,1)]"
                     case "Medium":
                         return "border-[rgba(231,90,3,1)] text-[rgba(231,90,3,1)]"
-                    case "Difficult":
+                    case "Hard":
                         return "border-[rgba(255,35,35,1)] text-[rgba(255,35,35,1)]"
                     default:
                         return "border-gray-300 text-muted-foreground"

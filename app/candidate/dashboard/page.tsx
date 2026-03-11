@@ -28,10 +28,10 @@ async function DashboardHeader() {
     const pending = response?.pending ?? 0
 
     return (
-        <div className="mb-4">
+        <div className="">
             <h1 className="text-3xl font-semibold text-[rgba(17,24,39,1)] mb-2 tracking-tight">Dashboard</h1>
             <p className="text-[rgba(17,24,39,0.6)] text-base">
-                You have <span className={pending > 0 ? "text-[rgba(255,20,20,1)]" : "text-[rgba(14,163,3,1)]"}>{pending} pending interviews</span> 
+                You have <span className={pending > 0 ? "text-[rgba(255,20,20,1)]" : "text-[rgba(14,163,3,1)]"}>{pending} pending {pending <= 1 ? 'interview' : 'interviews'}</span>
             </p>
         </div>
     )

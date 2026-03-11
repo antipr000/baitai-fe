@@ -24,6 +24,7 @@ interface InterviewInvite {
     created_at: string
     template_id: string
     title: string
+    role: string
     company_name: string
 }
 
@@ -47,7 +48,7 @@ async function CompanyHeader() {  // need to optimize
             <p className="text-[rgba(17,24,39,0.6)] text-base">
                 You have{' '}
                 <span className={stats.pending > 0 ? 'text-[rgba(255,107,107,1)]' : 'text-[rgba(14,163,3,1)]'}>
-                    {stats.pending} pending interviews
+                    {stats.pending} pending {stats.pending <= 1 ? 'interview' : 'interviews'}
                 </span>
             </p>
         </div>
@@ -67,7 +68,7 @@ async function CompanyStats() {
                         <Image src="/candidate/company-interviews/pending.svg" alt="Pending" width={24} height={24} />
                         <div>
                             <p className="text-2xl font-semibold text-[rgba(10,13,26,1)] leading-none">{stats.pending}</p>
-                            <p className="text-sm font-medium text-[rgba(10,13,26,0.7)] mt-1">Pending Interviews</p>
+                            <p className="text-sm font-medium text-[rgba(10,13,26,0.7)] mt-1">Pending {stats.pending <= 1 ? 'Interview' : 'Interviews'}</p>
                         </div>
                     </div>
                 </CardContent>
@@ -130,7 +131,7 @@ async function CompanyTable() {
             return {
                 id: invite.id,
                 company: invite.company_name,
-                position: invite.title,
+                position: invite.role ,
                 sentDate: new Date(invite.created_at).toISOString().split('T')[0],
                 deadline: deadlineDisplay,
                 status: (invite.status === 'invited' ? 'pending' : invite.status) as CompanyInterview['status'],
