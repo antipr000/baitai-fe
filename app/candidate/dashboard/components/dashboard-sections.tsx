@@ -40,10 +40,10 @@ export function InterviewInvitesCard({ items }: { items: any[] }) {
         <Card className="border-[rgba(212,217,255,1)] bg-[rgba(245,247,255,1)] shadow-sm flex flex-col h-full">
             <CardHeader className="flex flex-row items-center justify-between px-6">
                 <CardTitle className="font-semibold text-[rgba(10,13,26,1)] flex items-center gap-2">
-                    <Image src="/candidate/dashboard2/doc.svg" alt="doc" width={18} height={18} />
+                    <Image src="/candidate/dashboard/doc.svg" alt="doc" width={18} height={18} />
                     Interview Invites
                 </CardTitle>
-                <Link href="/candidate/company-interviews2">
+                <Link href="/candidate/company-interviews">
                     <Button variant="outline" className="border-[rgba(58,63,187,1)] text-[rgba(10,13,26,1)] h-8 px-4 font-semibold">View all</Button>
                 </Link>
             </CardHeader>
@@ -51,7 +51,7 @@ export function InterviewInvitesCard({ items }: { items: any[] }) {
                 {items.length === 0 ? (
                     <div className="flex flex-col items-center justify-center p-8 gap-4">
                         <p className="text-[rgba(10,13,26,0.7)] text-sm">No pending invites.</p>
-                        <Link href="/candidate/practice-interviews2">
+                        <Link href="/candidate/practice-interviews">
                             <Button className="bg-[rgba(58,63,187,1)] hover:bg-[rgba(58,63,187,0.9)] text-white font-semibold text-xs rounded-sm px-8">
                                 Try Practice Interviews
                             </Button>
@@ -70,9 +70,11 @@ export function InterviewInvitesCard({ items }: { items: any[] }) {
                                         </span>
                                     </div>
                                 </div>
-                                <Button className="bg-[rgba(58,63,187,1)] hover:bg-[rgba(58,63,187,0.9)] text-white font-semibold text-xs rounded-sm px-8">
-                                    Start Interview
-                                </Button>
+                                <Link href={`/interview/${item.template_id}`}>
+                                    <Button className="bg-[rgba(58,63,187,1)] hover:bg-[rgba(58,63,187,0.9)] text-white font-semibold text-xs rounded-sm px-8">
+                                        Start Interview
+                                    </Button>
+                                </Link>
                             </div>
                         ))}
                     </div>
@@ -96,6 +98,7 @@ export function CompanyPracticeCard({ items }: { items: any[] }) {
             const companyName = item.tags?.find((t: any) => t.tag_type === 'company')?.value
             if (!companyName) return null
             return {
+                id: item.id,
                 companyName,
                 role: item.role || 'General',
                 difficulty: normalizeDifficulty(item.difficulty),
@@ -104,6 +107,7 @@ export function CompanyPracticeCard({ items }: { items: any[] }) {
         })
         .filter(Boolean)
         .slice(0, 2) as Array<{
+        id: string
         companyName: string
         role: string
         difficulty: string
@@ -114,7 +118,7 @@ export function CompanyPracticeCard({ items }: { items: any[] }) {
         <Card className="border-[rgba(212,217,255,1)] bg-[rgba(245,247,255,1)] shadow-sm flex flex-col h-full">
             <CardHeader className="flex flex-row items-center justify-between   px-6 ">
                 <CardTitle className=" font-semibold text-[rgba(10,13,26,1)] flex items-center gap-2">
-                    <Image src="/candidate/dashboard2/company.svg" alt="company" width={18} height={18} />
+                    <Image src="/candidate/dashboard/company.svg" alt="company" width={18} height={18} />
                     Company-specific Practice Interviews
                 </CardTitle>
                 <Link href="/candidate/company-practice">
@@ -135,14 +139,16 @@ export function CompanyPracticeCard({ items }: { items: any[] }) {
                                             {item.difficulty}
                                         </span>
                                         <span className="flex items-center gap-1 text-xs">
-                                            <Image src="/candidate/dashboard2/time.svg" alt="time" width={14} height={14} />
+                                            <Image src="/candidate/dashboard/time.svg" alt="time" width={14} height={14} />
                                             {item.duration} min
                                         </span>
                                     </div>
                                 </div>
-                                <Button className="bg-[rgba(58,63,187,1)] hover:bg-[rgba(58,63,187,0.9)] text-white font-semibold text-xs rounded-sm px-8">
-                                    View List
-                                </Button>
+                                <Link href={`/interview/${item.id}`}>
+                                    <Button className="bg-[rgba(58,63,187,1)] hover:bg-[rgba(58,63,187,0.9)] text-white font-semibold text-xs rounded-sm px-8">
+                                        Start Interview
+                                    </Button>
+                                </Link>
                             </div>
                         ))}
                     </div>
@@ -157,10 +163,10 @@ export function PracticeInterviewsCard({ items }: { items: any[] }) {
         <Card className="border-[rgba(212,217,255,1)] bg-[rgba(245,247,255,1)] shadow-sm flex flex-col h-full">
             <CardHeader className="flex flex-row items-center justify-between px-6">
                 <CardTitle className="font-semibold text-[rgba(10,13,26,1)] flex items-center gap-2">
-                    <Image src="/candidate/dashboard2/target.svg" alt="target" width={18} height={18} />
+                    <Image src="/candidate/dashboard/target.svg" alt="target" width={18} height={18} />
                     Practice Interviews
                 </CardTitle>
-                <Link href="/candidate/practice-interviews2">
+                <Link href="/candidate/practice-interviews">
                     <Button variant="outline" className="border-[rgba(58,63,187,1)] text-[rgba(10,13,26,1)] h-8 px-4 font-semibold">View all</Button>
                 </Link>
             </CardHeader>
@@ -178,14 +184,16 @@ export function PracticeInterviewsCard({ items }: { items: any[] }) {
                                             {item.difficulty_level || 'Easy'}
                                         </span>
                                         <div className="flex items-center gap-1 text-xs text-[rgba(10,13,26,0.7)] shrink-0">
-                                            <Image src="/candidate/dashboard2/time.svg" alt="time" width={14} height={14} />
+                                            <Image src="/candidate/dashboard/time.svg" alt="time" width={14} height={14} />
                                             {item.duration || 30} min
                                         </div>
                                     </div>
                                 </div>
-                                <Button className="bg-[rgba(58,63,187,1)] hover:bg-[rgba(58,63,187,0.9)] text-white font-semibold text-xs rounded-sm px-8">
-                                    Start Interview
-                                </Button>
+                                <Link href={`/interview/${item.id}`}>
+                                    <Button className="bg-[rgba(58,63,187,1)] hover:bg-[rgba(58,63,187,0.9)] text-white font-semibold text-xs rounded-sm px-8">
+                                        Start Interview
+                                    </Button>
+                                </Link>
                             </div>
                         ))}
                     </div>
@@ -200,7 +208,7 @@ export function LatestResultsCard({ items }: { items: any[] }) {
         <Card className="border-[rgba(212,217,255,1)] bg-[rgba(245,247,255,1)] shadow-sm flex flex-col h-full">
             <CardHeader className="flex flex-row items-center justify-between px-6">
                 <CardTitle className="font-semibold text-[rgba(10,13,26,1)] flex items-center gap-2">
-                    <Image src="/candidate/dashboard2/score.svg" alt="score" width={18} height={18} />
+                    <Image src="/candidate/dashboard/score.svg" alt="score" width={18} height={18} />
                     Latest Results
                 </CardTitle>
                 <Link href="/candidate/results">
@@ -211,7 +219,7 @@ export function LatestResultsCard({ items }: { items: any[] }) {
                 {items.length === 0 ? (
                     <div className="flex flex-col items-center justify-center p-8 gap-4">
                         <p className="text-[rgba(10,13,26,0.7)] text-sm">No recent results.</p>
-                        <Link href="/candidate/dashboard2/practice">
+                        <Link href="/candidate/practice-interviews">
                             <Button className="bg-[rgba(58,63,187,1)] hover:bg-[rgba(58,63,187,0.9)] text-white font-semibold text-xs rounded-sm px-8">
                                 Try Practice Interviews
                             </Button>
@@ -230,9 +238,11 @@ export function LatestResultsCard({ items }: { items: any[] }) {
                                         <span className="text-[rgba(58,63,187,1)] font-medium text-lg">{item.score ?? '0'}%</span>
                                         <span className="text-[rgba(10,13,26,0.7)] text-xs">Score</span>
                                     </div>
-                                    <Button className="bg-[rgba(58,63,187,1)] hover:bg-[rgba(58,63,187,0.9)] text-white font-semibold text-xs rounded-sm px-8">
-                                        View Details
-                                    </Button>
+                                    <Link href={`/results/${item.session_id}`}>
+                                        <Button className="bg-[rgba(58,63,187,1)] hover:bg-[rgba(58,63,187,0.9)] text-white font-semibold text-xs rounded-sm px-8">
+                                            View Details
+                                        </Button>
+                                    </Link>
                                 </div>
                             </div>
                         ))}

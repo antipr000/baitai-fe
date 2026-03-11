@@ -1,139 +1,155 @@
 import React, { Suspense } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { Card, CardContent } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
-import Image from 'next/image'
-import { RecentResultsSection, ApiResultItem } from '@/components/candidate/dashboard/recent-results-section'
-import { InterviewInvitesSection, Interview } from '@/components/candidate/dashboard/interview-invites-section'
-import { PracticeInterviewsSection, PracticeInterview } from '@/components/candidate/dashboard/practice-interviews-section'
 import { serverFetch } from '@/lib/api/server'
+import { Button } from '@/components/ui/button'
 import {
-    StatsSkeleton,
-    InvitesSkeleton,
-    PracticeSkeleton,
-    ResultsSkeleton,
-} from '@/components/candidate/dashboard/dashboard-skeletons'
+    InterviewInvitesCard,
+    CompanyPracticeCard,
+    PracticeInterviewsCard,
+    LatestResultsCard
+} from './components/dashboard-sections'
 
 interface InterviewStats {
     average_score: number
-    total_time: number
     completed: number
     pending: number
+    completed_this_week: number
+    pending_this_week: number
+    avg_score_delta: number | null
+    streak: number
 }
 
-function formatTime(seconds: number): string {
-    const totalMinutes = Math.floor(seconds / 60)
-    if (totalMinutes < 60) return `${totalMinutes}m`
-    const hours = Math.floor(totalMinutes / 60)
-    const mins = totalMinutes % 60
-    return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`
+
+async function DashboardHeader() {
+    const response = await serverFetch<InterviewStats>('/api/v1/user/interview/stats/')
+    const pending = response?.pending ?? 0
+
+    return (
+        <div className="mb-4">
+            <h1 className="text-3xl font-semibold text-[rgba(17,24,39,1)] mb-2 tracking-tight">Dashboard</h1>
+            <p className="text-[rgba(17,24,39,0.6)] text-base">
+                You have <span className={pending > 0 ? "text-[rgba(255,20,20,1)]" : "text-[rgba(14,163,3,1)]"}>{pending} pending interviews</span> 
+            </p>
+        </div>
+    )
 }
 
-function formatDueDate(dueDate: string): string {
-    const due = new Date(dueDate)
-    const now = new Date()
-    const diffTime = due.getTime() - now.getTime()
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
-
-    if (diffDays < 0) return 'Overdue'
-    if (diffDays === 0) return 'Due today'
-    if (diffDays === 1) return 'Due tomorrow'
-    return `Due in ${diffDays} days`
-}
-
-function capitalize(str: string): string {
-    if (!str) return 'Easy'
-    return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase() as string
-}
-
-// ─── Async server sub-components ──────────────────────────────────────────────
-
-async function HeaderActions() {
-    try {
-        const response = await serverFetch<{ credits: number }>('/api/v1/user/interview/credits/')
-        const credits = response?.credits ?? 0
-        console.log(credits)
-
+function WeeklyBadge({ value, suffix }: { value: number; suffix: string }) {
+    if (value > 0) {
         return (
-            <div className="flex items-center gap-3">
-                <div className="flex items-center gap-2 px-4 py-1.5 translate-y-px rounded-md text-white bg-[linear-gradient(91.24deg,#3E54FB_-35.23%,#C3CEFF_202.55%)] hover:opacity-95 transition-opacity">
-                    <Image src="/candidate/dashboard/coin.svg" alt="Credits" width={28} height={28} />
-                    <span className='font-medium'>{credits} {credits === 1 ? 'Credit' : 'Credits'}</span>
-                </div>
-                <Link href="/results" className="flex items-center gap-2 px-4 py-2 rounded-md text-white bg-[linear-gradient(91.24deg,#3E54FB_-35.23%,#C3CEFF_202.55%)] hover:opacity-90 transition-opacity">
-                    <Image src="/candidate/dashboard/note.svg" alt="Results" width={20} height={20} /> <span className='font-semibold'>View all Results</span>
-                </Link>
-            </div>
-        )
-    } catch (error) {
-        return (
-            <div className="flex items-center gap-3">
-                <div className="flex items-center gap-2 px-4 py-1.5 translate-y-px rounded-md text-white bg-[linear-gradient(91.24deg,#3E54FB_-35.23%,#C3CEFF_202.55%)] opacity-80">
-                    <Image src="/candidate/dashboard/coin.svg" alt="Credits" width={28} height={28} />
-                    <span className='font-medium'>- Credits</span>
-                </div>
-                <Link href="/results" className="flex items-center gap-2 px-4 py-2 rounded-md text-white bg-[linear-gradient(91.24deg,#3E54FB_-35.23%,#C3CEFF_202.55%)] hover:opacity-90 transition-opacity">
-                    <Image src="/candidate/dashboard/note.svg" alt="Results" width={20} height={20} /> <span className='font-semibold'>View all Results</span>
-                </Link>
+            <div className="text-[12px] text-[rgba(14,163,3,1)] flex items-center gap-1 mt-1">
+                <Image src="/candidate/dashboard/up.svg" alt="Up" width={12} height={12} />
+                +{value} {suffix}
             </div>
         )
     }
+    if (value < 0) {
+        return (
+            <div className="text-[12px] text-[rgba(255,20,20,1)] flex items-center gap-1 mt-1">
+                <Image src="/candidate/dashboard/down.svg" alt="Down" width={15} height={15} />
+                -{value} {suffix}
+            </div>
+        )
+    }
+    return null
+}
+
+function ScoreDeltaBadge({ delta }: { delta: number | null }) {
+    if (delta === null) {
+        return null
+    }
+    if (delta > 0) {
+        return (
+            <div className="text-[12px] text-[rgba(14,163,3,1)] flex items-center gap-1 mt-1">
+                <Image src="/candidate/dashboard/up.svg" alt="Up" width={12} height={12} />
+                +{delta}% from last
+            </div>
+        )
+    }
+    if (delta < 0) {
+        return (
+            <div className="text-[12px] text-[rgba(255,20,20,1)] flex items-center gap-1 mt-1">
+                <Image src="/candidate/dashboard/down.svg" alt="Down" width={15} height={15} />
+                {delta}% from last
+            </div>
+        )
+    }
+    return null
 }
 
 async function StatsCards() {
     const response = await serverFetch<InterviewStats>('/api/v1/user/interview/stats/')
-    const stats: InterviewStats = response ?? { average_score: 0, total_time: 0, completed: 0, pending: 0 }
+    const stats: InterviewStats = response ?? { average_score: 0, completed: 0, pending: 0, completed_this_week: 0, pending_this_week: 0, avg_score_delta: null, streak: 0 }
 
     return (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {/* Completed */}
-            <Card className="bg-[rgba(0,186,0,0.1)] border border-[rgba(0,186,0,0.5)]">
-                <CardContent className="pt-6">
-                    <div className="group flex items-center justify-center gap-5">
-                        <Image src="/candidate/dashboard/complete.svg" alt="Completed" width={50} height={50} />
-                        <div>
-                            <p className="font-medium text-muted-foreground mb-2 transition-all duration-400 group-hover:-translate-y-1.5">Completed</p>
-                            <p className="text-center text-2xl font-bold text-[rgba(104,100,247,1)] transition-all duration-400 group-hover:scale-[1.3]">{stats.completed}</p>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            {/* Pending */}
+            <Card className="border-[rgba(107,124,255,1)] shadow-sm hover:shadow-md transition-shadow relative overflow-hidden py-2">
+                <CardContent className="p-5 flex flex-col gap-3 justify-between">
+                    <div className="flex items-start justify-between">
+                        <div className="w-8 h-8 rounded-md bg-[rgba(240,243,255,1)] flex items-center justify-center">
+                            <Image src="/candidate/dashboard/time.svg" alt="Pending" width={20} height={20} />
                         </div>
+                        <WeeklyBadge value={stats.pending_this_week} suffix="this week" />
+                    </div>
+                    <div>
+                        <h3 className="text-2xl font-semibold text-[rgba(10,13,26,1)] leading-tight mb-0.5">{stats.pending}</h3>
+                        <p className="text-[rgba(10,13,26,1)] opacity-70 text-sm font-medium">Pending</p>
                     </div>
                 </CardContent>
             </Card>
 
-            {/* Pending */}
-            <Card className="bg-[rgba(254,118,168,0.1)] border border-[rgba(252,183,50,0.5)]">
-                <CardContent className="pt-6">
-                    <div className="group flex items-center justify-center gap-5">
-                        <Image src="/candidate/dashboard/pending.svg" className='group-hover:-rotate-10 transition-all duration-400' alt="Pending" width={50} height={50} />
-                        <div>
-                            <p className="font-medium text-muted-foreground mb-2 transition-all duration-400 group-hover:-translate-y-1.5">Pending</p>
-                            <p className="text-center text-2xl font-bold text-[rgba(104,100,247,1)] transition-all duration-400 group-hover:scale-[1.3]">{stats.pending}</p>
+            {/* Completed */}
+            <Card className="border-[rgba(107,124,255,1)] shadow-sm hover:shadow-md transition-shadow relative overflow-hidden py-2">
+                <CardContent className="p-5 flex flex-col gap-3 justify-between">
+                    <div className="flex items-start justify-between">
+                        <div className="w-8 h-8 rounded-md bg-[rgba(240,243,255,1)] flex items-center justify-center">
+                            <Image src="/candidate/dashboard/tick.svg" alt="Completed" width={20} height={20} />
                         </div>
+                        <WeeklyBadge value={stats.completed_this_week} suffix="this week" />
+                    </div>
+                    <div>
+                        <h3 className="text-2xl font-semibold text-[rgba(10,13,26,1)] leading-tight mb-0.5">{stats.completed}</h3>
+                        <p className="text-[rgba(10,13,26,1)] opacity-70 text-sm font-medium">Completed</p>
                     </div>
                 </CardContent>
             </Card>
 
             {/* Average Score */}
-            <Card className="bg-[rgba(252,183,50,0.1)] border border-[rgba(252,183,50,0.5)]">
-                <CardContent className="pt-6">
-                    <div className="group flex items-center justify-center gap-5">
-                        <Image src="/candidate/dashboard/score.svg" className='group-hover:-rotate-10 transition-all duration-400' alt="score" width={50} height={50} />
-                        <div>
-                            <p className="font-medium text-muted-foreground mb-2 transition-all duration-400 group-hover:-translate-y-1.5">Average Score</p>
-                            <p className="text-center text-2xl font-bold text-[rgba(104,100,247,1)] transition-all duration-400 group-hover:scale-[1.3]">{stats.average_score.toFixed(1)}%</p>
+            <Card className="border-[rgba(107,124,255,1)] shadow-sm hover:shadow-md transition-shadow relative overflow-hidden py-2">
+                <CardContent className="p-5 flex flex-col gap-3 justify-between">
+                    <div className="flex items-start justify-between">
+                        <div className="w-8 h-8 rounded-md bg-[rgba(240,243,255,1)] flex items-center justify-center">
+                            <Image src="/candidate/dashboard/doc.svg" alt="Score" width={20} height={20} />
                         </div>
+                        <ScoreDeltaBadge delta={stats.avg_score_delta} />
+                    </div>
+                    <div>
+                        <h3 className="text-2xl font-semibold text-[rgba(10,13,26,1)] leading-tight mb-0.5">{stats.average_score.toFixed(0)}%</h3>
+                        <p className="text-[rgba(10,13,26,1)] opacity-70 text-sm font-medium">Avg Score</p>
                     </div>
                 </CardContent>
             </Card>
 
-            {/* Total Time */}
-            <Card className="bg-[rgba(224,83,83,0.1)] border border-[rgba(224,83,83,0.5)]">
-                <CardContent className="pt-6">
-                    <div className="group flex items-center justify-center gap-5">
-                        <Image src="/candidate/dashboard/time.svg" className='group-hover:-rotate-10 transition-all duration-400' alt="time" width={50} height={50} />
-                        <div>
-                            <p className="font-medium text-muted-foreground mb-2 transition-all duration-400 group-hover:-translate-y-1.5">Total Time</p>
-                            <p className="text-center text-2xl font-bold text-[rgba(104,100,247,1)] transition-all duration-400 group-hover:scale-[1.3]">{formatTime(stats.total_time)}</p>
+            {/* Streak */}
+            <Card className="border-[rgba(107,124,255,1)] shadow-sm hover:shadow-md transition-shadow relative overflow-hidden py-2">
+                <CardContent className="p-5 flex flex-col gap-3 justify-between">
+                    <div className="flex items-start justify-between">
+                        <div className="w-8 h-8 rounded-md bg-[rgba(240,243,255,1)] flex items-center justify-center">
+                            <Image src="/candidate/dashboard/fire.svg" alt="Streak" width={20} height={20} />
                         </div>
+                        {stats.streak >= 2 && (
+                            <div className="text-[12px] text-[rgba(14,163,3,1)] mt-1">
+                                Keep it up!
+                            </div>
+                        )}
+                    </div>
+                    <div>
+                        <h3 className="text-2xl font-semibold text-[rgba(10,13,26,1)] leading-tight mb-0.5">{stats.streak} {stats.streak === 1 ? 'Day' : 'Days'}</h3>
+                        <p className="text-[rgba(10,13,26,1)] opacity-70 text-sm font-medium">Streak</p>
                     </div>
                 </CardContent>
             </Card>
@@ -142,31 +158,69 @@ async function StatsCards() {
 }
 
 interface InvitesResponse {
-    items: {
-        id: string
-        status: string
-        end_date: string
-        created_at: string
-        title: string
-        company_name: string
-        message: string
-        template_id: string
-    }[]
+    items: any[]
 }
-
 interface PracticeResponse {
-    items: {
-        id: string
-        title: string
-        role: string
-        difficulty_level: string
-        duration: number
-    }[]
+    items: any[]
+}
+interface ResultsResponse {
+    items: any[]
 }
 
-async function InvitesAndPracticeSection() {
-    // Run both server fetches in parallel
-    const [invitesResponse, practiceResponse] = await Promise.all([
+function DashboardHeaderSkeleton() {
+    return (
+        <div className="mb-4 space-y-2">
+            <Skeleton className="h-9 w-44" />
+            <Skeleton className="h-5 w-72" />
+        </div>
+    )
+}
+
+function StatsCardsSkeleton() {
+    return (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            {Array.from({ length: 4 }).map((_, i) => (
+                <Card key={i} className=" shadow-sm py-2">
+                    <CardContent className="p-5 flex flex-col gap-3">
+                        <div className="flex items-start justify-between">
+                            <Skeleton className="h-8 w-8 rounded-md" />
+                            <Skeleton className="h-3 w-16" />
+                        </div>
+                        <div className="space-y-1">
+                            <Skeleton className="h-8 w-16" />
+                            <Skeleton className="h-4 w-20" />
+                        </div>
+                    </CardContent>
+                </Card>
+            ))}
+        </div>
+    )
+}
+
+function MainGridSkeleton() {
+    return (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {Array.from({ length: 4 }).map((_, i) => (
+                <Card key={i} className="border shadow-sm">
+                    <CardContent className="p-5 space-y-4">
+                        <Skeleton className="h-6 w-40" />
+                        <div className="space-y-3">
+                            {Array.from({ length: 2 }).map((__, j) => (
+                                <div key={j} className="flex items-center justify-between">
+                                    <Skeleton className="h-4 w-32" />
+                                    <Skeleton className="h-8 w-20 rounded-md" />
+                                </div>
+                            ))}
+                        </div>
+                    </CardContent>
+                </Card>
+            ))}
+        </div>
+    )
+}
+
+async function MainGrid() {
+    const [invitesResponse, practiceResponse, resultsResponse] = await Promise.all([
         serverFetch<InvitesResponse>('/api/v1/user/interview/invites/', {
             method: 'POST',
             body: { page: 1, page_size: 2 }
@@ -174,112 +228,48 @@ async function InvitesAndPracticeSection() {
         serverFetch<PracticeResponse>('/api/v1/user/interview/practice/filter/', {
             method: 'POST',
             body: { page: 1, page_size: 2, role: '' }
+        }),
+        serverFetch<ResultsResponse>('/api/v1/user/interview/results/filter/', {
+            method: 'POST',
+            body: { page: 1, page_size: 2, status: 'completed', is_scored: true }
         })
     ]);
 
-    const invites: Interview[] = invitesResponse
-        ? invitesResponse.items.map((item) => ({
-            id: item.id,
-            company: item.company_name,
-            position: item.title,
-            dueIn: formatDueDate(item.end_date),
-            status: item.status,
-            template_id: item.template_id,
-        }))
-        : [];
-
-    const practice: PracticeInterview[] = practiceResponse?.items
-        ? practiceResponse.items.slice(0, 2).map((item) => ({
-            id: item.id,
-            title: item.title,
-            difficulty: capitalize(item.difficulty_level) as 'Easy' | 'Medium' | 'Difficult',
-            duration: `${item.duration} min`,
-        }))
-        : [];
+    const invites = invitesResponse?.items || [];
+    const practice = practiceResponse?.items || [];
+    const results = resultsResponse?.items || [];
 
     return (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-15">
-            <InterviewInvitesSection
-                interviews={invites}
-                viewMoreHref="/candidate/company-interviews"
-            />
-            <PracticeInterviewsSection
-                interviews={practice}
-                viewMoreHref="/candidate/practice-interviews"
-            />
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <InterviewInvitesCard items={invites} />
+            <CompanyPracticeCard items={practice} />
+            <PracticeInterviewsCard items={practice} />
+            <LatestResultsCard items={results} />
         </div>
-    );
-}
-
-interface ResultsResponse {
-    items: ApiResultItem[]
-}
-
-async function ResultsCards() {
-    const response = await serverFetch<ResultsResponse>('/api/v1/user/interview/results/filter/', {
-        method: 'POST',
-        body: { page: 1, page_size: 5, status: 'completed', is_scored: true }
-    })
-
-    const results: ApiResultItem[] = response?.items ?? []
-
-    return (
-        <RecentResultsSection
-            results={results}
-            viewMoreHref="/results"
-        />
     )
 }
 
-
 export default function DashboardPage() {
     return (
-        <div className='w-full min-h-screen bg-[rgba(248,250,255,1)]'>
-            <div className="min-h-screen max-w-full md:max-w-4xl lg:max-w-5xl xl:max-w-7xl mx-auto">
-                <div className="max-w-7xl mx-auto p-6 space-y-8">
-
-                    {/* Header — renders immediately */}
-                    <div className="flex justify-between items-center">
-                        <div className='flex items-center justify-center gap-4'>
-                            <Link href="/">
-                                <div className='bg-[rgba(98,117,252,0.82)] p-2 px-1 rounded-md'>
-                                    <Image src="/candidate/dashboard/left-arrow.svg" alt="Back" width={20} height={20} />
-                                </div>
-                            </Link>
-                            <h1 className="text-2xl tracking-wide font-bold bg-[linear-gradient(91.24deg,#3E54FB_-35.23%,#C3CEFF_202.55%)] bg-clip-text text-transparent">My Dashboard</h1>
-                        </div>
-                        <Suspense fallback={
-                            <div className="flex items-center gap-3 w-[290px] h-10">
-                                <Skeleton className="w-[120px] h-full rounded-md" />
-                                <Skeleton className="w-[160px] h-full rounded-md" />
-                            </div>
-                        }>
-                            <HeaderActions />
-                        </Suspense>
-                    </div>
-
-                    {/* Stats Cards */}
-                    <Suspense fallback={<StatsSkeleton />}>
-                        <StatsCards />
+        <div className="min-h-screen w-full p-8 lg:p-10 pb-20 max-w-7xl mx-auto">
+            {/* Header Area */}
+            <div className="flex justify-between items-start mb-8">
+                <div className="flex items-center gap-3">
+                    <Suspense fallback={<DashboardHeaderSkeleton />}>
+                        <DashboardHeader />
                     </Suspense>
-
-                    {/* Interview Invites + Practice Interviews */}
-                    <Suspense fallback={
-                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-15">
-                            <InvitesSkeleton />
-                            <PracticeSkeleton />
-                        </div>
-                    }>
-                        <InvitesAndPracticeSection />
-                    </Suspense>
-
-                    {/* Recent Results */}
-                    <Suspense fallback={<ResultsSkeleton />}>
-                        <ResultsCards />
-                    </Suspense>
-
                 </div>
             </div>
+
+            {/* Stats Cards */}
+            <Suspense fallback={<StatsCardsSkeleton />}>
+                <StatsCards />
+            </Suspense>
+
+            {/* Grids */}
+            <Suspense fallback={<MainGridSkeleton />}>
+                <MainGrid />
+            </Suspense>
         </div>
     )
 }

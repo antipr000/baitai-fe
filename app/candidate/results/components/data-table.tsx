@@ -61,7 +61,7 @@ export function DataTable<TData, TValue>({
             <div className="flex gap-4 items-center">
                 <div className="relative flex-1">
                     <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
-                        <Image src="/candidate/practice-inteviews2/search.svg" alt="Search" width={20} height={20} />
+                        <Image src="/candidate/practice-inteviews/search.svg" alt="Search" width={20} height={20} />
                     </div>
                     <input
                         type="text"
@@ -74,7 +74,7 @@ export function DataTable<TData, TValue>({
                 <DropdownMenu modal={false}>
                     <DropdownMenuTrigger asChild>
                         <Button variant="outline" className="h-[46px] px-6 border border-[rgba(138,152,253,0.1)] text-[rgba(10,13,26,0.7)] hover:bg-[rgba(245,247,255,1)] hover:text-[rgba(10,13,26,1)] rounded-sm font-medium text-sm flex items-center bg-white ">
-                            <Image src="/candidate/practice-inteviews2/filter.svg" alt="Filter" width={16} height={16} className="mr-2 opacity-70" />
+                            <Image src="/candidate/practice-inteviews/filter.svg" alt="Filter" width={16} height={16} className="mr-2 opacity-70" />
                             Filter
                         </Button>
                     </DropdownMenuTrigger>

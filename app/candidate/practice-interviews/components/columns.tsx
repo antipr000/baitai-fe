@@ -5,9 +5,6 @@ import { ColumnDef } from "@tanstack/react-table"
 import Image from "next/image"
 import Link from "next/link"
 
-
-// This type is used to define the shape of our data.
-// You can use a Zod schema here if you want.
 export type PracticeInterview = {
     id: string
     title: string
@@ -19,11 +16,11 @@ export type PracticeInterview = {
 export const columns: ColumnDef<PracticeInterview>[] = [
     {
         accessorKey: "title",
-        header: "Title",
+        header: () => <div className="text-[rgba(10,13,26,1)] font-semibold text-sm pl-2">Title</div>,
         cell: ({ row }) => {
             const title = row.getValue("title") as string
             return (
-                <div className="font-semibold"> 
+                <div className=" text-[rgba(58,63,187,1)] text-sm pl-2">
                     {title}
                 </div>
             )
@@ -31,11 +28,11 @@ export const columns: ColumnDef<PracticeInterview>[] = [
     },
     {
         accessorKey: "category",
-        header: "Category",
+        header: () => <div className="text-[rgba(10,13,26,1)] font-semibold text-sm">Category</div>,
         cell: ({ row }) => {
             const category = row.getValue("category") as string
             return (
-                <div className="font-semibold text-muted-foreground"> 
+                <div className="text-[rgba(10,13,26,0.6)] text-sm">
                     {category}
                 </div>
             )
@@ -43,35 +40,37 @@ export const columns: ColumnDef<PracticeInterview>[] = [
     },
     {
         accessorKey: "difficulty",
-        header: "Difficulty",
+        header: () => <div className="text-[rgba(10,13,26,1)] font-semibold text-sm">Difficulty</div>,
         cell: ({ row }) => {
             const difficulty = row.getValue("difficulty") as string
             const getDifficultyStyles = (diff: string) => {
                 switch (diff) {
                     case "Easy":
-                        return "bg-[rgba(50,255,36,0.05)] border-[rgba(50,255,36,0.5)] text-[rgba(55,212,44,0.7)]"
+                        return "border-[rgba(3,231,41,1)] text-[rgba(3,231,41,1)]"
                     case "Medium":
-                        return "bg-[rgba(249,237,236,1)] border-[rgba(212,142,44,0.5)] text-[rgba(234,137,0,0.9)]"
+                        return "border-[rgba(231,90,3,1)] text-[rgba(231,90,3,1)]"
                     case "Difficult":
-                        return "bg-[rgba(255,51,0,0.05)] border-[rgba(255,51,0,0.5)] text-[rgba(255,51,0,0.9)]"
+                        return "border-[rgba(255,35,35,1)] text-[rgba(255,35,35,1)]"
                     default:
-                        return "bg-gray-100 border-gray-300 text-muted-foreground"
+                        return "border-gray-300 text-muted-foreground"
                 }
             }
             return (
-                <span className={`px-3 py-1 rounded-full text-sm font-semibold border ${getDifficultyStyles(difficulty)}`}>
-                    {difficulty}
-                </span>
+                <div className="flex items-center">
+                    <span className={`px-4 py-1 rounded-full text-xs font-semibold border ${getDifficultyStyles(difficulty)}`}>
+                        {difficulty}
+                    </span>
+                </div>
             )
         },
     },
     {
         accessorKey: "duration",
-        header: "Duration",
+        header: () => <div className="text-[rgba(10,13,26,1)] font-semibold text-sm">Duration</div>,
         cell: ({ row }) => {
             const duration = row.getValue("duration") as string
             return (
-                <div className="font-semibold text-muted-foreground"> 
+                <div className="text-[rgba(10,13,26,0.6)] text-sm">
                     {duration}
                 </div>
             )
@@ -79,13 +78,14 @@ export const columns: ColumnDef<PracticeInterview>[] = [
     },
     {
         id: "actions",
-        header: "Action",
+        header: () => <div className="text-[rgba(10,13,26,1)] font-semibold text-sm">Action</div>,
         cell: ({ row }) => {
             const interview = row.original
             return (
                 <Link href={`/interview/${interview.id}`}>
-                    <Button className="bg-[rgba(184,255,179,0.7)] hover:bg-white border-2 border-[rgba(19,232,4,0.1)]  hover:border-[rgba(8,102,2,0.8)] text-[rgba(8,102,2,0.9)] px-4 py-2 rounded-md" >
-                        <Image src="/candidate/company-interviews/play.svg" alt="Start" width={14} height={14} /> <span className="font-medium">Start</span>
+                    <Button className="bg-[rgba(58,63,187,1)] hover:bg-[rgba(58,63,187,0.9)] text-white px-6 py-2 rounded-sm text-xs font-semibold" >
+                        <Image src="/main/play.svg" alt="Start" width={8} height={10} className="mr-2" style={{ filter: 'brightness(0) invert(1)' }} />
+                        Take Interview
                     </Button>
                 </Link>
             )

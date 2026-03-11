@@ -158,11 +158,11 @@ async function ResultsTable() {
 
 // ─── Page ──────────────────────────────────────────────────────────────────────
 
-export default function LatestResultsV2() {
+export default function ResultsV2() {
     return (
         <div className="max-w-7xl mx-auto px-5 pt-10 w-full space-y-7 pb-10">
             <div className="flex flex-col gap-1.5 pt-2">
-                <h1 className="text-3xl font-semibold text-[rgba(17,24,39,1)] tracking-tight">Latest Results</h1>
+                <h1 className="text-3xl font-semibold text-[rgba(17,24,39,1)] tracking-tight">Results</h1>
                 <p className="text-[rgba(17,24,39,0.6)] text-base">Review your performance to ace interviews</p>
             </div>
 

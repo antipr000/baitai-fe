@@ -10,6 +10,7 @@ export async function TopHeader() {
         credits = response?.credits ?? 0
     } catch (e) {
         // failed to fetch credits
+        console.error('Failed to fetch credits:', e)
     }
 
     return (
@@ -20,11 +21,11 @@ export async function TopHeader() {
             </Link>
             <div className="flex items-center gap-4">
                 <button className="relative w-10 h-10 rounded-full flex items-center justify-center hover:bg-gray-100 transition-colors">
-                    <Image src="/candidate/dashboard2/notifcation.svg" alt="Notifications" width={24} height={24} />
+                    <Image src="/candidate/dashboard/notifcation.svg" alt="Notifications" width={24} height={24} />
                     {/* <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span> */}
                 </button>
                 <div className="flex items-center gap-2 px-4 py-2 bg-[rgba(58,63,187,1)] rounded-md text-white font-medium">
-                    <Image src="/candidate/dashboard2/coin.svg" alt="Credits" width={24} height={24} />
+                    <Image src="/candidate/dashboard/coin.svg" alt="Credits" width={24} height={24} />
                     <span className="text-sm">{credits} credits left</span>
                 </div>
                 <Button variant="outline" className="text-[rgba(10,13,26,1)] border-[rgba(58,63,187,1)]  h-10 px-6 rounded-md">

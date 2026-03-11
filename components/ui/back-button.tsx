@@ -15,7 +15,7 @@ export function BackButton({ className = "" }: BackButtonProps) {
       onClick={() => router.back()}
       className={`bg-[rgba(98,117,252,0.82)] p-2 px-1 rounded-md hover:bg-[rgba(98,117,252,0.9)] transition-colors cursor-pointer ${className}`}
     >
-      <Image src="/candidate/company-interviews/left-arrow.svg" alt="Back" width={20} height={20} />
+      <Image src="/left-arrow.svg" alt="Back" width={20} height={20} />
     </button>
   )
 }

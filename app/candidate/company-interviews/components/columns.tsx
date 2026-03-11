@@ -98,7 +98,7 @@ export const columns: ColumnDef<CompanyInterview>[] = [
             return (
                 <Link href={`/interview/${interview.id}`}>
                     <Button className="bg-[rgba(58,63,187,1)] hover:bg-[rgba(58,63,187,0.9)] text-white px-6 py-2 rounded-sm text-xs font-semibold" >
-                        <Image src="/candidate/company-interviews/play.svg" alt="Start" width={8} height={10} className="mr-2" style={{ filter: 'brightness(0) invert(1)' }} />
+                        <Image src="/main/play.svg" alt="Start" width={8} height={10} className="mr-2" style={{ filter: 'brightness(0) invert(1)' }} />
                         Take Interview
                     </Button>
                 </Link>

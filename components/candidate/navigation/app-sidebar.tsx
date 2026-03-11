@@ -18,28 +18,28 @@ import { cn } from "@/lib/utils"
 const navItems = [
     {
         title: "Dashboard",
-        url: "/candidate/dashboard2",
-        icon: "/candidate/dashboard2/dashboard.svg",
+        url: "/candidate/dashboard",
+        icon: "/candidate/dashboard/dashboard.svg",
     },
     {
         title: "Interview Invites",
-        url: "/candidate/company-interviews2",
-        icon: "/candidate/dashboard2/doc.svg",
+        url: "/candidate/company-interviews",
+        icon: "/candidate/dashboard/doc.svg",
     },
     {
         title: "Company Practice Interviews",
         url: "/candidate/company-practice",
-        icon: "/candidate/dashboard2/company.svg",
+        icon: "/candidate/dashboard/company.svg",
     },
     {
         title: "Practice Interviews",
-        url: "/candidate/practice-interviews2",
-        icon: "/candidate/dashboard2/target.svg",
+        url: "/candidate/practice-interviews",
+        icon: "/candidate/dashboard/target.svg",
     },
     {
         title: "Results",
         url: "/candidate/results",
-        icon: "/candidate/dashboard2/score.svg",
+        icon: "/candidate/dashboard/score.svg",
     },
 ]
 
@@ -47,12 +47,12 @@ const bottomNavItems = [
     {
         title: "Profile",
         url: "/candidate/profile",
-        icon: "/candidate/dashboard2/profile.svg",
+        icon: "/candidate/dashboard/profile.svg",
     },
     {
         title: "Sign out",
         url: "/logout",
-        icon: "/candidate/dashboard2/sign-out.svg",
+        icon: "/candidate/dashboard/sign-out.svg",
     },
 ]
 
