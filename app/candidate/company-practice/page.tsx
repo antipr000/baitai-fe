@@ -51,7 +51,6 @@ async function CompanyPracticeContent() {
             company_tags: []
         }
     })
-
     const items = interviewsRes?.items || []
     // Derive available companies from the interview tags
     const companyTags = items

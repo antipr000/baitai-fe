@@ -6,7 +6,7 @@ import { serverFetch } from '@/lib/api/server'
 export async function TopHeader() {
     let credits = 0;
     try {
-        const response = await serverFetch<{ credits: number }>('/api/v1/user/interview/credits/')
+        const response = await serverFetch<{ credits: number }>('/api/v1/user/credits/')
         credits = response?.credits ?? 0
     } catch (e) {
         // failed to fetch credits
@@ -20,17 +20,18 @@ export async function TopHeader() {
                 <span className="text-xl font-bold bg-clip-text text-transparent bg-[linear-gradient(106.63deg,#1051AB_0%,#1C0F6F_144.25%)]">bAIt</span>
             </Link>
             <div className="flex items-center gap-4">
-                <button className="relative w-10 h-10 rounded-full flex items-center justify-center hover:bg-gray-100 transition-colors">
+                {/* <button className="relative w-10 h-10 rounded-full flex items-center justify-center hover:bg-gray-100 transition-colors">
                     <Image src="/candidate/dashboard/notifcation.svg" alt="Notifications" width={24} height={24} />
-                    {/* <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span> */}
-                </button>
+                </button> */}
                 <div className="flex items-center gap-2 px-4 py-2 bg-[rgba(58,63,187,1)] rounded-md text-white font-medium">
                     <Image src="/candidate/dashboard/coin.svg" alt="Credits" width={24} height={24} />
                     <span className="text-sm">{credits} credits left</span>
                 </div>
-                <Button variant="outline" className="text-[rgba(10,13,26,1)] border-[rgba(58,63,187,1)]  h-10 px-6 rounded-md">
-                    Purchase Credits
-                </Button>
+                <Link href="/pricing">
+                    <Button variant="outline" className="text-[rgba(10,13,26,1)] border-[rgba(58,63,187,1)]  h-10 px-6 rounded-md">
+                        Purchase Credits
+                    </Button>
+                </Link>
             </div>
         </header>
     )

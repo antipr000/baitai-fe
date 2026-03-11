@@ -99,6 +99,7 @@ export function CompanyPracticeCard({ items }: { items: any[] }) {
             if (!companyName) return null
             return {
                 id: item.id,
+                title: item.title,
                 companyName,
                 role: item.role || 'General',
                 difficulty: normalizeDifficulty(item.difficulty),
@@ -108,6 +109,7 @@ export function CompanyPracticeCard({ items }: { items: any[] }) {
         .filter(Boolean)
         .slice(0, 2) as Array<{
         id: string
+        title: string
         companyName: string
         role: string
         difficulty: string
@@ -133,7 +135,7 @@ export function CompanyPracticeCard({ items }: { items: any[] }) {
                         {displayItems.map((item, idx) => (
                             <div key={idx} className="flex items-center justify-between bg-white p-4 border border-[rgba(107,124,255,1)] rounded-lg">
                                 <div>
-                                    <h4 className="font-medium text-[rgba(10,13,26,1)] leading-snug mb-1">{item.companyName}</h4>
+                                    <h4 className="font-medium text-[rgba(10,13,26,1)] leading-snug mb-1">{item.title}</h4>
                                     <div className="flex items-center gap-2 text-sm text-[rgba(10,13,26,0.7)]">
                                         <span className={`px-2 py-0.5 rounded-full border text-[11px] font-medium ${getDifficultyColor(item.difficulty)}`}>
                                             {item.difficulty}

@@ -91,7 +91,7 @@ export function DataTable<TData, TValue>({
                     <InputGroup className="bg-white w-full md:w-[350px] border-none shadow-sm rounded-md h-10">
                         <InputGroupAddon>
                             <div className="pl-3">
-                                <Image src="/candidate/practice-interviews/search.svg" alt="Search" width={20} height={20} className="text-[rgba(125,141,253,0.9)]" />
+                                <Image src="/search.svg" alt="Search" width={20} height={20} className="text-[rgba(125,141,253,0.9)]" />
                             </div>
                         </InputGroupAddon>
                         <InputGroupInput placeholder="Search interviews"
