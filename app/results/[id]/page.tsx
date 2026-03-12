@@ -91,23 +91,23 @@ async function ResultContent({ id }: { id: string }) {
     }))
 
     return (
-        <div className="min-h-screen bg-[rgba(245,247,255,1)]">
+        <div className="min-h-screen bg-white">
             <div className="max-w-7xl mx-auto p-6 space-y-6">
                 {/* Header */}
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4">
                         <BackButton />
-                        <h1 className="text-2xl font-semibold bg-[linear-gradient(91.24deg,#3E54FB_-35.23%,#C3CEFF_202.55%)] bg-clip-text text-transparent">
+                        <h1 className="text-2xl font-semibold text-[rgba(58,63,187,1)]">
                             Interview Results
                         </h1>
                     </div>
                     <Link href="/candidate/dashboard">
-                        <Button variant="outline" className="text-[rgba(104,100,247,1)] font-semibold hover:bg-white border-[rgba(142,158,254,0.6)] hover:border-[rgba(142, 158, 254, 0.6)] hover:opacity-80 hover:text-[rgba(104,100,247,1)]">Back to Dashboard</Button>
+                        <Button variant="outline" className="text-[rgba(10,13,26,1)] font-medium hover:bg-white border-[rgba(58,63,187,1)] hover:border-[rgba(58,63,187,0.6)] hover:opacity-80 hover:text-[rgba(10,13,26,1)]">Back to Dashboard</Button>
                     </Link>
                 </div>
 
                 {/* Main Score Card */}
-                <Card className="bg-[linear-gradient(95.63deg,rgba(236,252,255,0.1)_-32.56%,rgba(0,215,255,0.1)_114.78%)]!">
+                <Card className="bg-[rgba(250,251,255,1)] border-[rgba(107,124,255,0.1)]">
                     <CardContent className="p-8 ">
                         <div className="flex items-center justify-around">
                             {/* Left - Score Info */}
@@ -118,14 +118,14 @@ async function ResultContent({ id }: { id: string }) {
                                 </Badge>
 
                                 <div className="flex items-baseline gap-1">
-                                    <span className="text-5xl font-bold text-[rgba(64,158,227,1)]">{data.current_score}</span>
-                                    <span className="text-2xl font-semibold text-muted-foreground">/{maxScore}</span>
+                                    <span className="text-5xl font-bold text-[rgba(58,63,187,1)]">{data.current_score}</span>
+                                    <span className="text-2xl font-bold text-[rgba(10,13,26,1)]">/{maxScore}</span>
                                 </div>
 
-                                <p className="text-sm text-muted-foreground">{data.interview_title}</p>
+                                <p className="text-sm text-[rgba(10,13,26,0.7)]">{data.interview_title}</p>
 
                                 {data.total_attempts > 1 && data.improvement_points !== null && (
-                                    <div className="flex items-center  text-sm ">
+                                    <div className="flex items-center ">
                                         {data.improvement_points >= 0 ? (
                                             <Image src="/candidate/results/up.svg" alt="Up" width={20} height={20} className="mr-1 mt-2 h-8 w-8" />
                                         ) : (
@@ -146,13 +146,13 @@ async function ResultContent({ id }: { id: string }) {
                 {/* Stats Cards Row */}
                 <div className="mt-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-25 mx-3">
                     {/* Improvement */}
-                    <Card className="bg-[linear-gradient(104.37deg,rgba(246,251,255,0.1)_-20.97%,rgba(75,179,255,0.1)_129.56%)] border border-[rgba(75,179,255,0.5)]">
+                    <Card className="border border-[rgba(107,124,255,1)] bg-white">
                         <CardContent>
-                            <div className="flex items-center gap-3">
-                                <Image src="/candidate/results/up2.svg" alt="Up" width={20} height={20} className="mr-1 mt-2 h-8 w-8" />
+                            <div className="flex items-center gap-4">
+                                <Image src="/candidate/results/up2.svg" alt="Up" width={20} height={20} className="mr-1 mt-2 size-5" />
                                 <div>
-                                    <p className="text-sm text-muted-foreground">Improvement</p>
-                                    <p className="text-xl font-bold">
+                                    <p className="text-base font-medium text-[rgba(10,13,26,0.9)]">Improvement</p>
+                                    <p className="text-2xl text-[rgba(10,13,26,1)] font-bold">
                                         {data.total_attempts > 1 && data.improvement_percent !== null
                                             ? `${data.improvement_percent >= 0 ? '+' : ''}${data.improvement_percent}%`
                                             : 'N/A'}
@@ -163,39 +163,39 @@ async function ResultContent({ id }: { id: string }) {
                     </Card>
 
                     {/* Best Score */}
-                    <Card className="bg-[linear-gradient(109.41deg,rgba(255,250,242,0.3)_-15.66%,rgba(252,183,50,0.1)_119.55%)] border border-[rgba(252,183,50,0.5)]">
+                    <Card className="border border-[rgba(107,124,255,1)] bg-white">
                         <CardContent>
-                            <div className="flex items-center gap-3">
-                                <Image src="/candidate/results/note2.svg" alt="note" width={20} height={20} className="mr-1 mt-2 h-8 w-8" />
+                            <div className="flex items-center gap-4">
+                                <Image src="/candidate/results/note2.svg" alt="note" width={20} height={20} className="mr-1 mt-2 size-5" />
                                 <div>
-                                    <p className="text-sm text-muted-foreground">Best Score</p>
-                                    <p className="text-xl font-bold">{data.best_score}%</p>
+                                    <p className="text-base font-medium text-[rgba(10,13,26,0.9)]">Best Score</p>
+                                    <p className="text-2xl text-[rgba(10,13,26,1)] font-bold">{data.best_score}%</p>
                                 </div>
                             </div>
                         </CardContent>
                     </Card>
 
                     {/* Average */}
-                    <Card className="bg-[linear-gradient(109.41deg,rgba(242,255,255,0.15)_-15.66%,rgba(51,204,204,0.15)_119.55%)] border border-[rgba(51,204,204,0.5)]">
+                    <Card className="border border-[rgba(107,124,255,1)] bg-white">
                         <CardContent>
-                            <div className="flex items-center gap-3">
-                                <Image src="/candidate/results/graph.svg" alt="graph" width={20} height={20} className="mr-1 mt-2 h-8 w-8" />
+                            <div className="flex items-center gap-4">
+                                <Image src="/candidate/results/graph.svg" alt="graph" width={20} height={20} className="mr-1 mt-2 size-5" />
                                 <div>
-                                    <p className="text-sm text-muted-foreground">Average</p>
-                                    <p className="text-xl font-bold">{data.average_score}%</p>
+                                    <p className="text-base font-medium text-[rgba(10,13,26,0.9)]">Average</p>
+                                    <p className="text-2xl text-[rgba(10,13,26,1)] font-bold">{data.average_score}%</p>
                                 </div>
                             </div>
                         </CardContent>
                     </Card>
 
                     {/* Attempts */}
-                    <Card className="bg-[linear-gradient(109.41deg,rgba(244,255,240,0.1)_-15.66%,rgba(106,175,80,0.15)_34.39%)] border border-[rgba(106,175,80,0.5)]">
+                    <Card className="border border-[rgba(107,124,255,1)] bg-white">
                         <CardContent>
-                            <div className="flex items-center gap-3">
-                                <Image src="/candidate/results/thunder.svg" alt="attempt" width={20} height={20} className="mr-1 mt-2 h-8 w-8" />
+                            <div className="flex items-center gap-4">
+                                <Image src="/candidate/results/thunder.svg" alt="attempt" width={20} height={20} className="mr-1 mt-2 size-5" />
                                 <div>
-                                    <p className="text-sm text-muted-foreground">Attempts</p>
-                                    <p className="text-xl font-bold">{data.total_attempts}</p>
+                                    <p className="text-base font-medium text-[rgba(10,13,26,0.9)]">Attempts</p>
+                                    <p className="text-2xl text-[rgba(10,13,26,1)] font-bold">{data.total_attempts}</p>
                                 </div>
                             </div>
                         </CardContent>
@@ -205,7 +205,7 @@ async function ResultContent({ id }: { id: string }) {
                 {/* Charts Row */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-24 mt-12">
                     {/* Performance Trend */}
-                    <Card className="bg-[rgba(196,240,0,0.1)] border border-[rgba(196,240,0,0.05)]">
+                    <Card className="bg-white border border-[rgba(58,63,187,0.05)]">
                         <CardHeader className="pb-2">
                             <CardTitle className="flex items-center gap-2 text-base font-semibold">
                                 <Image src="/candidate/results/trend.svg" alt="trend" width={20} height={20} className="mr-1 mt-2 h-6 w-6" />
@@ -218,7 +218,7 @@ async function ResultContent({ id }: { id: string }) {
                     </Card>
 
                     {/* Skill Metrics */}
-                    <Card className="bg-[rgba(107,124,255,0.05)] border-[rgba(102,120,253,0.1)]">
+                    <Card className="bg-white border-[rgba(58,63,187,0.05)] shadow-xs">
                         <CardHeader className="pb-2">
                             <CardTitle className="flex items-center gap-2 text-base font-semibold">
                                 <Image src="/candidate/results/trend.svg" alt="trend" width={20} height={20} className="mr-1 mt-2 h-6 w-6" />
@@ -232,20 +232,20 @@ async function ResultContent({ id }: { id: string }) {
                 </div>
 
                 {/* Skill Cards Grid */}
-                <div className="mt-12 grid grid-cols-1 md:grid-cols-2 gap-6 p-8 px-10 rounded-3xl bg-[linear-gradient(94.46deg,rgba(119,198,255,0.3)_-27.34%,#F5F7FF_202.83%)]">
+                <div className="mt-12 grid grid-cols-1 md:grid-cols-2 gap-6 p-8 px-10 rounded-3xl shadow-xs ">
                     {skillCards.map((skill, index) => (
-                        <Card key={index} className="bg-white border border-[rgba(75,179,255,0.1)]">
+                        <Card key={index} className="bg-white border border-[rgba(58,63,187,0.7)]">
                             <CardContent className="p-6 px-12">
                                 <div className="flex justify-between items-center mb-3">
                                     <h3 className="font-semibold text-[rgba(10,13,26,0.9)]">{skill.title}</h3>
                                     <span className="text-lg ">
-                                        <span className="text-[rgba(45,166,255,0.9)] font-semibold">{skill.score}</span>
+                                        <span className="text-[rgba(58,63,187,1)] font-semibold">{skill.score}</span>
                                         <span className="text-[rgba(10,13,26,0.9)] font-semibold">/100</span>
                                     </span>
                                 </div>
-                                <Progress value={skill.score} indicatorColor="linear-gradient(90.14deg,rgba(45,166,255,0.9) -4.79%,#B9E1FF 161.26%)" className="h-[6px]" />
+                                <Progress value={skill.score} indicatorColor="rgba(58,63,187,1)" className="h-[5px]" />
                                 {skill.reason && (
-                                    <p className="mt-4 text-sm text-[rgba(10,13,26,0.5)]">
+                                    <p className="mt-4 text-xs text-[rgba(10,13,26,0.7)]">
                                         {skill.reason}
                                     </p>
                                 )}
@@ -257,16 +257,16 @@ async function ResultContent({ id }: { id: string }) {
                 {/* Key Strengths & Scope of Improvement */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-18 mx-10 mt-12">
                     {/* Key Strengths */}
-                    <Card className="bg-[rgba(5,187,54,0.05)] border-[rgba(25,192,71,0.5)]">
+                    <Card className="bg-[rgba(246,255,248,1)] border-[rgba(25,192,71,0.1)] shadow-xs">
                         <CardContent className="p-8 px-10">
                             <div className="flex items-center gap-2 mb-4">
                                 <Image src="/candidate/results/fire.svg" alt="Key Strengths" width={20} height={20} />
-                                <h3 className="text-lg font-semibold text-[rgba(3,187,52,0.9)]">Key Strengths</h3>
+                                <h3 className="text-lg font-semibold text-[rgba(10,13,26,1)]">Key Strengths</h3>
                             </div>
-                            <ul className="space-y-3 text-sm text-[rgba(10,13,26,0.5)] font-medium">
+                            <ul className="space-y-3 text-sm text-[rgba(10,13,26,1)] ">
                                 {data.key_strengths.map((strength, index) => (
                                     <li key={index} className="flex items-start gap-2">
-                                        <span className="mt-2 h-1 w-1 rounded-full bg-[rgba(10,13,26,0.7)] shrink-0" />
+                                        <span className="mt-2 h-1 w-1 rounded-full bg-[rgba(10,13,26,1)] text-sm shrink-0" />
                                         {strength}
                                     </li>
                                 ))}
@@ -275,16 +275,16 @@ async function ResultContent({ id }: { id: string }) {
                     </Card>
 
                     {/* Scope of Improvement */}
-                    <Card className="bg-[rgba(253,125,160,0.05)] border-[rgba(253,125,160,0.5)]">
+                    <Card className="bg-[rgba(255,248,250,1)] border-[rgba(255,60,73,0.1)] shadow-xs">
                         <CardContent className="p-8 px-10">
                             <div className="flex items-center gap-2 mb-4">
                                 <Image src="/candidate/results/improve.svg" alt="Scope of Improvement" className="w-6 h-6" width={24} height={24} />
-                                <h3 className="text-lg font-semibold text-[rgba(220,80,120,1)]">Scope of Improvement</h3>
+                                <h3 className="text-lg font-semibold text-[rgba(10,13,26,1)]">Scope of Improvement</h3>
                             </div>
-                            <ul className="space-y-3 text-sm text-[rgba(10,13,26,0.5)] font-medium">
+                            <ul className="space-y-3 text-sm text-[rgba(10,13,26,1)] ">
                                 {data.areas_for_improvement.map((area, index) => (
                                     <li key={index} className="flex items-start gap-2">
-                                        <span className="mt-2 h-1 w-1 rounded-full bg-[rgba(10,13,26,0.7)] shrink-0" />
+                                        <span className="mt-2 h-1 w-1 rounded-full bg-[rgba(10,13,26,1)] shrink-0" />
                                         {area}
                                     </li>
                                 ))}
@@ -296,12 +296,12 @@ async function ResultContent({ id }: { id: string }) {
                 {/* Action Buttons */}
                 <div className="flex items-center my-12  gap-16 pb-8 mx-18">
                     <Link href={`/interview/${data.template_id}`} className="flex-1">
-                        <Button className="p-6 w-full h-14 rounded-xl bg-[linear-gradient(92.27deg,rgba(62,84,251,0.82)_18.18%,rgba(143,164,255,0.738)_110.61%)] hover:opacity-80 text-[rgba(248,250,255,1)] font-semibold text-xl">
+                        <Button className="p-6 w-full h-14 rounded-sm bg-[rgba(58,63,187,1)] text-lg hover:bg-white hover:border hover:border-[rgba(58,63,187,1)] hover:text-[rgba(58,76,207,1)] text-[rgba(248,250,255,1)] font-medium ">
                             Retake Interview
                         </Button>
                     </Link>
                     <Link href="/candidate/practice-interviews" className="flex-1">
-                        <Button variant="outline" className="p-6 w-full h-14 rounded-xl border-2 border-[rgba(58,76,207,0.5)] text-[rgba(58,76,207,1)] hover:bg-[rgba(58,76,207,1)] hover:text-[rgba(248,250,255,1)] hover:border-[rgba(58,76,207,1)]  font-semibold text-xl">
+                        <Button variant="outline" className="p-6 w-full h-14 rounded-sm border text-lg border-[rgba(58,63,187,1)] text-[rgba(58,76,207,1)] hover:bg-[rgba(58,76,207,1)] hover:text-[rgba(248,250,255,1)]  font-medium ">
                             Try Another Interview
                         </Button>
                     </Link>
