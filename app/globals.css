@@ -4,6 +4,10 @@
 
 html {
   scroll-behavior: smooth;
+  overflow-x: hidden;
+}
+body {
+  @apply !min-w-full;
 }
 
 @custom-variant dark (&:is(.dark *));

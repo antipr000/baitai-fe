@@ -43,7 +43,7 @@ const navItems = [
     {
         title: "Results",
         url: "/candidate/results",
-        icon: "/candidate/dashboard/score.svg",
+        icon: "/candidate/dashboard/graph-up.svg",
     },
 ]
 
@@ -112,9 +112,15 @@ export function AppSidebar({ userProfile, ...props }: AppSidebarProps) {
                 <SidebarMenu className="gap-2">
                     {/* Profile row */}
                     <SidebarMenuItem>
-                        <SidebarMenuButton asChild className="flex items-center gap-3 px-3 py-5 rounded-xl text-[#0A0D1A] font-medium hover:bg-[#F1F3FB]">
-                            <div>  
-                                {/*  Can add a page later for it */}
+                        <SidebarMenuButton
+                            asChild
+                            isActive={pathname === "/candidate/profile"}
+                            className={cn(
+                                "flex items-center gap-3 px-3 py-5 rounded-xl transition-colors",
+                                pathname === "/candidate/profile" ? "bg-[#F1F3FB] text-[#1D215E] font-medium" : "text-[#0A0D1A] font-medium hover:bg-[#F1F3FB]"
+                            )}
+                        >
+                            <Link href="/candidate/profile">
                                 <div className="w-6 h-6 rounded-full overflow-hidden flex items-center justify-center bg-[#1D215E] text-white text-xs font-bold shrink-0">
                                     {user?.profile_picture_url ? (
                                         <Image src={user.profile_picture_url} alt="Profile" width={32} height={32} className="object-cover w-full h-full" />
@@ -123,7 +129,7 @@ export function AppSidebar({ userProfile, ...props }: AppSidebarProps) {
                                     )}
                                 </div>
                                 <span>{user ? `${user.first_name} ${user.last_name}` : "Profile"}</span>
-                            </div>
+                            </Link>
                         </SidebarMenuButton>
                     </SidebarMenuItem>
                     {/* Sign out */}
