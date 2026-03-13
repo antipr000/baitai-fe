@@ -40,71 +40,64 @@ export default async function InterviewsPage() {
     const [interviews, stats] = await Promise.all([getInterviews(), getStats()])
 
     return (
-        <div className='w-full min-h-screen bg-[rgba(248,250,255,1)]'>
-            <div className="min-h-screen max-w-full md:max-w-4xl lg:max-w-5xl xl:max-w-7xl mx-auto">
-                <div className="max-w-7xl mx-auto p-6 space-y-10">
-
-                    {/* Header */}
-                    <div className="flex justify-between items-center">
-                        <div className='flex items-start gap-4'>
-                            <BackButton />
-                            <div>
-                                <h1 className="text-2xl font-bold tracking-tight text-[rgba(125,141,253,1)]">All Interviews</h1>
-                                <p className="text-[rgba(84,86,95,0.5)] font-medium text-sm">Manage all your created interviews</p>
-                            </div>
+        <div className='w-full min-h-screen bg-white flex flex-col'>
+            <div className="bg-white  w-full">
+                <div className="max-w-7xl mx-auto px-6 py-10 flex justify-between items-center">
+                    <div className='flex items-start gap-4'>
+                        <BackButton />
+                        <div>
+                            <h1 className="text-2xl font-semibold text-[rgba(10,13,26,1)]">All Interviews</h1>
+                            <p className="text-[rgba(107,114,128,0.7)] ">Manage all your created interviews</p>
                         </div>
-                        <Link href="/company/create">
-                            <Button size={"lg"} className="bg-[linear-gradient(93.21deg,rgba(125,141,253,1)_-31.21%,rgba(148,162,255,1)_174.4%)] hover:opacity-90 text-white flex items-center gap-2 rounded-lg px-6 shadow-md shadow-[rgba(125,141,253,0.3)]">
-                                <PlusCircle className="h-5 w-5" />
-                                <span className="font-semibold">New Interview</span>
-                            </Button>
-                        </Link>
                     </div>
+                    <Link href="/company/create">
+                        <Button variant="outline" className="border-[rgba(58,63,187,1)] text-[rgba(58,63,187,1)] hover:text-[rgba(58,63,187,1)] hover:bg-[rgba(58,63,187,0.05)] flex items-center gap-2 rounded-sm px-6 h-11">
+                            <Image src="/company/dashboard/plus.svg" alt="Plus" width={18} height={18} />
+                            <span className="font-medium">New Interview</span>
+                        </Button>
+                    </Link>
+                </div>
+            </div>
 
+            <div className="flex-1 w-full max-w-7xl mx-auto p-6 space-y-10">
+                <div className="space-y-10">
                     {/* Stats Cards */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
-
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
                         {/* Total Interviews */}
-                        <Card className="bg-[rgba(104,100,247,0.05)] border border-[rgba(104,100,247,0.2)] shadow-none">
-                            <CardContent className="pt-6">
-                                <div className="flex items-center gap-5">
-                                    <div className="bg-[rgba(104,100,247,0.15)] w-14 h-14 rounded-xl flex items-center justify-center">
-                                        <Image src="/company/interviews/doc.svg" alt="doc" width={28} height={28} className="text-[rgba(104,100,247,1)]" />
-                                    </div>
-                                    <div>
-                                        <p className="text-base font-medium text-[rgba(10,13,26,0.46)] ">Total Interviews</p>
-                                        <p className="text-3xl font-semibold text-[rgba(10,13,26,0.7)]">{stats.total_interviews}</p>
-                                    </div>
+                        <Card className="rounded-xl border-[rgba(58,63,187,1)] shadow-none h-full bg-white">
+                            <CardContent className="p-6 flex flex-row items-center gap-4 py-3">
+                                <div className="bg-[rgba(240,243,255,1)] w-7 h-7 rounded-sm shrink-0 flex items-center justify-center">
+                                    <Image src="/company/interviews/doc.svg" alt="doc" width={20} height={20} className="text-[#6A7DFC]" />
+                                </div>
+                                <div className='space-y-0.5'>
+                                    <p className="text-2xl font-semibold text-[rgba(10,13,26,1)] leading-none">{stats.total_interviews}</p>
+                                    <p className="text-lg font-medium text-[rgba(10,13,26,1)] whitespace-nowrap">Total Interviews</p>
                                 </div>
                             </CardContent>
                         </Card>
 
                         {/* Active Interviews */}
-                        <Card className="bg-[rgba(51,204,204,0.05)] border border-[rgba(51,204,204,0.2)] shadow-none">
-                            <CardContent className="pt-6">
-                                <div className="flex items-center gap-5">
-                                    <div className="bg-[rgba(51,204,204,0.15)] w-14 h-14 rounded-full flex items-center justify-center">
-                                        <Image src="/company/interviews/clock.svg" alt="clock" width={28} height={28} />
-                                    </div>
-                                    <div>
-                                        <p className="text-base font-medium text-[rgba(10,13,26,0.46)] ">Active Interviews</p>
-                                        <p className="text-3xl font-semibold text-[rgba(10,13,26,0.7)]">{stats.active}</p>
-                                    </div>
+                        <Card className="rounded-xl border-[rgba(58,63,187,1)] shadow-none h-full bg-white">
+                            <CardContent className="p-6 flex flex-row items-center gap-4 py-3">
+                                <div className="bg-[rgba(240,243,255,1)] w-7 h-7 rounded-sm shrink-0 flex items-center justify-center">
+                                    <Image src="/company/dashboard/time2.svg" alt="time" width={20} height={20} className="text-[#6A7DFC]" />
+                                </div>
+                                <div className='space-y-0.5'>
+                                    <p className="text-2xl font-semibold text-[rgba(10,13,26,1)] leading-none">{stats.active}</p>
+                                    <p className="text-lg font-medium text-[rgba(10,13,26,1)] whitespace-nowrap">Active Interviews</p>
                                 </div>
                             </CardContent>
                         </Card>
 
                         {/* Total Candidates */}
-                        <Card className="bg-[rgba(253,96,80,0.05)] border border-[rgba(253,96,80,0.2)] shadow-none">
-                            <CardContent className="pt-6">
-                                <div className="flex items-center gap-5">
-                                    <div className="bg-[rgba(253,96,80,0.15)] w-14 h-14 rounded-lg flex items-center justify-center">
-                                        <Image src="/company/interviews/people.svg" alt="people" width={28} height={28} />
-                                    </div>
-                                    <div>
-                                        <p className="text-base font-medium text-[rgba(10,13,26,0.46)] ">Total Candidates</p>
-                                        <p className="text-3xl font-semibold text-[rgba(10,13,26,0.7)]">{stats.candidates}</p>
-                                    </div>
+                        <Card className="rounded-xl border-[rgba(58,63,187,1)] shadow-none h-full bg-white">
+                            <CardContent className="p-6 flex flex-row items-center gap-4 py-3">
+                                <div className="bg-[rgba(240,243,255,1)] w-7 h-7 rounded-sm shrink-0 flex items-center justify-center">
+                                    <Image src="/company/dashboard/people2.svg" alt="people" width={20} height={20} className="text-[#6A7DFC]" />
+                                </div>
+                                <div className='space-y-0.5'>
+                                    <p className="text-2xl font-semibold text-[rgba(10,13,26,1)] leading-none">{stats.candidates}</p>
+                                    <p className="text-lg font-medium text-[rgba(10,13,26,1)] whitespace-nowrap">Total Candidates</p>
                                 </div>
                             </CardContent>
                         </Card>

@@ -21,17 +21,15 @@ export type Interview = {
 export const columns: ColumnDef<Interview>[] = [
     {
         accessorKey: "title",
-        header: ({ column }) => {
-            return (
-                <div className="font-semibold text-xs uppercase tracking-wider text-[rgba(10,13,26,0.8)] px-4">
-                    Interview Title
-                </div>
-            )
-        },
+        header: () => (
+            <div className="font-semibold text-sm text-[rgba(10,13,26,0.8)] px-4">
+                Interview Title
+            </div>
+        ),
         cell: ({ row }) => {
             const title = row.getValue("title") as string
             return (
-                <div className="font-semibold text-[rgba(10,13,26,0.9)] px-4">
+                <div className="font-medium text-sm text-[rgba(10,13,26,0.9)] px-4 max-w-[300px] whitespace-normal leading-relaxed" title={title}>
                     {title}
                 </div>
             )
@@ -39,17 +37,15 @@ export const columns: ColumnDef<Interview>[] = [
     },
     {
         accessorKey: "sections",
-        header: ({ column }) => {
-            return (
-                <div className="font-semibold text-xs uppercase tracking-wider text-[rgba(10,13,26,0.8)]">
-                    Sections
-                </div>
-            )
-        },
+        header: () => (
+            <div className="font-semibold text-sm text-[rgba(10,13,26,0.8)] px-4">
+                Sections
+            </div>
+        ),
         cell: ({ row }) => {
             const sections = row.getValue("sections") as number
             return (
-                <div className="font-medium text-[rgba(10,13,26,0.9)] pl-4">
+                <div className=" text-sm text-[rgba(10,13,26,0.9)] pl-4">
                     {sections}
                 </div>
             )
@@ -57,22 +53,20 @@ export const columns: ColumnDef<Interview>[] = [
     },
     {
         accessorKey: "candidates",
-        header: ({ column }) => {
-            return (
-                <Button
-                    variant="ghost"
-                    onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-                    className="hover:bg-transparent p-0 text-[rgba(10,13,26,0.8)] font-semibold text-xs uppercase tracking-wider"
-                >
-                    Candidates
-                    <ArrowUpDown className="ml-2 h-4 w-4 text-[rgba(125,141,253,1)]" />
-                </Button>
-            )
-        },
+        header: ({ column }) => (
+            <Button
+                variant="ghost"
+                onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+                className=" p-0 text-[rgba(10,13,26,0.8)] font-semibold text-sm"
+            >
+                Candidates
+                <ArrowUpDown className="ml-2 h-4 w-4 text-[rgba(58,63,187,1)]" />
+            </Button>
+        ),
         cell: ({ row }) => {
             const candidates = row.getValue("candidates") as number
             return (
-                <div className="font-bold text-[rgba(10,13,26,0.9)] pl-6">
+                <div className=" text-[rgba(10,13,26,0.9)] pl-6">
                     {candidates}
                 </div>
             )
@@ -80,22 +74,20 @@ export const columns: ColumnDef<Interview>[] = [
     },
     {
         accessorKey: "avg_time",
-        header: ({ column }) => {
-            return (
-                <Button
-                    variant="ghost"
-                    onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-                    className="hover:bg-transparent p-0 text-[rgba(10,13,26,0.8)] font-semibold text-xs uppercase tracking-wider"
-                >
-                    Avg Time
-                    <ArrowUpDown className="ml-2 h-4 w-4 text-[rgba(125,141,253,1)]" />
-                </Button>
-            )
-        },
+        header: ({ column }) => (
+            <Button
+                variant="ghost"
+                onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+                className=" p-0 text-[rgba(10,13,26,0.8)] font-semibold text-sm"
+            >
+                Avg Time
+                <ArrowUpDown className="ml-2 h-4 w-4 text-[rgba(58,63,187,1)]" />
+            </Button>
+        ),
         cell: ({ row }) => {
             const avg_time = row.getValue("avg_time") as number
             return (
-                <div className="font-bold text-[rgba(10,13,26,0.9)]">
+                <div className=" text-sm text-[rgba(10,13,26,0.9)]">
                     {formatDuration(avg_time)}
                 </div>
             )
@@ -103,36 +95,34 @@ export const columns: ColumnDef<Interview>[] = [
     },
     {
         accessorKey: "status",
-        header: ({ column }) => {
-            return (
-                <Button
-                    variant="ghost"
-                    onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-                    className="hover:bg-transparent p-0 text-[rgba(10,13,26,0.8)] font-semibold text-xs uppercase tracking-wider"
-                >
-                    Status
-                    <ArrowUpDown className="ml-2 h-4 w-4 text-[rgba(125,141,253,1)]" />
-                </Button>
-            )
-        },
+        header: ({ column }) => (
+            <Button
+                variant="ghost"
+                onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+                className=" p-0 text-[rgba(10,13,26,0.8)] font-semibold text-sm"
+            >
+                Status
+                <ArrowUpDown className="ml-2 h-4 w-4 text-[rgba(58,63,187,1)]" />
+            </Button>
+        ),
         cell: ({ row }) => {
             const status = row.getValue("status") as string
             const getStatusStyles = (status: string) => {
                 const s = status?.toLowerCase()
                 switch (s) {
                     case "active":
-                        return "bg-[rgba(50,255,36,0.1)] border border-[rgba(50,255,36,0.5)] text-[rgba(40,199,29,1)]"
+                        return "bg-[rgba(50,255,36,0.1)] border text-sm border-[rgba(50,255,36,0.5)] text-[rgba(40,199,29,1)]"
                     case "archived":
-                        return "bg-[rgba(242,129,68,0.1)] border border-[rgba(242,129,68,0.5)] text-[rgba(242,129,68,0.7)]"
+                        return "bg-[rgba(242,129,68,0.1)] border text-sm border-[rgba(242,129,68,0.5)] text-[rgba(242,129,68,0.7)]"
                     case "draft":
-                        return "bg-[rgba(105,108,118,0.05)] border border-[rgba(105,108,118,0.5)] text-[rgba(105,108,118,0.7)]"
+                        return "bg-[rgba(105,108,118,0.05)] border text-sm border-[rgba(105,108,118,0.5)] text-[rgba(105,108,118,0.7)]"
                     default:
-                        return "bg-gray-100 border border-gray-300 text-muted-foreground"
-                }
+                        return "bg-gray-100 border border-gray-300 text-sm text-muted-foreground"
+                } 
             }
             return (
                 <div className="flex justify-start">
-                    <span className={`px-4 py-1.5 rounded-full text-xs font-semibold border ${getStatusStyles(status)} min-w-[80px] text-center capitalize`}>
+                    <span className={`px-4 py-1.5 rounded-full text-xs font-semibold border ${getStatusStyles(status)} min-w-20 text-center capitalize`}>
                         {status}
                     </span>
                 </div>
@@ -141,18 +131,16 @@ export const columns: ColumnDef<Interview>[] = [
     },
     {
         accessorKey: "date",
-        header: ({ column }) => {
-            return (
-                <Button
-                    variant="ghost"
-                    onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-                    className="hover:bg-transparent p-0 text-[rgba(10,13,26,0.8)] font-semibold text-xs uppercase tracking-wider"
-                >
-                    Date
-                    <ArrowUpDown className="ml-2 h-4 w-4 text-[rgba(125,141,253,1)]" />
-                </Button>
-            )
-        },
+        header: ({ column }) => (
+            <Button
+                variant="ghost"
+                onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+                className=" p-0 text-[rgba(10,13,26,0.8)] font-medium text-sm"
+            >
+                Date
+                <ArrowUpDown className="ml-2 h-4 w-4 text-[rgba(58,63,187,1)]" />
+            </Button>
+        ),
         cell: ({ row }) => {
             const date = row.getValue("date") as string
             const formattedDate = new Date(date).toLocaleDateString('en-GB', {
@@ -161,7 +149,7 @@ export const columns: ColumnDef<Interview>[] = [
                 year: '2-digit'
             })
             return (
-                <div className="font-bold text-[rgba(10,13,26,0.9)]">
+                <div className=" text-sm text-[rgba(10,13,26,0.9)]">
                     {formattedDate}
                 </div>
             )
@@ -169,13 +157,11 @@ export const columns: ColumnDef<Interview>[] = [
     },
     {
         id: "actions",
-        header: ({ column }) => {
-            return (
-                <div className="font-semibold text-xs uppercase tracking-wider text-[rgba(10,13,26,0.8)] text-center w-full">
-                    Action
-                </div>
-            )
-        },
+        header: () => (
+            <div className="font-semibold text-sm text-[rgba(10,13,26,0.8)] px-4">
+                Action
+            </div>
+        ),
         cell: ({ row }) => {
             const interview = row.original
             return (
@@ -184,10 +170,14 @@ export const columns: ColumnDef<Interview>[] = [
                     onClick={(e) => e.stopPropagation()}
                 >
                     <Link href={`/company/edit/${interview.template_id}`}>
-                        <Button variant="ghost" className="bg-[rgba(255,241,234,1)] hover:bg-[rgba(255,144,85,0.2)] border border-[rgba(255,144,85,0.1)] rounded-full px-4 text-[rgba(10,13,26,0.7)] h-8" >
-                            {/* Using pencil icon similar to mockup */}
-                            <Image src="/company/interviews/pencil.svg" alt='pencil' width={14} height={14} className="h-3.5 w-3.5 mr-2 opacity-60" />
-                            <span className="font-bold text-xs">Edit</span>
+                        <Button
+                            variant="outline"
+                            className="border-[rgba(58,63,187,1)] text-[rgba(58,63,187,1)] hover:bg-[rgba(58,63,187,1)] hover:text-white rounded-md px-4 h-8 transition-all duration-200 flex items-center gap-2"
+                        >
+                            <svg width="14" height="14" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg" className="transition-colors duration-200">
+                                <path fillRule="evenodd" clipRule="evenodd" d="M13.0298 1.17417C12.2976 0.441943 11.1104 0.44194 10.3781 1.17417L1.52965 10.0227C1.2679 10.2844 1.08948 10.6178 1.01689 10.9808L0.649969 12.8154C0.475039 13.69 1.24619 14.4612 2.12084 14.2863L3.95543 13.9193C4.31841 13.8468 4.65178 13.6683 4.91353 13.4066L13.762 4.55806C14.4942 3.82582 14.4942 2.63864 13.762 1.90641L13.0298 1.17417ZM11.262 2.05806C11.5061 1.81398 11.9018 1.81398 12.1459 2.05806L12.8781 2.79029C13.1222 3.03437 13.1222 3.43009 12.8781 3.67418L11.2084 5.34392L9.59231 3.7278L11.262 2.05806ZM8.70838 4.61169L2.41353 10.9066C2.32628 10.9938 2.26681 11.1049 2.24261 11.2259L1.87569 13.0605L3.71028 12.6936C3.83128 12.6694 3.9424 12.6099 4.02965 12.5227L10.3245 6.2278L8.70838 4.61169Z" fill="currentColor" />
+                            </svg>
+                            <span className=" text-xs">Edit</span>
                         </Button>
                     </Link>
                 </div>
