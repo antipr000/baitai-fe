@@ -172,11 +172,11 @@ export default async function CompanyDashboard() {
                                                 <div className="space-y-2">
                                                     <h3 className="text-base font-medium text-[rgba(10,13,26,1)]">{interview.title}</h3>
                                                     <div className="space-y-1">
-                                                        <div className="flex items-center gap-2 text-xs text-[rgba(10,13,26,0.7)]">
+                                                        <div className="flex items-center gap-2 text-sm text-[rgba(10,13,26,0.7)]">
                                                             <Image src="/company/dashboard/note2.svg" alt='note' width={12} height={12} />
                                                             <span>{interview.sections} Sections</span>
                                                         </div>
-                                                        <div className="flex items-center gap-4 text-xs text-[rgba(10,13,26,0.7)]">
+                                                        <div className="flex items-center gap-4 text-sm text-[rgba(10,13,26,0.7)]">
                                                             <div className="flex items-center gap-2">
                                                                 <Image src="/company/dashboard/people2.svg" alt='people' width={12} height={12} className="text-[#6A7DFC]" />
                                                                 <span>{interview.candidates} candidates</span>

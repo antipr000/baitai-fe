@@ -42,7 +42,7 @@ export default async function InterviewsPage() {
     return (
         <div className='w-full min-h-screen bg-white flex flex-col'>
             <div className="bg-white  w-full">
-                <div className="max-w-7xl mx-auto px-6 py-10 flex justify-between items-center">
+                <div className="max-w-7xl mx-auto px-6 py-10 pb-5 flex justify-between items-center">
                     <div className='flex items-start gap-4'>
                         <BackButton />
                         <div>

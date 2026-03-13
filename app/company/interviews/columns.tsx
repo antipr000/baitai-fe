@@ -111,13 +111,13 @@ export const columns: ColumnDef<Interview>[] = [
                 const s = status?.toLowerCase()
                 switch (s) {
                     case "active":
-                        return "bg-[rgba(50,255,36,0.1)] border text-sm border-[rgba(50,255,36,0.5)] text-[rgba(40,199,29,1)]"
+                        return " border text-sm border-[rgba(50,255,36,1)] text-[rgba(40,199,29,1)]"
                     case "archived":
-                        return "bg-[rgba(242,129,68,0.1)] border text-sm border-[rgba(242,129,68,0.5)] text-[rgba(242,129,68,0.7)]"
+                        return " border text-sm border-[rgba(242,129,68,1)] text-[rgba(242,129,68,0.7)]"
                     case "draft":
-                        return "bg-[rgba(105,108,118,0.05)] border text-sm border-[rgba(105,108,118,0.5)] text-[rgba(105,108,118,0.7)]"
+                        return " border text-sm border-[rgba(105,108,118,1)] text-[rgba(105,108,118,0.7)]"
                     default:
-                        return "bg-gray-100 border border-gray-300 text-sm text-muted-foreground"
+                        return " border border-gray-300 text-sm text-muted-foreground"
                 } 
             }
             return (

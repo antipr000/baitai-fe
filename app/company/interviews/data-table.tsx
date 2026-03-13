@@ -61,7 +61,7 @@ export function DataTable<TData, TValue>({
     return (
         <div className="space-y-6">
             {/* Header and Controls */}
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+            <div className="flex flex-col md:flex-row  items-start md:items-center gap-6">
                 <h2 className="text-2xl font-semibold text-[rgba(10,13,26,1)]">All Interviews</h2>
 
                 <div className="flex gap-4 items-center w-full md:w-auto">

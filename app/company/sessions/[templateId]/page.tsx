@@ -3,6 +3,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { BackButton2 } from '@/components/ui/back-button2'
 import Image from 'next/image'
+import Link from 'next/link'
 import { SessionTable } from './session-table'
 import { Candidate } from './columns'
 import { BackButton } from '@/components/ui/back-button'
@@ -78,86 +79,76 @@ export default async function SessionPage({ params }: { params: Promise<{ templa
     const authToken = tokens?.token
 
     return (
-        <div className='w-full min-h-screen bg-[rgba(248,250,255,1)]'>
+        <div className='w-full min-h-screen bg-white'>
             <div className="min-h-screen max-w-full md:max-w-4xl lg:max-w-5xl xl:max-w-7xl mx-auto">
                 <div className="max-w-7xl mx-auto p-6 space-y-10">
 
                     {/* Header */}
                     <div className="flex justify-between items-center">
                         <div className='flex items-center gap-4'>
-                            <BackButton className="self-start" />
                             <div>
-                                <h1 className="text-2xl font-bold tracking-tight text-transparent bg-clip-text bg-[linear-gradient(91.24deg,#3E54FB_-35.23%,#C3CEFF_202.55%)]">{stats.template_name}</h1>
-                                <p className="text-[rgba(84,86,95,0.5)]  font-medium">Interview Dashboard</p>
+                                <h1 className="text-2xl font-bold tracking-tight text-[rgba(58,63,187,1)]">{stats.template_name}</h1>
+                                <p className="text-[rgba(107,114,128,1)] font-medium text-sm">Interview Dashboard</p>
                             </div>
                         </div>
-                        <InviteForm templateId={templateId} authToken={authToken}>
-                            <Button size="lg" className="bg-[linear-gradient(93.21deg,rgba(242,129,68,0.9)_-31.21%,rgba(255,178,136,0.9)_174.4%)] hover:opacity-90 text-white flex items-center gap-2 rounded-lg px-6 ">
-                                <Image src="/company/candidates/mail.svg" alt="Mail" width={20} height={20} className="h-4 w-4" />
-                                <span className="font-semibold">Send Invites</span>
-                            </Button>
-                        </InviteForm>
+                        <div className="flex items-center gap-4">
+                            <InviteForm templateId={templateId} authToken={authToken}>
+                                <Button size="lg" className="bg-[rgba(58,63,187,1)] hover:bg-[rgba(58,63,187,0.9)] text-white flex items-center gap-2 rounded-sm px-6 h-11">
+                                    <Image src="/company/candidates/mail.svg" alt="Mail" width={18} height={18} />
+                                    <span className="font-semibold text-sm">Send Invites</span>
+                                </Button>
+                            </InviteForm>
+                            <Link href="/company/dashboard">
+                                <Button variant="outline" size="lg" className="border-[rgba(58,63,187,1)] text-[rgba(58,63,187,1)] hover:text-[rgba(58,63,187,1)] hover:bg-[rgba(58,63,187,0.05)] rounded-sm px-6 h-11">
+                                    <span className="font-semibold text-sm">Back Home</span>
+                                </Button>
+                            </Link>
+                        </div>
                     </div>
 
                     {/* Stats Cards */}
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
 
                         {/* Invites Sent  */}
-                        <Card className="bg-[rgba(104,100,247,0.05)] border border-[rgba(104,100,247,0.3)] ">
-                            <CardContent className="">
-                                <div className="flex items-center gap-4">
-                                    <div className="bg-[rgba(104,100,247,0.15)] shrink-0 w-12 h-12 rounded-xl flex items-center justify-center text-[rgba(104,100,247,1)]">
-                                        <Image src="/company/candidates/invite.svg" alt="Mail" width={24} height={24} className="h-6 w-6" />
-                                    </div>
-                                    <div>
-                                        <p className="text-xl font-medium text-gray-500 mb-0.5">Invites Sent</p>
-                                        <p className="text-2xl font-semibold text-[rgba(10,13,26,0.7)]">{stats.invites_sent}</p>
-                                    </div>
+                        <Card className="rounded-xl border-[rgba(58,63,187,1)] shadow-none bg-white">
+                            <CardContent className="p-6 flex flex-row items-center gap-5 py-3">
+                                    <Image src="/company/candidates/invite.svg" alt="Mail" width={30} height={30} />
+                                <div className='space-y-0.5'>
+                                    <p className="text-xl font-medium text-[rgba(10,13,26,0.6)] whitespace-nowrap">Invites Sent</p>
+                                    <p className="text-2xl font-semibold text-[rgba(10,13,26,1)] leading-none">{stats.invites_sent}</p>
                                 </div>
                             </CardContent>
                         </Card>
 
                         {/* Appeared  */}
-                        <Card className="bg-[rgba(50,255,36,0.05)] border border-[rgba(50,255,36,0.3)] ">
-                            <CardContent className="">
-                                <div className="flex items-center gap-4">
-                                    <div className="bg-[rgba(50,255,36,0.15)] shrink-0 w-12 h-12 rounded-xl flex items-center justify-center text-[rgba(40,199,29,1)]">
-                                        <Image src="/company/candidates/tick.svg" alt="tick" width={24} height={24} className="h-6 w-6" />
-                                    </div>
-                                    <div>
-                                        <p className="text-xl font-medium text-[rgba(10,13,26,0.46)] mb-0.5">Appeared</p>
-                                        <p className="text-2xl font-semibold text-[rgba(10,13,26,0.7)]">{stats.appeared}</p>
-                                    </div>
+                        <Card className="rounded-xl border-[rgba(58,63,187,1)] shadow-none bg-white">
+                            <CardContent className="p-6 flex flex-row items-center gap-5 py-3">
+                                    <Image src="/company/candidates/tick.svg" alt="tick" width={30} height={30}  />
+                                <div className='space-y-0.5'>
+                                    <p className="text-xl font-medium text-[rgba(10,13,26,0.6)] whitespace-nowrap">Appeared</p>
+                                    <p className="text-2xl font-semibold text-[rgba(10,13,26,1)] leading-none">{stats.appeared}</p>
                                 </div>
                             </CardContent>
                         </Card>
 
                         {/* Pending */}
-                        <Card className="bg-[rgba(242,129,68,0.05)] border border-[rgba(242,129,68,0.3)] ">
-                            <CardContent className="">
-                                <div className="flex items-center gap-4">
-                                    <div className="bg-[rgba(242,129,68,0.15)] shrink-0 w-12 h-12 rounded-xl flex items-center justify-center text-[rgba(242,129,68,1)]">
-                                        <Image src="/company/candidates/clock.svg" alt="clock" width={24} height={24} className="h-6 w-6" />
-                                    </div>
-                                    <div>
-                                        <p className="text-xl font-medium text-[rgba(10,13,26,0.46)] mb-0.5">Pending</p>
-                                        <p className="text-2xl font-semibold text-[rgba(10,13,26,0.7)]">{stats.pending}</p>
-                                    </div>
+                        <Card className="rounded-xl border-[rgba(58,63,187,1)] shadow-none bg-white">
+                            <CardContent className="p-6 flex flex-row items-center gap-5 py-3">
+                                    <Image src="/company/candidates/clock.svg" alt="clock" width={30} height={30}  />
+                                <div className='space-y-0.5'>
+                                    <p className="text-xl font-medium text-[rgba(10,13,26,0.6)] whitespace-nowrap">Pending</p>
+                                    <p className="text-2xl font-semibold text-[rgba(10,13,26,1)] leading-none">{stats.pending}</p>
                                 </div>
                             </CardContent>
                         </Card>
 
                         {/* Avg Score */}
-                        <Card className="bg-[rgba(58,170,255,0.05)] border border-[rgba(58,170,255,0.3)] ">
-                            <CardContent className="">
-                                <div className="flex items-center gap-4">
-                                    <div className="bg-[rgba(58,170,255,0.15)] shrink-0 w-12 h-12 rounded-xl flex items-center justify-center text-[rgba(58,170,255,1)]">
-                                        <Image src="/company/candidates/people.svg" alt="people" width={24} height={24} className="h-6 w-6" />
-                                    </div>
-                                    <div>
-                                        <p className="text-xl font-medium text-[rgba(10,13,26,0.46)] mb-0.5">Avg Score</p>
-                                        <p className="text-2xl font-semibold text-[rgba(10,13,26,0.7)]">{stats.avg_score}%</p>
-                                    </div>
+                        <Card className="rounded-xl border-[rgba(58,63,187,1)] shadow-none bg-white">
+                            <CardContent className="p-6 flex flex-row items-center gap-5 py-3">
+                                    <Image src="/company/candidates/people.svg" alt="people" width={40} height={40} />
+                                <div className='space-y-0.5'>
+                                    <p className="text-xl font-medium text-[rgba(10,13,26,0.6)] whitespace-nowrap">Avg Score</p>
+                                    <p className="text-2xl font-semibold text-[rgba(10,13,26,1)] leading-none">{stats.avg_score}%</p>
                                 </div>
                             </CardContent>
                         </Card>

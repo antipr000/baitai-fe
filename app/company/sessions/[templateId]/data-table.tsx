@@ -60,13 +60,13 @@ export function DataTable<TData, TValue>({
         <div className="space-y-4">
             {/* Header and Controls */}
             <div className="flex flex-col md:flex-row justify-start items-start md:items-center gap-4">
-                <h2 className="text-2xl font-semibold text-[rgba(56,59,72,0.9)]">All Candidates</h2>
+                <h2 className="text-2xl font-semibold text-[rgba(10,13,26,1)]">All Candidates</h2>
 
                 <div className="flex gap-4 items-center w-fit md:w-auto">
                     <DropdownMenu modal={false}>
                         <DropdownMenuTrigger asChild>
-                            <Button variant="outline" className="gap-2 bg-white text-[rgba(75,85,99,1)] border-gray-200 hover:bg-gray-50 h-10 px-4 min-w-[100px]">
-                                <Filter className="h-4 w-4 text-[rgba(138,152,253,1)]" />
+                            <Button variant="outline" className="gap-2 border-[rgba(58,63,187,0.1)] text-[rgba(10,13,26,0.8)] hover:bg-[rgba(249,250,251,1)] h-10 px-4 min-w-[100px]">
+                                <Image src="/company/candidates/filter.svg" alt="Filter" width={16} height={16} />
                                 Filter
                             </Button>
                         </DropdownMenuTrigger>
@@ -89,26 +89,26 @@ export function DataTable<TData, TValue>({
                     <InputGroup className="bg-white w-full md:w-[300px] border border-gray-200 rounded-md h-10">
                         <InputGroupAddon>
                             <div className="pl-1">
-                                <Image src="/search.svg" alt="Search" width={18} height={18} className="text-[rgba(125,141,253,0.9)]" />
+                                <Image src="/company/candidates/search.svg" alt="Search" width={18} height={18} className="text-[rgba(125,141,253,0.9)]" />
                             </div>
                         </InputGroupAddon>
                         <InputGroupInput placeholder="Search..."
                             value={globalFilter ?? ""}
                             onChange={(event) => setGlobalFilter(event.target.value)}
-                            className="font-medium placeholder:text-muted-foreground/50 border-none focus-visible:ring-0 h-9"
+                            className="font-medium placeholder:text-[rgba(10,13,26,0.6)] border-none focus-visible:ring-0 h-9"
                         />
                     </InputGroup>
                 </div>
             </div>
 
-            <div className="overflow-hidden rounded-lg border border-[rgba(104,100,247,0.15)] bg-white shadow-sm">
+            <div className="overflow-x-auto rounded-xl border border-[rgba(229,231,235,1)] bg-white shadow-none">
                 <Table>
-                    <TableHeader className="bg-[rgba(125,141,253,0.08)] border-b border-[rgba(125,141,253,0.2)]">
+                    <TableHeader className="bg-[rgba(249,250,251,1)] border-b border-[rgba(229,231,235,1)]">
                         {table.getHeaderGroups().map((headerGroup) => (
                             <TableRow key={headerGroup.id} className="hover:bg-transparent border-none">
                                 {headerGroup.headers.map((header) => {
                                     return (
-                                        <TableHead key={header.id} className="h-14 px-6 font-semibold text-gray-700 first:rounded-tl-lg last:rounded-tr-lg">
+                                        <TableHead key={header.id} className="h-12 px-6 font-semibold text-gray-700 first:rounded-tl-xl last:rounded-tr-xl">
                                             {header.isPlaceholder
                                                 ? null
                                                 : flexRender(
