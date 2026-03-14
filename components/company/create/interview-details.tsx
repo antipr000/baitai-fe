@@ -15,13 +15,19 @@ import {
 import { useInterviewStore } from '@/stores/interview-store'
 import api from '@/lib/api/client'
 
-export const InterviewDetails = ({ companyId, authToken, roles }: { companyId?: string; authToken?: string; roles: string[] }) => {
+export const InterviewDetails = ({ companyId, authToken, roles, mode = 'create' }: { 
+    companyId?: string; 
+    authToken?: string; 
+    roles: string[];
+    mode?: 'create' | 'edit'
+}) => {
     const {
         title, description, role, duration, difficultyLevel, isPublic, credits, screenShare,
         setTitle, setDescription, setRole, setDuration, setDifficultyLevel, setIsPublic, setCredits, setScreenShare
     } = useInterviewStore()
 
     const isAllowedCustomization = companyId === process.env.NEXT_PUBLIC_BAIT_COMPANY;
+    const showCredits = isAllowedCustomization && mode === 'edit';
 
     return (
         <Card className=" bg-[rgba(0,215,255,0.02)] border border-[rgba(84,104,252,0.1)]">
@@ -102,13 +108,17 @@ export const InterviewDetails = ({ companyId, authToken, roles }: { companyId?: 
                         <label htmlFor="duration" className="text-sm font-medium text-[rgba(10,13,26,0.82)] block">
                             Total Duration (minutes) <span className="text-red-500">*</span>
                         </label>
+                        <div className={!isAllowedCustomization && mode === 'edit' ? 'cursor-not-allowed' : ''}>
                         <Input
                             id="duration"
                             type="number"
                             value={duration}
                             onChange={(e) => setDuration(Number(e.target.value))}
-                            className="bg-white dark:bg-background/50 border-gray-200"
+                            readOnly={!isAllowedCustomization && mode === 'edit'}
+                            disabled={!isAllowedCustomization && mode === 'edit'}
+                            className="bg-white dark:bg-background/50 border-gray-200 disabled:opacity-70 disabled:cursor-not-allowed"
                         />
+                        </div>
                     </div>
                     <div className="space-y-2">
                         <label htmlFor="difficulty" className="text-sm font-medium text-[rgba(10,13,26,0.82)] block">
@@ -127,7 +137,7 @@ export const InterviewDetails = ({ companyId, authToken, roles }: { companyId?: 
                     </div>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {isAllowedCustomization && (
+                    {showCredits && (
                         <div className="space-y-2">
                             <label htmlFor="credits" className="text-sm font-medium text-[rgba(10,13,26,0.82)] block">
                                 Credits Cost

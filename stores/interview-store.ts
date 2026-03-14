@@ -461,7 +461,6 @@ export function buildInterviewPayload(state: InterviewState) {
         role: state.role,
         difficulty_level: state.difficultyLevel,
         screen_share: state.screenShare,
-        credits: state.credits,
         sections: state.sections.map(section => ({
             name: section.name,
             order: section.order,

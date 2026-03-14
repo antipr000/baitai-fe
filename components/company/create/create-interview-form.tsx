@@ -30,7 +30,7 @@ export function CreateInterviewForm({ companyId, authToken, roles }: CreateInter
             <Header authToken={authToken} companyId={companyId} />
 
             <div className='max-w-5xl mx-auto'>
-                <InterviewDetails companyId={companyId} authToken={authToken} roles={roles} />
+                <InterviewDetails companyId={companyId} authToken={authToken} roles={roles} mode="create" />
             </div>
 
             {/* Interview Sections */}

@@ -1,7 +1,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { LogoutButton } from '@/components/company/logout-button'
+import { CompanyLogoutButton } from './logout-button'
 
 export function CompanyHeader({ credits }: { credits: number }) {
     return (
@@ -23,11 +23,7 @@ export function CompanyHeader({ credits }: { credits: number }) {
                         <span className="text-sm">{credits} Credits</span>
                     </div>
 
-                    <Link href="/">
-                        <Button variant="outline" className="text-[rgba(58,63,187,1)] border-[rgba(58,63,187,1)] h-10 px-6 rounded-md hover:text-[rgba(58,63,187,1)]">
-                            Back Home
-                        </Button>
-                    </Link>
+                    <CompanyLogoutButton />
 
                 </div>
             </div>

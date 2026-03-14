@@ -133,7 +133,7 @@ export function EditInterviewForm({ templateId, templateData, authToken, roles }
 
                     {/* Interview Details - Same components as Create */}
                     <div className='max-w-5xl mx-auto'>
-                        <InterviewDetails companyId={templateData.company_id} authToken={authToken} roles={roles} />
+                        <InterviewDetails companyId={templateData.company_id} authToken={authToken} roles={roles} mode="edit" />
                     </div>
 
                     {/* Interview Sections */}

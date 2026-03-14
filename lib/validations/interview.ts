@@ -75,7 +75,6 @@ export const interviewCreateSchema = z.object({
     is_public: z.boolean().default(false),
     llm_config: z.record(z.string(), z.unknown()).default({}),
     screen_share: z.boolean().default(false),
-    credits: z.number().int().min(0).default(0),
     sections: z.array(sectionSchema).default([])
 })
 

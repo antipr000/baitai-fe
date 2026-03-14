@@ -31,7 +31,7 @@ async function DashboardHeader() {
         <div className="">
             <h1 className="text-3xl font-semibold text-[rgba(17,24,39,1)] mb-2 tracking-tight">Dashboard</h1>
             <p className="text-[rgba(17,24,39,0.6)] text-base">
-                You have <span className={pending > 0 ? "text-[rgba(255,20,20,1)]" : "text-[rgba(14,163,3,1)]"}>{pending} pending {pending <= 1 ? 'interview' : 'interviews'}</span>
+                You have <span className={pending > 0 ? "text-[rgba(107,114,128,1)]" : "text-[rgba(14,163,3,1)]"}>{pending} pending {pending <= 1 ? 'interview' : 'interviews'}</span>
             </p>
         </div>
     )
@@ -93,7 +93,11 @@ async function StatsCards() {
                         <div className="w-8 h-8 rounded-md bg-[rgba(240,243,255,1)] flex items-center justify-center">
                             <Image src="/candidate/dashboard/time.svg" alt="Pending" width={20} height={20} />
                         </div>
-                        <WeeklyBadge value={stats.pending_this_week} suffix="this week" />
+                        {stats.pending_this_week > 0 && (
+                            <div className="text-[12px] text-[rgba(10,13,26,0.6)] flex items-center gap-1 mt-1">
+                                +{stats.pending_this_week} this week
+                            </div>
+                        )}
                     </div>
                     <div>
                         <h3 className="text-2xl font-semibold text-[rgba(10,13,26,1)] leading-tight mb-0.5">{stats.pending}</h3>

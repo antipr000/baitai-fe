@@ -100,7 +100,7 @@ export default async function SessionPage({ params }: { params: Promise<{ templa
                             </InviteForm>
                             <Link href="/company/dashboard">
                                 <Button variant="outline" size="lg" className="border-[rgba(58,63,187,1)] text-[rgba(58,63,187,1)] hover:text-[rgba(58,63,187,1)] hover:bg-[rgba(58,63,187,0.05)] rounded-sm px-6 h-11">
-                                    <span className="font-semibold text-sm">Back Home</span>
+                                    <span className="font-semibold text-sm">Dashboard</span>
                                 </Button>
                             </Link>
                         </div>

@@ -6,7 +6,6 @@ import { Card, CardContent } from '@/components/ui/card'
 import { ArrowRight, PlusCircle } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { LogoutButton } from '@/components/company/logout-button'
 import { CompanyHeader } from './components/company-header'
 
 interface CompanyStats {

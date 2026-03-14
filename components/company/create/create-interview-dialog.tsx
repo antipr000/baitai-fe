@@ -63,6 +63,10 @@ export function CreateInterviewDialog({ open, onClose, authToken, roles }: Creat
             toast.error('Please select a difficulty level')
             return
         }
+        if (!duration || duration < 5) {
+            toast.error('Interview duration must be at least 5 minutes')
+            return
+        }
         if (!prompt.trim()) {
             toast.error('Please provide an AI prompt')
             return

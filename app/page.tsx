@@ -44,24 +44,49 @@ export default async function Home() {
               transition={{ duration: 0.2, ease: "easeOut" }}
               className="text-center lg:text-left flex flex-col items-center lg:items-start w-full"
             >
-              {/* AI Badge */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6, delay: 0.2, ease: "easeOut" }}
-              >
-                <Badge className="bg-[rgba(196,240,0,1)] z-30 text-[rgba(58,63,187,1)] px-7 py-3 mb-5 md:text-sm text-xs lg:text-base font-medium border-none rounded-full">
-                  <Image
-                    src="/main/lightning2.svg"
-                    alt="AI Badge"
-                    width={13}
-                    height={18}
-                    className="inline-block mr-2"
-                  />
-                  AI-Powered Interviews
-                </Badge>
-              </motion.div>
+              {/* Badges */}
+              <div className="flex flex-col items-center lg:items-start gap-4 mb-5">
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.6, delay: 0.2, ease: "easeOut" }}
+                >
+                  <Badge className="bg-[rgba(196,240,0,1)] z-30 text-[rgba(58,63,187,1)] px-5 py-2 md:text-sm text-xs lg:text-base font-medium border-none rounded-full">
+                    <Image
+                      src="/main/lightning2.svg"
+                      alt="AI Badge"
+                      width={13}
+                      height={18}
+                      className="inline-block mr-2"
+                    />
+                    AI-Powered Interviews
+                  </Badge>
+                </motion.div>
+
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.6, delay: 0.3, ease: "easeOut" }}
+                >
+                  <Badge 
+                    variant="outline"
+                    className="bg-white z-30 text-[rgba(58,63,187,1)] border-[rgba(58,63,187,1)] px-5 py-2 md:text-sm text-xs lg:text-base font-medium rounded-full flex items-center gap-2"
+                  >
+                    <Image
+                      src="/candidate/dashboard/trophy.gif"
+                      alt="Trophy"
+                      width={20}
+                      height={20}
+                      className="inline-block"
+                    />
+                    <span>
+                      <span className="font-semibold">#1 Product of the day</span> - Peerpush
+                    </span>
+                  </Badge>
+                </motion.div>
+              </div>
 
               {/* Main Heading */}
               <motion.div
@@ -251,7 +276,7 @@ export default async function Home() {
             </div>
 
             {/* Steps - Removed flex/space-y to ensure sticky context works natively */}
-            <div className="relative pb-[5vh]">
+<div className="relative pb-[5vh]">
               {jobSeekerSteps.map((step, index) => {
 
                 return (
