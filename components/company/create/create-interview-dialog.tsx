@@ -25,14 +25,17 @@ interface CreateInterviewDialogProps {
     open: boolean
     onClose: () => void
     authToken?: string
+    roles: string[]
 }
 
-export function CreateInterviewDialog({ open, onClose, authToken }: CreateInterviewDialogProps) {
+export function CreateInterviewDialog({ open, onClose, authToken, roles }: CreateInterviewDialogProps) {
     const router = useRouter()
     const [step, setStep] = useState<Step>('choose')
     const [format, setFormat] = useState<AssessmentFormat>('')
     const [duration, setDuration] = useState(30)
+    const [difficulty, setDifficulty] = useState<string>('medium')
     const [prompt, setPrompt] = useState('')
+    const [role, setRole] = useState('')
     const [isGenerating, setIsGenerating] = useState(false)
 
     // Reset to first step whenever dialog reopens
@@ -41,13 +44,23 @@ export function CreateInterviewDialog({ open, onClose, authToken }: CreateInterv
             setStep('choose')
             setFormat('')
             setDuration(30)
+            setDifficulty('medium')
             setPrompt('')
+            setRole('')
         }
     }, [open])
 
     const handleGenerate = async () => {
+        if (!role) {
+            toast.error('Please select a target role')
+            return
+        }
         if (!format) {
             toast.error('Please select an assessment format')
+            return
+        }
+        if (!difficulty) {
+            toast.error('Please select a difficulty level')
             return
         }
         if (!prompt.trim()) {
@@ -59,7 +72,7 @@ export function CreateInterviewDialog({ open, onClose, authToken }: CreateInterv
         try {
             const response = await api.post(
                 '/api/v1/company/interviews/generate/',
-                { prompt, artifact_type: format, duration },
+                { prompt, artifact_type: format, duration, role, difficulty_level: difficulty },
                 { headers: authToken ? { Authorization: `Bearer ${authToken}` } : undefined }
             )
             toast.success('Interview generated successfully!')
@@ -171,9 +184,32 @@ export function CreateInterviewDialog({ open, onClose, authToken }: CreateInterv
                             </p>
                         </div>
 
-                        {/* Assessment Format + Duration row */}
-                        <div className="flex items-end gap-4 mb-6">
-                            <div className="flex-1 space-y-2">
+                        {/* Grid for settings */}
+                        <div className="grid grid-cols-2 gap-x-6 gap-y-6 mb-6">
+                            {/* Role Selection */}
+                            <div className="space-y-2">
+                                <label className="text-sm font-semibold text-[rgba(10,13,26,0.82)] block">
+                                    Target Role
+                                </label>
+                                <Select
+                                    value={role}
+                                    onValueChange={setRole}
+                                >
+                                    <SelectTrigger className="w-full border-[rgba(55,58,70,0.05)] bg-[rgba(248,248,255,1)]">
+                                        <SelectValue placeholder="-Choose Role-" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {roles.map((r) => (
+                                            <SelectItem key={r} value={r}>
+                                                {r}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+
+                            {/* Assessment Format */}
+                            <div className="space-y-2">
                                 <label className="text-sm font-semibold text-[rgba(10,13,26,0.82)] block">
                                     Assessment Format
                                 </label>
@@ -191,20 +227,41 @@ export function CreateInterviewDialog({ open, onClose, authToken }: CreateInterv
                                 </Select>
                             </div>
 
+                            {/* Duration */}
                             <div className="space-y-2">
                                 <label className="text-sm font-semibold text-[rgba(10,13,26,0.82)] block">
                                     Duration
                                 </label>
-                                <div className="flex items-center gap-1  rounded-md px-3 h-9 bg-[rgba(248,248,255,1)]">
+                                <div className="flex items-center gap-2 rounded-md px-3 h-10 border border-[rgba(55,58,70,0.05)] bg-[rgba(248,248,255,1)]">
                                     <Input
                                         type="number"
                                         value={duration}
                                         onChange={(e) => setDuration(Number(e.target.value))}
                                         min={5}
-                                        className="w-12 border-0 p-0 text-[rgba(10,13,26,0.6)] h-auto focus-visible:ring-0 shadow-none text-sm"
+                                        className="flex-1 border-0 p-0 text-[rgba(10,13,26,0.82)] font-medium h-auto focus-visible:ring-0 shadow-none text-sm bg-transparent"
                                     />
-                                    <span className="text-sm text-[rgba(10,13,26,0.6)]">min</span>
+                                    <span className="text-sm font-medium text-[rgba(10,13,26,0.4)]">min</span>
                                 </div>
+                            </div>
+
+                            {/* Difficulty */}
+                            <div className="space-y-2">
+                                <label className="text-sm font-semibold text-[rgba(10,13,26,0.82)] block">
+                                    Difficulty 69
+                                </label>
+                                <Select
+                                    value={difficulty}
+                                    onValueChange={setDifficulty}
+                                >
+                                    <SelectTrigger className="w-full border-[rgba(55,58,70,0.05)] bg-[rgba(248,248,255,1)]">
+                                        <SelectValue placeholder="-Difficulty-" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="easy">Easy</SelectItem>
+                                        <SelectItem value="medium">Medium</SelectItem>
+                                        <SelectItem value="hard">Hard</SelectItem>
+                                    </SelectContent>
+                                </Select>
                             </div>
                         </div>
 

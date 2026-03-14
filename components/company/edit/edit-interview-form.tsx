@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button'
 import { BackButton } from '@/components/ui/back-button'
 import { toast } from 'sonner'
 import api from '@/lib/api/client'
-import { useInterviewStore, buildEditPayload } from '@/stores/interview-store'
+import { useInterviewStore, buildEditPayload, type ApiTemplateData, type DifficultyLevel, type InterviewTemplateStatus } from '@/stores/interview-store'
 import { validateInterviewEditPayload, formatZodErrors } from '@/lib/validations/interview'
 import { InterviewDetails } from '@/components/company/create/interview-details'
 import { IntroductionSection } from '@/components/company/create/introduction-section'
@@ -15,31 +15,20 @@ import { SectionList } from '@/components/company/create/section-list'
 import { ConclusionSection } from '@/components/company/create/conclusion-section'
 
 // Full interview template data from API
-export interface InterviewTemplateData {
-    id: string
+export interface InterviewTemplateData extends ApiTemplateData {
     created_at: string
     updated_at: string
-    title: string
-    company_id: string
-    description?: string | null
-    status: 'active' | 'archived' | 'draft'
-    is_public: boolean
-    duration: number
-    role: string
-    credits: number
-    difficulty_level: string
-    llm_config: Record<string, unknown>
-    screen_share: boolean
-    sections: any[]
+    status: InterviewTemplateStatus
 }
 
 interface EditInterviewFormProps {
     templateId: string
     templateData: InterviewTemplateData
     authToken?: string
+    roles: string[]
 }
 
-export function EditInterviewForm({ templateId, templateData, authToken }: EditInterviewFormProps) {
+export function EditInterviewForm({ templateId, templateData, authToken, roles }: EditInterviewFormProps) {
     const router = useRouter()
     const [isSubmitting, setIsSubmitting] = useState(false)
     const store = useInterviewStore()
@@ -144,7 +133,7 @@ export function EditInterviewForm({ templateId, templateData, authToken }: EditI
 
                     {/* Interview Details - Same components as Create */}
                     <div className='max-w-5xl mx-auto'>
-                        <InterviewDetails />
+                        <InterviewDetails companyId={templateData.company_id} authToken={authToken} roles={roles} />
                     </div>
 
                     {/* Interview Sections */}

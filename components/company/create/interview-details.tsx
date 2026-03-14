@@ -5,13 +5,23 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Switch } from '@/components/ui/switch'
 import { Textarea } from '@/components/ui/textarea'
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select'
 import { useInterviewStore } from '@/stores/interview-store'
+import api from '@/lib/api/client'
 
-export const InterviewDetails = () => {
+export const InterviewDetails = ({ companyId, authToken, roles }: { companyId?: string; authToken?: string; roles: string[] }) => {
     const {
-        title, description, role, duration, isPublic, credits, screenShare,
-        setTitle, setDescription, setRole, setDuration, setIsPublic, setCredits, setScreenShare
+        title, description, role, duration, difficultyLevel, isPublic, credits, screenShare,
+        setTitle, setDescription, setRole, setDuration, setDifficultyLevel, setIsPublic, setCredits, setScreenShare
     } = useInterviewStore()
+
+    const isAllowedCustomization = companyId === process.env.NEXT_PUBLIC_BAIT_COMPANY;
 
     return (
         <Card className=" bg-[rgba(0,215,255,0.02)] border border-[rgba(84,104,252,0.1)]">
@@ -21,14 +31,18 @@ export const InterviewDetails = () => {
 
                     {/* Toggles */}
                     <div className="flex items-center gap-6">
-                        <div className="flex items-center gap-2">
-                            <span className="text-sm font-medium text-[rgba(10,13,26,0.82)]">Public</span>
-                            <Switch
-                                checked={isPublic}
-                                onCheckedChange={setIsPublic}
-                                className="data-[state=checked]:bg-[rgba(58,63,187,1)]"
-                            />
-                        </div>
+                        {isAllowedCustomization && (
+                            <div className="flex items-center gap-2">
+                                <span className="text-sm font-medium text-[rgba(10,13,26,0.82)]">Public</span>
+                                <div>
+                                    <Switch
+                                        checked={isPublic}
+                                        onCheckedChange={setIsPublic}
+                                        className="data-[state=checked]:bg-[rgba(58,63,187,1)]"
+                                    />
+                                </div>
+                            </div>
+                        )}
                         <div className="flex items-center gap-2">
                             <span className="text-sm font-medium text-[rgba(10,13,26,0.82)]">Screenshare</span>
                             <Switch
@@ -62,13 +76,23 @@ export const InterviewDetails = () => {
                         <label htmlFor="role" className="text-sm font-medium text-[rgba(10,13,26,0.82)] block">
                             Role / Job Title <span className="text-red-500">*</span>
                         </label>
-                        <Input
-                            id="role"
-                            value={role}
-                            onChange={(e) => setRole(e.target.value)}
-                            placeholder="E.g., Backend Developer"
-                            className="bg-white dark:bg-background/50 border-gray-200"
-                        />
+                        <Select value={role} onValueChange={setRole}>
+                            <SelectTrigger id="role" className="bg-white dark:bg-background/50 border-gray-200 w-full h-10">
+                                <SelectValue placeholder="Select a role" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {roles.length > 0 && !roles.includes(role) && role && (
+                                    <SelectItem key={role} value={role}>
+                                        {role}
+                                    </SelectItem>
+                                )}
+                                {roles.map((r) => (
+                                    <SelectItem key={r} value={r}>
+                                        {r}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
                     </div>
                 </div>
 
@@ -87,20 +111,41 @@ export const InterviewDetails = () => {
                         />
                     </div>
                     <div className="space-y-2">
-                        <label htmlFor="credits" className="text-sm font-medium text-[rgba(10,13,26,0.82)] block">
-                            Credits Cost
+                        <label htmlFor="difficulty" className="text-sm font-medium text-[rgba(10,13,26,0.82)] block">
+                            Overall Difficulty <span className="text-red-500">*</span>
                         </label>
-                        <Input
-                            id="credits"
-                            type="number"
-                            value={credits}
-                            onChange={(e) => {
-                                const val = Number(e.target.value)
-                                if (val >= 0) setCredits(val)
-                            }}
-                            className="bg-white dark:bg-background/50 border-gray-200"
-                        />
+                        <Select value={difficultyLevel} onValueChange={(v) => setDifficultyLevel(v as any)}>
+                            <SelectTrigger id="difficulty" className="bg-white dark:bg-background/50 border-gray-200 w-full h-10">
+                                <SelectValue placeholder="Select difficulty" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="easy">Easy</SelectItem>
+                                <SelectItem value="medium">Medium</SelectItem>
+                                <SelectItem value="hard">Hard</SelectItem>
+                            </SelectContent>
+                        </Select>
                     </div>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {isAllowedCustomization && (
+                        <div className="space-y-2">
+                            <label htmlFor="credits" className="text-sm font-medium text-[rgba(10,13,26,0.82)] block">
+                                Credits Cost
+                            </label>
+                            <div>
+                                <Input
+                                    id="credits"
+                                    type="number"
+                                    value={credits}
+                                    onChange={(e) => {
+                                        const val = Number(e.target.value)
+                                        if (val >= 0) setCredits(val)
+                                    }}
+                                    className="bg-white dark:bg-background/50 border-gray-200"
+                                />
+                            </div>
+                        </div>
+                    )}
                 </div>
 
                 {/* Description */}

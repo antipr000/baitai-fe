@@ -5,7 +5,7 @@ import { clientConfig, serverConfig } from '@/lib/auth/config'
 import { serverFetch } from '@/lib/api/server'
 import { CreateInterviewForm } from '@/components/company/create/create-interview-form'
 
-interface HiringManager {
+interface Company {
     id: string
     name: string
 }
@@ -19,14 +19,18 @@ export default async function CreateInterviewPage() {
         serviceAccount: serverConfig.serviceAccount,
     })
 
-    // Fetch company details
-    const hiringManager = await serverFetch<HiringManager>('/api/v1/company/hiring-managers/company')
-    const companyId = hiringManager?.id
+    // Fetch data in parallel
+    const [company, roles] = await Promise.all([
+        serverFetch<Company>('/api/v1/company/hiring-managers/company'),
+        serverFetch<string[]>('/api/v1/company/roles/')
+    ])
 
+    const companyId = company?.id
     return (
         <CreateInterviewForm
             companyId={companyId}
             authToken={tokens?.token}
+            roles={roles || []}
         />
     )
 }

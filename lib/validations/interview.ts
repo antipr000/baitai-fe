@@ -67,6 +67,7 @@ export const interviewCreateSchema = z.object({
     title: z.string().min(1, 'Interview title is required').max(200, 'Title must be less than 200 characters'),
     company_id: z.string().min(1, 'Company ID is required'),
     duration: z.number().int().min(1, 'Total duration must be at least 1 minute'),
+    difficulty_level: difficultyLevelSchema,
     role: z.string().min(1, 'Role/Job title is required').max(200, 'Role must be less than 200 characters'),
 
     // OPTIONAL fields with defaults
@@ -163,6 +164,7 @@ export const interviewEditSchema = z.object({
     llm_config: z.record(z.string(), z.unknown()).default({}),
     screen_share: z.boolean().default(false),
     credits: z.number().int().min(0).default(0),
+    difficulty_level: difficultyLevelSchema,
     sections: z.array(sectionEditSchema).default([])
 })
 

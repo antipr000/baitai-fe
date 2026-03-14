@@ -7,14 +7,16 @@ import { IntroductionSection } from './introduction-section'
 import { SectionList } from './section-list'
 import { ConclusionSection } from './conclusion-section'
 import { CreateInterviewDialog } from './create-interview-dialog'
+import api from '@/lib/api/client'
 
 
 interface CreateInterviewFormProps {
     companyId?: string
     authToken?: string
+    roles: string[]
 }
 
-export function CreateInterviewForm({ companyId, authToken }: CreateInterviewFormProps) {
+export function CreateInterviewForm({ companyId, authToken, roles }: CreateInterviewFormProps) {
     const [dialogOpen, setDialogOpen] = useState(true)
 
     return (
@@ -23,11 +25,12 @@ export function CreateInterviewForm({ companyId, authToken }: CreateInterviewFor
                 open={dialogOpen}
                 onClose={() => setDialogOpen(false)}
                 authToken={authToken}
+                roles={roles}
             />
             <Header authToken={authToken} companyId={companyId} />
 
             <div className='max-w-5xl mx-auto'>
-                <InterviewDetails />
+                <InterviewDetails companyId={companyId} authToken={authToken} roles={roles} />
             </div>
 
             {/* Interview Sections */}

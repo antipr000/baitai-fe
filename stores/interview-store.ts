@@ -5,6 +5,7 @@ import { create } from 'zustand'
 export type SectionType = 'intro' | 'questioning' | 'closing'
 export type ArtifactType = 'none' | 'document' | 'diagram' | 'code'
 export type DifficultyLevel = 'easy' | 'medium' | 'hard'
+export type InterviewTemplateStatus = 'active' | 'draft' | 'archived'
 export type EvalCategory =
     | 'technical'
     | 'problem_solving'
@@ -18,7 +19,7 @@ export type EvalCategory =
 
 // --- API Response Types (snake_case from backend) ---
 
-interface ApiFollowupRule {
+export interface ApiFollowupRule {
     id: string
     trigger_condition: string
     ai_instructions: string
@@ -26,7 +27,7 @@ interface ApiFollowupRule {
     max_depth: number
 }
 
-interface ApiQuestion {
+export interface ApiQuestion {
     id: string
     difficulty_level: DifficultyLevel
     ai_instructions: string
@@ -35,7 +36,7 @@ interface ApiQuestion {
     followup_rules: ApiFollowupRule[]
 }
 
-interface ApiEvaluationCriteria {
+export interface ApiEvaluationCriteria {
     id: string
     category: EvalCategory
     weight: number
@@ -43,7 +44,7 @@ interface ApiEvaluationCriteria {
     scoring_scale: number
 }
 
-interface ApiSection {
+export interface ApiSection {
     id: string
     name: string
     order: number
@@ -58,16 +59,20 @@ interface ApiSection {
 }
 
 export interface ApiTemplateData {
+    id: string
     title: string
     description?: string | null
     company_id: string
+    status: InterviewTemplateStatus
     is_public: boolean
     duration: number
     role: string
     credits: number
+    difficulty_level: DifficultyLevel
     screen_share: boolean
     llm_config: Record<string, unknown>
     sections: ApiSection[]
+    tags?: { tag_type: string; value: string }[]
 }
 
 // --- Interfaces matching Backend API ---
@@ -118,6 +123,7 @@ export interface InterviewState {
     companyId: string
     role: string
     duration: number
+    difficultyLevel: DifficultyLevel
     isPublic: boolean
     credits: number
     screenShare: boolean
@@ -129,6 +135,7 @@ export interface InterviewState {
     setDescription: (description: string) => void
     setRole: (role: string) => void
     setDuration: (duration: number) => void
+    setDifficultyLevel: (difficultyLevel: DifficultyLevel) => void
     setIsPublic: (isPublic: boolean) => void
     setCredits: (credits: number) => void
     setScreenShare: (screenShare: boolean) => void
@@ -211,9 +218,10 @@ const initialState = {
     description: '',
     companyId: '', // Will be set dynamically from auth context
     role: '',
-    duration: 60,
+    duration: 30,
+    difficultyLevel: 'medium' as DifficultyLevel,
     isPublic: false,
-    credits: 0,
+    credits: 3,
     screenShare: false,
     llmConfig: {},
     sections: [
@@ -231,6 +239,7 @@ export const useInterviewStore = create<InterviewState>((set, get) => ({
     setDescription: (description) => set({ description }),
     setRole: (role) => set({ role }),
     setDuration: (duration) => set({ duration }),
+    setDifficultyLevel: (difficultyLevel) => set({ difficultyLevel }),
     setIsPublic: (isPublic) => set({ isPublic }),
     setCredits: (credits) => set({ credits }),
     setScreenShare: (screenShare) => set({ screenShare }),
@@ -240,7 +249,8 @@ export const useInterviewStore = create<InterviewState>((set, get) => ({
         title: data.title || '',
         description: data.description || '',
         role: data.role || '',
-        duration: data.duration || 60,
+        duration: data.duration || 30,
+        difficultyLevel: data.difficulty_level || 'medium',
         isPublic: data.is_public ?? false,
         credits: data.credits || 0,
         screenShare: data.screen_share ?? false,
@@ -449,6 +459,7 @@ export function buildInterviewPayload(state: InterviewState) {
         duration: state.duration,
         llm_config: state.llmConfig,
         role: state.role,
+        difficulty_level: state.difficultyLevel,
         screen_share: state.screenShare,
         credits: state.credits,
         sections: state.sections.map(section => ({
@@ -494,6 +505,7 @@ export function buildEditPayload(state: InterviewState) {
         duration: state.duration,
         llm_config: state.llmConfig,
         role: state.role,
+        difficulty_level: state.difficultyLevel,
         screen_share: state.screenShare,
         credits: state.credits,
         sections: state.sections.map(section => ({

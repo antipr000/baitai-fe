@@ -20,10 +20,11 @@ export default async function EditInterviewPage({ params }: PageProps) {
         serviceAccount: serverConfig.serviceAccount,
     })
 
-    // Fetch interview template data
-    const templateData = await serverFetch<InterviewTemplateData>(
-        `/api/v1/company/interviews/${templateId}/`
-    )
+    // Fetch data in parallel
+    const [templateData, roles] = await Promise.all([
+        serverFetch<InterviewTemplateData>(`/api/v1/company/interviews/${templateId}/`),
+        serverFetch<string[]>('/api/v1/company/roles/')
+    ])
 
     if (!templateData) {
         return (
@@ -41,6 +42,7 @@ export default async function EditInterviewPage({ params }: PageProps) {
             templateId={templateId}
             templateData={templateData}
             authToken={tokens?.token}
+            roles={roles || []}
         />
     )
 }
