@@ -119,6 +119,22 @@ export const InterviewDetails = ({ companyId, authToken, roles, mode = 'create' 
                             className="bg-white dark:bg-background/50 border-gray-200 disabled:opacity-70 disabled:cursor-not-allowed"
                         />
                         </div>
+                        <div className="mt-2 flex items-center gap-3 text-[10.5px] text-[rgba(10,13,26,0.7)]">
+                            {[
+                                { label: '≤ 30m', cr: 3, active: duration <= 30 },
+                                { label: '31-45m', cr: 5, active: duration > 30 && duration <= 45 },
+                                { label: '45m+', cr: 7, active: duration > 45 }
+                            ].map((rule, i) => (
+                                <React.Fragment key={i}>
+                                    <div className={`flex items-center gap-1 ${rule.active ? 'text-[rgba(58,63,187,1)] font-bold' : ''}`}>
+                                        <span>{rule.label}</span>
+                                        <span className="opacity-60">•</span>
+                                        <span>{rule.cr} Credits</span>
+                                    </div>
+                                    {i < 2 && <span className="text-[rgba(10,13,26,0.82)]">|</span>}
+                                </React.Fragment>
+                            ))}
+                        </div>
                     </div>
                     <div className="space-y-2">
                         <label htmlFor="difficulty" className="text-sm font-medium text-[rgba(10,13,26,0.82)] block">
