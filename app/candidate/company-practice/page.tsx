@@ -42,16 +42,22 @@ function capitalize(str: string): string {
 // ─── Async server sub-component ───────────────────────────────────────────────
 
 async function CompanyPracticeContent() {
-    const interviewsRes = await serverFetch<ApiResponse>('/api/v1/user/interview/practice/filter/', {
-        method: 'POST',
-        body: {
-            page: 1,
-            page_size: 100,
-            has_any_company_tag: true,
-            company_tags: []
-        }
-    })
+    const [interviewsRes, rolesRes] = await Promise.all([
+        serverFetch<ApiResponse>('/api/v1/user/interview/practice/filter/', {
+            method: 'POST',
+            body: {
+                page: 1,
+                page_size: 100,
+                has_any_company_tag: true,
+                company_tags: []
+            }
+        }),
+        serverFetch<string[]>('/api/v1/user/roles/')
+    ])
+
     const items = interviewsRes?.items || []
+    const activeRoles = rolesRes || []
+
     // Derive available companies from the interview tags
     const companyTags = items
         .flatMap(item => item.tags)
@@ -68,7 +74,7 @@ async function CompanyPracticeContent() {
         return {
             id: item.id,
             title: item.title,
-            category: item.role || 'General',
+            role: item.role,
             difficulty: capitalize(item.difficulty_level) as PracticeInterview['difficulty'],
             duration: `${item.duration} min`,
             companyLogo: logo,
@@ -80,6 +86,7 @@ async function CompanyPracticeContent() {
         <CompanyPracticeClient
             companies={availableCompanies}
             interviews={interviews}
+            roles={activeRoles}
         />
     )
 }

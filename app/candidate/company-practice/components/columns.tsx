@@ -9,7 +9,7 @@ import { Clock } from "lucide-react"
 export type PracticeInterview = {
     id: string
     title: string
-    category: string
+    role: string
     difficulty: "Easy" | "Medium" | "Hard"
     duration: string
     companyLogo?: string
@@ -24,7 +24,7 @@ export const columns: ColumnDef<PracticeInterview>[] = [
         cell: ({ row }) => {
             const logo = row.original.companyLogo
             const name = row.original.title
-            const category = row.original.category
+            const role = row.original.role
             const difficulty = row.original.difficulty
             const duration = row.original.duration
             const getDifficultyStyles = (diff: string) => {
@@ -48,7 +48,6 @@ export const columns: ColumnDef<PracticeInterview>[] = [
                     )}
                     <div className="space-y-1">
                         <div className="font-medium text-sm text-[rgba(10,13,26,1)]">{name}</div>
-                        <div className="text-xs text-[rgba(10,13,26,0.7)]">{category}</div>
                         <div className="flex items-center gap-3 pt-0.5">
                             <span className={`px-3 py-0.5 rounded-full text-xs font-semibold border ${getDifficultyStyles(difficulty)}`}>
                                 {difficulty}
@@ -65,6 +64,17 @@ export const columns: ColumnDef<PracticeInterview>[] = [
     },
     {
         accessorKey: "difficulty",
+        filterFn: (row, _columnId, filterValue) => {
+            if (!filterValue) return true
+            return row.original.difficulty?.toLowerCase() === (filterValue as string).toLowerCase()
+        },
+    },
+    {
+        accessorKey: "role",
+        filterFn: (row, _columnId, filterValue) => {
+            if (!filterValue) return true
+            return row.original.role?.toLowerCase() === (filterValue as string).toLowerCase()
+        },
     },
     {
         accessorKey: "duration",

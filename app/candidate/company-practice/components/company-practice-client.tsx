@@ -17,15 +17,16 @@ interface Company {
 interface CompanyPracticeClientProps {
     companies: Company[]
     interviews: PracticeInterview[]
+    roles: string[]
 }
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
-export function CompanyPracticeClient({ companies, interviews }: CompanyPracticeClientProps) {
+export function CompanyPracticeClient({ companies, interviews, roles }: CompanyPracticeClientProps) {
     const [selectedCompany, setSelectedCompany] = useState<string>("")
 
     return (
-        <DataTable columns={columns} data={interviews} hideHeaders companyFilter={selectedCompany}>
+        <DataTable columns={columns} data={interviews} hideHeaders companyFilter={selectedCompany} roles={roles}>
             <ScrollArea className="w-full whitespace-nowrap">
                 <ToggleGroup
                     type="single"
