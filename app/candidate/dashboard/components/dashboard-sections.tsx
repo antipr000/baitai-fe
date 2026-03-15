@@ -102,7 +102,7 @@ export function CompanyPracticeCard({ items }: { items: any[] }) {
                 title: item.title,
                 companyName,
                 role: item.role || 'General',
-                difficulty: normalizeDifficulty(item.difficulty),
+                difficulty_level: normalizeDifficulty(item.difficulty_level),
                 duration: item.duration
             }
         })
@@ -112,7 +112,7 @@ export function CompanyPracticeCard({ items }: { items: any[] }) {
             title: string
             companyName: string
             role: string
-            difficulty: string
+            difficulty_level: string
             duration: number
         }>
 
@@ -137,8 +137,8 @@ export function CompanyPracticeCard({ items }: { items: any[] }) {
                                 <div>
                                     <h4 className="font-medium text-[rgba(10,13,26,1)] leading-snug mb-1">{item.title}</h4>
                                     <div className="flex items-center gap-2 text-sm text-[rgba(10,13,26,0.7)]">
-                                        <span className={`px-2 py-0.5 rounded-full border text-[11px] font-medium ${getDifficultyColor(item.difficulty)}`}>
-                                            {item.difficulty}
+                                        <span className={`px-2 py-0.5 rounded-full border text-[11px] font-medium ${getDifficultyColor(item.difficulty_level)}`}>
+                                            {item.difficulty_level}
                                         </span>
                                         <span className="flex items-center gap-1 text-xs">
                                             <Image src="/candidate/dashboard/time.svg" alt="time" width={14} height={14} />
