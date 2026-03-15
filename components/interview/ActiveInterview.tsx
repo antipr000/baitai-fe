@@ -13,6 +13,7 @@
 import React, { useEffect, useRef } from 'react'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
+import dynamic from 'next/dynamic'
 import AIVisualization from './AIVisualization'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
@@ -32,7 +33,8 @@ import {
 import { toast } from 'sonner'
 
 // Code Editor
-import { CodeEditor, EditorToolbar } from '@/components/editor'
+const CodeEditor = dynamic(() => import('@/components/editor/code-editor').then(mod => mod.CodeEditor), { ssr: false })
+const EditorToolbar = dynamic(() => import('@/components/editor/editor-toolbar').then(mod => mod.EditorToolbar), { ssr: false })
 import { useCodeEditorStore } from './store'
 
 // Zustand store
