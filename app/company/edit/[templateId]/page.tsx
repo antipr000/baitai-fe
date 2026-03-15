@@ -2,7 +2,7 @@ import React from 'react'
 import { cookies } from 'next/headers'
 import { getTokens } from 'next-firebase-auth-edge'
 import { clientConfig, serverConfig } from '@/lib/auth/config'
-import { serverFetch, getCachedPreferencesMetadata } from '@/lib/api/server'
+import { serverFetch, getPreferencesMetadata } from '@/lib/api/server'
 import { EditInterviewForm, InterviewTemplateData } from "@/components/company/edit/edit-interview-form"
 
 interface PageProps {
@@ -24,7 +24,7 @@ export default async function EditInterviewPage({ params }: PageProps) {
     const [templateData, roles, metadata] = await Promise.all([
         serverFetch<InterviewTemplateData>(`/api/v1/company/interviews/${templateId}/`),
         serverFetch<string[]>('/api/v1/company/roles/'),
-        getCachedPreferencesMetadata()
+        getPreferencesMetadata()
     ])
     if (!templateData) {
         return (

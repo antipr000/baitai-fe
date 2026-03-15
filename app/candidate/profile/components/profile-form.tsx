@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { type UserProfile, type PreferencesMetadata } from "@/lib/api/server"
 import api from "@/lib/api/client"
 import { toast } from "sonner"
 import { useRouter } from "next/navigation"
@@ -23,21 +24,6 @@ const profileSchema = z.object({
     ]).optional(),
 })
 
-interface UserProfile {
-    first_name: string
-    last_name: string
-    email: string
-    phone_number?: string | null
-    location?: string | null
-    website?: string | null
-    role?: string | null
-    experience?: string | null
-}
-
-interface PreferencesMetadata {
-    roles: string[]
-    experience_levels: { value: string, label: string }[]
-}
 
 interface ProfileFormProps {
     initialData: UserProfile | null

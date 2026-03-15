@@ -14,6 +14,7 @@ import {
     SidebarRail,
 } from "@/components/ui/sidebar"
 import { cn } from "@/lib/utils"
+import { type UserProfile } from "@/lib/api/server"
 import { signOut } from "firebase/auth"
 import { auth } from "@/lib/firebase"
 import { useRouter } from "next/navigation"
@@ -47,11 +48,6 @@ const navItems = [
     },
 ]
 
-interface UserProfile {
-    first_name: string
-    last_name: string
-    profile_picture_url: string | null
-}
 
 interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
     userProfile?: UserProfile | null

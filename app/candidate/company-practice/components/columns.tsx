@@ -54,11 +54,11 @@ export const columns: ColumnDef<PracticeInterview>[] = [
                             <span className={`px-3 py-0.5 rounded-full text-xs font-semibold border ${getDifficultyStyles(difficulty)}`}>
                                 {difficulty}
                             </span>
-                            {experienceLevels.map(level => (
+                            {/* {experienceLevels.map(level => (
                                 <span key={level} className="px-3 py-0.5 rounded-full text-xs font-semibold border border-[rgba(58,63,187,0.3)] text-[rgba(58,63,187,1)] capitalize">
                                     {level}
                                 </span>
-                            ))}
+                            ))} */}
                             <span className="flex items-center gap-1 text-[rgba(10,13,26,0.7)] text-xs">
                                 <Clock className="w-3.5 h-3.5" />
                                 {duration}

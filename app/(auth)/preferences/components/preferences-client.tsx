@@ -14,15 +14,12 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
+import { type PreferencesMetadata } from "@/lib/api/server";
 import api from "@/lib/api/client";
 import { useAuth } from "@/lib/auth/authContext";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 
-interface PreferencesMetadata {
-    roles: string[]
-    experience_levels: { value: string, label: string }[]
-}
 
 interface PreferencesClientProps {
     metadata: PreferencesMetadata
@@ -53,6 +50,7 @@ export default function PreferencesClient({ metadata, authToken }: PreferencesCl
             const headers = authToken ? { Authorization: `Bearer ${authToken}` } : {}
             await api.post("/api/v1/user/preferences/", { role, experience }, { headers });
             toast.success("Preferences saved!");
+            router.refresh();
             router.push("/candidate/dashboard");
         } catch {
             toast.error("Failed to save preferences. Please try again.");

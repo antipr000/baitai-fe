@@ -3,7 +3,7 @@ import { AppSidebar } from "@/components/candidate/navigation/app-sidebar"
 import { TopHeader } from "@/components/candidate/navigation/top-header"
 import { Suspense } from "react"
 import { redirect } from "next/navigation"
-import { serverFetch, getCachedUserProfile, UserProfile } from "@/lib/api/server"
+import { serverFetch, getUserProfile, UserProfile } from "@/lib/api/server"
 import { Skeleton } from "@/components/ui/skeleton"
 
 async function SidebarWithProfile({ userProfile }: { userProfile: UserProfile | null }) {
@@ -15,7 +15,7 @@ export default async function CandidateLayout({
 }: {
     children: React.ReactNode
 }) {
-    const userProfile = await getCachedUserProfile()
+    const userProfile = await getUserProfile()
 
     if (userProfile?.preferences_set === false) {
         redirect("/preferences")

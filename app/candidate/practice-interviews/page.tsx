@@ -114,7 +114,7 @@ async function PracticeTable() {
     })
 
     const data: PracticeInterview[] = response?.items
-        ? response.items.map((item) => ({
+        ? response.items.map((item: ApiPracticeInterview) => ({
             id: item.id,
             title: item.title,
             category: item.role || 'General',  // check

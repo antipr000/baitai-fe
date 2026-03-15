@@ -3,7 +3,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { Card, CardContent } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
-import { serverFetch } from '@/lib/api/server'
+import { serverFetch, getUserPreferences, type UserPreferences } from '@/lib/api/server'
 import { Button } from '@/components/ui/button'
 import {
     InterviewInvitesCard,
@@ -224,7 +224,7 @@ function MainGridSkeleton() {
 }
 
 async function MainGrid() {
-    const [invitesResponse, companyPracticeResponse, generalPracticeResponse, resultsResponse] = await Promise.all([
+    const [invitesResponse, companyPracticeResponse, generalPracticeResponse, resultsResponse, userPrefs] = await Promise.all([
         serverFetch<InvitesResponse>('/api/v1/user/interview/invites/', {
             method: 'POST',
             body: { page: 1, page_size: 2 }
@@ -238,14 +238,22 @@ async function MainGrid() {
                 has_any_company_tag: true
             }
         }),
-        serverFetch<PracticeResponse>('/api/v1/user/interview/practice/filter/', {
-            method: 'POST',
-            body: { page: 1, page_size: 2, role: '' }
-        }),
+        getUserPreferences().then((prefs: UserPreferences | null) => 
+            serverFetch<PracticeResponse>('/api/v1/user/interview/practice/filter/', {
+                method: 'POST',
+                body: { 
+                    page: 1, 
+                    page_size: 2, 
+                    role: prefs?.role || '',
+                    level_tags: prefs?.experience ? [prefs.experience] : []
+                }
+            })
+        ),
         serverFetch<ResultsResponse>('/api/v1/user/interview/results/filter/', {
             method: 'POST',
             body: { page: 1, page_size: 2, status: 'completed', is_scored: true }
-        })
+        }),
+        getUserPreferences()
     ]);
 
     const invites = invitesResponse?.items || [];

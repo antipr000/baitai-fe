@@ -5,7 +5,7 @@ import { clientConfig, serverConfig } from "@/lib/auth/config"
 import { ProfileHeader } from './components/profile-header'
 import { ProfileForm } from './components/profile-form'
 import { ResumeSection } from './components/resume-section'
-import { serverFetch, getCachedUserProfile, UserProfile } from '@/lib/api/server'
+import { serverFetch, getUserProfile, getPreferencesMetadata, UserProfile } from '@/lib/api/server'
 import { Skeleton } from '@/components/ui/skeleton'
 
 import { ResumeCheckResponse } from '@/lib/api/resume'
@@ -18,14 +18,18 @@ async function ProfileContent() {
             cookieSignatureKeys: serverConfig.cookieSignatureKeys,
             serviceAccount: serverConfig.serviceAccount,
         }),
-        getCachedUserProfile(),
+        getUserProfile(),
         serverFetch<ResumeCheckResponse>('/api/v1/resume/check/').catch(() => null),
-        serverFetch<any>('/api/v1/user/preferences/metadata')
+        getPreferencesMetadata()
     ])
 
     return (
         <div className="mt-8 space-y-6">
-            <ProfileForm initialData={userProfile} authToken={tokens?.token} metadata={preferences} />
+            <ProfileForm 
+                initialData={userProfile} 
+                authToken={tokens?.token} 
+                metadata={preferences || { roles: [], experience_levels: [] }} 
+            />
             <ResumeSection initialResume={resumeCheck?.resume || null} authToken={tokens?.token} />
         </div>
     )

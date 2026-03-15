@@ -1,13 +1,9 @@
-import { serverFetch } from "@/lib/api/server";
+import { serverFetch, type PreferencesMetadata } from "@/lib/api/server";
 import { getTokens } from "next-firebase-auth-edge";
 import { cookies } from "next/headers";
 import { clientConfig, serverConfig } from "@/lib/auth/config";
 import PreferencesClient from "./components/preferences-client";
 
-interface PreferencesMetadata {
-    roles: string[];
-    experience_levels: { value: string; label: string }[];
-}
 
 export default async function PreferencesPage() {
     const [tokens, metadata] = await Promise.all([

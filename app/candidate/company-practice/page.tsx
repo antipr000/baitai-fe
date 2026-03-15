@@ -1,5 +1,5 @@
 import React, { Suspense } from 'react'
-import { serverFetch, getCachedPreferencesMetadata } from '@/lib/api/server'
+import { serverFetch, getPreferencesMetadata } from '@/lib/api/server'
 import { CompanyPracticeClient } from './components/company-practice-client'
 import { PracticeInterview } from './components/columns'
 import {
@@ -52,7 +52,7 @@ async function CompanyPracticeContent() {
                 company_tags: []
             }
         }),
-        getCachedPreferencesMetadata()
+        getPreferencesMetadata()
     ])
 
     const items = interviewsRes?.items || []
@@ -61,18 +61,18 @@ async function CompanyPracticeContent() {
 
     // Derive available companies from the interview tags
     const companyTags = items
-        .flatMap(item => item.tags)
-        .filter(tag => tag.tag_type === 'company')
-        .map(tag => tag.value.toLowerCase())
+        .flatMap((item: ApiPracticeInterview) => item.tags || [])
+        .filter((tag) => tag.tag_type === 'company')
+        .map((tag) => tag.value.toLowerCase())
 
     const companyTagSet = new Set(companyTags)
     const availableCompanies = COMPANIES.filter(c => companyTagSet.has(c.name.toLowerCase()))
 
-    const interviews: PracticeInterview[] = items.map((item) => {
-        const companyTag = item.tags.find(t => t.tag_type === 'company')?.value
-        const levelTags = item.tags
-            .filter(t => t.tag_type === 'level')
-            .map(t => t.value)
+    const interviews: PracticeInterview[] = items.map((item: ApiPracticeInterview) => {
+        const companyTag = (item.tags || []).find((t) => t.tag_type === 'company')?.value
+        const levelTags = (item.tags || [])
+            .filter((t) => t.tag_type === 'level')
+            .map((t) => t.value)
         const logo = COMPANIES.find(c => c.name.toLowerCase() === companyTag?.toLowerCase())?.logo
 
         return {
