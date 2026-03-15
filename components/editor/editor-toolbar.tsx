@@ -22,6 +22,8 @@ interface EditorToolbarProps {
 }
 
 const languages: { value: EditorLanguage; label: string }[] = [
+    { value: 'cpp', label: 'C / C++' },
+    { value: 'java', label: 'Java' },
     { value: 'javascript', label: 'JavaScript' },
     { value: 'typescript', label: 'TypeScript' },
     { value: 'python', label: 'Python' },

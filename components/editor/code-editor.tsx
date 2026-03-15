@@ -4,13 +4,15 @@ import React from 'react'
 import CodeMirror from '@uiw/react-codemirror'
 import { javascript } from '@codemirror/lang-javascript'
 import { python } from '@codemirror/lang-python'
+import { cpp } from '@codemirror/lang-cpp'
+import { java } from '@codemirror/lang-java'
 import { oneDark } from '@codemirror/theme-one-dark'
 import { autocompletion } from '@codemirror/autocomplete'
 import { completionKeymap } from "@codemirror/autocomplete";
 import { keymap } from "@codemirror/view";
 import { indentWithTab } from "@codemirror/commands";
 
-export type EditorLanguage = 'javascript' | 'typescript' | 'python'
+export type EditorLanguage = 'cpp' | 'java' | 'javascript' | 'typescript' | 'python'
 
 interface CodeEditorProps {
     value: string
@@ -24,6 +26,10 @@ interface CodeEditorProps {
 // Each language has its own explicit setup
 const getLanguageExtension = (language: EditorLanguage) => {
     switch (language) {
+        case 'cpp':
+            return cpp()
+        case 'java':
+            return java()
         case 'javascript':
             return javascript({ jsx: true, typescript: false })
         case 'typescript':
@@ -31,7 +37,7 @@ const getLanguageExtension = (language: EditorLanguage) => {
         case 'python':
             return python()
         default:
-            return javascript()
+            return cpp()
     }
 }
 

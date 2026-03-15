@@ -121,9 +121,9 @@ export const InterviewDetails = ({ companyId, authToken, roles, mode = 'create' 
                         </div>
                         <div className="mt-2 flex items-center gap-3 text-[10.5px] text-[rgba(10,13,26,0.7)]">
                             {[
-                                { label: '≤ 30m', cr: 3, active: duration <= 30 },
-                                { label: '31-45m', cr: 5, active: duration > 30 && duration <= 45 },
-                                { label: '45m+', cr: 7, active: duration > 45 }
+                                { label: '≤ 45min', cr: 3, active: duration <= 45 },
+                                { label: '45-90min', cr: 5, active: duration > 45 && duration <= 90 },
+                                { label: '90min+', cr: 7, active: duration > 90 }
                             ].map((rule, i) => (
                                 <React.Fragment key={i}>
                                     <div className={`flex items-center gap-1 ${rule.active ? 'text-[rgba(58,63,187,1)] font-bold' : ''}`}>

@@ -50,7 +50,7 @@ type CodeEditorStore = CodeEditorState & CodeEditorActions
 const initialState: CodeEditorState = {
     isOpen: false,
     content: '',
-    language: 'javascript',
+    language: 'cpp',
     artifactId: null,
     isBackendControlled: false,
     pendingArtifactOpen: null,
