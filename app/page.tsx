@@ -128,7 +128,7 @@ export default async function Home() {
                   <Link href="/candidate/dashboard">
                     <Button
                       size="lg"
-                      className="bg-[rgba(58,63,187,1)] border border-[rgba(58,63,187,0.9)] hover:bg-white hover:text-[rgba(58,63,187,1)] text-white font-medium px-8  md:py-6 py-4 rounded-md xl:text-xl md:text-base text-sm  flex items-center gap-2 w-full sm:w-auto justify-center"
+                      className="bg-[rgba(58,63,187,1)] border border-[rgba(58,63,187,0.9)] hover:bg-white hover:text-[rgba(58,63,187,1)] text-white font-medium px-8  md:py-6 py-4 rounded-md xl:text-lg md:text-base text-sm  flex items-center gap-2 w-full sm:w-auto justify-center"
                     >
                       Take Interviews
                       <svg
@@ -152,7 +152,7 @@ export default async function Home() {
                   <Link href="https://cal.com/soham-mukherjee-8yzald/30min" target="_blank" rel="noopener noreferrer">
                     <Button
                       size="lg"
-                      className="bg-white hover:bg-[rgba(58,63,187,1)] text-[rgba(58,63,187,1)] hover:text-white border border-[rgba(58,63,187,1)] font-medium px-8  md:py-6 py-4 rounded-md xl:text-xl md:text-base text-sm  flex items-center gap-2 transition-colors duration-200 w-full sm:w-auto justify-center"
+                      className="bg-white hover:bg-[rgba(58,63,187,1)] text-[rgba(58,63,187,1)] hover:text-white border border-[rgba(58,63,187,1)] font-medium px-8  md:py-6 py-4 rounded-md xl:text-lg md:text-base text-sm  flex items-center gap-2 transition-colors duration-200 w-full sm:w-auto justify-center"
                     >
                       Request Demo
                       <svg

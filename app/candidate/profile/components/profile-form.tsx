@@ -23,34 +23,6 @@ const profileSchema = z.object({
     ]).optional(),
 })
 
-const ROLES = [
-    { value: "software_engineer", label: "Software Engineer" },
-    { value: "frontend_engineer", label: "Frontend Engineer" },
-    { value: "backend_engineer", label: "Backend Engineer" },
-    { value: "fullstack_engineer", label: "Fullstack Engineer" },
-    { value: "data_scientist", label: "Data Scientist" },
-    { value: "data_engineer", label: "Data Engineer" },
-    { value: "ml_engineer", label: "ML Engineer" },
-    { value: "devops_engineer", label: "DevOps Engineer" },
-    { value: "mobile_engineer", label: "Mobile Engineer" },
-    { value: "qa_engineer", label: "QA Engineer" },
-    { value: "product_manager", label: "Product Manager" },
-    { value: "designer", label: "Designer" },
-    { value: "other", label: "Other" },
-] as const;
-
-const EXPERIENCE_LEVELS = [
-    { value: "entry_level", label: "Entry Level" },
-    { value: "mid_level", label: "Mid Level" },
-    { value: "senior", label: "Senior" },
-    { value: "staff", label: "Staff" },
-    { value: "principal", label: "Principal" },
-    { value: "manager", label: "Manager" },
-    { value: "director", label: "Director" },
-    { value: "vp", label: "VP" },
-    { value: "c_level", label: "C-Level" },
-] as const;
-
 interface UserProfile {
     first_name: string
     last_name: string
@@ -62,12 +34,18 @@ interface UserProfile {
     experience?: string | null
 }
 
+interface PreferencesMetadata {
+    roles: string[]
+    experience_levels: { value: string, label: string }[]
+}
+
 interface ProfileFormProps {
     initialData: UserProfile | null
     authToken?: string
+    metadata: PreferencesMetadata
 }
 
-export function ProfileForm({ initialData, authToken }: ProfileFormProps) {
+export function ProfileForm({ initialData, authToken, metadata }: ProfileFormProps) {
     const router = useRouter()
     const [firstName, setFirstName] = useState(initialData?.first_name || "")
     const [lastName, setLastName] = useState(initialData?.last_name || "")
@@ -201,9 +179,9 @@ export function ProfileForm({ initialData, authToken }: ProfileFormProps) {
                             <SelectValue placeholder="Select your role" />
                         </SelectTrigger>
                         <SelectContent>
-                            {ROLES.map((r) => (
-                                <SelectItem key={r.value} value={r.value}>
-                                    {r.label}
+                            {metadata.roles.map((r) => (
+                                <SelectItem key={r} value={r}>
+                                    {r}
                                 </SelectItem>
                             ))}
                         </SelectContent>
@@ -217,7 +195,7 @@ export function ProfileForm({ initialData, authToken }: ProfileFormProps) {
                             <SelectValue placeholder="Select your experience level" />
                         </SelectTrigger>
                         <SelectContent>
-                            {EXPERIENCE_LEVELS.map((exp) => (
+                            {metadata.experience_levels.map((exp) => (
                                 <SelectItem key={exp.value} value={exp.value}>
                                     {exp.label}
                                 </SelectItem>

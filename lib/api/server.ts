@@ -19,6 +19,21 @@ const getCachedTokens = cache(async () => {
     })
 })
 
+export interface UserProfile {
+    first_name: string
+    last_name: string
+    email: string
+    profile_picture_url: string | null
+    preferences_set: boolean
+    phone_number?: string | null
+    location?: string | null
+    website?: string | null
+}
+
+export const getCachedUserProfile = cache(async () => {
+    return serverFetch<UserProfile>('/api/v1/user/profile/')
+})
+
 export async function serverFetch<T>(url: string, options?: FetchOptions): Promise<T | null> {
     const tokens = await getCachedTokens()
 

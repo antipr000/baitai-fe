@@ -22,7 +22,6 @@ import { Separator } from "@/components/ui/separator";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import api from "@/lib/api/client";
-import { storePreferences } from "@/lib/auth/authContext";
 import { toast } from "sonner";
 
 export default function LoginPageV2() {
@@ -87,9 +86,7 @@ export default function LoginPageV2() {
                 },
             });
             toast.success("Successfully logged in! Redirecting...");
-            const preferencesSet = tokenResponse.data?.preferences_set ?? false;
-            storePreferences(preferencesSet);
-            window.location.href = preferencesSet === false ? "/preferences" : redirectTo;
+            window.location.href = redirectTo;
         } catch (err: any) {
             console.log(err);
             if (axios.isAxiosError(err)) {
@@ -121,9 +118,7 @@ export default function LoginPageV2() {
                         headers: { Authorization: `Bearer ${idToken}` },
                     }),
                 ]);
-                const preferencesSet = tokenResponse.data?.preferences_set ?? false;
-                storePreferences(preferencesSet);
-                window.location.href = preferencesSet === false ? "/preferences" : redirectTo;
+                window.location.href = redirectTo;
             } else {
                 toast.error("Please verify your email before signing in.");
             }

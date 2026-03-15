@@ -5,36 +5,27 @@ import { clientConfig, serverConfig } from "@/lib/auth/config"
 import { ProfileHeader } from './components/profile-header'
 import { ProfileForm } from './components/profile-form'
 import { ResumeSection } from './components/resume-section'
-import { serverFetch } from '@/lib/api/server'
+import { serverFetch, getCachedUserProfile, UserProfile } from '@/lib/api/server'
 import { Skeleton } from '@/components/ui/skeleton'
 
 import { ResumeCheckResponse } from '@/lib/api/resume'
 
-interface UserProfile {
-    first_name: string
-    last_name: string
-    email: string
-    profile_picture_url: string | null
-    phone_number?: string | null
-    location?: string | null
-    website?: string | null
-}
-
 async function ProfileContent() {
-    const [tokens, userProfile, resumeCheck] = await Promise.all([
+    const [tokens, userProfile, resumeCheck, preferences] = await Promise.all([
         getTokens(await cookies(), {
             apiKey: clientConfig.apiKey,
             cookieName: serverConfig.cookieName,
             cookieSignatureKeys: serverConfig.cookieSignatureKeys,
             serviceAccount: serverConfig.serviceAccount,
         }),
-        serverFetch<UserProfile>('/api/v1/user/profile/'),
-        serverFetch<ResumeCheckResponse>('/api/v1/resume/check/').catch(() => null)
+        getCachedUserProfile(),
+        serverFetch<ResumeCheckResponse>('/api/v1/resume/check/').catch(() => null),
+        serverFetch<any>('/api/v1/user/preferences/metadata')
     ])
 
     return (
         <div className="mt-8 space-y-6">
-            <ProfileForm initialData={userProfile} authToken={tokens?.token} />
+            <ProfileForm initialData={userProfile} authToken={tokens?.token} metadata={preferences} />
             <ResumeSection initialResume={resumeCheck?.resume || null} authToken={tokens?.token} />
         </div>
     )
