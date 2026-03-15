@@ -2,7 +2,7 @@ import React from 'react'
 import { cookies } from 'next/headers'
 import { getTokens } from 'next-firebase-auth-edge'
 import { clientConfig, serverConfig } from '@/lib/auth/config'
-import { serverFetch } from '@/lib/api/server'
+import { serverFetch, getCachedPreferencesMetadata } from '@/lib/api/server'
 import { CreateInterviewForm } from '@/components/company/create/create-interview-form'
 
 interface Company {
@@ -20,9 +20,10 @@ export default async function CreateInterviewPage() {
     })
 
     // Fetch data in parallel
-    const [company, roles] = await Promise.all([
+    const [company, roles, metadata] = await Promise.all([
         serverFetch<Company>('/api/v1/company/hiring-managers/company'),
-        serverFetch<string[]>('/api/v1/company/roles/')
+        serverFetch<string[]>('/api/v1/company/roles/'),
+        getCachedPreferencesMetadata()
     ])
 
     const companyId = company?.id
@@ -31,6 +32,7 @@ export default async function CreateInterviewPage() {
             companyId={companyId}
             authToken={tokens?.token}
             roles={roles || []}
+            metadata={metadata}
         />
     )
 }

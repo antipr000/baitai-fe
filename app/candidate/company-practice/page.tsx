@@ -1,5 +1,5 @@
 import React, { Suspense } from 'react'
-import { serverFetch } from '@/lib/api/server'
+import { serverFetch, getCachedPreferencesMetadata } from '@/lib/api/server'
 import { CompanyPracticeClient } from './components/company-practice-client'
 import { PracticeInterview } from './components/columns'
 import {
@@ -42,7 +42,7 @@ function capitalize(str: string): string {
 // ─── Async server sub-component ───────────────────────────────────────────────
 
 async function CompanyPracticeContent() {
-    const [interviewsRes, rolesRes] = await Promise.all([
+    const [interviewsRes, metadata] = await Promise.all([
         serverFetch<ApiResponse>('/api/v1/user/interview/practice/filter/', {
             method: 'POST',
             body: {
@@ -52,11 +52,12 @@ async function CompanyPracticeContent() {
                 company_tags: []
             }
         }),
-        serverFetch<string[]>('/api/v1/user/roles/')
+        getCachedPreferencesMetadata()
     ])
 
     const items = interviewsRes?.items || []
-    const activeRoles = rolesRes || []
+    const activeRoles = metadata?.roles || []
+    const experienceLevels = metadata?.experience_levels || []
 
     // Derive available companies from the interview tags
     const companyTags = items
@@ -69,12 +70,16 @@ async function CompanyPracticeContent() {
 
     const interviews: PracticeInterview[] = items.map((item) => {
         const companyTag = item.tags.find(t => t.tag_type === 'company')?.value
+        const levelTags = item.tags
+            .filter(t => t.tag_type === 'level')
+            .map(t => t.value)
         const logo = COMPANIES.find(c => c.name.toLowerCase() === companyTag?.toLowerCase())?.logo
 
         return {
             id: item.id,
             title: item.title,
             role: item.role,
+            experienceLevels: levelTags,
             difficulty: capitalize(item.difficulty_level) as PracticeInterview['difficulty'],
             duration: `${item.duration} min`,
             companyLogo: logo,
@@ -87,6 +92,7 @@ async function CompanyPracticeContent() {
             companies={availableCompanies}
             interviews={interviews}
             roles={activeRoles}
+            experienceLevelsMetadata={experienceLevels}
         />
     )
 }

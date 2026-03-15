@@ -129,6 +129,8 @@ export interface InterviewState {
     screenShare: boolean
     llmConfig: Record<string, unknown>
     sections: Section[]
+    experienceLevels: string[]
+    otherTags: { tag_type: string; value: string }[]
 
     // Actions
     setTitle: (title: string) => void
@@ -140,6 +142,7 @@ export interface InterviewState {
     setCredits: (credits: number) => void
     setScreenShare: (screenShare: boolean) => void
     setCompanyId: (companyId: string) => void
+    setExperienceLevels: (levels: string[]) => void
     initializeFromTemplate: (data: ApiTemplateData) => void
 
     // Section Actions
@@ -227,7 +230,9 @@ const initialState = {
     sections: [
         createDefaultIntroSection(),
         createDefaultConclusionSection()
-    ]
+    ],
+    experienceLevels: [],
+    otherTags: []
 }
 
 // --- Store ---
@@ -244,6 +249,7 @@ export const useInterviewStore = create<InterviewState>((set, get) => ({
     setCredits: (credits) => set({ credits }),
     setScreenShare: (screenShare) => set({ screenShare }),
     setCompanyId: (companyId) => set({ companyId }),
+    setExperienceLevels: (experienceLevels) => set({ experienceLevels }),
 
     initializeFromTemplate: (data) => set({
         title: data.title || '',
@@ -256,6 +262,11 @@ export const useInterviewStore = create<InterviewState>((set, get) => ({
         screenShare: data.screen_share ?? false,
         companyId: data.company_id || '',
         llmConfig: data.llm_config || {},
+        experienceLevels: (data.tags || [])
+            .filter(t => t.tag_type === 'level')
+            .map(t => t.value),
+        otherTags: (data.tags || [])
+            .filter(t => t.tag_type !== 'level'),
         sections: (data.sections || []).map((s: ApiSection): Section => ({
             id: s.id,
             name: s.name || '',
@@ -461,6 +472,13 @@ export function buildInterviewPayload(state: InterviewState) {
         role: state.role,
         difficulty_level: state.difficultyLevel,
         screen_share: state.screenShare,
+        tags: [
+            ...state.experienceLevels.map(level => ({
+                tag_type: 'level',
+                value: level
+            })),
+            ...state.otherTags
+        ],
         sections: state.sections.map(section => ({
             name: section.name,
             order: section.order,
@@ -507,6 +525,13 @@ export function buildEditPayload(state: InterviewState) {
         difficulty_level: state.difficultyLevel,
         screen_share: state.screenShare,
         credits: state.credits,
+        tags: [
+            ...state.experienceLevels.map(level => ({
+                tag_type: 'level',
+                value: level
+            })),
+            ...state.otherTags
+        ],
         sections: state.sections.map(section => ({
             ...(section.id ? { id: section.id } : {}),
             name: section.name,

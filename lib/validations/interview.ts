@@ -59,8 +59,13 @@ export const sectionSchema = z.object({
     evaluation_criterias: z.array(evaluationCriteriaSchema).default([])
 })
 
-// --- Main Interview Schema ---
-// InterviewTemplateCreate: title, company_id, duration, role are REQUIRED
+// --- Tag Schema ---
+export const tagSchema = z.object({
+    tag_type: z.string(),
+    value: z.string()
+})
+
+// --- Main Interview Schemas ---
 
 export const interviewCreateSchema = z.object({
     // REQUIRED fields
@@ -75,6 +80,7 @@ export const interviewCreateSchema = z.object({
     is_public: z.boolean().default(false),
     llm_config: z.record(z.string(), z.unknown()).default({}),
     screen_share: z.boolean().default(false),
+    tags: z.array(tagSchema).default([]),
     sections: z.array(sectionSchema).default([])
 })
 
@@ -164,6 +170,7 @@ export const interviewEditSchema = z.object({
     screen_share: z.boolean().default(false),
     credits: z.number().int().min(0).default(0),
     difficulty_level: difficultyLevelSchema,
+    tags: z.array(tagSchema).default([]),
     sections: z.array(sectionEditSchema).default([])
 })
 

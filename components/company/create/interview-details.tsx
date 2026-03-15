@@ -14,16 +14,20 @@ import {
 } from '@/components/ui/select'
 import { useInterviewStore } from '@/stores/interview-store'
 import api from '@/lib/api/client'
+import { MultiSelect } from '@/components/ui/multi-select'
 
-export const InterviewDetails = ({ companyId, authToken, roles, mode = 'create' }: { 
+import { type MetadataOption } from '@/lib/api/server'
+
+export const InterviewDetails = ({ companyId, authToken, roles, experienceLevelsMetadata, mode = 'create' }: { 
     companyId?: string; 
     authToken?: string; 
     roles: string[];
+    experienceLevelsMetadata?: MetadataOption[];
     mode?: 'create' | 'edit'
 }) => {
     const {
-        title, description, role, duration, difficultyLevel, isPublic, credits, screenShare,
-        setTitle, setDescription, setRole, setDuration, setDifficultyLevel, setIsPublic, setCredits, setScreenShare
+        title, description, role, duration, difficultyLevel, isPublic, credits, screenShare, experienceLevels,
+        setTitle, setDescription, setRole, setDuration, setDifficultyLevel, setIsPublic, setCredits, setScreenShare, setExperienceLevels
     } = useInterviewStore()
 
     const isAllowedCustomization = companyId === process.env.NEXT_PUBLIC_BAIT_COMPANY;
@@ -99,6 +103,20 @@ export const InterviewDetails = ({ companyId, authToken, roles, mode = 'create' 
                                 ))}
                             </SelectContent>
                         </Select>
+                    </div>
+
+                    {/* Experience Level */}
+                    <div className="space-y-2">
+                        <label htmlFor="experience" className="text-sm font-medium text-[rgba(10,13,26,0.82)] block">
+                            Experience Level
+                        </label>
+                        <MultiSelect
+                            options={(experienceLevelsMetadata || []).map(opt => (typeof opt === 'string' ? { label: opt, value: opt } : opt))}
+                            defaultValue={experienceLevels}
+                            onValueChange={setExperienceLevels}
+                            placeholder="Select experience levels"
+                            className="bg-white dark:bg-background/50 border-gray-200"
+                        />
                     </div>
                 </div>
 

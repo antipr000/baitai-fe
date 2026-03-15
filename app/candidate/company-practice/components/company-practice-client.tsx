@@ -7,6 +7,8 @@ import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { DataTable } from './data-table'
 import { columns, PracticeInterview } from './columns'
 
+import { type MetadataOption } from '@/lib/api/server'
+
 // ─── Interfaces ───────────────────────────────────────────────────────────────
 
 interface Company {
@@ -18,15 +20,23 @@ interface CompanyPracticeClientProps {
     companies: Company[]
     interviews: PracticeInterview[]
     roles: string[]
+    experienceLevelsMetadata: MetadataOption[]
 }
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
-export function CompanyPracticeClient({ companies, interviews, roles }: CompanyPracticeClientProps) {
+export function CompanyPracticeClient({ companies, interviews, roles, experienceLevelsMetadata }: CompanyPracticeClientProps) {
     const [selectedCompany, setSelectedCompany] = useState<string>("")
 
     return (
-        <DataTable columns={columns} data={interviews} hideHeaders companyFilter={selectedCompany} roles={roles}>
+        <DataTable 
+            columns={columns} 
+            data={interviews} 
+            hideHeaders 
+            companyFilter={selectedCompany} 
+            roles={roles}
+            experienceLevels={experienceLevelsMetadata}
+        >
             <ScrollArea className="w-full whitespace-nowrap">
                 <ToggleGroup
                     type="single"

@@ -34,6 +34,20 @@ export const getCachedUserProfile = cache(async () => {
     return serverFetch<UserProfile>('/api/v1/user/profile/')
 })
 
+export interface MetadataOption {
+    value: string;
+    label: string;
+}
+
+export interface PreferencesMetadata {
+    roles: string[];
+    experience_levels: MetadataOption[];
+}
+
+export const getCachedPreferencesMetadata = cache(async () => {
+    return serverFetch<PreferencesMetadata>('/api/v1/user/preferences/metadata')
+})
+
 export async function serverFetch<T>(url: string, options?: FetchOptions): Promise<T | null> {
     const tokens = await getCachedTokens()
 

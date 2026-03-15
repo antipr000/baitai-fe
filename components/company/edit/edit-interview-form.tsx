@@ -13,6 +13,7 @@ import { InterviewDetails } from '@/components/company/create/interview-details'
 import { IntroductionSection } from '@/components/company/create/introduction-section'
 import { SectionList } from '@/components/company/create/section-list'
 import { ConclusionSection } from '@/components/company/create/conclusion-section'
+import { type PreferencesMetadata } from '@/lib/api/server'
 
 // Full interview template data from API
 export interface InterviewTemplateData extends ApiTemplateData {
@@ -26,9 +27,10 @@ interface EditInterviewFormProps {
     templateData: InterviewTemplateData
     authToken?: string
     roles: string[]
+    metadata: PreferencesMetadata | null
 }
 
-export function EditInterviewForm({ templateId, templateData, authToken, roles }: EditInterviewFormProps) {
+export function EditInterviewForm({ templateId, templateData, authToken, roles, metadata }: EditInterviewFormProps) {
     const router = useRouter()
     const [isSubmitting, setIsSubmitting] = useState(false)
     const store = useInterviewStore()
@@ -133,7 +135,13 @@ export function EditInterviewForm({ templateId, templateData, authToken, roles }
 
                     {/* Interview Details - Same components as Create */}
                     <div className='max-w-5xl mx-auto'>
-                        <InterviewDetails companyId={templateData.company_id} authToken={authToken} roles={roles} mode="edit" />
+                        <InterviewDetails 
+                            companyId={templateData.company_id} 
+                            authToken={authToken} 
+                            roles={roles} 
+                            experienceLevelsMetadata={metadata?.experience_levels}
+                            mode="edit" 
+                        />
                     </div>
 
                     {/* Interview Sections */}

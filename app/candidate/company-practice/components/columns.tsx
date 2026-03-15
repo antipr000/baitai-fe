@@ -11,6 +11,7 @@ export type PracticeInterview = {
     title: string
     role: string
     difficulty: "Easy" | "Medium" | "Hard"
+    experienceLevels?: string[]
     duration: string
     companyLogo?: string
     companyName?: string
@@ -26,6 +27,7 @@ export const columns: ColumnDef<PracticeInterview>[] = [
             const name = row.original.title
             const role = row.original.role
             const difficulty = row.original.difficulty
+            const experienceLevels = row.original.experienceLevels || []
             const duration = row.original.duration
             const getDifficultyStyles = (diff: string) => {
                 switch (diff) {
@@ -52,6 +54,11 @@ export const columns: ColumnDef<PracticeInterview>[] = [
                             <span className={`px-3 py-0.5 rounded-full text-xs font-semibold border ${getDifficultyStyles(difficulty)}`}>
                                 {difficulty}
                             </span>
+                            {experienceLevels.map(level => (
+                                <span key={level} className="px-3 py-0.5 rounded-full text-xs font-semibold border border-[rgba(58,63,187,0.3)] text-[rgba(58,63,187,1)] capitalize">
+                                    {level}
+                                </span>
+                            ))}
                             <span className="flex items-center gap-1 text-[rgba(10,13,26,0.7)] text-xs">
                                 <Clock className="w-3.5 h-3.5" />
                                 {duration}
@@ -67,6 +74,14 @@ export const columns: ColumnDef<PracticeInterview>[] = [
         filterFn: (row, _columnId, filterValue) => {
             if (!filterValue) return true
             return row.original.difficulty?.toLowerCase() === (filterValue as string).toLowerCase()
+        },
+    },
+    {
+        accessorKey: "experienceLevel",
+        filterFn: (row, _columnId, filterValue) => {
+            if (!filterValue) return true
+            const searchLevel = (filterValue as string).toLowerCase()
+            return row.original.experienceLevels?.some(level => level.toLowerCase() === searchLevel) ?? false
         },
     },
     {

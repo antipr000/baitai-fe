@@ -1,22 +1,23 @@
 "use client"
 
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Header } from './header'
 import { InterviewDetails } from './interview-details'
 import { IntroductionSection } from './introduction-section'
 import { SectionList } from './section-list'
 import { ConclusionSection } from './conclusion-section'
 import { CreateInterviewDialog } from './create-interview-dialog'
-import api from '@/lib/api/client'
+import { type PreferencesMetadata } from '@/lib/api/server'
 
 
 interface CreateInterviewFormProps {
     companyId?: string
     authToken?: string
     roles: string[]
+    metadata: PreferencesMetadata | null
 }
 
-export function CreateInterviewForm({ companyId, authToken, roles }: CreateInterviewFormProps) {
+export function CreateInterviewForm({ companyId, authToken, roles, metadata }: CreateInterviewFormProps) {
     const [dialogOpen, setDialogOpen] = useState(true)
 
     return (
@@ -26,11 +27,18 @@ export function CreateInterviewForm({ companyId, authToken, roles }: CreateInter
                 onClose={() => setDialogOpen(false)}
                 authToken={authToken}
                 roles={roles}
+                experienceLevelsMetadata={metadata?.experience_levels}
             />
             <Header authToken={authToken} companyId={companyId} />
 
             <div className='max-w-5xl mx-auto'>
-                <InterviewDetails companyId={companyId} authToken={authToken} roles={roles} mode="create" />
+                <InterviewDetails 
+                    companyId={companyId} 
+                    authToken={authToken} 
+                    roles={roles} 
+                    experienceLevelsMetadata={metadata?.experience_levels}
+                    mode="create" 
+                />
             </div>
 
             {/* Interview Sections */}

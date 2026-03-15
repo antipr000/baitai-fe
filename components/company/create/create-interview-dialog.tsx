@@ -16,7 +16,9 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select'
+import { MultiSelect } from '@/components/ui/multi-select'
 import api from '@/lib/api/client'
+import { type PreferencesMetadata, type MetadataOption } from '@/lib/api/server'
 
 type Step = 'choose' | 'generate'
 type AssessmentFormat = 'none' | 'code' | ''
@@ -26,9 +28,10 @@ interface CreateInterviewDialogProps {
     onClose: () => void
     authToken?: string
     roles: string[]
+    experienceLevelsMetadata?: MetadataOption[]
 }
 
-export function CreateInterviewDialog({ open, onClose, authToken, roles }: CreateInterviewDialogProps) {
+export function CreateInterviewDialog({ open, onClose, authToken, roles, experienceLevelsMetadata }: CreateInterviewDialogProps) {
     const router = useRouter()
     const [step, setStep] = useState<Step>('choose')
     const [format, setFormat] = useState<AssessmentFormat>('')
@@ -36,6 +39,7 @@ export function CreateInterviewDialog({ open, onClose, authToken, roles }: Creat
     const [difficulty, setDifficulty] = useState<string>('medium')
     const [prompt, setPrompt] = useState('')
     const [role, setRole] = useState('')
+    const [experienceLevels, setExperienceLevels] = useState<string[]>([])
     const [isGenerating, setIsGenerating] = useState(false)
 
     // Reset to first step whenever dialog reopens
@@ -47,6 +51,7 @@ export function CreateInterviewDialog({ open, onClose, authToken, roles }: Creat
             setDifficulty('medium')
             setPrompt('')
             setRole('')
+            setExperienceLevels([])
         }
     }, [open])
 
@@ -71,12 +76,23 @@ export function CreateInterviewDialog({ open, onClose, authToken, roles }: Creat
             toast.error('Please provide an AI prompt')
             return
         }
-
         setIsGenerating(true)
         try {
+            const tags = experienceLevels.map(level => ({
+                tag_type: 'level',
+                value: level
+            }))
+
             const response = await api.post(
                 '/api/v1/company/interviews/generate/',
-                { prompt, artifact_type: format, duration, role, difficulty_level: difficulty },
+                { 
+                    prompt, 
+                    artifact_type: format, 
+                    duration, 
+                    role, 
+                    difficulty_level: difficulty,
+                    tags: tags
+                },
                 { headers: authToken ? { Authorization: `Bearer ${authToken}` } : undefined }
             )
             toast.success('Interview generated successfully!')
@@ -251,7 +267,7 @@ export function CreateInterviewDialog({ open, onClose, authToken, roles }: Creat
                             {/* Difficulty */}
                             <div className="space-y-2">
                                 <label className="text-sm font-semibold text-[rgba(10,13,26,0.82)] block">
-                                    Difficulty 69
+                                    Difficulty
                                 </label>
                                 <Select
                                     value={difficulty}
@@ -266,6 +282,20 @@ export function CreateInterviewDialog({ open, onClose, authToken, roles }: Creat
                                         <SelectItem value="hard">Hard</SelectItem>
                                     </SelectContent>
                                 </Select>
+                            </div>
+
+                            {/* Experience Level */}
+                            <div className="space-y-2 col-span-2">
+                                <label className="text-sm font-semibold text-[rgba(10,13,26,0.82)] block">
+                                    Experience Level
+                                </label>
+                                <MultiSelect
+                                    options={(experienceLevelsMetadata || []).map(opt => (typeof opt === 'string' ? { label: opt, value: opt } : opt))}
+                                    defaultValue={experienceLevels}
+                                    onValueChange={setExperienceLevels}
+                                    placeholder="-Select Experience Levels-"
+                                    className="w-full border-[rgba(55,58,70,0.05)] bg-[rgba(248,248,255,1)]"
+                                />
                             </div>
                         </div>
 

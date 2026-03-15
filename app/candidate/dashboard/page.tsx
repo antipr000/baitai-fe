@@ -224,10 +224,19 @@ function MainGridSkeleton() {
 }
 
 async function MainGrid() {
-    const [invitesResponse, practiceResponse, resultsResponse] = await Promise.all([
+    const [invitesResponse, companyPracticeResponse, generalPracticeResponse, resultsResponse] = await Promise.all([
         serverFetch<InvitesResponse>('/api/v1/user/interview/invites/', {
             method: 'POST',
             body: { page: 1, page_size: 2 }
+        }),
+        serverFetch<PracticeResponse>('/api/v1/user/interview/practice/filter/', {
+            method: 'POST',
+            body: { 
+                page: 1, 
+                page_size: 2, 
+                role: '',
+                has_any_company_tag: true
+            }
         }),
         serverFetch<PracticeResponse>('/api/v1/user/interview/practice/filter/', {
             method: 'POST',
@@ -240,14 +249,15 @@ async function MainGrid() {
     ]);
 
     const invites = invitesResponse?.items || [];
-    const practice = practiceResponse?.items || [];
+    const companyPractice = companyPracticeResponse?.items || [];
+    const generalPractice = generalPracticeResponse?.items || [];
     const results = resultsResponse?.items || [];
 
     return (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <InterviewInvitesCard items={invites} />
-            <CompanyPracticeCard items={practice} />
-            <PracticeInterviewsCard items={practice} />
+            <CompanyPracticeCard items={companyPractice} />
+            <PracticeInterviewsCard items={generalPractice} />
             <LatestResultsCard items={results} />
         </div>
     )
