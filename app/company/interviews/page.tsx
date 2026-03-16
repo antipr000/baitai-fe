@@ -62,7 +62,7 @@ export default async function InterviewsPage() {
             <div className="flex-1 w-full max-w-7xl mx-auto p-6 space-y-10">
                 <div className="space-y-10">
                     {/* Stats Cards */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-23">
                         {/* Total Interviews */}
                         <Card className="rounded-xl border-[rgba(58,63,187,1)] shadow-none h-full bg-white">
                             <CardContent className="p-6 flex flex-row items-center gap-4 py-3">

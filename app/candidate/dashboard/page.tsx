@@ -85,10 +85,10 @@ async function StatsCards() {
     const stats: InterviewStats = response ?? { average_score: 0, completed: 0, pending: 0, completed_this_week: 0, pending_this_week: 0, avg_score_delta: null, streak: 0 }
 
     return (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 mb-8">
             {/* Pending */}
-            <Card className="border-[rgba(107,124,255,1)] shadow-sm hover:shadow-md transition-shadow relative overflow-hidden py-2">
-                <CardContent className="p-5 flex flex-col gap-3 justify-between">
+            <Card className="border-[rgba(107,124,255,1)] rounded-lg shadow-sm hover:shadow-md transition-shadow relative overflow-hidden py-2">
+                <CardContent className="px-5 py-2.5 flex flex-col gap-4 justify-between">
                     <div className="flex items-start justify-between">
                         <div className="w-8 h-8 rounded-md bg-[rgba(240,243,255,1)] flex items-center justify-center">
                             <Image src="/candidate/dashboard/time.svg" alt="Pending" width={20} height={20} />
@@ -101,14 +101,14 @@ async function StatsCards() {
                     </div>
                     <div>
                         <h3 className="text-2xl font-semibold text-[rgba(10,13,26,1)] leading-tight mb-0.5">{stats.pending}</h3>
-                        <p className="text-[rgba(10,13,26,1)] opacity-70 text-sm font-medium">Pending</p>
+                        <p className="text-[rgba(10,13,26,0.9)]  text-sm font-medium">Pending</p>
                     </div>
                 </CardContent>
             </Card>
 
             {/* Completed */}
-            <Card className="border-[rgba(107,124,255,1)] shadow-sm hover:shadow-md transition-shadow relative overflow-hidden py-2">
-                <CardContent className="p-5 flex flex-col gap-3 justify-between">
+            <Card className="border-[rgba(107,124,255,1)] rounded-lg shadow-sm hover:shadow-md transition-shadow relative overflow-hidden py-2">
+                <CardContent className="px-5 py-2.5 flex flex-col gap-4 justify-between">
                     <div className="flex items-start justify-between">
                         <div className="w-8 h-8 rounded-md bg-[rgba(240,243,255,1)] flex items-center justify-center">
                             <Image src="/candidate/dashboard/tick.svg" alt="Completed" width={20} height={20} />
@@ -117,30 +117,30 @@ async function StatsCards() {
                     </div>
                     <div>
                         <h3 className="text-2xl font-semibold text-[rgba(10,13,26,1)] leading-tight mb-0.5">{stats.completed}</h3>
-                        <p className="text-[rgba(10,13,26,1)] opacity-70 text-sm font-medium">Completed</p>
+                        <p className="text-[rgba(10,13,26,0.9)]  text-sm font-medium">Completed</p>
                     </div>
                 </CardContent>
             </Card>
 
             {/* Average Score */}
-            <Card className="border-[rgba(107,124,255,1)] shadow-sm hover:shadow-md transition-shadow relative overflow-hidden py-2">
-                <CardContent className="p-5 flex flex-col gap-3 justify-between">
+            <Card className="border-[rgba(107,124,255,1)] rounded-lg shadow-sm hover:shadow-md transition-shadow relative overflow-hidden py-2">
+                <CardContent className="px-5 py-2.5 flex flex-col gap-4 justify-between">
                     <div className="flex items-start justify-between">
                         <div className="w-8 h-8 rounded-md bg-[rgba(240,243,255,1)] flex items-center justify-center">
-                            <Image src="/candidate/dashboard/doc.svg" alt="Score" width={20} height={20} />
+                            <Image src="/candidate/dashboard/score.svg" alt="Score" width={20} height={20} />
                         </div>
                         <ScoreDeltaBadge delta={stats.avg_score_delta} />
                     </div>
                     <div>
                         <h3 className="text-2xl font-semibold text-[rgba(10,13,26,1)] leading-tight mb-0.5">{stats.average_score.toFixed(0)}%</h3>
-                        <p className="text-[rgba(10,13,26,1)] opacity-70 text-sm font-medium">Avg Score</p>
+                        <p className="text-[rgba(10,13,26,0.9)]  text-sm font-medium">Avg Score</p>
                     </div>
                 </CardContent>
             </Card>
 
             {/* Streak */}
-            <Card className="border-[rgba(107,124,255,1)] shadow-sm hover:shadow-md transition-shadow relative overflow-hidden py-2">
-                <CardContent className="p-5 flex flex-col gap-3 justify-between">
+            <Card className="border-[rgba(107,124,255,1)] rounded-lg shadow-sm hover:shadow-md transition-shadow relative overflow-hidden py-2">
+                <CardContent className="px-5 py-2.5 flex flex-col gap-4 justify-between">
                     <div className="flex items-start justify-between">
                         <div className="w-8 h-8 rounded-md bg-[rgba(240,243,255,1)] flex items-center justify-center">
                             <Image src="/candidate/dashboard/fire.svg" alt="Streak" width={20} height={20} />
@@ -153,7 +153,7 @@ async function StatsCards() {
                     </div>
                     <div>
                         <h3 className="text-2xl font-semibold text-[rgba(10,13,26,1)] leading-tight mb-0.5">{stats.streak} {stats.streak === 1 ? 'Day' : 'Days'}</h3>
-                        <p className="text-[rgba(10,13,26,1)] opacity-70 text-sm font-medium">Streak</p>
+                        <p className="text-[rgba(10,13,26,0.9)] text-sm font-medium">Streak</p>
                     </div>
                 </CardContent>
             </Card>

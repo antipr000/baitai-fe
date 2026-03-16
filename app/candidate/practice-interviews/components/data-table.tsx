@@ -67,14 +67,14 @@ export function DataTable<TData, TValue>({
             <div className="flex gap-4 items-center">
                 <div className="relative flex-1">
                     <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
-                        <Image src="/candidate/practice-inteviews/search.svg" alt="Search" width={20} height={20} />
+                        <Image src="/candidate/practice-inteviews/search.svg" alt="Search" width={18} height={18} />
                     </div>
                     <input
                         type="text"
                         placeholder="Search..."
                         value={globalFilter ?? ""}
                         onChange={(event) => setGlobalFilter(event.target.value)}
-                        className="w-full pl-12 pr-4 py-3 bg-white border border-[rgba(58,63,187,0.3)] rounded-sm outline-none placeholder:text-[rgba(10,13,26,0.5)] text-sm font-medium focus:border-[rgba(58,63,187,1)] transition-colors"
+                        className="w-full pl-12 pr-4 py-3 bg-white border border-[rgba(125,141,253,0.1)] rounded-sm outline-none placeholder:text-[rgba(10,13,26,0.5)] text-sm font-medium focus:border-[rgba(58,63,187,1)] transition-colors"
                     />
                 </div>
                 <DropdownMenu modal={false}>
