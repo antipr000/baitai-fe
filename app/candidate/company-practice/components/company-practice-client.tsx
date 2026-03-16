@@ -1,6 +1,7 @@
 "use client"
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
+import { useSearchParams } from 'next/navigation'
 import Image from 'next/image'
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
@@ -26,7 +27,13 @@ interface CompanyPracticeClientProps {
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export function CompanyPracticeClient({ companies, interviews, roles, experienceLevelsMetadata }: CompanyPracticeClientProps) {
-    const [selectedCompany, setSelectedCompany] = useState<string>("")
+    const searchParams = useSearchParams()
+    const initialCompany = searchParams.get('company') || ""  // filter handles both capitalized and non capitalized cases
+    const [selectedCompany, setSelectedCompany] = useState<string>(initialCompany.toLowerCase())
+
+    useEffect(() => {
+        setSelectedCompany(initialCompany.toLowerCase())
+    }, [initialCompany])
 
     return (
         <DataTable 
@@ -54,7 +61,7 @@ export function CompanyPracticeClient({ companies, interviews, roles, experience
                     {companies.map((company) => (
                         <ToggleGroupItem
                             key={company.name}
-                            value={company.name}
+                            value={company.name.toLowerCase()}
                             className="h-10 px-6 flex items-center justify-center gap-3 border border-[rgba(58,63,187,0.1)] rounded-full bg-white hover:bg-[rgba(245,247,255,1)] data-[state=on]:border-[rgba(58,63,187,1)] data-[state=on]:bg-[rgba(245,247,255,1)] transition-all shrink-0"
                         >
                             <div className="relative w-5 h-5">

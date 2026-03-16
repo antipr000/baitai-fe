@@ -7,7 +7,7 @@ import { ArrowRight, BookOpen } from 'lucide-react'
 export interface PracticeInterview {
   id: string
   title: string
-  difficulty: 'Easy' | 'Medium' | 'Difficult'
+  difficulty: 'easy' | 'medium' | 'hard'
   duration: string
 }
 

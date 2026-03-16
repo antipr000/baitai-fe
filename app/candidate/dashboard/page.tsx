@@ -229,14 +229,9 @@ async function MainGrid() {
             method: 'POST',
             body: { page: 1, page_size: 2 }
         }),
-        serverFetch<PracticeResponse>('/api/v1/user/interview/practice/filter/', {
+        serverFetch<PracticeResponse>('/api/v1/user/interview/practice/companies/', {
             method: 'POST',
-            body: { 
-                page: 1, 
-                page_size: 2, 
-                role: '',
-                has_any_company_tag: true
-            }
+            body: { limit: 2 }
         }),
         getUserPreferences().then((prefs: UserPreferences | null) => 
             serverFetch<PracticeResponse>('/api/v1/user/interview/practice/filter/', {

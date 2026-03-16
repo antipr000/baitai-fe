@@ -150,11 +150,12 @@ export function DataTable<TData, TValue>({
                                 >
                                     All Difficulties
                                 </DropdownMenuCheckboxItem>
-                                {["Easy", "Medium", "Hard"].map((diff) => (
+                                {["easy", "medium", "hard"].map((diff) => (
                                     <DropdownMenuCheckboxItem
                                         key={diff}
                                         checked={diffFilter === diff}
                                         onCheckedChange={() => table.getColumn("difficulty")?.setFilterValue(diff)}
+                                        className="capitalize"
                                     >
                                         {diff}
                                     </DropdownMenuCheckboxItem>

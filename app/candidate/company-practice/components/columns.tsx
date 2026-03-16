@@ -10,11 +10,25 @@ export type PracticeInterview = {
     id: string
     title: string
     role: string
-    difficulty: "Easy" | "Medium" | "Hard"
+    difficulty: "easy" | "medium" | "hard"
     experienceLevels?: string[]
     duration: string
     companyLogo?: string
     companyName?: string
+}
+
+const getDifficultyStyles = (diff: string | undefined) => {
+    const d = diff?.toLowerCase()
+    switch (d) {
+        case "easy":
+            return "border-[rgba(3,231,41,1)] text-[rgba(3,231,41,1)]"
+        case "medium":
+            return "border-[rgba(231,90,3,1)] text-[rgba(231,90,3,1)]"
+        case "hard":
+            return "border-[rgba(255,35,35,1)] text-[rgba(255,35,35,1)]"
+        default:
+            return "border-gray-300 text-muted-foreground"
+    }
 }
 
 export const columns: ColumnDef<PracticeInterview>[] = [
@@ -29,18 +43,6 @@ export const columns: ColumnDef<PracticeInterview>[] = [
             const difficulty = row.original.difficulty
             const experienceLevels = row.original.experienceLevels || []
             const duration = row.original.duration
-            const getDifficultyStyles = (diff: string) => {
-                switch (diff) {
-                    case "Easy":
-                        return "border-[rgba(3,231,41,1)] text-[rgba(3,231,41,1)]"
-                    case "Medium":
-                        return "border-[rgba(231,90,3,1)] text-[rgba(231,90,3,1)]"
-                    case "Hard":
-                        return "border-[rgba(255,35,35,1)] text-[rgba(255,35,35,1)]"
-                    default:
-                        return "border-gray-300 text-muted-foreground"
-                }
-            }
             return (
                 <div className="flex items-center gap-3 pl-2">
                     {logo && (
@@ -51,12 +53,12 @@ export const columns: ColumnDef<PracticeInterview>[] = [
                     <div className="space-y-1">
                         <div className="font-medium text-sm text-[rgba(10,13,26,1)]">{name}</div>
                         <div className="flex items-center gap-3 pt-0.5">
-                            <span className={`px-3 py-0.5 rounded-full text-xs font-semibold border ${getDifficultyStyles(difficulty)}`}>
+                            <span className={`px-3 py-0.5 rounded-full text-xs font-semibold border capitalize ${getDifficultyStyles(difficulty)}`}>
                                 {difficulty}
                             </span>
                             {/* {experienceLevels.map(level => (
                                 <span key={level} className="px-3 py-0.5 rounded-full text-xs font-semibold border border-[rgba(58,63,187,0.3)] text-[rgba(58,63,187,1)] capitalize">
-                                    {level}
+                                    {level.replace(/_/g, " ")}
                                 </span>
                             ))} */}
                             <span className="flex items-center gap-1 text-[rgba(10,13,26,0.7)] text-xs">

@@ -84,37 +84,23 @@ export function InterviewInvitesCard({ items }: { items: any[] }) {
     )
 }
 
-export function CompanyPracticeCard({ items }: { items: any[] }) {
-    const normalizeDifficulty = (value: string | undefined): string => {
-        const d = value?.toLowerCase()
-        if (d === 'hard' || d === 'difficult') return 'Difficult'
-        if (d === 'medium') return 'Medium'
-        if (d === 'easy') return 'Easy'
-        return 'Easy'
-    }
+const DASHBOARD_COMPANIES = [
+    { name: 'Google', logo: '/candidate/company-practice/google.svg' },
+    { name: 'Meta', logo: '/candidate/company-practice/meta.svg' },
+    { name: 'Amazon', logo: '/candidate/company-practice/amazon.svg' },
+    { name: 'Microsoft', logo: '/candidate/company-practice/microsoft.svg' },
+    { name: 'Apple', logo: '/candidate/company-practice/apple.svg' },
+]
 
-    const displayItems = items
-        .map((item) => {
-            const companyName = item.tags?.find((t: any) => t.tag_type === 'company')?.value
-            if (!companyName) return null
-            return {
-                id: item.id,
-                title: item.title,
-                companyName,
-                role: item.role || 'General',
-                difficulty_level: normalizeDifficulty(item.difficulty_level),
-                duration: item.duration
-            }
-        })
-        .filter(Boolean)
-        .slice(0, 2) as Array<{
-            id: string
-            title: string
-            companyName: string
-            role: string
-            difficulty_level: string
-            duration: number
-        }>
+export function CompanyPracticeCard({ items }: { items: { companyName: string, count: number }[] }) {
+    const displayItems = items.map((item) => {
+        const logo = DASHBOARD_COMPANIES.find(c => c.name.toLowerCase() === item.companyName.toLowerCase())?.logo || '/candidate/dashboard/company.svg'
+        return {
+            companyName: item.companyName,
+            logo,
+            count: item.count
+        }
+    })
 
     return (
         <Card className="border-[rgba(212,217,255,1)] bg-[rgba(245,247,255,1)] shadow-sm flex flex-col h-full">
@@ -134,21 +120,22 @@ export function CompanyPracticeCard({ items }: { items: any[] }) {
                     <div className="flex flex-col gap-3 px-6 pb-6">
                         {displayItems.map((item, idx) => (
                             <div key={idx} className="flex items-center justify-between bg-white p-4 border border-[rgba(107,124,255,1)] rounded-lg">
-                                <div>
-                                    <h4 className="font-medium text-[rgba(10,13,26,1)] leading-snug mb-1">{item.title}</h4>
-                                    <div className="flex items-center gap-2 text-sm text-[rgba(10,13,26,0.7)]">
-                                        <span className={`px-2 py-0.5 rounded-full border text-[11px] font-medium ${getDifficultyColor(item.difficulty_level)}`}>
-                                            {item.difficulty_level}
-                                        </span>
-                                        <span className="flex items-center gap-1 text-xs">
-                                            <Image src="/candidate/dashboard/time.svg" alt="time" width={14} height={14} />
-                                            {item.duration} min
-                                        </span>
+                                <div className="flex items-center gap-4">
+                                    <div className="relative w-5 h-5 shrink-0">
+                                        <Image src={item.logo} alt={item.companyName} fill className="object-contain" />
+                                    </div>
+                                    <div>
+                                        <h4 className="font-medium text-[rgba(10,13,26,1)] leading-snug mb-1 capitalize">{item.companyName}</h4>
+                                        <div className="flex items-center gap-2 text-sm text-[rgba(10,13,26,0.7)]">
+                                            <span className="flex items-center gap-1 text-xs">
+                                                {item.count} {item.count === 1 ? 'Interview' : 'Interviews'}
+                                            </span>
+                                        </div>
                                     </div>
                                 </div>
-                                <Link href={`/interview/${item.id}`}>
+                                <Link href={`/candidate/company-practice?company=${encodeURIComponent(item.companyName)}`}>
                                     <Button className="bg-[rgba(58,63,187,1)] hover:bg-[rgba(58,63,187,0.9)] text-white font-semibold text-xs rounded-sm px-8">
-                                        Start Interview
+                                        View List
                                     </Button>
                                 </Link>
                             </div>
@@ -161,14 +148,6 @@ export function CompanyPracticeCard({ items }: { items: any[] }) {
 }
 
 export function PracticeInterviewsCard({ items }: { items: any[] }) {
-    const normalizeDifficulty = (value: string | undefined): string => {
-        const d = value?.toLowerCase()
-        if (d === 'hard' ) return 'Hard'
-        if (d === 'medium') return 'Medium'
-        if (d === 'easy') return 'Easy'
-        return 'Easy'
-    }
-
     return (
         <Card className="border-[rgba(212,217,255,1)] bg-[rgba(245,247,255,1)] shadow-sm flex flex-col h-full">
             <CardHeader className="flex flex-row items-center justify-between px-6">
@@ -190,8 +169,8 @@ export function PracticeInterviewsCard({ items }: { items: any[] }) {
                                 <div>
                                     <h4 className="font-medium text-[rgba(10,13,26,1)] leading-snug mb-1">{item.title}</h4>
                                     <div className="flex items-center gap-3">
-                                        <span className={`inline-block px-2 py-0.5 rounded-full border text-[11px] font-medium ${getDifficultyColor(item.difficulty_level)}`}>
-                                            {normalizeDifficulty(item.difficulty_level)}
+                                        <span className={`inline-block px-2 py-0.5 rounded-full border text-[11px] font-medium capitalize ${getDifficultyColor(item.difficulty_level)}`}>
+                                            {item.difficulty_level}
                                         </span>
                                         <div className="flex items-center gap-1 text-xs text-[rgba(10,13,26,0.7)] shrink-0">
                                             <Image src="/candidate/dashboard/time.svg" alt="time" width={14} height={14} />

@@ -31,19 +31,16 @@ interface MetadataResponse {
     total: number
     easy: number
     medium: number
-    difficult: number
+    hard: number
 }
 
-function capitalize(str: string): string {
-    if (!str) return ''
-    return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase()
-}
+
 
 // ─── Async server sub-components ──────────────────────────────────────────────
 
 async function PracticeStats() {
     const response = await serverFetch<MetadataResponse>('/api/v1/user/interview/practice/metadata/')
-    const metadata: MetadataResponse = response ?? { total: 0, easy: 0, medium: 0, difficult: 0 }
+    const metadata: MetadataResponse = response ?? { total: 0, easy: 0, medium: 0, hard: 0 }
 
     return (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
@@ -86,14 +83,14 @@ async function PracticeStats() {
                 </CardContent>
             </Card>
 
-            {/* Difficult */}
+            {/* Hard */}
             <Card className="border border-[rgba(58,63,187,1)] shadow-sm bg-white rounded-[12px]">
                 <CardContent className="">
                     <div className="flex items-center gap-4">
-                        <Image src="/candidate/practice-inteviews/hard.svg" alt="Difficult" width={24} height={24} />
+                        <Image src="/candidate/practice-inteviews/hard.svg" alt="Hard" width={24} height={24} />
                         <div>
-                            <p className="text-2xl font-semibold text-[rgba(10,13,26,1)] leading-none">{metadata.difficult}</p>
-                            <p className="text-sm font-medium text-[rgba(10,13,26,0.7)] mt-1">Difficult</p>
+                            <p className="text-2xl font-semibold text-[rgba(10,13,26,1)] leading-none">{metadata.hard}</p>
+                            <p className="text-sm font-medium text-[rgba(10,13,26,0.7)] mt-1">Hard</p>
                         </div>
                     </div>
                 </CardContent>
@@ -118,7 +115,7 @@ async function PracticeTable() {
             id: item.id,
             title: item.title,
             category: item.role || 'General',  // check
-            difficulty: capitalize(item.difficulty_level) as PracticeInterview['difficulty'],
+            difficulty: item.difficulty_level.toLowerCase() as PracticeInterview['difficulty'],
             duration: `${item.duration} min`,
         }))
         : []

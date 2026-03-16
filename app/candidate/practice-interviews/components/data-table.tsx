@@ -75,14 +75,14 @@ export function DataTable<TData, TValue>({
                         <DropdownMenuItem onClick={() => table.getColumn("difficulty")?.setFilterValue("")}>
                             All
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => table.getColumn("difficulty")?.setFilterValue("Easy")}>
+                        <DropdownMenuItem onClick={() => table.getColumn("difficulty")?.setFilterValue("easy")}>
                             Easy
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => table.getColumn("difficulty")?.setFilterValue("Medium")}>
+                        <DropdownMenuItem onClick={() => table.getColumn("difficulty")?.setFilterValue("medium")}>
                             Medium
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => table.getColumn("difficulty")?.setFilterValue("Difficult")}>
-                            Difficult
+                        <DropdownMenuItem onClick={() => table.getColumn("difficulty")?.setFilterValue("hard")}>
+                            Hard
                         </DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>

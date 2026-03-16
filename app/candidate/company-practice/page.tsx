@@ -34,10 +34,7 @@ interface ApiResponse {
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-function capitalize(str: string): string {
-    if (!str) return ''
-    return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase()
-}
+// No helpers needed, using CSS for capitalization
 
 // ─── Async server sub-component ───────────────────────────────────────────────
 
@@ -80,7 +77,7 @@ async function CompanyPracticeContent() {
             title: item.title,
             role: item.role,
             experienceLevels: levelTags,
-            difficulty: capitalize(item.difficulty_level) as PracticeInterview['difficulty'],
+            difficulty: item.difficulty_level.toLowerCase() as PracticeInterview['difficulty'],
             duration: `${item.duration} min`,
             companyLogo: logo,
             companyName: companyTag || '',

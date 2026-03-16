@@ -9,8 +9,22 @@ export type PracticeInterview = {
     id: string
     title: string
     category: string
-    difficulty: "Easy" | "Medium" | "Hard"
+    difficulty: "easy" | "medium" | "hard"
     duration: string
+}
+
+const getDifficultyStyles = (diff: string | undefined) => {
+    const d = diff?.toLowerCase()
+    switch (d) {
+        case "easy":
+            return "border-[rgba(3,231,41,1)] text-[rgba(3,231,41,1)]"
+        case "medium":
+            return "border-[rgba(231,90,3,1)] text-[rgba(231,90,3,1)]"
+        case "hard":
+            return "border-[rgba(255,35,35,1)] text-[rgba(255,35,35,1)]"
+        default:
+            return "border-gray-300 text-muted-foreground"
+    }
 }
 
 export const columns: ColumnDef<PracticeInterview>[] = [
@@ -43,21 +57,9 @@ export const columns: ColumnDef<PracticeInterview>[] = [
         header: () => <div className="text-[rgba(10,13,26,1)] font-semibold text-sm">Difficulty</div>,
         cell: ({ row }) => {
             const difficulty = row.getValue("difficulty") as string
-            const getDifficultyStyles = (diff: string) => {
-                switch (diff) {
-                    case "Easy":
-                        return "border-[rgba(3,231,41,1)] text-[rgba(3,231,41,1)]"
-                    case "Medium":
-                        return "border-[rgba(231,90,3,1)] text-[rgba(231,90,3,1)]"
-                    case "Hard":
-                        return "border-[rgba(255,35,35,1)] text-[rgba(255,35,35,1)]"
-                    default:
-                        return "border-gray-300 text-muted-foreground"
-                }
-            }
             return (
                 <div className="flex items-center">
-                    <span className={`px-4 py-1 rounded-full text-xs font-semibold border ${getDifficultyStyles(difficulty)}`}>
+                    <span className={`px-4 py-1 rounded-full text-xs font-semibold border capitalize ${getDifficultyStyles(difficulty)}`}>
                         {difficulty}
                     </span>
                 </div>
