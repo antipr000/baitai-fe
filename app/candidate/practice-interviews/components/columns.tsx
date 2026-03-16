@@ -8,8 +8,9 @@ import Link from "next/link"
 export type PracticeInterview = {
     id: string
     title: string
-    category: string
+    role: string
     difficulty: "easy" | "medium" | "hard"
+    experience?: string[]
     duration: string
 }
 
@@ -41,15 +42,19 @@ export const columns: ColumnDef<PracticeInterview>[] = [
         },
     },
     {
-        accessorKey: "category",
-        header: () => <div className="text-[rgba(10,13,26,1)] font-semibold text-sm">Category</div>,
+        accessorKey: "role",
+        header: () => <div className="text-[rgba(10,13,26,1)] font-semibold text-sm">Role</div>,
         cell: ({ row }) => {
-            const category = row.getValue("category") as string
+            const role = row.getValue("role") as string
             return (
                 <div className="text-[rgba(10,13,26,0.6)] text-sm">
-                    {category}
+                    {role}
                 </div>
             )
+        },
+        filterFn: (row, _columnId, filterValue) => {
+            if (!filterValue) return true
+            return row.original.role?.toLowerCase().includes((filterValue as string).toLowerCase())
         },
     },
     {
@@ -64,6 +69,18 @@ export const columns: ColumnDef<PracticeInterview>[] = [
                     </span>
                 </div>
             )
+        },
+        filterFn: (row, _columnId, filterValue) => {
+            if (!filterValue) return true
+            return row.original.difficulty?.toLowerCase() === (filterValue as string).toLowerCase()
+        },
+    },
+    {
+        accessorKey: "experience",
+        filterFn: (row, _columnId, filterValue) => {
+            if (!filterValue) return true
+            const searchLevel = (filterValue as string).toLowerCase()
+            return row.original.experience?.some(level => level.toLowerCase() === searchLevel) ?? false
         },
     },
     {

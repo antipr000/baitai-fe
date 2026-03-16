@@ -115,7 +115,7 @@ export const InterviewDetails = ({ companyId, authToken, roles, experienceLevels
                             defaultValue={experienceLevels}
                             onValueChange={setExperienceLevels}
                             placeholder="Select experience levels"
-                            className="bg-white dark:bg-background/50 border-gray-200"
+                            className="bg-white dark:bg-background/50 border-gray-200 w-full h-10 font-normal"
                         />
                     </div>
                 </div>

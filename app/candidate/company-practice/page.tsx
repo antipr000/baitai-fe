@@ -76,7 +76,7 @@ async function CompanyPracticeContent() {
             id: item.id,
             title: item.title,
             role: item.role,
-            experienceLevels: levelTags,
+            experience: levelTags,
             difficulty: item.difficulty_level.toLowerCase() as PracticeInterview['difficulty'],
             duration: `${item.duration} min`,
             companyLogo: logo,

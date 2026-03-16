@@ -3,7 +3,7 @@ import Image from 'next/image'
 import React, { Suspense } from 'react'
 import { DataTable } from './components/data-table'
 import { columns, PracticeInterview } from './components/columns'
-import { serverFetch } from '@/lib/api/server'
+import { serverFetch, getPreferencesMetadata } from '@/lib/api/server'
 import {
     PracticeStatsSkeleton,
     PracticeTableSkeleton,
@@ -17,6 +17,7 @@ interface ApiPracticeInterview {
     role: string
     difficulty_level: string
     duration: number
+    tags?: { tag_type: string; value: string }[]
 }
 
 interface ApiResponse {
@@ -100,27 +101,37 @@ async function PracticeStats() {
 }
 
 async function PracticeTable() {
-    const response = await serverFetch<ApiResponse>('/api/v1/user/interview/practice/filter/', {
-        method: 'POST',
-        body: {
-            page: 1,
-            page_size: 100,
-            role: '',
-            difficulty_level: null
-        }
-    })
+    const [response, metadata] = await Promise.all([
+        serverFetch<ApiResponse>('/api/v1/user/interview/practice/filter/', {
+            method: 'POST',
+            body: {
+                page: 1,
+                page_size: 100,
+                role: '',
+                difficulty_level: null
+            }
+        }),
+        getPreferencesMetadata()
+    ])
 
     const data: PracticeInterview[] = response?.items
-        ? response.items.map((item: ApiPracticeInterview) => ({
-            id: item.id,
-            title: item.title,
-            category: item.role || 'General',  // check
-            difficulty: item.difficulty_level.toLowerCase() as PracticeInterview['difficulty'],
-            duration: `${item.duration} min`,
-        }))
+        ? response.items.map((item: ApiPracticeInterview) => {
+            const levelTags = (item.tags || [])
+                .filter(t => t.tag_type === 'level')
+                .map(t => t.value)
+
+            return {
+                id: item.id,
+                title: item.title,
+                role: item.role || 'General',
+                difficulty: item.difficulty_level.toLowerCase() as PracticeInterview['difficulty'],
+                duration: `${item.duration} min`,
+                experience: levelTags,
+            }
+        })
         : []
 
-    return <DataTable columns={columns} data={data} />
+    return <DataTable columns={columns} data={data} roles={metadata?.roles || []} experienceLevels={metadata?.experience_levels || []} />
 }
 
 // ─── Page ──────────────────────────────────────────────────────────────────────

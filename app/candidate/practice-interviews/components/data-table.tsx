@@ -20,17 +20,22 @@ import {
 import Image from "next/image"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { ChevronDown, Filter } from "lucide-react"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSub, DropdownMenuSubTrigger, DropdownMenuSubContent, DropdownMenuCheckboxItem } from "@/components/ui/dropdown-menu"
+import { Badge } from "@/components/ui/badge"
+import { type MetadataOption } from "@/lib/api/server"
 
 interface DataTableProps<TData, TValue> {
     columns: ColumnDef<TData, TValue>[]
     data: TData[]
+    roles?: string[]
+    experienceLevels?: MetadataOption[]
 }
 
 export function DataTable<TData, TValue>({
     columns,
     data,
+    roles = [],
+    experienceLevels = [],
 }: DataTableProps<TData, TValue>) {
     const [globalFilter, setGlobalFilter] = useState("")
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
@@ -40,6 +45,9 @@ export function DataTable<TData, TValue>({
         columns,
         getCoreRowModel: getCoreRowModel(),
         getFilteredRowModel: getFilteredRowModel(),
+        initialState: {
+            columnVisibility: { experience: false },
+        },
         globalFilterFn: "includesString",
         state: {
             globalFilter,
@@ -48,6 +56,11 @@ export function DataTable<TData, TValue>({
         onGlobalFilterChange: setGlobalFilter,
         onColumnFiltersChange: setColumnFilters,
     })
+
+    const isFiltered = table.getState().columnFilters.length > 0
+    const roleFilter = table.getColumn("role")?.getFilterValue() as string | undefined;
+    const levelFilter = table.getColumn("experience")?.getFilterValue() as string | undefined;
+    const diffFilter = table.getColumn("difficulty")?.getFilterValue() as string | undefined;
 
     return (
         <div className="space-y-6">
@@ -71,22 +84,100 @@ export function DataTable<TData, TValue>({
                             Filter
                         </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="start" className="w-40">
-                        <DropdownMenuItem onClick={() => table.getColumn("difficulty")?.setFilterValue("")}>
-                            All
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => table.getColumn("difficulty")?.setFilterValue("easy")}>
-                            Easy
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => table.getColumn("difficulty")?.setFilterValue("medium")}>
-                            Medium
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => table.getColumn("difficulty")?.setFilterValue("hard")}>
-                            Hard
-                        </DropdownMenuItem>
+                    <DropdownMenuContent align="start" className="w-48">
+                        <DropdownMenuSub>
+                            <DropdownMenuSubTrigger>Role</DropdownMenuSubTrigger>
+                            <DropdownMenuSubContent className="w-56 max-h-[300px] overflow-y-auto">
+                                <DropdownMenuCheckboxItem
+                                    checked={!roleFilter}
+                                    onCheckedChange={() => table.getColumn("role")?.setFilterValue(undefined)}
+                                >
+                                    All Roles
+                                </DropdownMenuCheckboxItem>
+                                {roles?.map(role => (
+                                    <DropdownMenuCheckboxItem
+                                        key={role}
+                                        checked={roleFilter === role}
+                                        onCheckedChange={() => table.getColumn("role")?.setFilterValue(role)}
+                                    >
+                                        {role}
+                                    </DropdownMenuCheckboxItem>
+                                ))}
+                            </DropdownMenuSubContent>
+                        </DropdownMenuSub>
+                        <DropdownMenuSub>
+                            <DropdownMenuSubTrigger>Experience</DropdownMenuSubTrigger>
+                            <DropdownMenuSubContent className="w-56">
+                                <DropdownMenuCheckboxItem
+                                    checked={!levelFilter}
+                                    onCheckedChange={() => table.getColumn("experience")?.setFilterValue(undefined)}
+                                >
+                                    All Experience
+                                </DropdownMenuCheckboxItem>
+                                {experienceLevels?.map(level => (
+                                    <DropdownMenuCheckboxItem
+                                        key={level.value}
+                                        checked={levelFilter === level.value}
+                                        onCheckedChange={() => table.getColumn("experience")?.setFilterValue(level.value)}
+                                    >
+                                        {level.label}
+                                    </DropdownMenuCheckboxItem>
+                                ))}
+                            </DropdownMenuSubContent>
+                        </DropdownMenuSub>
+                        <DropdownMenuSub>
+                            <DropdownMenuSubTrigger>Difficulty</DropdownMenuSubTrigger>
+                            <DropdownMenuSubContent className="w-40">
+                                <DropdownMenuCheckboxItem
+                                    checked={!diffFilter}
+                                    onCheckedChange={() => table.getColumn("difficulty")?.setFilterValue(undefined)}
+                                >
+                                    All Difficulties
+                                </DropdownMenuCheckboxItem>
+                                {["easy", "medium", "hard"].map((diff) => (
+                                    <DropdownMenuCheckboxItem
+                                        key={diff}
+                                        checked={diffFilter?.toLowerCase() === diff}
+                                        onCheckedChange={() => table.getColumn("difficulty")?.setFilterValue(diff)}
+                                        className="capitalize"
+                                    >
+                                        {diff}
+                                    </DropdownMenuCheckboxItem>
+                                ))}
+                            </DropdownMenuSubContent>
+                        </DropdownMenuSub>
                     </DropdownMenuContent>
                 </DropdownMenu>
             </div>
+
+            {isFiltered && (
+                <div className="flex gap-2 min-h-8 items-center">
+                    {table.getState().columnFilters.map((filter) => (
+                        <Badge 
+                            key={filter.id} 
+                            variant="secondary" 
+                            className="pl-3 py-1 font-normal bg-white border border-[rgba(58,63,187,0.2)] text-[rgba(17,24,39,0.8)] hover:bg-[rgba(58,63,187,0.05)] rounded-full"
+                        >
+                            <span className="capitalize">{filter.id}</span>: {filter.value as string}
+                            <button 
+                                onClick={() => table.getColumn(filter.id)?.setFilterValue(undefined)} 
+                                className="ml-2 bg-transparent hover:bg-[rgba(0,0,0,0.1)] rounded-full p-0.5 transition-colors"
+                            >
+                                <Image src="/cross.svg" alt="Cancel" width={10} height={10} className="opacity-60" />
+                            </button>
+                        </Badge>
+                    ))}
+                    
+                    <Button
+                        variant="ghost"
+                        onClick={() => table.resetColumnFilters()}
+                        className="h-8 px-2 lg:px-3 text-xs text-[rgba(10,13,26,0.6)] hover:text-[rgba(58,63,187,1)] font-medium"
+                    >
+                        Reset
+                        <span className="ml-2">×</span>
+                    </Button>
+                </div>
+            )}
 
             <div className="rounded-lg overflow-hidden bg-[rgba(245,247,255,1)]">
                 <Table>
@@ -101,7 +192,7 @@ export function DataTable<TData, TValue>({
                                                 : flexRender(
                                                     header.column.columnDef.header,
                                                     header.getContext()
-                                                )}
+                                                ) as React.ReactNode}
                                         </TableHead>
                                     )
                                 })}
@@ -118,7 +209,7 @@ export function DataTable<TData, TValue>({
                                 >
                                     {row.getVisibleCells().map((cell) => (
                                         <TableCell key={cell.id} className="px-4 py-5 align-middle">
-                                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                                            {flexRender(cell.column.columnDef.cell, cell.getContext()) as React.ReactNode}
                                         </TableCell>
                                     ))}
                                 </TableRow>

@@ -11,7 +11,7 @@ export type PracticeInterview = {
     title: string
     role: string
     difficulty: "easy" | "medium" | "hard"
-    experienceLevels?: string[]
+    experience?: string[]
     duration: string
     companyLogo?: string
     companyName?: string
@@ -41,7 +41,7 @@ export const columns: ColumnDef<PracticeInterview>[] = [
             const name = row.original.title
             const role = row.original.role
             const difficulty = row.original.difficulty
-            const experienceLevels = row.original.experienceLevels || []
+            const experience = row.original.experience || []
             const duration = row.original.duration
             return (
                 <div className="flex items-center gap-3 pl-2">
@@ -79,11 +79,11 @@ export const columns: ColumnDef<PracticeInterview>[] = [
         },
     },
     {
-        accessorKey: "experienceLevel",
+        accessorKey: "experience",
         filterFn: (row, _columnId, filterValue) => {
             if (!filterValue) return true
             const searchLevel = (filterValue as string).toLowerCase()
-            return row.original.experienceLevels?.some(level => level.toLowerCase() === searchLevel) ?? false
+            return row.original.experience?.some(level => level.toLowerCase() === searchLevel) ?? false
         },
     },
     {

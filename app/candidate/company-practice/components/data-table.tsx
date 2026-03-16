@@ -62,7 +62,7 @@ export function DataTable<TData, TValue>({
         getCoreRowModel: getCoreRowModel(),
         getFilteredRowModel: getFilteredRowModel(),
         initialState: {
-            columnVisibility: { companyName: false, difficulty: false, duration: false, role: false, experienceLevel: false },
+            columnVisibility: { companyName: false, difficulty: false, duration: false, role: false, experience: false },
         },
         globalFilterFn: "includesString",
         state: {
@@ -75,7 +75,7 @@ export function DataTable<TData, TValue>({
 
     const isFiltered = table.getState().columnFilters.some(f => f.id !== "companyName")
     const roleFilter = table.getColumn("role")?.getFilterValue() as string | undefined;
-    const levelFilter = table.getColumn("experienceLevel")?.getFilterValue() as string | undefined;
+    const levelFilter = table.getColumn("experience")?.getFilterValue() as string | undefined;
     const diffFilter = table.getColumn("difficulty")?.getFilterValue() as string | undefined;
 
     return (
@@ -122,19 +122,19 @@ export function DataTable<TData, TValue>({
                             </DropdownMenuSubContent>
                         </DropdownMenuSub>
                         <DropdownMenuSub>
-                            <DropdownMenuSubTrigger>Experience Level</DropdownMenuSubTrigger>
+                            <DropdownMenuSubTrigger>Experience</DropdownMenuSubTrigger>
                             <DropdownMenuSubContent className="w-56">
                                 <DropdownMenuCheckboxItem
                                     checked={!levelFilter}
-                                    onCheckedChange={() => table.getColumn("experienceLevel")?.setFilterValue(undefined)}
+                                    onCheckedChange={() => table.getColumn("experience")?.setFilterValue(undefined)}
                                 >
-                                    All Experience Levels
+                                    All Experience
                                 </DropdownMenuCheckboxItem>
                                 {experienceLevels?.map(level => (
                                     <DropdownMenuCheckboxItem
                                         key={level.value}
                                         checked={levelFilter === level.value}
-                                        onCheckedChange={() => table.getColumn("experienceLevel")?.setFilterValue(level.value)}
+                                        onCheckedChange={() => table.getColumn("experience")?.setFilterValue(level.value)}
                                     >
                                         {level.label}
                                     </DropdownMenuCheckboxItem>
