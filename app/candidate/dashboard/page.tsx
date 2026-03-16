@@ -11,6 +11,7 @@ import {
     PracticeInterviewsCard,
     LatestResultsCard
 } from './components/dashboard-sections'
+import { ScorePoller } from '@/components/candidate/dashboard/score-poller'
 
 interface InterviewStats {
     average_score: number
@@ -269,6 +270,7 @@ async function MainGrid() {
 export default function DashboardPage() {
     return (
         <div className="min-h-screen w-full p-8 lg:p-10 pb-20 max-w-7xl mx-auto">
+            <ScorePoller />
             {/* Header Area */}
             <div className="flex justify-between items-start mb-8">
                 <div className="flex items-center gap-3">

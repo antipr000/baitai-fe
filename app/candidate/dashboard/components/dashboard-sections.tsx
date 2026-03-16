@@ -52,7 +52,7 @@ export function InterviewInvitesCard({ items }: { items: any[] }) {
                     <div className="flex flex-col items-center justify-center p-8 gap-4">
                         <p className="text-[rgba(10,13,26,0.7)] text-sm">No pending invites.</p>
                         <Link href="/candidate/practice-interviews">
-                            <Button className="bg-[rgba(58,63,187,1)] hover:bg-[rgba(58,63,187,0.9)] text-white font-semibold text-xs rounded-sm px-8">
+                            <Button className="bg-[rgba(58,63,187,1)] hover:bg-white border border-[rgba(58,63,187,1)] hover:text-[rgba(58,63,187,1)] text-white font-semibold text-xs rounded-sm px-8">
                                 Try Practice Interviews
                             </Button>
                         </Link>
@@ -71,7 +71,7 @@ export function InterviewInvitesCard({ items }: { items: any[] }) {
                                     <p className="text-xs text-[rgba(10,13,26,0.7)] mt-1.5">{item.role || item.title}</p>
                                 </div>
                                 <Link href={`/interview/${item.template_id}`}>
-                                    <Button className="bg-[rgba(58,63,187,1)] hover:bg-[rgba(58,63,187,0.9)] text-white font-semibold text-xs rounded-sm px-8">
+                                    <Button className="bg-[rgba(58,63,187,1)] hover:bg-white border border-[rgba(58,63,187,1)] hover:text-[rgba(58,63,187,1)] text-white font-semibold text-xs rounded-sm px-8">
                                         Start Interview
                                     </Button>
                                 </Link>
@@ -134,7 +134,7 @@ export function CompanyPracticeCard({ items }: { items: { companyName: string, c
                                     </div>
                                 </div>
                                 <Link href={`/candidate/company-practice?company=${encodeURIComponent(item.companyName)}`}>
-                                    <Button className="bg-[rgba(58,63,187,1)] hover:bg-[rgba(58,63,187,0.9)] text-white font-semibold text-xs rounded-sm px-8">
+                                    <Button className="bg-[rgba(58,63,187,1)] hover:bg-white border border-[rgba(58,63,187,1)] hover:text-[rgba(58,63,187,1)] text-white font-semibold text-xs rounded-sm px-8">
                                         View List
                                     </Button>
                                 </Link>
@@ -179,7 +179,7 @@ export function PracticeInterviewsCard({ items }: { items: any[] }) {
                                     </div>
                                 </div>
                                 <Link href={`/interview/${item.id}`}>
-                                    <Button className="bg-[rgba(58,63,187,1)] hover:bg-[rgba(58,63,187,0.9)] text-white font-semibold text-xs rounded-sm px-8">
+                                    <Button className="bg-[rgba(58,63,187,1)] hover:bg-white border border-[rgba(58,63,187,1)] hover:text-[rgba(58,63,187,1)] text-white font-semibold text-xs rounded-sm px-8">
                                         Start Interview
                                     </Button>
                                 </Link>
@@ -228,7 +228,7 @@ export function LatestResultsCard({ items }: { items: any[] }) {
                                         <span className="text-[rgba(10,13,26,0.7)] text-xs">Score</span>
                                     </div>
                                     <Link href={`/results/${item.session_id}`}>
-                                        <Button className="bg-[rgba(58,63,187,1)] hover:bg-[rgba(58,63,187,0.9)] text-white font-semibold text-xs rounded-sm px-8">
+                                        <Button className="bg-[rgba(58,63,187,1)] hover:bg-white border border-[rgba(58,63,187,1)] hover:text-[rgba(58,63,187,1)] text-white font-semibold text-xs rounded-sm px-8">
                                             View Details
                                         </Button>
                                     </Link>

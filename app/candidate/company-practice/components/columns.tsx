@@ -111,8 +111,17 @@ export const columns: ColumnDef<PracticeInterview>[] = [
             return (
                 <div className="flex justify-end">
                     <Link href={`/interview/${interview.id}`}>
-                        <Button className="bg-[rgba(58,63,187,1)] hover:bg-[rgba(58,63,187,0.9)] text-white px-6 py-2 rounded-sm text-xs font-semibold">
-                            <Image src="/main/play.svg" alt="Start" width={8} height={10} className="mr-2" style={{ filter: 'brightness(0) invert(1)' }} />
+                        <Button className="bg-[rgba(58,63,187,1)] hover:bg-white border border-[rgba(58,63,187,1)] hover:text-[rgba(58,63,187,1)] text-white px-6 py-3 rounded-sm text-xs font-medium">
+                            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg" className="mr-2">
+                                <g clipPath="url(#clip0_3251_438)">
+                                    <path fillRule="evenodd" clipRule="evenodd" d="M10.463 5.38068L2.32144 0.133663C1.83844 -0.12648 1.28516 -0.099476 1.28516 0.834381V11.1664C1.28516 12.0201 1.87873 12.1547 2.32144 11.8671L10.463 6.62009C10.7982 6.27767 10.7982 5.72311 10.463 5.38068Z" fill="currentColor"/>
+                                </g>
+                                <defs>
+                                    <clipPath id="clip0_3251_438">
+                                        <rect width="12" height="12" fill="white"/>
+                                    </clipPath>
+                                </defs>
+                            </svg>
                             Take Interview
                         </Button>
                     </Link>

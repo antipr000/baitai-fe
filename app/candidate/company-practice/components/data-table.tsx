@@ -202,8 +202,8 @@ export function DataTable<TData, TValue>({
 
             {children}
 
-            <div className="rounded-lg overflow-hidden bg-[rgba(245,247,255,1)]">
-                <Table>
+            <div className="">
+                <Table className="border-separate border-spacing-y-3  ">
                     {!hideHeaders && (
                         <TableHeader className="bg-[rgba(245,247,255,1)] opacity-90 border-b border-[rgba(245,247,255,1)]">
                             {table.getHeaderGroups().map((headerGroup) => (
@@ -224,11 +224,11 @@ export function DataTable<TData, TValue>({
                             ))}
                         </TableHeader>
                     )}
-                    <TableBody className="bg-white">
+                    <TableBody>
                         {table.getRowModel().rows?.length ? (
                             table.getRowModel().rows.map((row) => (
                                 <TableRow
-                                    className="border border-[rgba(245,247,255,1)] bg-[rgba(245,247,255,1)] hover:bg-[rgba(245,247,255,0.4)] transition-colors"
+                                    className="bg-[rgba(245,247,255,1)] py-4 hover:bg-[rgba(245,247,255,0.7)] transition-colors border-none [&_td:first-child]:rounded-l-lg [&_td:last-child]:rounded-r-lg "
                                     key={row.id}
                                     data-state={row.getIsSelected() && "selected"}
                                 >
