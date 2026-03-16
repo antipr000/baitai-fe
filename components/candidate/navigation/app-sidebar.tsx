@@ -77,7 +77,7 @@ export function AppSidebar({ userProfile, ...props }: AppSidebarProps) {
         : "?"
 
     return (
-        <Sidebar collapsible="icon" className="top-[72px]! h-[calc(100svh-72px)]! border-r border-[#E2E8F0] bg-white" {...props}>
+        <Sidebar collapsible="none" className="top-[72px]! h-[calc(100svh-72px)]! border-r border-[#E2E8F0] bg-white" {...props}>
             <SidebarContent className="px-3 gap-2 py-4">
                 <SidebarMenu className="gap-2">
                     {navItems.map((item) => {
@@ -142,7 +142,6 @@ export function AppSidebar({ userProfile, ...props }: AppSidebarProps) {
                     </SidebarMenuItem>
                 </SidebarMenu>
             </SidebarFooter>
-            <SidebarRail />
         </Sidebar>
     )
 }
