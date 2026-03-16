@@ -220,7 +220,7 @@ export function LatestResultsCard({ items }: { items: any[] }) {
                             <div key={idx} className="flex items-center justify-between bg-white p-4 border border-[rgba(107,124,255,1)] rounded-lg">
                                 <div>
                                     <h4 className="font-medium text-[rgba(10,13,26,1)] mb-1">{item.template_title || item.title}</h4>
-                                    <p className="text-sm text-[rgba(10,13,26,0.7)]">{formatDateAgo(item.date || item.ended_at || item.completed_at || item.created_at)}</p>
+                                    <p className="text-xs text-[rgba(10,13,26,0.7)]">{formatDateAgo(item.date || item.ended_at || item.completed_at || item.created_at)}</p>
                                 </div>
                                 <div className="flex items-center gap-6">
                                     <div className="flex flex-col items-center">
