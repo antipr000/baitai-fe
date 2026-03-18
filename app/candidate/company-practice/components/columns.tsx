@@ -45,7 +45,7 @@ export const columns: ColumnDef<PracticeInterview>[] = [
             const duration = row.original.duration
             return (
                 <div className="flex items-center gap-3 pl-2">
-                    <div className="flex -space-x-3 hover:space-x-1 transition-all">
+                    <div className="flex -space-x-3 transition-all">
                         {logos.map((logo, index) => (
                             <div 
                                 key={index} 
