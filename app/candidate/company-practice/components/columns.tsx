@@ -13,8 +13,8 @@ export type PracticeInterview = {
     difficulty: "easy" | "medium" | "hard"
     experience?: string[]
     duration: string
-    companyLogo?: string
-    companyName?: string
+    companyLogos?: string[]
+    companyNames?: string[]
 }
 
 const getDifficultyStyles = (diff: string | undefined) => {
@@ -37,7 +37,7 @@ export const columns: ColumnDef<PracticeInterview>[] = [
         accessorKey: "title",
         header: () => null,
         cell: ({ row }) => {
-            const logo = row.original.companyLogo
+            const logos = row.original.companyLogos || []
             const name = row.original.title
             const role = row.original.role
             const difficulty = row.original.difficulty
@@ -45,11 +45,17 @@ export const columns: ColumnDef<PracticeInterview>[] = [
             const duration = row.original.duration
             return (
                 <div className="flex items-center gap-3 pl-2">
-                    {logo && (
-                        <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center border border-[rgba(58,63,187,0.1)] p-1.5 shrink-0">
-                            <Image src={logo} alt="Company" width={20} height={20} className="object-contain" />
-                        </div>
-                    )}
+                    <div className="flex -space-x-3 hover:space-x-1 transition-all">
+                        {logos.map((logo, index) => (
+                            <div 
+                                key={index} 
+                                className="w-8 h-8 rounded-full bg-white flex items-center justify-center border border-[rgba(58,63,187,0.1)] p-1.5 shrink-0 shadow-sm"
+                                style={{ zIndex: logos.length - index }}
+                            >
+                                <Image src={logo} alt="Company" width={20} height={20} className="object-contain" />
+                            </div>
+                        ))}
+                    </div>
                     <div className="space-y-1">
                         <div className="font-medium text-sm text-[rgba(10,13,26,1)]">{name}</div>
                         <div className="flex items-center gap-3 pt-0.5">
@@ -97,10 +103,11 @@ export const columns: ColumnDef<PracticeInterview>[] = [
         accessorKey: "duration",
     },
     {
-        accessorKey: "companyName",
+        accessorKey: "companyNames",
         filterFn: (row, _columnId, filterValue) => {
             if (!filterValue) return true
-            return row.original.companyName?.toLowerCase() === (filterValue as string).toLowerCase()
+            const filterStr = (filterValue as string).toLowerCase()
+            return row.original.companyNames?.some(name => name.toLowerCase() === filterStr) ?? false
         },
     },
     {

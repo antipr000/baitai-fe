@@ -66,11 +66,15 @@ async function CompanyPracticeContent() {
     const availableCompanies = COMPANIES.filter(c => companyTagSet.has(c.name.toLowerCase()))
 
     const interviews: PracticeInterview[] = items.map((item: ApiPracticeInterview) => {
-        const companyTag = (item.tags || []).find((t) => t.tag_type === 'company')?.value
+        const companyTags = (item.tags || [])
+            .filter((t) => t.tag_type === 'company')
+            .map((t) => t.value)
         const levelTags = (item.tags || [])
             .filter((t) => t.tag_type === 'level')
             .map((t) => t.value)
-        const logo = COMPANIES.find(c => c.name.toLowerCase() === companyTag?.toLowerCase())?.logo
+        const logos = companyTags
+            .map(tag => COMPANIES.find(c => c.name.toLowerCase() === tag.toLowerCase())?.logo)
+            .filter((logo): logo is string => !!logo)
 
         return {
             id: item.id,
@@ -79,8 +83,8 @@ async function CompanyPracticeContent() {
             experience: levelTags,
             difficulty: item.difficulty_level.toLowerCase() as PracticeInterview['difficulty'],
             duration: `${item.duration} min`,
-            companyLogo: logo,
-            companyName: companyTag || '',
+            companyLogos: logos,
+            companyNames: companyTags,
         }
     })
 

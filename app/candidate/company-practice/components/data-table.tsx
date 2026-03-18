@@ -50,9 +50,9 @@ export function DataTable<TData, TValue>({
     // Sync company filter prop into column filters
     useEffect(() => {
         setColumnFilters(prev => {
-            const withoutCompany = prev.filter(f => f.id !== "companyName")
+            const withoutCompany = prev.filter(f => f.id !== "companyNames")
             if (!companyFilter) return withoutCompany
-            return [...withoutCompany, { id: "companyName", value: companyFilter }]
+            return [...withoutCompany, { id: "companyNames", value: companyFilter }]
         })
     }, [companyFilter])
 
@@ -62,7 +62,7 @@ export function DataTable<TData, TValue>({
         getCoreRowModel: getCoreRowModel(),
         getFilteredRowModel: getFilteredRowModel(),
         initialState: {
-            columnVisibility: { companyName: false, difficulty: false, duration: false, role: false, experience: false },
+            columnVisibility: { companyNames: false, difficulty: false, duration: false, role: false, experience: false },
         },
         globalFilterFn: "includesString",
         state: {
@@ -73,7 +73,7 @@ export function DataTable<TData, TValue>({
         onColumnFiltersChange: setColumnFilters,
     })
 
-    const isFiltered = table.getState().columnFilters.some(f => f.id !== "companyName")
+    const isFiltered = table.getState().columnFilters.some(f => f.id !== "companyNames")
     const roleFilter = table.getColumn("role")?.getFilterValue() as string | undefined;
     const levelFilter = table.getColumn("experience")?.getFilterValue() as string | undefined;
     const diffFilter = table.getColumn("difficulty")?.getFilterValue() as string | undefined;
@@ -169,7 +169,7 @@ export function DataTable<TData, TValue>({
             {isFiltered && (
                 <div className="flex gap-2 min-h-8 items-center">
                     {table.getState().columnFilters
-                        .filter(f => f.id !== "companyName")
+                        .filter(f => f.id !== "companyNames")
                         .map((filter) => (
                             <Badge 
                                 key={filter.id} 
@@ -189,8 +189,8 @@ export function DataTable<TData, TValue>({
                     <Button
                         variant="ghost"
                         onClick={() => {
-                            // Dynamically clear all filters EXCEPT companyName
-                            table.setColumnFilters(prev => prev.filter(f => f.id === "companyName"))
+                            // Dynamically clear all filters EXCEPT companyNames
+                            table.setColumnFilters(prev => prev.filter(f => f.id === "companyNames"))
                         }}
                         className="h-8 px-2 lg:px-3 text-xs text-[rgba(10,13,26,0.6)] hover:text-[rgba(58,63,187,1)] font-medium"
                     >
