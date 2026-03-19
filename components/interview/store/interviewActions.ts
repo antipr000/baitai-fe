@@ -534,11 +534,21 @@ export async function handleEndInterview(
 // ============================================
 
 export function cleanupAll() {
+  const store = useInterviewStore.getState()
+
+  // 1. Mark as intentional so the WebSocket hook doesn't try to reconnect
+  // while we are clearing the state.
+  store.setIsIntentionalDisconnect(true)
+
+  // 2. Disconnect and nullify managers
+  wsManager?.disconnect()
   wsManager = null
+
   audioRecorderControls = null
   audioPlayerControls = null
   mediaRecorderControls = null
 
-  // Reset the Zustand store to initial state
-  useInterviewStore.getState().reset()
+  // 3. Reset all Zustand stores to initial state
+  store.reset()
+  useCodeEditorStore.getState().reset()
 }

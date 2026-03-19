@@ -113,10 +113,9 @@ export const useInterviewStore = create<InterviewStore>()(
     // ----------------------------------------
     initialize: (sessionId: string, templateId: string) =>
       set({
+        ...createInitialState(),
         sessionId,
         templateId,
-        conversationState: 'idle',
-        connectionStatus: 'disconnected',
         isInitialized: true,
       }),
 
