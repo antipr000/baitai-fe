@@ -43,6 +43,7 @@ import {
   finalizeAllMedia,
   applyListeningState,
   checkAudioPlaybackComplete,
+  sendSpeechCompletedMessage,
 } from '../store/interviewActions'
 import { useCodeEditorStore } from '../store/codeEditorStore'
 
@@ -236,11 +237,22 @@ export function useInterviewWebSocket(
 
     console.log(`[WebSocket] State sync: ${newState} (session_status: ${message.session_status})`)
     const currentStore = store.getState()
-    currentStore.setConversationState(newState)
+    const localPreviousState = currentStore.conversationState
 
-    // Apply side effects based on synced state
-    if (newState === 'listening') {
-      applyListeningState()
+    // 1. Run all state side-effects (onStateChanged will now see the sync accurately)
+    onStateChanged(newState, localPreviousState, message.metadata ?? {})
+
+    // 2. Check if we recovered into a stuck 'speaking' state after side effects are applied
+    if (newState === 'speaking' && message.metadata?.audio_streaming_complete) {
+      console.log('[WebSocket] StateSync: backend audio_streaming_complete is true -> syncing local playback status')
+      
+      // Tell the audio player that the backend is fully done generating this chunk.
+      currentStore.setResponseAudioDone(true)
+
+      // This native check prevents cutting off recovered audio.
+      // If the queue is empty, it fires the Ack instantly.
+      // If the queue is full of recovered audio, it ignores this, and the player will naturally fire the Ack when it finishes playing!
+      checkAudioPlaybackComplete(true)
     }
   }
 

@@ -75,8 +75,8 @@ export function useAudioPlayer(
   //   - audioQueueRef is empty (no chunks waiting)
   //   - speechCompletedSentRef is false (haven't already sent)
 
-  const checkIfFullyDone = useCallback((): void => {
-    if (speechCompletedSentRef.current) return
+  const checkIfFullyDone = useCallback((force: boolean = false): void => {
+    if (speechCompletedSentRef.current && !force) return
 
     const state = store.getState()
     const queueEmpty = audioQueueRef.current.length === 0

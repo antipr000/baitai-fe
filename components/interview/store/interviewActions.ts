@@ -40,7 +40,7 @@ let audioPlayerControls: {
   stop: () => void
   getAnalyser: () => AnalyserNode | null
   /** Check if all audio has been received AND played; if so, send SPEECH_COMPLETED */
-  checkIfFullyDone: () => void
+  checkIfFullyDone: (force?: boolean) => void
 } | null = null
 let mediaRecorderControls: {
   startVideo: (stream: MediaStream) => void
@@ -181,8 +181,8 @@ export function getAudioAnalyser(): AnalyserNode | null {
  * so that if playback already finished while waiting for the flag, we
  * send SPEECH_COMPLETED immediately.
  */
-export function checkAudioPlaybackComplete() {
-  audioPlayerControls?.checkIfFullyDone()
+export function checkAudioPlaybackComplete(force: boolean = false) {
+  audioPlayerControls?.checkIfFullyDone(force)
 }
 
 // ============================================
@@ -242,13 +242,15 @@ export function retryMediaUploadSession(type: 'video' | 'screen') {
  * Resets: hasHeardSpeech, hasSentAudioSegments
  * Starts: recording with silence detection (if mic is on and connected)
  */
-export async function applyListeningState() {
+export async function applyListeningState(isSync: boolean = false) {
   const store = useInterviewStore.getState()
-  console.log('[State] Backend → listening')
+  console.log('[State] Backend → listening', isSync ? '(syncing)' : '')
 
-  store.setHasHeardSpeech(false)
-  store.setHasSentAudioSegments(false)
-  store.clearTranscript()
+  if (!isSync) {
+    store.setHasHeardSpeech(false)
+    store.setHasSentAudioSegments(false)
+    store.clearTranscript()
+  }
 
   // Check if there's a pending ARTIFACT_OPENED to send.
   // This happens when LOAD_ARTIFACT arrived during SPEAKING state --
@@ -318,41 +320,39 @@ export function applyThinkingState() {
  * Stops: recording and silence detection
  * Resets: responseAudioDone, streaming state for new response
  */
-export function applySpeakingState() {
+export function applySpeakingState(isSync: boolean = false) {
   const store = useInterviewStore.getState()
-  console.log('[State] Backend → speaking')
+  console.log('[State] Backend → speaking', isSync ? '(syncing)' : '')
 
+  // Always stop the microphone and silence detection if we are supposed to be listening to the AI
   stopAndClearRecordingBuffer()
   stopSilenceDetection()
 
-  // Reset for new response
-  store.setResponseAudioDone(false)
-  store.clearStreamingState()
-  store.setExpectedAudioChunk(null)
-  store.clearCompletedSentences()
-  store.startStreamingMessage()
+  if (!isSync) {
+    // Reset for new response only on fresh turn
+    store.setResponseAudioDone(false)
+    store.clearStreamingState()
+    store.setExpectedAudioChunk(null)
+    store.clearCompletedSentences()
+    store.startStreamingMessage()
+  }
 }
 
 /**
  * Apply side effects for ARTIFACT state (user working on code/whiteboard)
  * Called when: backend sends STATE_CHANGED with state = 'artifact'
  *
- * Keeps audio recording + silence detection running so the user can speak
- * to ask questions or request help while coding. The backend accepts
- * END_OF_TURN in ARTIFACT state and uses a hands-off decision prompt
- * (defaults to WAIT unless the user explicitly asks for help).
- *
- * The silence detection uses the existing "speech-then-silence" pattern:
- * silence is the default (user is typing), only speech followed by 1s
- * of silence triggers end_of_turn.
+ * @param isSync If true, skips resetting progress flags but restarts the microphone onset detector.
  */
-export async function applyArtifactState() {
+export async function applyArtifactState(isSync: boolean = false) {
   const store = useInterviewStore.getState()
-  console.log('[State] Backend → artifact')
+  console.log('[State] Backend → artifact', isSync ? '(syncing)' : '')
 
-  // Reset speech/audio flags for a clean start.
-  store.setHasHeardSpeech(false)
-  store.setHasSentAudioSegments(false)
+  if (!isSync) {
+    // Reset speech/audio flags for a clean start.
+    store.setHasHeardSpeech(false)
+    store.setHasSentAudioSegments(false)
+  }
 
   // Start recording WITHOUT silence detection.
   // The speech onset detector will activate full silence detection
@@ -412,8 +412,14 @@ export async function onStateChanged(
   _previousState: ConversationState,
   _metadata: Record<string, unknown>
 ) {
-  // Update the store first
   const store = useInterviewStore.getState()
+
+  // Use the LOCAL state to detect if this is a redundant update/sync.
+  // This is more robust than relying on the backend's reported previous_state,
+  // which might be 'disconnected' (mapped to 'idle' or null).
+  const isSync = newState === store.conversationState
+
+  // Update the store first
   store.setConversationState(newState)
 
   // Apply side effects for the new state
@@ -422,16 +428,16 @@ export async function onStateChanged(
       applyIdleState()
       break
     case 'listening':
-      await applyListeningState()
+      await applyListeningState(isSync)
       break
     case 'thinking':
       applyThinkingState()
       break
     case 'speaking':
-      applySpeakingState()
+      applySpeakingState(isSync)
       break
     case 'artifact':
-      await applyArtifactState()
+      await applyArtifactState(isSync)
       break
     case 'completed':
       applyCompletedState()
