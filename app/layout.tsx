@@ -10,7 +10,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://baitai.com"),
+  metadataBase: new URL("https://baitai.club"),
   title: {
     default: "Bait AI | Redefining How Hiring Works",
     template: "%s | Bait AI",
