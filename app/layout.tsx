@@ -20,7 +20,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Bait AI | Redefining How Hiring Works",
     description: "Bait AI is an AI-powered interviewing platform that gives candidates the practice they need and hiring teams the insights they deserve.",
-    url: "https://baitai.com",
+    url: "https://baitai.club",
     siteName: "Bait AI",
     locale: "en_US",
     type: "website",
