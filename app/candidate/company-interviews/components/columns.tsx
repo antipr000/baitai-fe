@@ -11,7 +11,7 @@ export type CompanyInterview = {
     position: string
     sentDate: string
     deadline: string
-    status: "pending" | "completed" | "expired"
+    status: "pending" | "completed" | "expired" | "cancelled"
     templateId: string
 }
 
@@ -95,6 +95,16 @@ export const columns: ColumnDef<CompanyInterview>[] = [
         header: () => <div className="text-[rgba(10,13,26,1)] font-semibold text-sm">Action</div>,
         cell: ({ row }) => {
             const interview = row.original
+            const isDisabled = interview.status === "completed" || interview.status === "expired" || interview.status === "cancelled"
+            
+            if (isDisabled) {
+                return (
+                    <Button disabled className="bg-[rgba(10,13,26,0.2)] text-[rgba(10,13,26,0.6)] border-[rgba(10,13,26,0.2)] px-6 py-3 rounded-sm text-xs font-medium cursor-not-allowed">
+                        Take Interview
+                    </Button>
+                )
+            }
+            
             return (
                 <Link href={`/interview/${interview.id}`}>
                         <Button className="bg-[rgba(58,63,187,1)] hover:bg-white border border-[rgba(58,63,187,1)] hover:text-[rgba(58,63,187,1)] text-white px-6 py-3 rounded-sm text-xs font-medium">

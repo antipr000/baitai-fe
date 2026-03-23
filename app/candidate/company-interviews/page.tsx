@@ -134,7 +134,7 @@ async function CompanyTable() {
                 position: invite.role ,
                 sentDate: new Date(invite.created_at).toISOString().split('T')[0],
                 deadline: deadlineDisplay,
-                status: (invite.status === 'invited' ? 'pending' : invite.status) as CompanyInterview['status'],
+                status: (invite.status === 'invited' ? (deadlineDisplay === 'Expired' ? 'expired' : 'pending') : invite.status) as CompanyInterview['status'],
                 templateId: invite.template_id,
             }
         })

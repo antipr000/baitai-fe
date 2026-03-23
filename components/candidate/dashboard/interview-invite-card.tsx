@@ -60,7 +60,7 @@ export function InterviewInviteCard({
                             </Badge>
                         )}
                     </div>
-                    {status === 'invited' ? (
+                    {status === 'invited' && dueIn !== 'Expired' ? (
                         <Link
                             href={`/interview/${interviewId}`}
                             className="block w-full text-center py-2 rounded-md hover:opacity-70 transition-opacity duration-100 text-[rgba(248,250,255,1)] font-semibold bg-[linear-gradient(92.34deg,rgba(255,103,32,1)_17.04%,rgba(255,140,86,1)_122.22%)] border border-[rgba(255,147,96,0.1)]"
@@ -69,7 +69,7 @@ export function InterviewInviteCard({
                         </Link>
                     ) : (
                         <div className="block w-full text-center py-2 rounded-md text-slate-400 font-semibold bg-slate-50 border border-slate-200 cursor-not-allowed">
-                            Invite {status}
+                            {status === 'invited' && dueIn === 'Expired' ? 'Expired' : status.charAt(0).toUpperCase() + status.slice(1)}
                         </div>
                     )}
                 </div>

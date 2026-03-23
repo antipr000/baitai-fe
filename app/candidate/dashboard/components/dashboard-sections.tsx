@@ -59,24 +59,38 @@ export function InterviewInvitesCard({ items }: { items: any[] }) {
                     </div>
                 ) : (
                     <div className="flex flex-col gap-3 px-6 ">
-                        {items.map((item, idx) => (
-                            <div key={idx} className="flex items-center justify-between bg-white p-4 border border-[rgba(107,124,255,1)] rounded-lg">
-                                <div>
-                                    <div className="flex items-center gap-3 mb-1">
-                                        <h4 className="font-medium text-[rgba(10,13,26,1)] leading-snug">{item.company_name}</h4>
-                                        <span className="px-3 py-0.5 w-max rounded-full border border-[rgba(255,20,20,1)] text-[rgba(255,20,20,1)] text-[11px] font-medium ">
-                                            {formatDueDate(item.end_date)}
-                                        </span>
+                        {items.map((item, idx) => {
+                            const dueDateStatus = formatDueDate(item.end_date)
+                            const isExpired = dueDateStatus === 'Overdue'
+                            const isCompleted = item.status === 'completed' || item.status === 'cancelled'
+                            const isDisabled = isExpired || isCompleted
+                            const buttonText = isCompleted ? (item.status.charAt(0).toUpperCase() + item.status.slice(1)) : (isExpired ? 'Expired' : 'Start Interview')
+                            
+                            return (
+                                <div key={idx} className="flex items-center justify-between bg-white p-4 border border-[rgba(107,124,255,1)] rounded-lg">
+                                    <div>
+                                        <div className="flex items-center gap-3 mb-1">
+                                            <h4 className="font-medium text-[rgba(10,13,26,1)] leading-snug">{item.company_name}</h4>
+                                            <span className="px-3 py-0.5 w-max rounded-full border border-[rgba(255,20,20,1)] text-[rgba(255,20,20,1)] text-[11px] font-medium ">
+                                                {dueDateStatus}
+                                            </span>
+                                        </div>
+                                        <p className="text-xs text-[rgba(10,13,26,0.7)] mt-1.5">{item.role || item.title}</p>
                                     </div>
-                                    <p className="text-xs text-[rgba(10,13,26,0.7)] mt-1.5">{item.role || item.title}</p>
+                                    {isDisabled ? (
+                                        <Button disabled className="bg-[rgba(10,13,26,0.2)] text-[rgba(10,13,26,0.6)] border-[rgba(10,13,26,0.2)] px-8 py-3 rounded-sm text-xs font-semibold cursor-not-allowed">
+                                            {buttonText}
+                                        </Button>
+                                    ) : (
+                                        <Link href={`/interview/${item.template_id}`}>
+                                            <Button className="bg-[rgba(58,63,187,1)] hover:bg-white border border-[rgba(58,63,187,1)] hover:text-[rgba(58,63,187,1)] text-white font-semibold text-xs rounded-sm px-8">
+                                                {buttonText}
+                                            </Button>
+                                        </Link>
+                                    )}
                                 </div>
-                                <Link href={`/interview/${item.template_id}`}>
-                                    <Button className="bg-[rgba(58,63,187,1)] hover:bg-white border border-[rgba(58,63,187,1)] hover:text-[rgba(58,63,187,1)] text-white font-semibold text-xs rounded-sm px-8">
-                                        Start Interview
-                                    </Button>
-                                </Link>
-                            </div>
-                        ))}
+                            )
+                        })}
                     </div>
                 )}
             </CardContent>

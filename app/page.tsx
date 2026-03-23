@@ -70,7 +70,7 @@ export default async function Home() {
                   viewport={{ once: true }}
                   transition={{ duration: 0.6, delay: 0.3, ease: "easeOut" }}
                 >
-                  <Badge 
+                  <Badge
                     variant="outline"
                     className="bg-white z-30 text-[rgba(58,63,187,1)] border-[rgba(58,63,187,1)] px-5 py-2 md:text-sm text-xs lg:text-base font-medium rounded-full flex items-center gap-2"
                   >
@@ -276,7 +276,7 @@ export default async function Home() {
             </div>
 
             {/* Steps - Removed flex/space-y to ensure sticky context works natively */}
-<div className="relative pb-[5vh]">
+            <div className="relative pb-[5vh]">
               {jobSeekerSteps.map((step, index) => {
 
                 return (
