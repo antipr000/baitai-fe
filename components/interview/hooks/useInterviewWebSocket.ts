@@ -13,6 +13,7 @@
  */
 
 import { useEffect, useRef } from 'react'
+import { toast } from 'sonner'
 import { useInterviewStore } from '../store'
 import { WebSocketManager } from '../manager/WebSocketManager'
 import { OutboundEvent, BackendInterviewState } from '../store/events'
@@ -132,14 +133,15 @@ export function useInterviewWebSocket(
           console.log('[WebSocket] Disconnected')
           const state = store.getState()
 
-          // Check if we should attempt to reconnect
-          if (!state.isIntentionalDisconnect && state.reconnectAttempts < MAX_RECONNECT_ATTEMPTS) {
+          // Check if we should attempt to reconnect (infinite retries)
+          if (!state.isIntentionalDisconnect) {
             const attempt = state.incrementReconnectAttempts()
-            const delay = Math.min(1000 * Math.pow(2, attempt - 1), 5000) // Exponential backoff: 1s, 2s, 4s, 5s...
+            const delay = 5000 // Always wait 5 seconds between attempts
 
-            console.log(`[WebSocket] Connection lost unexpectedly. Attempting reconnect ${attempt}/${MAX_RECONNECT_ATTEMPTS} in ${delay}ms...`)
+            console.log(`[WebSocket] Connection lost unexpectedly. Attempting reconnect (Attempt ${attempt}) in ${delay}ms...`)
 
             state.setConnectionStatus('connecting')
+            toast.error('Connection lost. Trying to reconnect...', { id: 'connection-status' })
 
             reconnectTimeoutRef.current = setTimeout(() => {
               console.log('[WebSocket] Reconnecting now...')
@@ -149,30 +151,19 @@ export function useInterviewWebSocket(
             return
           }
 
-          if (!state.isIntentionalDisconnect) {
-            console.error('[WebSocket] Max reconnection attempts reached')
-            state.setError('Connection lost. Please refresh the page.')
-            onError?.(new Error('WebSocket connection lost'))
-          }
+        
 
-          // Legacy behavior: Stop recording when finally disconnected
           stopRecording()
         },
         onStatusChange: (status) => {
           const state = store.getState()
-          // Don't overwrite 'connecting' status during reconnection delay
-          if (status === 'disconnected' && !state.isIntentionalDisconnect && state.reconnectAttempts < MAX_RECONNECT_ATTEMPTS) {
-            return
-          }
           state.setConnectionStatus(status)
         },
         onError: (error) => {
           console.error('[WebSocket] Error:', error)
           const state = store.getState()
-          // Only set user-facing error if we're not going to retry or if it's a critical error
-          if (state.reconnectAttempts >= MAX_RECONNECT_ATTEMPTS) {
-            state.setError('Connection error. Please try again.')
-          }
+          // We log the error but don't show a fatal overlay since we are retrying indefinitely.
+          state.setError('Connection error. Retrying...')
           onError?.(error instanceof Error ? error : new Error('WebSocket connection error'))
         },
         onTextMessage: handleTextMessage,
