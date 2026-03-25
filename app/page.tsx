@@ -19,10 +19,10 @@ export default async function Home() {
       {/* Header */}
       <Header />
 
-      {/* Hero Section */}
-      <main className="relative w-full px-7 md:px-17 lg:pt-32 lg:pb-25 md:py-15 py-6 ">
-        {/* Content */}
-        <div className="relative z-10 lg:max-w-7xl  md:max-w-4xl w-full mx-auto py-2">
+      {/* Hero Section — fixed 100dvh from lg up; pt-23 clears fixed header (h-23) */}
+      <main className="relative flex h-auto w-full flex-col px-7 pt-20 sm:px-17 lg:h-[100dvh]">
+        {/* Content: grows to remaining viewport and centers vertically */}
+        <div className="relative z-10 mx-auto flex min-h-0 w-full flex-1 flex-col justify-center py-6 md:py-10 lg:max-w-7xl md:max-w-4xl">
           {/* Grid Overlay */}
           <div
             className="
@@ -35,7 +35,7 @@ export default async function Home() {
       "
           />
 
-          <div className="flex flex-col lg:flex-row lg:gap-0 gap-9 mt-18 lg:mt-10 lg:items-center">
+          <div className="flex flex-col gap-9 lg:flex-row lg:items-center lg:gap-0">
             {/* Left Column */}
             <motion.div
               initial={{ opacity: 0 }}

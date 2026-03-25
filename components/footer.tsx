@@ -5,7 +5,7 @@ import React from "react";
 export const Footer = () => {
   // TODO: Add links
   return (
-    <footer className="  mx-auto py-3 md:py-10 lg:py-20 md:mb-20 lg:mb-20 md:mt-20">
+    <footer className="  mx-auto py-3 md:py-10 lg:py-20 md:mb-15 lg:mb-15 md:mt-15">
       <div className="px-4 mx-auto md:px-16 lg:px-24">
         <div className="flex flex-col md:flex-row gap-10 justify-between">
 
@@ -107,7 +107,7 @@ export const Footer = () => {
           </div>
 
           {/* Right Columns: Links */}
-          <div className="grid md:text-base text-xs mt-1 md:mt-0 grid-cols-3 gap-2 md:gap-10 lg:gap-15 justify-center px-10">
+          <div className="grid lg:text-base md:text-sm text-xs mt-1 md:mt-0 grid-cols-3 gap-2 md:gap-10 lg:gap-15 justify-center px-10">
 
             {/* Product */}
             <div className=" flex flex-col items-center  gap-4 ">
