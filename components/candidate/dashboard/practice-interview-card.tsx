@@ -7,23 +7,23 @@ import Image from 'next/image'
 
 interface PracticeInterviewCardProps {
   title: string
-  difficulty: 'Easy' | 'Medium' | 'Difficult'
+  difficulty: 'easy' | 'medium' | 'hard'
   duration: string
   interviewId: string
 }
 
 const difficultyStyles = {
-  Easy: {
+  easy: {
     bg: 'bg-[rgba(50,255,36,0.05)]',
     text: 'text-[rgba(55,212,44,0.7)]',
     border: 'border-[rgba(50,255,36,0.5)]'
   },
-  Medium: {
+  medium: {
     bg: 'bg-[rgba(249,237,236,1)]',
     text: 'text-[rgba(234,137,0,0.9)]',
     border: 'border-[rgba(212,142,44,0.5)]'
   },
-  Difficult: {
+  hard: {
     bg: 'bg-[rgba(255,51,0,0.05)]',
     text: 'text-[rgba(255,51,0,0.9)]',
     border: 'border-[rgba(255,51,0,0.5)]'
@@ -36,7 +36,7 @@ export function PracticeInterviewCard({
   duration,
   interviewId
 }: PracticeInterviewCardProps) {
-  const style = difficultyStyles[difficulty]
+  const style = difficultyStyles[difficulty] || difficultyStyles.easy
 
   return (
     <Card className="bg-white hover:border-2 hover:border-[rgba(82,86,184,1)] transition-border">
@@ -45,7 +45,7 @@ export function PracticeInterviewCard({
           <div>
             <h3 className="font-medium text-lg">{title}</h3>
             <div className="flex items-center gap-4 mt-1">
-              <Badge className={cn(style.bg, style.text, style.border, "p-1 px-7 border")}>
+              <Badge className={cn(style.bg, style.text, style.border, "p-1 px-7 border capitalize")}>
                 {difficulty}
               </Badge>
               <span className="text-sm text-muted-foreground flex items-center justify-center">

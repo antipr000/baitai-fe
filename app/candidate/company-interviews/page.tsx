@@ -1,135 +1,168 @@
-import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import { BackButton } from '@/components/ui/back-button'
 import Image from 'next/image'
-import React from 'react'
-import { DataTable } from './data-table'
-import { columns, CompanyInterview } from './columns'
+import React, { Suspense } from 'react'
+import { DataTable } from './components/data-table'
+import { columns, CompanyInterview } from './components/columns'
+import { serverFetch } from '@/lib/api/server'
+import {
+    CompanyStatsSkeleton,
+    CompanyTableSkeleton,
+} from '@/components/candidate/company-interviews/company-skeletons'
 
+// ─── Interfaces ───────────────────────────────────────────────────────────────
 
-async function getData(): Promise<CompanyInterview[]> {
-  return [
-    {
-      id: "1",
-      company: "TechCorp",
-      position: "Senior Developer",
-      sentDate: "2025-12-06",
-      deadline: "Due in 2 days",
-      status: "pending",
-    },
-    {
-      id: "2",
-      company: "StartupX",
-      position: "Product Engineer",
-      sentDate: "2025-12-05",
-      deadline: "Due in 3 days",
-      status: "pending",
-    },
-    {
-      id: "3",
-      company: "Mindtrix",
-      position: "Product Engineer",
-      sentDate: "2025-12-04",
-      deadline: "Due in 4 days",
-      status: "pending",
-    },
-    {
-      id: "4",
-      company: "AIclub",
-      position: "Product Engineer",
-      sentDate: "2025-12-03",
-      deadline: "Due in 5 days",
-      status: "pending",
-    },
-    {
-      id: "5",
-      company: "Cloudsystem",
-      position: "Product Engineer",
-      sentDate: "2025-12-02",
-      deadline: "Due in 10 days",
-      status: "pending",
-    },
-    {
-      id: "6",
-      company: "Syncdata",
-      position: "Product Engineer",
-      sentDate: "2025-12-02",
-      deadline: "Due in 3 weeks",
-      status: "pending",
-    },
-  ]
+interface StatsResponse {
+    pending: number
+    companies: number
+    positions: number
 }
 
+interface InterviewInvite {
+    id: string
+    status: string
+    end_date: string
+    created_at: string
+    template_id: string
+    title: string
+    role: string
+    company_name: string
+}
 
+interface InvitesResponse {
+    items: InterviewInvite[]
+    total: number
+    page: number
+    page_size: number
+    total_pages: number
+}
 
+// ─── Async server sub-components ──────────────────────────────────────────────
 
-export default async function CompanyInterviews() {
-    const data = await getData()
-    
+async function CompanyHeader() {  // need to optimize 
+    const data = await serverFetch<StatsResponse>('/api/v1/user/interview/invites/stats/')
+    const stats = data ?? { pending: 0, companies: 0, positions: 0 }
+
     return (
-        <div>
-            <div className='w-full min-h-screen bg-[rgba(248,250,255,1)]'>
-                <div className="min-h-screen max-w-full md:max-w-4xl lg:max-w-5xl xl:max-w-7xl mx-auto  ">
-                    <div className="max-w-7xl mx-auto p-6 space-y-8">
+        <div className="flex flex-col gap-1.5 pt-2">
+            <h1 className="text-3xl font-semibold text-[rgba(17,24,39,1)] tracking-tight">Interview Invites</h1>
+            <p className="text-[rgba(17,24,39,0.6)] text-base">
+                You have{' '}
+                <span className={stats.pending > 0 ? 'text-[rgba(255,107,107,1)]' : 'text-[rgba(14,163,3,1)]'}>
+                    {stats.pending} pending {stats.pending <= 1 ? 'interview' : 'interviews'}
+                </span>
+            </p>
+        </div>
+    )
+}
 
-                        {/* Header */}
-                        <div className="flex justify-between items-center ">
-                            <div className='flex items-center justify-center gap-4'>
-                                <BackButton />
-                                <h1 className="text-2xl tracking-wide font-semibold bg-[linear-gradient(91.24deg,#3E54FB_-35.23%,#C3CEFF_202.55%)] bg-clip-text text-transparent">Interview Invites</h1>
-                            </div>
+async function CompanyStats() {
+    const data = await serverFetch<StatsResponse>('/api/v1/user/interview/invites/stats/')
+    const stats = data ?? { pending: 0, companies: 0, positions: 0 }
 
+    return (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-23">
+            {/* Pending Interviews */}
+            <Card className="border border-[rgba(58,63,187,1)] shadow-sm bg-white rounded-[12px]">
+                <CardContent className="">
+                    <div className="flex items-center gap-4">
+                        <Image src="/candidate/company-interviews/pending.svg" alt="Pending" width={24} height={24} />
+                        <div>
+                            <p className="text-2xl font-semibold text-[rgba(10,13,26,1)] leading-none">{stats.pending}</p>
+                            <p className="text-sm font-medium text-[rgba(10,13,26,0.7)] mt-1">Pending {stats.pending <= 1 ? 'Interview' : 'Interviews'}</p>
                         </div>
-                        {/* Stats Cards */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {/* Pending Interviews */}
-                            <Card className="bg-[rgba(104,100,247,0.05)] border border-[rgba(104,100,247,0.3)]">
-                                <CardContent className="">
-                                    <div className=" flex items-center gap-3">
-                                        <Image src="/candidate/company-interviews/interview.svg" className='translate-y-1' alt="Pending Interviews" width={60} height={60} />
-                                        <div className=''>
-                                            <p className="text-xl font-medium text-muted-foreground/70  ">Pending Interviews</p>
-                                            <p className=" text-2xl font-bold text-[rgba(104,100,247,1)]">6</p>
-                                        </div>
-                                    </div>
-                                </CardContent>
-                            </Card>
-
-                            {/* Companies */}
-
-                            <Card className="bg-[rgba(51,204,204,0.05)] border border-[rgba(51,204,204,0.3)]">
-                                <CardContent className="">
-                                    <div className=" flex items-center gap-3">
-                                        <Image  src="/candidate/company-interviews/building.png" className='translate-y-1' alt="Company" width={60} height={60} />
-                                        <div className=''>
-                                            <p className="text-xl font-medium text-muted-foreground/70 ">Companies</p>
-                                            <p className="text-2xl font-bold text-[rgba(104,100,247,1)] ">6</p>
-                                        </div>
-                                    </div>
-                                </CardContent>
-                            </Card>
-
-                            {/*positions */}
-                            <Card className="bg-[rgba(242,129,68,0.05)] border border-[rgba(252,183,50,0.3)]">
-                                <CardContent className="">
-                                    <div className=" flex items-center gap-3">
-                                        <Image src="/candidate/company-interviews/bag.svg" className="translate-y-1" alt="positions" width={60} height={60} />
-                                        <div className=''>
-                                            <p className="text-xl font-medium text-muted-foreground/70 ">Positions</p>
-                                            <p className="text-2xl font-bold text-[rgba(104,100,247,1)]">6</p>
-                                        </div>
-                                    </div>
-                                </CardContent>
-                            </Card>
-                        </div>
-
-                      
-                        {/*Data table  */}
-                        <DataTable columns={columns} data={data} />
-
                     </div>
+                </CardContent>
+            </Card>
+
+            {/* Companies */}
+            <Card className="border border-[rgba(58,63,187,1)] shadow-sm bg-white rounded-[12px]">
+                <CardContent className="">
+                    <div className="flex items-center gap-4">
+                        <Image src="/candidate/company-interviews/company.svg" alt="Companies" width={24} height={24} />
+                        <div>
+                            <p className="text-2xl font-semibold text-[rgba(10,13,26,1)] leading-none">{stats.companies}</p>
+                            <p className="text-sm font-medium text-[rgba(10,13,26,0.7)] mt-1">Companies</p>
+                        </div>
+                    </div>
+                </CardContent>
+            </Card>
+
+            {/* Positions */}
+            <Card className="border border-[rgba(58,63,187,1)] shadow-sm bg-white rounded-[12px]">
+                <CardContent className="">
+                    <div className="flex items-center gap-4">
+                        <Image src="/candidate/company-interviews/bag.svg" alt="Positions" width={24} height={24} />
+                        <div>
+                            <p className="text-2xl font-semibold text-[rgba(10,13,26,1)] leading-none">{stats.positions}</p>
+                            <p className="text-sm font-medium text-[rgba(10,13,26,0.7)] mt-1">Positions</p>
+                        </div>
+                    </div>
+                </CardContent>
+            </Card>
+        </div>
+    )
+}
+
+async function CompanyTable() {
+    const data = await serverFetch<InvitesResponse>('/api/v1/user/interview/invites/', {
+        method: 'POST',
+        body: {
+            page: 1,
+            page_size: 100
+        }
+    })
+
+    const invites: CompanyInterview[] = data?.items
+        ? data.items.map(invite => {
+            const endDate = new Date(invite.end_date)
+            const now = new Date()
+            const diffTime = endDate.getTime() - now.getTime()
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+
+            let deadlineDisplay = endDate.toLocaleDateString()
+            if (diffDays > 0 && diffDays <= 30) {
+                deadlineDisplay = `Due in ${diffDays} day${diffDays !== 1 ? 's' : ''}`
+            } else if (diffDays === 0) {
+                deadlineDisplay = 'Due today'
+            } else if (diffDays < 0) {
+                deadlineDisplay = 'Expired'
+            }
+
+            return {
+                id: invite.id,
+                company: invite.company_name,
+                position: invite.role ,
+                sentDate: new Date(invite.created_at).toISOString().split('T')[0],
+                deadline: deadlineDisplay,
+                status: (invite.status === 'invited' ? (deadlineDisplay === 'Expired' ? 'expired' : 'pending') : invite.status) as CompanyInterview['status'],
+                templateId: invite.template_id,
+            }
+        })
+        : []
+
+    return <DataTable columns={columns} data={invites} />
+}
+
+// ─── Page ──────────────────────────────────────────────────────────────────────
+
+export default function InterviewInvitesV2() {
+    return (
+        <div className="max-w-7xl mx-auto px-5 pt-10 w-full space-y-7 pb-10">
+            <Suspense fallback={
+                <div className="flex flex-col gap-1.5 pt-2">
+                    <h1 className="text-3xl font-semibold text-[rgba(17,24,39,1)] tracking-tight">Interview Invites</h1>
                 </div>
-            </div>
+            }>
+                <CompanyHeader />
+            </Suspense>
+
+            <Suspense fallback={<CompanyStatsSkeleton />}>
+                <CompanyStats />
+            </Suspense>
+
+            <Suspense fallback={<CompanyTableSkeleton />}>
+                <CompanyTable />
+            </Suspense>
         </div>
     )
 }

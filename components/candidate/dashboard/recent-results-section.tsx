@@ -1,10 +1,10 @@
-import { serverFetch } from '@/lib/api/server'
+
 import { ResultItem } from './result-item'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import { ScorePoller } from './score-poller'
 
-interface ApiResultItem { 
+export interface ApiResultItem {
   session_id: string
   template_id: string
   template_title: string
@@ -18,6 +18,8 @@ interface ApiResultItem {
   started_at: string
   ended_at: string
 }
+
+
 
 function formatTimeAgo(dateString: string): string {
   const date = new Date(dateString)
@@ -35,19 +37,17 @@ function formatTimeAgo(dateString: string): string {
 }
 
 interface RecentResultsSectionProps {
+  results: ApiResultItem[]
   viewMoreHref?: string
 }
 
-export async function RecentResultsSection({
-  viewMoreHref = '/candidate/results'
+export function RecentResultsSection({
+  results,
+  viewMoreHref = '/results'
 }: RecentResultsSectionProps) {
-  const results = await serverFetch<ApiResultItem[]>('/api/v1/user/interview/results/recent/')
 
-  if (!results || !Array.isArray(results)) {
-    return null
-  }
 
-  const hasPending = results.some(r => !r.is_scored)
+  // const hasPending = results.some(r => !r.is_scored)
 
   return (
     <div>
@@ -56,7 +56,7 @@ export async function RecentResultsSection({
       </div>
 
       {/* Poll for updates if any results are pending */}
-      {hasPending && <ScorePoller />}
+      <ScorePoller />
 
       {results.length === 0 ? (
         <div className="flex items-center justify-between p-6 bg-white rounded-lg shadow-sm">
@@ -85,7 +85,7 @@ export async function RecentResultsSection({
                 title={item.template_title || item.role}
                 timeAgo={formatTimeAgo(item.date)}
                 score={item.score}
-                href={`/candidate/results/${item.session_id}`}
+                href={`/results/${item.session_id}`}
                 isScored={item.is_scored}
               />
             ))}
